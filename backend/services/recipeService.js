@@ -8,17 +8,32 @@ class RecipeService {
 
   async findRecipesByIngredients(ingredients, preferences = {}) {
     try {
-      console.log('Finding recipes for ingredients:', ingredients);
+      console.log('RecipeService: Finding recipes for ingredients:', ingredients?.slice(0, 3));
+      console.log('RecipeService: Has API key:', !!this.spoonacularApiKey);
+      
+      if (!ingredients || ingredients.length === 0) {
+        console.log('RecipeService: No ingredients provided, returning mock recipes');
+        return this.getMockRecipes(preferences);
+      }
       
       if (!this.spoonacularApiKey) {
-        console.log('No Spoonacular API key found, using mock data');
+        console.log('RecipeService: No Spoonacular API key, using mock data');
         return this.getMockRecipes(preferences);
       }
 
       // Clean up ingredients list - take first word of each ingredient for better matching
       const cleanIngredients = ingredients
-        .map(ingredient => ingredient.split(' ')[0].toLowerCase())
+        .filter(ing => ing && typeof ing === 'string')
+        .map(ingredient => ingredient.split(' ')[0].toLowerCase().replace(/[^a-z]/g, ''))
+        .filter(ing => ing.length > 2) // Remove very short words
         .slice(0, 5); // Limit to 5 ingredients to avoid long URLs
+      
+      console.log('RecipeService: Clean ingredients:', cleanIngredients);
+      
+      if (cleanIngredients.length === 0) {
+        console.log('RecipeService: No valid ingredients after cleaning, using mock data');
+        return this.getMockRecipes(preferences);
+      }
       
       const params = {
         apiKey: this.spoonacularApiKey,
@@ -27,7 +42,7 @@ class RecipeService {
         ranking: 2, // Maximize used ingredients
         fillIngredients: true,
         addRecipeInformation: true,
-        instructionsRequired: true
+        instructionsRequired: false // Don't require instructions to get more results
       };
 
       // Add dietary filters if specified
@@ -40,20 +55,32 @@ class RecipeService {
         }
       }
 
-      const response = await axios.get(`${this.baseURL}/complexSearch`, { params });
+      console.log('RecipeService: Making API request with params:', { 
+        ...params, 
+        apiKey: '[HIDDEN]' 
+      });
       
-      if (response.data && response.data.results) {
+      const response = await axios.get(`${this.baseURL}/complexSearch`, { 
+        params,
+        timeout: 10000 // 10 second timeout
+      });
+      
+      console.log('RecipeService: API response status:', response.status);
+      console.log('RecipeService: Found recipes count:', response.data?.results?.length || 0);
+      
+      if (response.data && response.data.results && response.data.results.length > 0) {
         const recipes = response.data.results.map(recipe => ({
           id: recipe.id,
           title: recipe.title,
-          image: recipe.image,
+          image: recipe.image || 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400',
           cookTime: recipe.readyInMinutes || 30,
           servings: recipe.servings || 4,
-          rating: recipe.spoonacularScore ? (recipe.spoonacularScore / 20) : 4.0, // Convert to 5-star scale
+          rating: recipe.spoonacularScore ? Math.round((recipe.spoonacularScore / 20) * 10) / 10 : 4.0,
           ingredients: recipe.extendedIngredients ? 
-            recipe.extendedIngredients.map(ing => ing.original) : [],
+            recipe.extendedIngredients.map(ing => ing.original || ing.name) : [],
           dealIngredients: this.findDealIngredients(recipe.extendedIngredients, ingredients),
-          description: recipe.summary ? this.stripHtml(recipe.summary).substring(0, 150) + '...' : 'A delicious recipe',
+          description: recipe.summary ? this.stripHtml(recipe.summary).substring(0, 150) + '...' : 
+            'A delicious recipe featuring your deal ingredients',
           instructions: recipe.analyzedInstructions && recipe.analyzedInstructions[0] ? 
             recipe.analyzedInstructions[0].steps.map(step => step.step).join(' ') : 
             'Instructions available on recipe page',
@@ -72,12 +99,20 @@ class RecipeService {
           vegetarian: recipe.vegetarian
         }));
         
+        console.log('RecipeService: Successfully processed recipes');
         return recipes;
+      } else {
+        console.log('RecipeService: No recipes found in API response, using mock data');
+        return this.getMockRecipes(preferences);
       }
       
-      return this.getMockRecipes(preferences);
     } catch (error) {
-      console.error('Error finding recipes:', error);
+      console.error('RecipeService: Error finding recipes:', error.message);
+      if (error.response) {
+        console.error('RecipeService: API response status:', error.response.status);
+        console.error('RecipeService: API response data:', error.response.data);
+      }
+      console.log('RecipeService: Falling back to mock data');
       return this.getMockRecipes(preferences);
     }
   }
@@ -95,7 +130,10 @@ class RecipeService {
         addTasteData: false
       };
 
-      const response = await axios.get(`${this.baseURL}/${recipeId}/information`, { params });
+      const response = await axios.get(`${this.baseURL}/${recipeId}/information`, { 
+        params,
+        timeout: 10000
+      });
       
       if (response.data) {
         const recipe = response.data;
@@ -117,7 +155,7 @@ class RecipeService {
       
       return null;
     } catch (error) {
-      console.error('Error fetching recipe details:', error);
+      console.error('RecipeService: Error fetching recipe details:', error.message);
       return this.getMockRecipeDetails(recipeId);
     }
   }
@@ -143,30 +181,30 @@ class RecipeService {
         if (preferences.dietary.includes('gluten-free')) params.intolerances = 'gluten';
       }
 
-      const response = await axios.get(`${this.baseURL}/complexSearch`, { params });
+      const response = await axios.get(`${this.baseURL}/complexSearch`, { 
+        params,
+        timeout: 10000
+      });
       
       return response.data.results || [];
     } catch (error) {
-      console.error('Error searching recipes:', error);
+      console.error('RecipeService: Error searching recipes:', error.message);
       return [];
     }
   }
 
   findDealIngredients(recipeIngredients, dealIngredients) {
-    if (!recipeIngredients) return [];
+    if (!recipeIngredients || !dealIngredients) return [];
     
     const dealIngredientsLower = dealIngredients.map(ing => ing.toLowerCase());
     const matches = [];
     
     recipeIngredients.forEach(ingredient => {
-      const ingredientName = ingredient.name || ingredient.original || '';
-      dealIngredientsLower.forEach(dealIng => {
-        if (ingredientName.toLowerCase().includes(dealIng) || dealIng.includes(ingredientName.toLowerCase())) {
-          // Find the original deal ingredient name
-          const originalDealIng = dealIngredients.find(di => 
-            di.toLowerCase() === dealIng || 
-            ingredientName.toLowerCase().includes(di.toLowerCase())
-          );
+      const ingredientName = (ingredient.name || ingredient.original || '').toLowerCase();
+      dealIngredientsLower.forEach((dealIng, index) => {
+        if (ingredientName.includes(dealIng.toLowerCase()) || 
+            dealIng.toLowerCase().includes(ingredientName)) {
+          const originalDealIng = dealIngredients[index];
           if (originalDealIng && !matches.includes(originalDealIng)) {
             matches.push(originalDealIng);
           }
@@ -178,7 +216,7 @@ class RecipeService {
   }
 
   stripHtml(html) {
-    return html ? html.replace(/<[^>]*>/g, '') : '';
+    return html ? html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim() : '';
   }
 
   getMockRecipes(preferences = {}) {
@@ -191,15 +229,11 @@ class RecipeService {
         servings: 4,
         rating: 4.8,
         ingredients: ["Atlantic Salmon", "Baby Spinach", "Lemon", "Olive Oil", "Garlic"],
-        dealIngredients: ["Atlantic Salmon", "Baby Spinach", "Olive Oil"],
-        description: "Fresh salmon grilled to perfection with sautéed spinach",
-        instructions: "1. Season salmon with salt and pepper. 2. Heat oil in pan. 3. Cook salmon 4-5 minutes per side. 4. Sauté spinach with garlic. 5. Serve together.",
-        nutrition: {
-          calories: 320,
-          protein: 28,
-          carbs: 8,
-          fat: 20
-        }
+        dealIngredients: ["Atlantic Salmon", "Baby Spinach"],
+        description: "Fresh salmon grilled to perfection with sautéed spinach and lemon",
+        instructions: "Season salmon with salt and pepper. Heat oil in pan. Cook salmon 4-5 minutes per side. Sauté spinach with garlic. Serve together.",
+        nutrition: { calories: 320, protein: 28, carbs: 8, fat: 20 },
+        sourceUrl: "#"
       },
       {
         id: 2,
@@ -209,15 +243,11 @@ class RecipeService {
         servings: 2,
         rating: 4.6,
         ingredients: ["Chicken Breast", "Avocados", "Brown Rice", "Greek Yogurt", "Lime"],
-        dealIngredients: ["Chicken Breast", "Avocados", "Brown Rice", "Greek Yogurt"],
-        description: "Healthy bowl with grilled chicken and creamy avocado",
-        instructions: "1. Cook rice according to package instructions. 2. Season and grill chicken. 3. Slice avocado. 4. Assemble bowl with rice, chicken, avocado, and yogurt.",
-        nutrition: {
-          calories: 450,
-          protein: 35,
-          carbs: 35,
-          fat: 18
-        }
+        dealIngredients: ["Chicken Breast", "Avocados", "Greek Yogurt"],
+        description: "Healthy bowl with grilled chicken, creamy avocado and Greek yogurt",
+        instructions: "Cook rice according to package instructions. Season and grill chicken. Slice avocado. Assemble bowl with rice, chicken, avocado, and yogurt.",
+        nutrition: { calories: 450, protein: 35, carbs: 35, fat: 18 },
+        sourceUrl: "#"
       },
       {
         id: 3,
@@ -228,14 +258,10 @@ class RecipeService {
         rating: 4.4,
         ingredients: ["Greek Yogurt", "Mixed Berries", "Granola", "Honey"],
         dealIngredients: ["Greek Yogurt", "Mixed Berries"],
-        description: "Quick and healthy breakfast or snack option",
-        instructions: "1. Layer yogurt in glass. 2. Add berries. 3. Top with granola. 4. Drizzle with honey.",
-        nutrition: {
-          calories: 280,
-          protein: 15,
-          carbs: 35,
-          fat: 8
-        }
+        description: "Quick and healthy breakfast parfait with fresh berries",
+        instructions: "Layer yogurt in glass. Add berries. Top with granola. Drizzle with honey.",
+        nutrition: { calories: 280, protein: 15, carbs: 35, fat: 8 },
+        sourceUrl: "#"
       },
       {
         id: 4,
@@ -246,14 +272,38 @@ class RecipeService {
         rating: 4.5,
         ingredients: ["Beef Mince", "Mixed Vegetables", "Soy Sauce", "Garlic", "Ginger"],
         dealIngredients: ["Beef Mince"],
-        description: "Quick and flavorful stir fry with tender beef",
-        instructions: "1. Brown beef mince in hot pan. 2. Add vegetables and stir fry. 3. Season with soy sauce, garlic, and ginger. 4. Serve hot.",
-        nutrition: {
-          calories: 380,
-          protein: 25,
-          carbs: 15,
-          fat: 22
-        }
+        description: "Quick and flavorful stir fry with tender beef and fresh vegetables",
+        instructions: "Brown beef mince in hot pan. Add vegetables and stir fry. Season with soy sauce, garlic, and ginger. Serve hot.",
+        nutrition: { calories: 380, protein: 25, carbs: 15, fat: 22 },
+        sourceUrl: "#"
+      },
+      {
+        id: 5,
+        title: "Sweet Potato and Egg Bowl",
+        image: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400",
+        cookTime: 30,
+        servings: 2,
+        rating: 4.3,
+        ingredients: ["Sweet Potato", "Organic Eggs", "Spinach", "Olive Oil"],
+        dealIngredients: ["Sweet Potato", "Organic Eggs"],
+        description: "Nutritious bowl with roasted sweet potato and perfectly cooked eggs",
+        instructions: "Roast sweet potato cubes. Fry or poach eggs. Serve over spinach with olive oil drizzle.",
+        nutrition: { calories: 340, protein: 18, carbs: 28, fat: 16 },
+        sourceUrl: "#"
+      },
+      {
+        id: 6,
+        title: "Greek Yogurt Chicken Marinade",
+        image: "https://images.unsplash.com/photo-1532636721035-f3fc20e4bb12?w=400",
+        cookTime: 35,
+        servings: 4,
+        rating: 4.7,
+        ingredients: ["Free Range Chicken Breast", "Greek Style Yogurt", "Lemon", "Herbs"],
+        dealIngredients: ["Free Range Chicken Breast", "Greek Style Yogurt"],
+        description: "Tender chicken marinated in Greek yogurt with herbs and lemon",
+        instructions: "Marinate chicken in yogurt, lemon and herbs for 2 hours. Grill until cooked through.",
+        nutrition: { calories: 290, protein: 32, carbs: 8, fat: 14 },
+        sourceUrl: "#"
       }
     ];
     
@@ -270,6 +320,7 @@ class RecipeService {
       }
     }
     
+    console.log('RecipeService: Returning', mockRecipes.length, 'mock recipes');
     return mockRecipes;
   }
 
