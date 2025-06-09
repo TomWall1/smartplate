@@ -15,3 +15,164 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Custom utility classes */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Enhanced hover effects for deal cards */
+.deal-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.deal-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Store logo styling */
+.store-logo {
+  transition: transform 0.2s ease-in-out;
+  filter: brightness(1);
+}
+
+.store-logo:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+/* Smooth transitions for interactive elements */
+.interactive-element {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Focus styles for accessibility */
+.focus\:ring-2:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Deal card click animation */
+@keyframes dealClick {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+.deal-card:active {
+  animation: dealClick 0.1s ease-in-out;
+}
+
+/* Loading spinner enhancement */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Store brand colors */
+.woolworths-green {
+  background-color: #2d5016;
+}
+
+.coles-red {
+  background-color: #e31837;
+}
+
+/* Gradient backgrounds for premium feel */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Enhanced button styles */
+.btn-primary {
+  @apply bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600 transition-colors duration-200 focus:ring-2 focus:ring-primary-300 focus:outline-none;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors duration-200 focus:ring-2 focus:ring-gray-300 focus:outline-none;
+}
+
+/* Deal discount badge */
+.discount-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.discount-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.discount-badge:hover::before {
+  left: 100%;
+}
+
+/* Store section styling */
+.store-section {
+  border-left: 4px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.store-section.woolworths {
+  border-left-color: #2d5016;
+}
+
+.store-section.coles {
+  border-left-color: #e31837;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .deal-card {
+    padding: 0.75rem;
+  }
+  
+  .store-logo {
+    height: 1.5rem;
+  }
+  
+  .discount-badge {
+    font-size: 0.75rem;
+  }
+}
