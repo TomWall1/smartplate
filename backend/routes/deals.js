@@ -72,6 +72,35 @@ router.get('/current', async (req, res) => {
   }
 });
 
+// DEBUG: Test Coles API directly with detailed logging
+router.get('/debug/coles-live', async (req, res) => {
+  try {
+    console.log('\n=== MANUAL COLES API TEST ===');
+    const colesService = require('../services/coles');
+    
+    // This will trigger the new detailed logging
+    const deals = await colesService.fetchDeals();
+    
+    console.log('=== MANUAL TEST COMPLETE ===\n');
+    
+    res.json({
+      status: 'LIVE_TEST_COMPLETE',
+      message: 'Check the Vercel function logs for detailed API call information',
+      dealsReturned: deals.length,
+      firstDeal: deals[0] || null,
+      allHaveApiSource: deals.every(deal => deal.apiSource),
+      apiSources: [...new Set(deals.map(deal => deal.apiSource))],
+      instruction: 'Go to Vercel dashboard > Functions tab > View function logs to see detailed API call logs'
+    });
+  } catch (error) {
+    console.error('Live test error:', error.message);
+    res.status(500).json({
+      status: 'ERROR',
+      message: error.message
+    });
+  }
+});
+
 // DEBUG: Test Coles API directly
 router.get('/debug/coles', async (req, res) => {
   try {
@@ -96,7 +125,7 @@ router.get('/debug/coles', async (req, res) => {
     const testDeals = await colesService.fetchDeals();
     
     // Check if we got real data or mock data
-    const isRealData = testDeals.some(deal => deal.productUrl && !deal.productUrl.includes('search?q='));
+    const isRealData = testDeals.some(deal => deal.apiSource === 'real-coles-api');
     
     res.json({
       status: 'API_KEY_CONFIGURED',
@@ -105,7 +134,8 @@ router.get('/debug/coles', async (req, res) => {
       isRealData: isRealData,
       usingMockData: !isRealData,
       sampleDeal: testDeals[0] || null,
-      apiKeyPrefix: process.env.COLES_API_KEY ? process.env.COLES_API_KEY.substring(0, 8) + '...' : 'Not set'
+      apiKeyPrefix: process.env.COLES_API_KEY ? process.env.COLES_API_KEY.substring(0, 8) + '...' : 'Not set',
+      apiSources: [...new Set(testDeals.map(deal => deal.apiSource || 'unknown'))]
     });
   } catch (error) {
     console.error('Coles API debug error:', error.message);
@@ -135,6 +165,8 @@ router.get('/debug/status', async (req, res) => {
       deal.productUrl !== '#'
     );
     
+    const hasRealApiSource = colesDeals.some(deal => deal.apiSource === 'real-coles-api');
+    
     res.json({
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
@@ -149,11 +181,18 @@ router.get('/debug/status', async (req, res) => {
       },
       dataSource: {
         hasRealProductUrls: hasRealProductUrls,
-        likelySource: hasRealProductUrls ? 'Real API' : 'Mock Data',
-        sampleColesUrl: colesDeals[0]?.productUrl || 'No Coles deals found'
+        hasRealApiSource: hasRealApiSource,
+        likelySource: hasRealApiSource ? 'Real API' : 'Mock Data',
+        sampleColesUrl: colesDeals[0]?.productUrl || 'No Coles deals found',
+        apiSources: [...new Set(currentDeals.map(deal => deal.apiSource || 'legacy-mock'))]
+      },
+      debugEndpoints: {
+        liveTest: '/api/deals/debug/coles-live (triggers real API call with logging)',
+        status: '/api/deals/debug/status (this endpoint)',
+        colesTest: '/api/deals/debug/coles (basic API test)'
       },
       nextSteps: hasColesKey ? 
-        'API key configured - check logs for API call results' : 
+        'API key configured - use /debug/coles-live to test with full logging' : 
         'Add COLES_API_KEY environment variable to use real data'
     });
   } catch (error) {
