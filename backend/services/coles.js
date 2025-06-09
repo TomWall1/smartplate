@@ -48,7 +48,7 @@ class ColesService {
               description: product.description || product.name,
               unit: product.size || "per item",
               validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-              productUrl: product.url,
+              productUrl: product.url || this.generateColesSearchUrl(product.name),
               brand: product.brand
             }));
             
@@ -91,6 +91,11 @@ class ColesService {
     }
   }
 
+  generateColesSearchUrl(productName) {
+    const searchQuery = encodeURIComponent(productName);
+    return `https://www.coles.com.au/search?q=${searchQuery}`;
+  }
+
   getMockDeals() {
     return [
       {
@@ -101,17 +106,21 @@ class ColesService {
         store: "coles",
         description: "Fresh Baby Spinach 100g",
         unit: "per pack",
-        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        productUrl: "https://www.coles.com.au/search?q=baby%20spinach",
+        discountPercentage: 37
       },
       {
-        name: "Greek Yogurt",
+        name: "Greek Style Yogurt",
         category: "Dairy",
         price: 4.50,
         originalPrice: 6.99,
         store: "coles",
-        description: "Natural Greek Yogurt 500g",
+        description: "Chobani Greek Style Yogurt 500g",
         unit: "per tub",
-        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        productUrl: "https://www.coles.com.au/search?q=chobani%20greek%20yogurt",
+        discountPercentage: 36
       },
       {
         name: "Beef Mince",
@@ -121,7 +130,9 @@ class ColesService {
         store: "coles",
         description: "Premium Beef Mince 500g",
         unit: "per pack",
-        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        productUrl: "https://www.coles.com.au/search?q=beef%20mince",
+        discountPercentage: 33
       },
       {
         name: "Mixed Berries",
@@ -131,7 +142,9 @@ class ColesService {
         store: "coles",
         description: "Frozen Mixed Berries 300g",
         unit: "per pack",
-        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        productUrl: "https://www.coles.com.au/search?q=frozen%20mixed%20berries",
+        discountPercentage: 33
       },
       {
         name: "Pasta",
@@ -139,9 +152,47 @@ class ColesService {
         price: 1.50,
         originalPrice: 2.50,
         store: "coles",
-        description: "Durum Wheat Pasta 500g",
+        description: "San Remo Durum Wheat Pasta 500g",
         unit: "per pack",
-        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        productUrl: "https://www.coles.com.au/search?q=san%20remo%20pasta",
+        discountPercentage: 40
+      },
+      {
+        name: "Lean Chicken Thighs",
+        category: "Meat",
+        price: 6.99,
+        originalPrice: 9.99,
+        store: "coles",
+        description: "Free Range Chicken Thighs 1kg",
+        unit: "per kg",
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        productUrl: "https://www.coles.com.au/search?q=free%20range%20chicken%20thighs",
+        discountPercentage: 30
+      },
+      {
+        name: "Carrots",
+        category: "Vegetables",
+        price: 1.50,
+        originalPrice: 2.90,
+        store: "coles",
+        description: "Fresh Carrots 1kg",
+        unit: "per kg",
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        productUrl: "https://www.coles.com.au/search?q=fresh%20carrots",
+        discountPercentage: 48
+      },
+      {
+        name: "Bananas",
+        category: "Fruit",
+        price: 2.90,
+        originalPrice: 4.90,
+        store: "coles",
+        description: "Fresh Bananas",
+        unit: "per kg",
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        productUrl: "https://www.coles.com.au/search?q=bananas",
+        discountPercentage: 41
       }
     ];
   }
