@@ -12,9 +12,25 @@ const { updateAllDeals } = require('./services/dealService');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// CORS configuration - Allow requests from Vercel frontend
+const corsOptions = {
+  origin: [
+    'http://localhost:3000', // Local development
+    'https://smartplate-beryl.vercel.app', // Your Vercel frontend
+    'https://smartplate.vercel.app', // Alternative URL
+    /\.vercel\.app$/ // Any Vercel app subdomain
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -30,7 +46,24 @@ app.use('/api/users', usersRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    message: 'SmartPlate API is running'
+  });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'SmartPlate API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      deals: '/api/deals/current',
+      recipes: '/api/recipes/suggestions'
+    }
+  });
 });
 
 // Schedule deal updates - runs every day at 6 AM
@@ -44,6 +77,18 @@ cron.schedule('0 6 * * *', async () => {
   }
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`SmartPlate API running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
