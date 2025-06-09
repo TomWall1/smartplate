@@ -12,61 +12,100 @@ class ColesService {
 
   async fetchDeals() {
     try {
-      console.log('Fetching Coles deals from RapidAPI...');
+      console.log('=== COLES API DEBUG START ===');
+      console.log('API Key configured:', !!this.apiKey);
+      console.log('API Key prefix:', this.apiKey ? this.apiKey.substring(0, 8) + '...' : 'Not set');
+      console.log('Base URL:', this.baseURL);
       
       if (!this.apiKey) {
         console.log('No Coles API key found, using mock data');
         return this.getMockDeals();
       }
 
-      // Search for products that are commonly on sale
-      const searchTerms = [
-        'chicken', 'beef', 'salmon', 'yogurt', 'spinach', 
-        'avocado', 'rice', 'pasta', 'berries', 'milk'
-      ];
+      // Test with a single search term first
+      console.log('Testing single API call to Coles...');
       
-      const allDeals = [];
-      
-      for (const term of searchTerms) {
-        try {
-          const response = await axios.get(`${this.baseURL}/search`, {
-            headers: this.headers,
-            params: {
-              query: term,
-              page: 1,
-              pageSize: 5 // Limit to avoid hitting rate limits
-            }
-          });
+      try {
+        const testResponse = await axios.get(`${this.baseURL}/search`, {
+          headers: this.headers,
+          params: {
+            query: 'chicken',
+            page: 1,
+            pageSize: 3
+          },
+          timeout: 15000
+        });
+        
+        console.log('API Response Status:', testResponse.status);
+        console.log('API Response Headers:', JSON.stringify(testResponse.headers, null, 2));
+        console.log('API Response Data Keys:', Object.keys(testResponse.data || {}));
+        console.log('API Response Data:', JSON.stringify(testResponse.data, null, 2));
+        
+        if (testResponse.data && testResponse.data.products && testResponse.data.products.length > 0) {
+          console.log('SUCCESS: Got real data from Coles API');
+          console.log('Sample product:', JSON.stringify(testResponse.data.products[0], null, 2));
           
-          if (response.data && response.data.products) {
-            const products = response.data.products.map(product => ({
-              name: product.name,
-              category: this.categorizeProduct(product.name),
-              price: parseFloat(product.price) || 0,
-              originalPrice: this.estimateOriginalPrice(parseFloat(product.price) || 0),
-              store: "coles",
-              description: product.description || product.name,
-              unit: product.size || "per item",
-              validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-              productUrl: product.url || this.generateColesSearchUrl(product.name),
-              brand: product.brand
-            }));
-            
-            allDeals.push(...products);
-          }
-          
-          // Rate limiting - wait between requests
-          await this.delay(200);
-        } catch (error) {
-          console.error(`Error fetching ${term} from Coles:`, error.message);
+          // Process the real data
+          const realDeals = this.processRealApiData(testResponse.data.products);
+          console.log('Processed deals:', realDeals.length);
+          console.log('=== COLES API DEBUG END (SUCCESS) ===');
+          return realDeals;
+        } else {
+          console.log('API returned data but no products found');
+          console.log('Full response:', JSON.stringify(testResponse.data, null, 2));
         }
+        
+      } catch (apiError) {
+        console.error('=== COLES API ERROR ===');
+        console.error('Error message:', apiError.message);
+        console.error('Error code:', apiError.code);
+        if (apiError.response) {
+          console.error('Response status:', apiError.response.status);
+          console.error('Response headers:', JSON.stringify(apiError.response.headers, null, 2));
+          console.error('Response data:', JSON.stringify(apiError.response.data, null, 2));
+        }
+        console.error('Request config:', JSON.stringify({
+          url: apiError.config?.url,
+          method: apiError.config?.method,
+          headers: apiError.config?.headers,
+          params: apiError.config?.params
+        }, null, 2));
+        console.error('=== END COLES API ERROR ===');
       }
       
-      return allDeals.length > 0 ? allDeals : this.getMockDeals();
+      console.log('API call failed, falling back to mock data');
+      console.log('=== COLES API DEBUG END (FALLBACK) ===');
+      return this.getMockDeals();
+      
     } catch (error) {
-      console.error('Error fetching Coles deals:', error);
+      console.error('Outer error in fetchDeals:', error.message);
       return this.getMockDeals();
     }
+  }
+
+  processRealApiData(products) {
+    return products.map(product => ({
+      name: product.name || product.displayName || 'Unknown Product',
+      category: this.categorizeProduct(product.name || product.displayName || ''),
+      price: this.parsePrice(product.price || product.currentPrice || 0),
+      originalPrice: this.parsePrice(product.originalPrice || product.wasPrice || product.price || 0) * 1.3, // Estimate original
+      store: "coles",
+      description: product.description || product.name || '',
+      unit: product.packageSize || product.unit || "per item",
+      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      productUrl: product.url || product.link || this.generateColesSearchUrl(product.name || 'product'),
+      brand: product.brand || product.manufacturer || '',
+      apiSource: 'real-coles-api'
+    }));
+  }
+
+  parsePrice(priceString) {
+    if (typeof priceString === 'number') return priceString;
+    if (typeof priceString === 'string') {
+      const cleaned = priceString.replace(/[^0-9.]/g, '');
+      return parseFloat(cleaned) || 0;
+    }
+    return 0;
   }
 
   async searchProducts(query, page = 1, pageSize = 10) {
@@ -75,18 +114,21 @@ class ColesService {
         throw new Error('Coles API key not configured');
       }
 
+      console.log(`Searching Coles API: ${query}`);
       const response = await axios.get(`${this.baseURL}/search`, {
         headers: this.headers,
         params: {
           query,
           page,
           pageSize
-        }
+        },
+        timeout: 15000
       });
 
+      console.log('Search response:', response.status, response.data?.products?.length || 0, 'products');
       return response.data;
     } catch (error) {
-      console.error('Error searching Coles products:', error);
+      console.error('Error searching Coles products:', error.message);
       throw error;
     }
   }
@@ -97,6 +139,7 @@ class ColesService {
   }
 
   getMockDeals() {
+    console.log('Returning Coles mock data');
     return [
       {
         name: "Baby Spinach",
@@ -108,7 +151,8 @@ class ColesService {
         unit: "per pack",
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         productUrl: "https://www.coles.com.au/search?q=baby%20spinach",
-        discountPercentage: 37
+        discountPercentage: 37,
+        apiSource: 'mock-data'
       },
       {
         name: "Greek Style Yogurt",
@@ -120,7 +164,8 @@ class ColesService {
         unit: "per tub",
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         productUrl: "https://www.coles.com.au/search?q=chobani%20greek%20yogurt",
-        discountPercentage: 36
+        discountPercentage: 36,
+        apiSource: 'mock-data'
       },
       {
         name: "Beef Mince",
@@ -132,7 +177,8 @@ class ColesService {
         unit: "per pack",
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         productUrl: "https://www.coles.com.au/search?q=beef%20mince",
-        discountPercentage: 33
+        discountPercentage: 33,
+        apiSource: 'mock-data'
       },
       {
         name: "Mixed Berries",
@@ -144,7 +190,8 @@ class ColesService {
         unit: "per pack",
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         productUrl: "https://www.coles.com.au/search?q=frozen%20mixed%20berries",
-        discountPercentage: 33
+        discountPercentage: 33,
+        apiSource: 'mock-data'
       },
       {
         name: "Pasta",
@@ -156,7 +203,8 @@ class ColesService {
         unit: "per pack",
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         productUrl: "https://www.coles.com.au/search?q=san%20remo%20pasta",
-        discountPercentage: 40
+        discountPercentage: 40,
+        apiSource: 'mock-data'
       },
       {
         name: "Lean Chicken Thighs",
@@ -168,7 +216,8 @@ class ColesService {
         unit: "per kg",
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         productUrl: "https://www.coles.com.au/search?q=free%20range%20chicken%20thighs",
-        discountPercentage: 30
+        discountPercentage: 30,
+        apiSource: 'mock-data'
       },
       {
         name: "Carrots",
@@ -180,7 +229,8 @@ class ColesService {
         unit: "per kg",
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         productUrl: "https://www.coles.com.au/search?q=fresh%20carrots",
-        discountPercentage: 48
+        discountPercentage: 48,
+        apiSource: 'mock-data'
       },
       {
         name: "Bananas",
@@ -192,7 +242,8 @@ class ColesService {
         unit: "per kg",
         validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         productUrl: "https://www.coles.com.au/search?q=bananas",
-        discountPercentage: 41
+        discountPercentage: 41,
+        apiSource: 'mock-data'
       }
     ];
   }
@@ -220,12 +271,6 @@ class ColesService {
     }
     
     return 'Other';
-  }
-
-  estimateOriginalPrice(currentPrice) {
-    // Estimate original price assuming 20-40% discount
-    const discountMultiplier = 1 + (Math.random() * 0.2 + 0.2); // 20-40% markup
-    return Math.round(currentPrice * discountMultiplier * 100) / 100;
   }
 
   delay(ms) {
