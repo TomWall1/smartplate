@@ -72,6 +72,98 @@ router.get('/current', async (req, res) => {
   }
 });
 
+// DEBUG: Test Coles API directly
+router.get('/debug/coles', async (req, res) => {
+  try {
+    const colesService = require('../services/coles');
+    const hasApiKey = !!process.env.COLES_API_KEY;
+    
+    console.log('DEBUG: Testing Coles API');
+    console.log('Has API Key:', hasApiKey);
+    
+    if (!hasApiKey) {
+      return res.json({
+        status: 'NO_API_KEY',
+        message: 'Coles API key not configured',
+        usingMockData: true,
+        apiKey: 'Not set',
+        mockDataCount: colesService.getMockDeals().length
+      });
+    }
+    
+    // Test API call
+    console.log('Attempting real API call...');
+    const testDeals = await colesService.fetchDeals();
+    
+    // Check if we got real data or mock data
+    const isRealData = testDeals.some(deal => deal.productUrl && !deal.productUrl.includes('search?q='));
+    
+    res.json({
+      status: 'API_KEY_CONFIGURED',
+      message: 'Coles API key is configured',
+      dealsFound: testDeals.length,
+      isRealData: isRealData,
+      usingMockData: !isRealData,
+      sampleDeal: testDeals[0] || null,
+      apiKeyPrefix: process.env.COLES_API_KEY ? process.env.COLES_API_KEY.substring(0, 8) + '...' : 'Not set'
+    });
+  } catch (error) {
+    console.error('Coles API debug error:', error.message);
+    res.json({
+      status: 'ERROR',
+      message: error.message,
+      usingMockData: true,
+      error: error.toString()
+    });
+  }
+});
+
+// DEBUG: Get detailed service info
+router.get('/debug/status', async (req, res) => {
+  try {
+    const hasColesKey = !!process.env.COLES_API_KEY;
+    const hasSpoonacularKey = !!process.env.SPOONACULAR_API_KEY;
+    
+    // Get current deals to see what type they are
+    const currentDeals = await dealService.getCurrentDeals();
+    const colesDeals = currentDeals.filter(deal => deal.store === 'coles');
+    
+    // Check if deals look like real API data
+    const hasRealProductUrls = colesDeals.some(deal => 
+      deal.productUrl && 
+      !deal.productUrl.includes('search?q=') && 
+      deal.productUrl !== '#'
+    );
+    
+    res.json({
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      apiKeys: {
+        coles: hasColesKey ? 'configured' : 'missing',
+        spoonacular: hasSpoonacularKey ? 'configured' : 'missing'
+      },
+      dealsSummary: {
+        total: currentDeals.length,
+        coles: colesDeals.length,
+        woolworths: currentDeals.filter(deal => deal.store === 'woolworths').length
+      },
+      dataSource: {
+        hasRealProductUrls: hasRealProductUrls,
+        likelySource: hasRealProductUrls ? 'Real API' : 'Mock Data',
+        sampleColesUrl: colesDeals[0]?.productUrl || 'No Coles deals found'
+      },
+      nextSteps: hasColesKey ? 
+        'API key configured - check logs for API call results' : 
+        'Add COLES_API_KEY environment variable to use real data'
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'ERROR',
+      message: error.message
+    });
+  }
+});
+
 // Manually trigger deal update (admin endpoint)
 router.post('/refresh', async (req, res) => {
   try {
