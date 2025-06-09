@@ -1,8 +1,8 @@
 import React from 'react';
-import { RefreshCw, Store } from 'lucide-react';
+import { RefreshCw, ExternalLink } from 'lucide-react';
 import DealCard from '../components/DealCard';
 
-const Home = ({ deals, loading, onRefreshDeals }) => {
+const Home = ({ deals, loading, onRefreshDeals, apiStatus }) => {
   const woolworthsDeals = deals.filter(deal => deal.store === 'woolworths');
   const colesDeals = deals.filter(deal => deal.store === 'coles');
 
@@ -35,35 +35,87 @@ const Home = ({ deals, loading, onRefreshDeals }) => {
           <StoreSection
             title="Woolworths"
             deals={woolworthsDeals}
-            color="bg-green-500"
+            logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Woolworths_logo.svg/320px-Woolworths_logo.svg.png"
+            storeUrl="https://www.woolworths.com.au"
+            brandColor="bg-green-600"
           />
           <StoreSection
             title="Coles"
             deals={colesDeals}
-            color="bg-red-500"
+            logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Coles_logo.svg/320px-Coles_logo.svg.png"
+            storeUrl="https://www.coles.com.au"
+            brandColor="bg-red-600"
           />
+        </div>
+      )}
+
+      {!loading && deals.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-600">No deals available at the moment.</p>
+          <button
+            onClick={onRefreshDeals}
+            className="mt-4 text-primary-500 hover:text-primary-600"
+          >
+            Try refreshing
+          </button>
         </div>
       )}
     </div>
   );
 };
 
-const StoreSection = ({ title, deals, color }) => (
+const StoreSection = ({ title, deals, logo, storeUrl, brandColor }) => (
   <div className="bg-white rounded-lg shadow-sm border p-6">
-    <div className="flex items-center space-x-2 mb-4">
-      <div className={`w-4 h-4 ${color} rounded`}></div>
-      <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-      <span className="text-sm text-gray-500">({deals.length} deals)</span>
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center space-x-3">
+        <img 
+          src={logo} 
+          alt={`${title} logo`}
+          className="h-8 w-auto object-contain"
+          onError={(e) => {
+            // Fallback to text if logo fails to load
+            e.target.style.display = 'none';
+            e.target.nextSibling.style.display = 'block';
+          }}
+        />
+        <h2 
+          className={`text-xl font-semibold text-white px-3 py-1 rounded ${brandColor}`}
+          style={{ display: 'none' }}
+        >
+          {title}
+        </h2>
+        <span className="text-sm text-gray-500">({deals.length} deals)</span>
+      </div>
+      
+      <a 
+        href={storeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-gray-400 hover:text-gray-600 transition-colors"
+        title={`Visit ${title} website`}
+      >
+        <ExternalLink className="w-4 h-4" />
+      </a>
     </div>
     
     <div className="space-y-3">
-      {deals.slice(0, 10).map((deal, index) => (
+      {deals.slice(0, 12).map((deal, index) => (
         <DealCard key={index} deal={deal} />
       ))}
-      {deals.length > 10 && (
-        <p className="text-sm text-gray-500 text-center">
-          +{deals.length - 10} more deals
-        </p>
+      {deals.length > 12 && (
+        <div className="text-center pt-3">
+          <p className="text-sm text-gray-500">
+            +{deals.length - 12} more deals
+          </p>
+          <a 
+            href={storeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-500 hover:text-primary-600 text-sm font-medium"
+          >
+            View all on {title} →
+          </a>
+        </div>
       )}
     </div>
   </div>
