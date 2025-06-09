@@ -22,58 +22,87 @@ class ColesService {
         return this.getMockDeals();
       }
 
-      // Test with a single search term first
-      console.log('Testing single API call to Coles...');
+      // Try different endpoint patterns
+      const endpointsToTry = [
+        '/products/search',
+        '/product/search', 
+        '/api/products/search',
+        '/api/search',
+        '/search-products',
+        '/products',
+        '/',
+        '/api/products',
+        '/coles/products/search'
+      ];
       
-      try {
-        const testResponse = await axios.get(`${this.baseURL}/search`, {
-          headers: this.headers,
-          params: {
-            query: 'chicken',
-            page: 1,
-            pageSize: 3
-          },
-          timeout: 15000
-        });
-        
-        console.log('API Response Status:', testResponse.status);
-        console.log('API Response Headers:', JSON.stringify(testResponse.headers, null, 2));
-        console.log('API Response Data Keys:', Object.keys(testResponse.data || {}));
-        console.log('API Response Data:', JSON.stringify(testResponse.data, null, 2));
-        
-        if (testResponse.data && testResponse.data.products && testResponse.data.products.length > 0) {
-          console.log('SUCCESS: Got real data from Coles API');
-          console.log('Sample product:', JSON.stringify(testResponse.data.products[0], null, 2));
+      console.log('Testing multiple endpoint patterns...');
+      
+      for (const endpoint of endpointsToTry) {
+        try {
+          console.log(`\n--- Testing endpoint: ${endpoint} ---`);
           
-          // Process the real data
-          const realDeals = this.processRealApiData(testResponse.data.products);
-          console.log('Processed deals:', realDeals.length);
-          console.log('=== COLES API DEBUG END (SUCCESS) ===');
-          return realDeals;
-        } else {
-          console.log('API returned data but no products found');
-          console.log('Full response:', JSON.stringify(testResponse.data, null, 2));
+          const testResponse = await axios.get(`${this.baseURL}${endpoint}`, {
+            headers: this.headers,
+            params: {
+              query: 'chicken',
+              q: 'chicken', // Alternative parameter name
+              search: 'chicken', // Another alternative
+              page: 1,
+              pageSize: 3,
+              limit: 3 // Alternative parameter name
+            },
+            timeout: 10000
+          });
+          
+          console.log(`SUCCESS on ${endpoint}!`);
+          console.log('Response Status:', testResponse.status);
+          console.log('Response Data Keys:', Object.keys(testResponse.data || {}));
+          console.log('Response Data Structure:', JSON.stringify(testResponse.data, null, 2));
+          
+          // Check if we got products in any format
+          const data = testResponse.data;
+          let products = null;
+          
+          if (data.products && Array.isArray(data.products)) {
+            products = data.products;
+          } else if (data.results && Array.isArray(data.results)) {
+            products = data.results;
+          } else if (data.items && Array.isArray(data.items)) {
+            products = data.items;
+          } else if (Array.isArray(data)) {
+            products = data;
+          } else if (data.data && Array.isArray(data.data)) {
+            products = data.data;
+          }
+          
+          if (products && products.length > 0) {
+            console.log('SUCCESS: Found products!', products.length);
+            console.log('Sample product:', JSON.stringify(products[0], null, 2));
+            
+            // Process the real data
+            const realDeals = this.processRealApiData(products, endpoint);
+            console.log('Processed deals:', realDeals.length);
+            console.log('=== COLES API DEBUG END (SUCCESS) ===');
+            return realDeals;
+          } else {
+            console.log('Endpoint responded but no products found');
+          }
+          
+        } catch (endpointError) {
+          console.log(`${endpoint} failed:`, endpointError.response?.status || endpointError.message);
+          if (endpointError.response?.status === 404) {
+            console.log('404 - Endpoint does not exist');
+          } else if (endpointError.response?.status === 401) {
+            console.log('401 - Authentication failed');
+          } else if (endpointError.response?.status === 403) {
+            console.log('403 - Forbidden - API key might not have access');
+          } else {
+            console.log('Other error:', endpointError.response?.data || endpointError.message);
+          }
         }
-        
-      } catch (apiError) {
-        console.error('=== COLES API ERROR ===');
-        console.error('Error message:', apiError.message);
-        console.error('Error code:', apiError.code);
-        if (apiError.response) {
-          console.error('Response status:', apiError.response.status);
-          console.error('Response headers:', JSON.stringify(apiError.response.headers, null, 2));
-          console.error('Response data:', JSON.stringify(apiError.response.data, null, 2));
-        }
-        console.error('Request config:', JSON.stringify({
-          url: apiError.config?.url,
-          method: apiError.config?.method,
-          headers: apiError.config?.headers,
-          params: apiError.config?.params
-        }, null, 2));
-        console.error('=== END COLES API ERROR ===');
       }
       
-      console.log('API call failed, falling back to mock data');
+      console.log('All endpoints failed, falling back to mock data');
       console.log('=== COLES API DEBUG END (FALLBACK) ===');
       return this.getMockDeals();
       
@@ -83,20 +112,27 @@ class ColesService {
     }
   }
 
-  processRealApiData(products) {
-    return products.map(product => ({
-      name: product.name || product.displayName || 'Unknown Product',
-      category: this.categorizeProduct(product.name || product.displayName || ''),
-      price: this.parsePrice(product.price || product.currentPrice || 0),
-      originalPrice: this.parsePrice(product.originalPrice || product.wasPrice || product.price || 0) * 1.3, // Estimate original
-      store: "coles",
-      description: product.description || product.name || '',
-      unit: product.packageSize || product.unit || "per item",
-      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      productUrl: product.url || product.link || this.generateColesSearchUrl(product.name || 'product'),
-      brand: product.brand || product.manufacturer || '',
-      apiSource: 'real-coles-api'
-    }));
+  processRealApiData(products, successfulEndpoint) {
+    console.log(`Processing real data from endpoint: ${successfulEndpoint}`);
+    
+    return products.map((product, index) => {
+      console.log(`Processing product ${index}:`, JSON.stringify(product, null, 2));
+      
+      return {
+        name: product.name || product.displayName || product.title || product.productName || `Product ${index + 1}`,
+        category: this.categorizeProduct(product.name || product.displayName || product.title || ''),
+        price: this.parsePrice(product.price || product.currentPrice || product.salePrice || product.cost || 0),
+        originalPrice: this.parsePrice(product.originalPrice || product.wasPrice || product.regularPrice || product.listPrice || product.price || 0) * 1.3,
+        store: "coles",
+        description: product.description || product.name || product.title || '',
+        unit: product.packageSize || product.unit || product.size || "per item",
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        productUrl: product.url || product.link || product.productUrl || this.generateColesSearchUrl(product.name || 'product'),
+        brand: product.brand || product.manufacturer || product.brandName || '',
+        apiSource: 'real-coles-api',
+        sourceEndpoint: successfulEndpoint
+      };
+    });
   }
 
   parsePrice(priceString) {
@@ -115,7 +151,8 @@ class ColesService {
       }
 
       console.log(`Searching Coles API: ${query}`);
-      const response = await axios.get(`${this.baseURL}/search`, {
+      // Use the first endpoint that works (we'll discover this from fetchDeals)
+      const response = await axios.get(`${this.baseURL}/products/search`, {
         headers: this.headers,
         params: {
           query,
