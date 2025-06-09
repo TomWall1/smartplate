@@ -135,7 +135,8 @@ const getMockDeals = () => {
       description: "Fresh Atlantic Salmon Fillets",
       unit: "per kg",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 32
+      discountPercentage: 32,
+      productUrl: "https://www.woolworths.com.au/shop/search/products?searchTerm=atlantic%20salmon"
     },
     {
       name: "Free Range Chicken Breast",
@@ -146,7 +147,8 @@ const getMockDeals = () => {
       description: "Free Range Chicken Breast Fillets",
       unit: "per kg",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 31
+      discountPercentage: 31,
+      productUrl: "https://www.woolworths.com.au/shop/search/products?searchTerm=free%20range%20chicken%20breast"
     },
     {
       name: "Baby Spinach",
@@ -157,7 +159,8 @@ const getMockDeals = () => {
       description: "Fresh Baby Spinach 100g",
       unit: "per pack",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 37
+      discountPercentage: 37,
+      productUrl: "https://www.coles.com.au/search?q=baby%20spinach"
     },
     {
       name: "Greek Style Yogurt",
@@ -168,7 +171,8 @@ const getMockDeals = () => {
       description: "Natural Greek Style Yogurt 500g",
       unit: "per tub",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 36
+      discountPercentage: 36,
+      productUrl: "https://www.coles.com.au/search?q=greek%20style%20yogurt"
     },
     {
       name: "Hass Avocados",
@@ -179,7 +183,8 @@ const getMockDeals = () => {
       description: "Premium Hass Avocados",
       unit: "each",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 33
+      discountPercentage: 33,
+      productUrl: "https://www.woolworths.com.au/shop/search/products?searchTerm=hass%20avocado"
     },
     {
       name: "Beef Mince",
@@ -190,7 +195,8 @@ const getMockDeals = () => {
       description: "Premium Beef Mince 500g",
       unit: "per pack",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 33
+      discountPercentage: 33,
+      productUrl: "https://www.coles.com.au/search?q=beef%20mince"
     },
     {
       name: "Mixed Berries",
@@ -201,7 +207,8 @@ const getMockDeals = () => {
       description: "Frozen Mixed Berries 300g",
       unit: "per pack",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 33
+      discountPercentage: 33,
+      productUrl: "https://www.coles.com.au/search?q=frozen%20mixed%20berries"
     },
     {
       name: "Brown Rice",
@@ -209,10 +216,11 @@ const getMockDeals = () => {
       price: 2.50,
       originalPrice: 3.99,
       store: "woolworths",
-      description: "Long Grain Brown Rice 1kg",
+      description: "SunRice Long Grain Brown Rice 1kg",
       unit: "per pack",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 37
+      discountPercentage: 37,
+      productUrl: "https://www.woolworths.com.au/shop/search/products?searchTerm=sunrice%20brown%20rice"
     },
     {
       name: "Extra Virgin Olive Oil",
@@ -220,10 +228,11 @@ const getMockDeals = () => {
       price: 6.99,
       originalPrice: 9.99,
       store: "woolworths",
-      description: "Extra Virgin Olive Oil 500ml",
+      description: "Cobram Estate Extra Virgin Olive Oil 500ml",
       unit: "per bottle",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 30
+      discountPercentage: 30,
+      productUrl: "https://www.woolworths.com.au/shop/search/products?searchTerm=cobram%20estate%20olive%20oil"
     },
     {
       name: "Organic Eggs",
@@ -234,7 +243,8 @@ const getMockDeals = () => {
       description: "Free Range Organic Eggs 12 pack",
       unit: "per dozen",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 31
+      discountPercentage: 31,
+      productUrl: "https://www.woolworths.com.au/shop/search/products?searchTerm=organic%20eggs%2012%20pack"
     },
     {
       name: "Sweet Potato",
@@ -245,7 +255,8 @@ const getMockDeals = () => {
       description: "Fresh Sweet Potato",
       unit: "per kg",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 41
+      discountPercentage: 41,
+      productUrl: "https://www.woolworths.com.au/shop/search/products?searchTerm=sweet%20potato"
     },
     {
       name: "Pasta",
@@ -253,10 +264,11 @@ const getMockDeals = () => {
       price: 1.50,
       originalPrice: 2.50,
       store: "coles",
-      description: "Durum Wheat Pasta 500g",
+      description: "San Remo Durum Wheat Pasta 500g",
       unit: "per pack",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 40
+      discountPercentage: 40,
+      productUrl: "https://www.coles.com.au/search?q=san%20remo%20pasta"
     },
     {
       name: "Wholemeal Bread",
@@ -264,10 +276,11 @@ const getMockDeals = () => {
       price: 2.20,
       originalPrice: 3.50,
       store: "woolworths",
-      description: "Wholemeal Bread 700g",
+      description: "Tip Top Wholemeal Bread 700g",
       unit: "per loaf",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 37
+      discountPercentage: 37,
+      productUrl: "https://www.woolworths.com.au/shop/search/products?searchTerm=tip%20top%20wholemeal%20bread"
     },
     {
       name: "Lean Chicken Thighs",
@@ -278,7 +291,8 @@ const getMockDeals = () => {
       description: "Free Range Chicken Thighs 1kg",
       unit: "per kg",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 30
+      discountPercentage: 30,
+      productUrl: "https://www.coles.com.au/search?q=free%20range%20chicken%20thighs"
     },
     {
       name: "Carrots",
@@ -289,7 +303,8 @@ const getMockDeals = () => {
       description: "Fresh Carrots 1kg",
       unit: "per kg",
       validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      discountPercentage: 48
+      discountPercentage: 48,
+      productUrl: "https://www.coles.com.au/search?q=fresh%20carrots"
     }
   ];
 };
