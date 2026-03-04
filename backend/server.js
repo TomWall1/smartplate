@@ -90,14 +90,13 @@ app.use('*', (req, res) => {
   });
 });
 
-// Local development server (Vercel ignores app.listen and uses module.exports instead)
-if (process.env.NODE_ENV !== 'production') {
+// Start server (skipped on Vercel which uses module.exports instead)
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`SmartPlate API running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`CORS origins configured for Vercel deployment`);
   });
 }
 
-// Export for Vercel serverless
+// Export for serverless adapters (Vercel etc.)
 module.exports = app;
