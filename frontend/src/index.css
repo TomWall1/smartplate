@@ -9,7 +9,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #fef9f0;
+  background: #ffffff;
 }
 
 code {
@@ -185,11 +185,14 @@ code {
 /* ── Recipe card hover effect ─────────────────────────────────────── */
 .recipe-card {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border: 1.5px solid #e7e5e4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .recipe-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  border-color: #d6d3d1;
 }
 
 /* ── Store picker card hover effect ──────────────────────────────── */
@@ -257,9 +260,9 @@ code {
 .skeleton {
   background: linear-gradient(
     90deg,
-    #f0ebe3 25%,
-    #e8e0d4 50%,
-    #f0ebe3 75%
+    #f3f4f6 25%,
+    #e5e7eb 50%,
+    #f3f4f6 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;

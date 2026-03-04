@@ -36,8 +36,8 @@ const DealCard = ({ deal }) => {
   };
 
   return (
-    <div 
-      className="deal-card flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-white cursor-pointer group border border-transparent hover:border-gray-200 hover:shadow-md interactive-element focus:ring-2 focus:ring-primary-300"
+    <div
+      className="deal-card flex items-center justify-between p-3 bg-white rounded-xl cursor-pointer group border border-stone-200 shadow-sm hover:shadow-md hover:border-stone-300 interactive-element focus:ring-2 focus:ring-primary-300"
       onClick={handleClick}
       onKeyPress={handleKeyPress}
       tabIndex={0}
@@ -47,7 +47,7 @@ const DealCard = ({ deal }) => {
     >
       <div className="flex-1">
         <div className="flex items-center space-x-2">
-          <h3 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
+          <h3 className="font-semibold text-stone-900 group-hover:text-primary-600 transition-colors">
             {deal.name}
           </h3>
           <ExternalLink className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -87,7 +87,7 @@ const DealCard = ({ deal }) => {
       
       <div className="text-right ml-4 flex flex-col items-end">
         <div className="flex items-center space-x-2 mb-1">
-          <span className="text-lg font-bold text-green-600">
+          <span className="text-xl font-bold text-green-600">
             ${deal.price.toFixed(2)}
           </span>
           {deal.originalPrice && (

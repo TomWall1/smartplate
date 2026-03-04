@@ -115,7 +115,7 @@ export default function Recipes() {
   const showLoading = personalisedLoading || (weeklyRecipes.length === 0 && !isPersonalised);
 
   return (
-    <div className="min-h-screen" style={{ background: '#fef9f0' }}>
+    <div className="min-h-screen" style={{ background: '#ffffff' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
         {/* ── Page header ──────────────────────────────────────────────────── */}

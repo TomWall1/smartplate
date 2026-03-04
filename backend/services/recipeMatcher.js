@@ -58,6 +58,15 @@ const COMPOUND_BLOCKLIST = {
   milk: ['oat milk', 'almond milk', 'soy milk', 'coconut milk', 'skim milk', 'rice milk'],
 };
 
+// Protein keywords — a recipe must have at least one matched deal from this list
+// to appear in weekly results. Prevents pantry-staple-only matches.
+const PROTEIN_KEYWORDS = [
+  'chicken', 'beef', 'lamb', 'pork', 'mince', 'sausage', 'steak',
+  'salmon', 'fish', 'prawn', 'seafood', 'tuna', 'turkey', 'duck', 'veal',
+  'bacon', 'ham', 'bream', 'barramundi', 'snapper', 'trout', 'cod',
+  'schnitzel', 'rump', 'fillet', 'drumstick', 'wing', 'breast', 'thigh',
+];
+
 // Words to ignore during matching (too generic / cause false positives)
 const STOP_WORDS = new Set([
   'the', 'and', 'for', 'with', 'from', 'can', 'jar', 'tin', 'box',
@@ -275,8 +284,22 @@ class RecipeMatcher {
     // Sort by match score (desc), then total saving (desc)
     scored.sort((a, b) => b.matchScore - a.matchScore || b.totalSaving - a.totalSaving);
 
-    // Return top 20 with at least 1 match
-    return scored.filter(r => r.matchScore > 0).slice(0, 20);
+    // Filter to recipes with at least 1 match AND at least 1 protein deal
+    return scored
+      .filter(r => r.matchScore > 0 && this._hasProteinMatch(r))
+      .slice(0, 20);
+  }
+
+  /**
+   * Returns true if the recipe has at least one matched deal that is a protein.
+   * Prevents pantry-only recipes (oil, rice, pasta, flour, condiments) from appearing.
+   */
+  _hasProteinMatch(recipe) {
+    return recipe.matchedDeals.some(deal => {
+      const ing = deal.ingredient.toLowerCase();
+      const dn = deal.dealName.toLowerCase();
+      return PROTEIN_KEYWORDS.some(p => ing.includes(p) || dn.includes(p));
+    });
   }
 }
 

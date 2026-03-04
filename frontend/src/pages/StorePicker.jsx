@@ -12,6 +12,7 @@ const STORES = [
     lightBg: '#e8f5e9',
     borderColor: '#007833',
     tagline: 'The fresh food people',
+    logoUrl: 'https://logo.clearbit.com/woolworths.com.au',
   },
   {
     id: 'coles',
@@ -21,6 +22,7 @@ const STORES = [
     lightBg: '#ffeaed',
     borderColor: '#e31837',
     tagline: 'Good food, great value',
+    logoUrl: 'https://logo.clearbit.com/coles.com.au',
   },
   {
     id: 'iga',
@@ -30,6 +32,7 @@ const STORES = [
     lightBg: '#e8eeff',
     borderColor: '#003da5',
     tagline: 'Your local supermarket',
+    logoUrl: 'https://logo.clearbit.com/iga.com.au',
   },
 ];
 
@@ -54,10 +57,7 @@ export default function StorePicker() {
     : null;
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-12"
-      style={{ background: '#fef9f0' }}
-    >
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-white">
       {/* ── Continue banner ─────────────────────────────────────────────── */}
       {selectedMeta && (
         <div
@@ -85,7 +85,7 @@ export default function StorePicker() {
         <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500 mx-auto mb-4 shadow-md">
           <UtensilsCrossed className="w-9 h-9 text-white" />
         </div>
-        <h1 className="text-4xl font-bold text-stone-800 mb-2 tracking-tight">SmartPlate</h1>
+        <h1 className="text-4xl font-bold text-stone-900 mb-2 tracking-tight">Deals to Dish</h1>
         <p className="text-stone-500 text-lg max-w-sm mx-auto">
           Your weekly specials, matched to real recipes
         </p>
@@ -106,26 +106,41 @@ export default function StorePicker() {
             <button
               key={store.id}
               onClick={() => handleSelectStore(store.id)}
-              className="store-card bg-white rounded-2xl shadow-sm overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-offset-2"
+              className="store-card bg-white rounded-2xl overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{
                 border: isSelected
                   ? `2px solid ${store.headerBg}`
-                  : '2px solid transparent',
+                  : '2px solid #e5e7eb',
                 boxShadow: isSelected
                   ? `0 0 0 2px ${store.headerBg}30`
                   : undefined,
               }}
               aria-label={`Shop at ${store.label}`}
             >
-              {/* Coloured header band */}
+              {/* Logo area */}
               <div
-                className="flex items-center gap-2 px-4 py-3"
-                style={{ background: store.headerBg, color: store.headerText }}
+                className="flex items-center justify-center px-4 py-5"
+                style={{ background: store.headerBg }}
               >
-                <ShoppingBag className="w-5 h-5 opacity-80" />
-                <span className="font-bold text-lg">{store.label}</span>
+                <img
+                  src={store.logoUrl}
+                  alt={store.label}
+                  className="h-10 object-contain"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.querySelector('.logo-fallback').style.display = 'flex';
+                  }}
+                />
+                <span
+                  className="logo-fallback items-center gap-2 font-bold text-xl"
+                  style={{ display: 'none', color: store.headerText }}
+                >
+                  <ShoppingBag className="w-6 h-6 opacity-80" />
+                  {store.label}
+                </span>
                 {isSelected && (
-                  <span className="ml-auto text-xs bg-white/25 px-2 py-0.5 rounded-full font-medium">
+                  <span className="ml-auto text-xs bg-white/25 px-2 py-0.5 rounded-full font-medium"
+                    style={{ color: store.headerText }}>
                     Selected
                   </span>
                 )}
@@ -134,17 +149,13 @@ export default function StorePicker() {
               {/* Card body */}
               <div className="px-4 py-3" style={{ background: store.lightBg }}>
                 <p className="text-xs text-stone-500 mb-2">{store.tagline}</p>
-
                 {loading ? (
                   <div className="flex items-center gap-2 text-sm text-stone-500">
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                     <span>Loading deals...</span>
                   </div>
                 ) : (
-                  <p
-                    className="text-sm font-semibold"
-                    style={{ color: store.headerBg }}
-                  >
+                  <p className="text-sm font-semibold" style={{ color: store.headerBg }}>
                     {count > 0
                       ? `${count} deal${count !== 1 ? 's' : ''} this week`
                       : 'Check back soon'}
@@ -161,9 +172,7 @@ export default function StorePicker() {
         <p className="mt-6 text-sm text-stone-400">
           Want a different store?{' '}
           <button
-            onClick={() => {
-              setSelectedStore(null);
-            }}
+            onClick={() => setSelectedStore(null)}
             className="underline text-stone-500 hover:text-stone-700 transition-colors"
           >
             Clear selection

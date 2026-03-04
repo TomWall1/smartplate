@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, ChefHat } from 'lucide-react';
+import { ArrowLeft, ChefHat } from 'lucide-react';
 import { useApp } from '../App';
-import { dealsApi } from '../services/api';
+import { dealsApi, recipesApi } from '../services/api';
 import DealCard from '../components/DealCard';
 import RecipeCard from '../components/RecipeCard';
 
@@ -21,7 +21,7 @@ function capitalize(str) {
 // ── Skeleton deal card ────────────────────────────────────────────────────────
 function DealSkeleton() {
   return (
-    <div className="bg-white rounded-xl p-3 border border-stone-100">
+    <div className="bg-white rounded-xl p-3 border border-stone-200 shadow-sm">
       <div className="skeleton h-4 w-3/4 mb-2" />
       <div className="skeleton h-3 w-1/2 mb-3" />
       <div className="skeleton h-5 w-1/4 ml-auto" />
@@ -32,7 +32,7 @@ function DealSkeleton() {
 // ── Skeleton recipe card ──────────────────────────────────────────────────────
 function RecipeSkeleton() {
   return (
-    <div className="bg-white rounded-2xl shadow-sm overflow-hidden flex-shrink-0 w-64 sm:w-auto">
+    <div className="bg-white rounded-2xl overflow-hidden flex-shrink-0 w-64 sm:w-auto border border-stone-200 shadow-sm">
       <div className="skeleton aspect-video w-full" />
       <div className="p-4 space-y-2">
         <div className="skeleton h-4 w-4/5" />
@@ -46,11 +46,14 @@ function RecipeSkeleton() {
 export default function StorePage() {
   const { store } = useParams();
   const navigate = useNavigate();
-  const { weeklyRecipes, setSelectedStore } = useApp();
+  const { setSelectedStore } = useApp();
 
   const [storeDeals, setStoreDeals] = useState([]);
   const [dealsLoading, setDealsLoading] = useState(true);
   const [dealsError, setDealsError] = useState(null);
+
+  const [storeRecipes, setStoreRecipes] = useState([]);
+  const [recipesLoading, setRecipesLoading] = useState(true);
 
   const colors = STORE_COLORS[store] || { bg: '#78716c', light: '#f5f5f4', text: '#ffffff' };
   const storeName = capitalize(store);
@@ -58,7 +61,6 @@ export default function StorePage() {
   // Fetch deals for this store
   useEffect(() => {
     if (!store) return;
-
     setDealsLoading(true);
     setDealsError(null);
 
@@ -74,22 +76,22 @@ export default function StorePage() {
       .finally(() => setDealsLoading(false));
   }, [store]);
 
-  // Filter weekly recipes that have at least one deal from this store
-  const storeRecipes = weeklyRecipes
-    .filter((r) =>
-      r.matchedDeals?.some(
-        (d) => (d.store || '').toLowerCase() === store
-      )
-    )
-    .sort((a, b) => {
-      const countA = a.matchedDeals?.filter(
-        (d) => (d.store || '').toLowerCase() === store
-      ).length ?? 0;
-      const countB = b.matchedDeals?.filter(
-        (d) => (d.store || '').toLowerCase() === store
-      ).length ?? 0;
-      return countB - countA;
-    });
+  // Fetch store-isolated recipes (only deals from this store)
+  useEffect(() => {
+    if (!store) return;
+    setRecipesLoading(true);
+
+    recipesApi.getRecipesForStore(store)
+      .then((data) => {
+        const list = Array.isArray(data) ? data : (data?.recipes ?? []);
+        setStoreRecipes(list);
+      })
+      .catch((err) => {
+        console.error('Failed to load store recipes:', err);
+        setStoreRecipes([]);
+      })
+      .finally(() => setRecipesLoading(false));
+  }, [store]);
 
   const handleChangeStore = () => {
     setSelectedStore(null);
@@ -97,7 +99,7 @@ export default function StorePage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#fef9f0' }}>
+    <div className="min-h-screen bg-white">
       {/* ── Store header band ──────────────────────────────────────────────── */}
       <div
         className="w-full px-4 sm:px-6 lg:px-8 py-5"
@@ -127,9 +129,49 @@ export default function StorePage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
 
-        {/* ── Section 1: Deals ──────────────────────────────────────────────── */}
+        {/* ── Section 1: Recipes (top) ──────────────────────────────────────── */}
         <section>
-          <h2 className="text-xl font-bold text-stone-800 mb-4">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
+              <ChefHat className="w-5 h-5" style={{ color: colors.bg }} />
+              Recipes Using These Deals
+            </h2>
+            <Link
+              to="/recipes"
+              className="text-sm font-medium underline underline-offset-2 text-stone-500 hover:text-stone-800 transition-colors"
+            >
+              View all recipes →
+            </Link>
+          </div>
+
+          {recipesLoading ? (
+            <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0 -mx-4 sm:mx-0 px-4 sm:px-0">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <RecipeSkeleton key={i} />
+              ))}
+            </div>
+          ) : storeRecipes.length === 0 ? (
+            <div
+              className="rounded-2xl p-6 text-center text-sm text-stone-500 border border-dashed border-stone-300"
+              style={{ background: colors.light }}
+            >
+              <p>No recipes matched to {storeName} deals yet.</p>
+              <p className="mt-1 text-xs">Check back after recipes are generated for the week.</p>
+            </div>
+          ) : (
+            <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0 -mx-4 sm:mx-0 px-4 sm:px-0">
+              {storeRecipes.map((recipe) => (
+                <div key={recipe.id} className="flex-shrink-0 w-64 sm:w-auto">
+                  <RecipeCard recipe={recipe} />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── Section 2: Deals (bottom) ─────────────────────────────────────── */}
+        <section>
+          <h2 className="text-xl font-bold text-stone-900 mb-4">
             This Week's Deals at {storeName}
           </h2>
 
@@ -156,43 +198,6 @@ export default function StorePage() {
                 <DealCard key={deal.id ?? idx} deal={deal} />
               ))}
             </div>
-          )}
-        </section>
-
-        {/* ── Section 2: Recipes ────────────────────────────────────────────── */}
-        <section>
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-            <h2 className="text-xl font-bold text-stone-800 flex items-center gap-2">
-              <ChefHat className="w-5 h-5" style={{ color: colors.bg }} />
-              Recipes Using These Deals
-            </h2>
-            <Link
-              to="/recipes"
-              className="text-sm font-medium underline underline-offset-2 text-stone-500 hover:text-stone-800 transition-colors"
-            >
-              View all recipes →
-            </Link>
-          </div>
-
-          {storeRecipes.length === 0 ? (
-            <div
-              className="rounded-2xl p-6 text-center text-sm text-stone-500 border border-dashed border-stone-300"
-              style={{ background: colors.light }}
-            >
-              <p>No recipes matched to {storeName} deals yet.</p>
-              <p className="mt-1 text-xs">Check back after recipes are generated for the week.</p>
-            </div>
-          ) : (
-            <>
-              {/* Horizontal scroll on mobile, grid on desktop */}
-              <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0 -mx-4 sm:mx-0 px-4 sm:px-0">
-                {storeRecipes.map((recipe) => (
-                  <div key={recipe.id} className="flex-shrink-0 w-64 sm:w-auto">
-                    <RecipeCard recipe={recipe} />
-                  </div>
-                ))}
-              </div>
-            </>
           )}
         </section>
       </div>

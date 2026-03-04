@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 120000,
 });
 
 // Request interceptor for logging
@@ -100,6 +100,16 @@ export const recipesApi = {
       return response.data;
     } catch (error) {
       console.error('Error searching recipes:', error);
+      throw error;
+    }
+  },
+
+  getRecipesForStore: async (store) => {
+    try {
+      const response = await api.post('/api/recipes/suggestions', { store });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching recipes for store ${store}:`, error);
       throw error;
     }
   },

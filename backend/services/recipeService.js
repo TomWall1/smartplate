@@ -78,7 +78,6 @@ For each recipe return a JSON object with:
 - "totalEstimatedCost": realistic total ingredient cost in AUD for a home cook (number)
 - "dealIngredients": array of dealName strings from topDeals
 - "dealHighlights": array of strings formatted as "Ingredient $X.XX at Store (save $Y.YY)" — one per deal in topDeals
-- "whyThisWeek": 1-2 sentences mentioning 1-2 specific deals and dollar savings
 
 Respond with ONLY a JSON array of ${matched.length} objects. No markdown, no explanation.`;
 
@@ -118,7 +117,6 @@ Respond with ONLY a JSON array of ${matched.length} objects. No markdown, no exp
           servings: libRecipe.servings || 4,
           steps: libRecipe.steps || [],
           tags: libRecipe.tags || [],
-          whyThisWeek: e.whyThisWeek || '',
           dealHighlights: Array.isArray(e.dealHighlights) ? e.dealHighlights : [],
           matchedDeals: libRecipe.matchedDeals || [],
           // Backwards compat fields for existing frontend
@@ -305,15 +303,28 @@ Include only recipes that are compatible with the user's dietary restrictions. R
     return null;
   }
 
-  getWeeklyRecipes() {
+  getWeeklyRecipes(store = null) {
     // Try /tmp first (most recently generated on serverless), then deployed file
     const tmpData = this._readRecipesFile(TMP_RECIPES_PATH);
-    if (tmpData?.recipes?.length > 0) return tmpData.recipes;
+    const allRecipes = (tmpData?.recipes?.length > 0)
+      ? tmpData.recipes
+      : (this._readRecipesFile(WEEKLY_RECIPES_PATH)?.recipes ?? []);
 
-    const data = this._readRecipesFile(WEEKLY_RECIPES_PATH);
-    if (data?.recipes?.length > 0) return data.recipes;
+    if (!store) return allRecipes;
 
-    return [];
+    // Filter to recipes with at least one deal from the requested store.
+    // Also strip cross-store deals so savings figures are store-accurate.
+    return allRecipes
+      .map(r => {
+        const storeDeals = (r.matchedDeals || []).filter(
+          d => (d.store || '').toLowerCase() === store.toLowerCase()
+        );
+        if (storeDeals.length === 0) return null;
+        const storeSaving = +storeDeals.reduce((s, d) => s + (d.saving || 0), 0).toFixed(2);
+        return { ...r, matchedDeals: storeDeals, estimatedSaving: storeSaving };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.matchedDeals.length - a.matchedDeals.length);
   }
 
   getWeeklyRecipesMeta() {

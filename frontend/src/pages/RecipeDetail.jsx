@@ -14,7 +14,7 @@ import { recipesApi } from '../services/api';
 // ── Skeleton layout ───────────────────────────────────────────────────────────
 function RecipeDetailSkeleton() {
   return (
-    <div className="min-h-screen" style={{ background: '#fef9f0' }}>
+    <div className="min-h-screen" style={{ background: '#ffffff' }}>
       <div className="skeleton w-full h-56 sm:h-72" style={{ borderRadius: 0 }} />
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
         <div className="skeleton h-8 w-3/4" />
@@ -77,7 +77,7 @@ export default function RecipeDetail() {
   // ── Error ─────────────────────────────────────────────────────────────────
   if (error || !recipe) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: '#fef9f0' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: '#ffffff' }}>
         <p className="text-2xl mb-2">🍽️</p>
         <h2 className="text-xl font-bold text-stone-800 mb-2">Recipe not found</h2>
         <p className="text-stone-500 text-sm mb-6">
@@ -98,7 +98,6 @@ export default function RecipeDetail() {
     title,
     description,
     image,
-    whyThisWeek,
     prepTime,
     cookTime,
     servings,
@@ -124,7 +123,7 @@ export default function RecipeDetail() {
     (nutrition.calories > 0 || nutrition.protein > 0 || nutrition.carbs > 0 || nutrition.fat > 0);
 
   return (
-    <div className="min-h-screen" style={{ background: '#fef9f0' }}>
+    <div className="min-h-screen" style={{ background: '#ffffff' }}>
       {/* ── Hero image ──────────────────────────────────────────────────────── */}
       <div className="w-full h-56 sm:h-72 bg-stone-200 relative overflow-hidden">
         {image ? (
@@ -176,14 +175,6 @@ export default function RecipeDetail() {
                 {tag}
               </span>
             ))}
-          </div>
-        )}
-
-        {/* Why this week */}
-        {whyThisWeek && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-            <p className="text-xs font-bold text-amber-700 mb-1">Why this week:</p>
-            <p className="text-sm italic text-amber-800">{whyThisWeek}</p>
           </div>
         )}
 

@@ -27,7 +27,7 @@ router.post('/generate-weekly', async (req, res) => {
 // With preferences: calls Claude for personalised ranking
 router.post('/suggestions', async (req, res) => {
   try {
-    const { dealIngredients, preferences, pantryItems } = req.body;
+    const { dealIngredients, preferences, pantryItems, store } = req.body;
 
     const hasPreferences =
       (preferences?.dietary && preferences.dietary.length > 0) ||
@@ -48,8 +48,9 @@ router.post('/suggestions', async (req, res) => {
       recipes = await recipeService.getPersonalisedRecipes(fullPreferences);
     } else {
       // Default path — read from stored weekly recipes (free)
-      console.log('Serving stored weekly recipes');
-      recipes = recipeService.getWeeklyRecipes();
+      const storeLabel = store || null;
+      console.log(`Serving stored weekly recipes${storeLabel ? ` for store: ${storeLabel}` : ''}`);
+      recipes = recipeService.getWeeklyRecipes(storeLabel);
     }
 
     res.json(recipes);
