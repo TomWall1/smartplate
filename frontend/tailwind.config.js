@@ -17,8 +17,24 @@ export default {
           50: '#f8fafc',
           500: '#64748b',
           600: '#475569',
-        }
-      }
+        },
+        woolworths: {
+          DEFAULT: '#007833',
+          light: '#e8f5e9',
+        },
+        coles: {
+          DEFAULT: '#e31837',
+          light: '#ffeaed',
+        },
+        iga: {
+          DEFAULT: '#003da5',
+          light: '#e8eeff',
+        },
+        cream: {
+          DEFAULT: '#fef9f0',
+          warm: '#fdf3e3',
+        },
+      },
     },
   },
   plugins: [],

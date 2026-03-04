@@ -1,212 +1,284 @@
-import React, { useState } from 'react';
-import { Save, Plus, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Save, Plus, X, Check, User } from 'lucide-react';
+import { useApp } from '../App';
 
-const Profile = ({ preferences, onUpdatePreferences }) => {
-  const [localPreferences, setLocalPreferences] = useState(preferences);
+const DIETARY_OPTIONS = [
+  { id: 'vegetarian',  label: 'Vegetarian' },
+  { id: 'vegan',       label: 'Vegan' },
+  { id: 'gluten-free', label: 'Gluten Free' },
+  { id: 'dairy-free',  label: 'Dairy Free' },
+  { id: 'low-carb',    label: 'Low Carb' },
+  { id: 'keto',        label: 'Keto' },
+];
+
+const MEAL_TYPE_OPTIONS = [
+  { id: 'quick',          label: 'Quick (under 30 min)' },
+  { id: 'family-friendly',label: 'Family Friendly' },
+  { id: 'batch-cook',     label: 'Good for Batch Cooking' },
+  { id: 'one-pot',        label: 'One Pot Meals' },
+  { id: 'healthy',        label: 'Healthy' },
+  { id: 'comfort',        label: 'Comfort Food' },
+];
+
+export default function Profile() {
+  const { preferences, setPreferences } = useApp();
+
+  const [local, setLocal] = useState({ ...preferences });
   const [newPantryItem, setNewPantryItem] = useState('');
   const [newDislike, setNewDislike] = useState('');
+  const [saved, setSaved] = useState(false);
+  const saveTimerRef = useRef(null);
 
-  const dietaryOptions = [
-    { id: 'vegetarian', label: 'Vegetarian' },
-    { id: 'vegan', label: 'Vegan' },
-    { id: 'gluten-free', label: 'Gluten Free' },
-    { id: 'dairy-free', label: 'Dairy Free' },
-    { id: 'low-carb', label: 'Low Carb' },
-    { id: 'keto', label: 'Keto' }
-  ];
+  // Sync local state if context preferences change externally
+  useEffect(() => {
+    setLocal({ ...preferences });
+  }, [preferences]);
 
-  const mealTypeOptions = [
-    { id: 'quick', label: 'Quick (under 30 min)' },
-    { id: 'family-friendly', label: 'Family Friendly' },
-    { id: 'batch-cook', label: 'Good for Batch Cooking' },
-    { id: 'one-pot', label: 'One Pot Meals' },
-    { id: 'healthy', label: 'Healthy' },
-    { id: 'comfort', label: 'Comfort Food' }
-  ];
-
-  const handleDietaryChange = (dietaryId) => {
-    const newDietary = localPreferences.dietary.includes(dietaryId)
-      ? localPreferences.dietary.filter(id => id !== dietaryId)
-      : [...localPreferences.dietary, dietaryId];
-    
-    setLocalPreferences({ ...localPreferences, dietary: newDietary });
+  // ── Handlers ──────────────────────────────────────────────────────────────
+  const toggleDietary = (id) => {
+    setLocal((prev) => ({
+      ...prev,
+      dietary: (prev.dietary ?? []).includes(id)
+        ? (prev.dietary ?? []).filter((d) => d !== id)
+        : [...(prev.dietary ?? []), id],
+    }));
   };
 
-  const handleMealTypeChange = (mealTypeId) => {
-    const newMealTypes = localPreferences.mealTypes.includes(mealTypeId)
-      ? localPreferences.mealTypes.filter(id => id !== mealTypeId)
-      : [...localPreferences.mealTypes, mealTypeId];
-    
-    setLocalPreferences({ ...localPreferences, mealTypes: newMealTypes });
+  const toggleMealType = (id) => {
+    setLocal((prev) => ({
+      ...prev,
+      mealTypes: (prev.mealTypes ?? []).includes(id)
+        ? (prev.mealTypes ?? []).filter((m) => m !== id)
+        : [...(prev.mealTypes ?? []), id],
+    }));
   };
 
   const addPantryItem = () => {
-    if (newPantryItem.trim()) {
-      setLocalPreferences({
-        ...localPreferences,
-        pantryItems: [...localPreferences.pantryItems, newPantryItem.trim()]
-      });
-      setNewPantryItem('');
-    }
+    const val = newPantryItem.trim();
+    if (!val) return;
+    setLocal((prev) => ({
+      ...prev,
+      pantryItems: [...(prev.pantryItems ?? []), val],
+    }));
+    setNewPantryItem('');
   };
 
   const removePantryItem = (item) => {
-    setLocalPreferences({
-      ...localPreferences,
-      pantryItems: localPreferences.pantryItems.filter(i => i !== item)
-    });
+    setLocal((prev) => ({
+      ...prev,
+      pantryItems: (prev.pantryItems ?? []).filter((i) => i !== item),
+    }));
   };
 
   const addDislike = () => {
-    if (newDislike.trim()) {
-      setLocalPreferences({
-        ...localPreferences,
-        dislikes: [...localPreferences.dislikes, newDislike.trim()]
-      });
-      setNewDislike('');
-    }
+    const val = newDislike.trim();
+    if (!val) return;
+    setLocal((prev) => ({
+      ...prev,
+      dislikes: [...(prev.dislikes ?? []), val],
+    }));
+    setNewDislike('');
   };
 
   const removeDislike = (item) => {
-    setLocalPreferences({
-      ...localPreferences,
-      dislikes: localPreferences.dislikes.filter(i => i !== item)
-    });
+    setLocal((prev) => ({
+      ...prev,
+      dislikes: (prev.dislikes ?? []).filter((i) => i !== item),
+    }));
   };
 
   const handleSave = () => {
-    onUpdatePreferences(localPreferences);
-    alert('Preferences saved!');
+    setPreferences(local);
+
+    // Show success message, fade after 3 seconds
+    setSaved(true);
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => setSaved(false), 3000);
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Your Preferences
-        </h1>
-        <p className="text-gray-600">
-          Customize your recipe recommendations
-        </p>
-      </div>
+    <div className="min-h-screen" style={{ background: '#fef9f0' }}>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
-      <div className="bg-white rounded-lg shadow-sm border p-6 space-y-6">
-        {/* Dietary Restrictions */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Dietary Restrictions</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {dietaryOptions.map(option => (
-              <label key={option.id} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={localPreferences.dietary.includes(option.id)}
-                  onChange={() => handleDietaryChange(option.id)}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-gray-700">{option.label}</span>
-              </label>
-            ))}
+        {/* ── Header ───────────────────────────────────────────────────────── */}
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center shadow-sm">
+            <User className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-stone-800">Your Preferences</h1>
+            <p className="text-sm text-stone-500">Customise your recipe recommendations</p>
           </div>
         </div>
 
-        {/* Meal Types */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Preferred Meal Types</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {mealTypeOptions.map(option => (
-              <label key={option.id} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={localPreferences.mealTypes.includes(option.id)}
-                  onChange={() => handleMealTypeChange(option.id)}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-gray-700">{option.label}</span>
-              </label>
-            ))}
-          </div>
+        {/* ── Saved confirmation ────────────────────────────────────────────── */}
+        <div
+          className={`flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700 transition-all duration-300 ${
+            saved ? 'opacity-100 max-h-12' : 'opacity-0 max-h-0 overflow-hidden border-0 p-0'
+          }`}
+          aria-live="polite"
+        >
+          <Check className="w-4 h-4 flex-shrink-0" />
+          <span>Preferences saved!</span>
         </div>
 
-        {/* Pantry Items */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Pantry Items I Have</h3>
-          <div className="flex space-x-2 mb-3">
+        {/* ── Card: Dietary ─────────────────────────────────────────────────── */}
+        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+          <h2 className="text-base font-bold text-stone-800 mb-4">Dietary Restrictions</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {DIETARY_OPTIONS.map(({ id, label }) => {
+              const checked = (local.dietary ?? []).includes(id);
+              return (
+                <label key={id} className="flex items-center gap-2.5 cursor-pointer group">
+                  <div
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                      checked
+                        ? 'bg-amber-500 border-amber-500'
+                        : 'border-stone-300 group-hover:border-amber-400'
+                    }`}
+                    onClick={() => toggleDietary(id)}
+                  >
+                    {checked && <Check className="w-3 h-3 text-white" />}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleDietary(id)}
+                    className="sr-only"
+                  />
+                  <span className="text-sm text-stone-700 select-none">{label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── Card: Meal types ──────────────────────────────────────────────── */}
+        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+          <h2 className="text-base font-bold text-stone-800 mb-4">Preferred Meal Types</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {MEAL_TYPE_OPTIONS.map(({ id, label }) => {
+              const checked = (local.mealTypes ?? []).includes(id);
+              return (
+                <label key={id} className="flex items-center gap-2.5 cursor-pointer group">
+                  <div
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                      checked
+                        ? 'bg-amber-500 border-amber-500'
+                        : 'border-stone-300 group-hover:border-amber-400'
+                    }`}
+                    onClick={() => toggleMealType(id)}
+                  >
+                    {checked && <Check className="w-3 h-3 text-white" />}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleMealType(id)}
+                    className="sr-only"
+                  />
+                  <span className="text-sm text-stone-700 select-none">{label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── Card: Pantry items ────────────────────────────────────────────── */}
+        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+          <h2 className="text-base font-bold text-stone-800 mb-4">Pantry Items I Have</h2>
+          <div className="flex gap-2 mb-3">
             <input
               type="text"
               value={newPantryItem}
               onChange={(e) => setNewPantryItem(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addPantryItem()}
               placeholder="Add pantry item..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              onKeyPress={(e) => e.key === 'Enter' && addPantryItem()}
+              className="flex-1 px-3 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-400 focus:ring-2 focus:ring-amber-400 focus:border-transparent"
             />
             <button
               onClick={addPantryItem}
-              className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors"
+              className="p-2.5 rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+              aria-label="Add pantry item"
             >
               <Plus className="w-4 h-4" />
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {localPreferences.pantryItems.map((item, index) => (
-              <span key={index} className="inline-flex items-center space-x-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                <span>{item}</span>
+            {(local.pantryItems ?? []).map((item, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 text-sm px-3 py-1 rounded-full border border-amber-200"
+              >
+                {item}
                 <button
                   onClick={() => removePantryItem(item)}
-                  className="text-blue-600 hover:text-blue-800"
+                  className="text-amber-500 hover:text-amber-800 transition-colors"
+                  aria-label={`Remove ${item}`}
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </span>
             ))}
+            {(local.pantryItems ?? []).length === 0 && (
+              <p className="text-sm text-stone-400 italic">No pantry items added yet.</p>
+            )}
           </div>
-        </div>
+        </section>
 
-        {/* Dislikes */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Ingredients I Don't Like</h3>
-          <div className="flex space-x-2 mb-3">
+        {/* ── Card: Dislikes ────────────────────────────────────────────────── */}
+        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+          <h2 className="text-base font-bold text-stone-800 mb-4">Ingredients I Don't Like</h2>
+          <div className="flex gap-2 mb-3">
             <input
               type="text"
               value={newDislike}
               onChange={(e) => setNewDislike(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addDislike()}
               placeholder="Add disliked ingredient..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              onKeyPress={(e) => e.key === 'Enter' && addDislike()}
+              className="flex-1 px-3 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-400 focus:ring-2 focus:ring-amber-400 focus:border-transparent"
             />
             <button
               onClick={addDislike}
-              className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors"
+              className="p-2.5 rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+              aria-label="Add disliked ingredient"
             >
               <Plus className="w-4 h-4" />
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {localPreferences.dislikes.map((item, index) => (
-              <span key={index} className="inline-flex items-center space-x-1 bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
-                <span>{item}</span>
+            {(local.dislikes ?? []).map((item, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center gap-1.5 bg-red-50 text-red-800 text-sm px-3 py-1 rounded-full border border-red-100"
+              >
+                {item}
                 <button
                   onClick={() => removeDislike(item)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-red-400 hover:text-red-700 transition-colors"
+                  aria-label={`Remove ${item}`}
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </span>
             ))}
+            {(local.dislikes ?? []).length === 0 && (
+              <p className="text-sm text-stone-400 italic">No dislikes added yet.</p>
+            )}
           </div>
-        </div>
+        </section>
 
-        <div className="flex justify-end">
+        {/* ── Save button ───────────────────────────────────────────────────── */}
+        <div className="flex justify-end pb-4">
           <button
             onClick={handleSave}
-            className="inline-flex items-center space-x-2 px-6 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white rounded-xl font-semibold text-sm hover:bg-amber-600 transition-colors shadow-sm"
           >
             <Save className="w-4 h-4" />
-            <span>Save Preferences</span>
+            Save Preferences
           </button>
         </div>
       </div>
     </div>
   );
-};
-
-export default Profile;
+}

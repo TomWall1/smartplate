@@ -61,7 +61,7 @@ export const dealsApi = {
       console.error(`Error fetching ${storeName} deals:`, error);
       throw error;
     }
-  }
+  },
 };
 
 // Recipe API calls
@@ -71,7 +71,7 @@ export const recipesApi = {
       const response = await api.post('/api/recipes/suggestions', {
         dealIngredients,
         preferences,
-        pantryItems
+        pantryItems,
       }, { timeout: 60000 });
       return response.data;
     } catch (error) {
@@ -95,14 +95,24 @@ export const recipesApi = {
       const params = { query };
       if (diet) params.diet = diet;
       if (type) params.type = type;
-      
+
       const response = await api.get('/api/recipes/search', { params });
       return response.data;
     } catch (error) {
       console.error('Error searching recipes:', error);
       throw error;
     }
-  }
+  },
+
+  generateWeekly: async () => {
+    try {
+      const response = await api.post('/api/recipes/generate-weekly', {}, { timeout: 300000 });
+      return response.data;
+    } catch (error) {
+      console.error('Error generating weekly recipes:', error);
+      throw error;
+    }
+  },
 };
 
 // Health check
@@ -115,7 +125,7 @@ export const healthApi = {
       console.error('Health check failed:', error);
       throw error;
     }
-  }
+  },
 };
 
 export default api;
