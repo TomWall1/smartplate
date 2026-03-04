@@ -1,340 +1,432 @@
-const axios = require('axios');
+const Anthropic = require('@anthropic-ai/sdk');
+const fs = require('fs');
+const path = require('path');
+
+// Primary path (works locally, read-only on Vercel but included in deploy)
+const WEEKLY_RECIPES_PATH = path.join(__dirname, '..', 'data', 'weekly-recipes.json');
+// Fallback writable path for serverless environments
+const TMP_RECIPES_PATH = path.join('/tmp', 'weekly-recipes.json');
 
 class RecipeService {
   constructor() {
-    this.spoonacularApiKey = process.env.SPOONACULAR_API_KEY;
-    this.baseURL = 'https://api.spoonacular.com/recipes';
+    this.anthropic = process.env.ANTHROPIC_API_KEY
+      ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+      : null;
   }
 
-  async findRecipesByIngredients(ingredients, preferences = {}) {
-    try {
-      console.log('RecipeService: Finding recipes for ingredients:', ingredients?.slice(0, 3));
-      console.log('RecipeService: Has API key:', !!this.spoonacularApiKey);
-      
-      if (!ingredients || ingredients.length === 0) {
-        console.log('RecipeService: No ingredients provided, returning mock recipes');
-        return this.getMockRecipes(preferences);
-      }
-      
-      if (!this.spoonacularApiKey) {
-        console.log('RecipeService: No Spoonacular API key, using mock data');
-        return this.getMockRecipes(preferences);
-      }
+  // ── Weekly generation (library matching + Claude enrichment) ──────
 
-      // Clean up ingredients list - take first word of each ingredient for better matching
-      const cleanIngredients = ingredients
-        .filter(ing => ing && typeof ing === 'string')
-        .map(ingredient => ingredient.split(' ')[0].toLowerCase().replace(/[^a-z]/g, ''))
-        .filter(ing => ing.length > 2) // Remove very short words
-        .slice(0, 5); // Limit to 5 ingredients to avoid long URLs
-      
-      console.log('RecipeService: Clean ingredients:', cleanIngredients);
-      
-      if (cleanIngredients.length === 0) {
-        console.log('RecipeService: No valid ingredients after cleaning, using mock data');
-        return this.getMockRecipes(preferences);
-      }
-      
-      const params = {
-        apiKey: this.spoonacularApiKey,
-        includeIngredients: cleanIngredients.join(','),
-        number: 12,
-        ranking: 2, // Maximize used ingredients
-        fillIngredients: true,
-        addRecipeInformation: true,
-        instructionsRequired: false // Don't require instructions to get more results
+  async generateWeeklyRecipes() {
+    if (!this.anthropic) {
+      throw new Error('ANTHROPIC_API_KEY is not configured');
+    }
+
+    const dealService = require('./dealService');
+    const recipeMatcher = require('./recipeMatcher');
+
+    const deals = await dealService.getCurrentDeals();
+    console.log(`RecipeService: Matching library recipes against ${deals.length} deals`);
+
+    // Step 1: Find top 20 library recipes that match current deals
+    const matched = recipeMatcher.matchDeals(deals);
+    console.log(`RecipeService: Found ${matched.length} matching library recipes`);
+
+    // If no matches (library empty or no overlap), fall back to pure generation
+    if (matched.length === 0) {
+      console.log('RecipeService: No library matches, falling back to full generation');
+      return this._generateFromScratch(deals);
+    }
+
+    // Step 2: Send matched recipes to Claude for enrichment.
+    // Slim payload — drop the full deal list and cap matchedDeals to top 5 per recipe
+    // so the prompt stays under ~6k input tokens and completes in ~15-20s.
+    const recipeSummary = matched.map((r, i) => {
+      // Best deal per unique ingredient (deduped), then top 5 by saving.
+      // Without dedup, "rice" can match 4+ rice products and Claude sums them all,
+      // making estimatedSaving exceed totalEstimatedCost.
+      const seenIngredients = new Set();
+      const topDeals = [...r.matchedDeals]
+        .sort((a, b) => (b.saving || 0) - (a.saving || 0))
+        .filter(md => {
+          if (seenIngredients.has(md.ingredient)) return false;
+          seenIngredients.add(md.ingredient);
+          return true;
+        })
+        .slice(0, 5)
+        .map(md => ({
+          ingredient: md.ingredient,
+          dealName: md.dealName,
+          price: md.price,
+          saving: md.saving,
+          store: md.store,
+        }));
+      return {
+        id: i + 1,
+        title: r.title,
+        topDeals,
       };
+    });
 
-      // Add dietary filters if specified
-      if (preferences.dietary && preferences.dietary.length > 0) {
-        if (preferences.dietary.includes('vegetarian')) params.diet = 'vegetarian';
-        if (preferences.dietary.includes('vegan')) params.diet = 'vegan';
-        if (preferences.dietary.includes('gluten-free')) params.intolerances = 'gluten';
-        if (preferences.dietary.includes('dairy-free')) {
-          params.intolerances = params.intolerances ? `${params.intolerances},dairy` : 'dairy';
+    const prompt = `You are a helpful Australian meal-planning assistant. Below are ${matched.length} real recipes with their top on-special ingredients this week.
+
+MATCHED RECIPES:
+${JSON.stringify(recipeSummary, null, 2)}
+
+For each recipe return a JSON object with:
+- "id": the recipe id
+- "estimatedSaving": sum of saving fields in topDeals (number, 2 decimal places)
+- "totalEstimatedCost": realistic total ingredient cost in AUD for a home cook (number)
+- "dealIngredients": array of dealName strings from topDeals
+- "dealHighlights": array of strings formatted as "Ingredient $X.XX at Store (save $Y.YY)" — one per deal in topDeals
+- "whyThisWeek": 1-2 sentences mentioning 1-2 specific deals and dollar savings
+
+Respond with ONLY a JSON array of ${matched.length} objects. No markdown, no explanation.`;
+
+    try {
+      const response = await this.anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 16000,
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      const text = response.content[0].text.trim();
+      let jsonText = text;
+      const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (fenceMatch) jsonText = fenceMatch[1].trim();
+
+      const enriched = JSON.parse(jsonText);
+
+      if (!Array.isArray(enriched) || enriched.length === 0) {
+        throw new Error('Claude returned invalid enrichment data');
+      }
+
+      // Merge Claude enrichment with full library recipe data.
+      // Claude only returns the deal-aware fields; everything else comes from the library.
+      const normalised = enriched.map((e, i) => {
+        const libRecipe = matched[i] || {};
+        const libIngredients = libRecipe.ingredients || [];
+        const allIngredients = libIngredients.map(ing => ing.raw || ing.name).filter(Boolean);
+        return {
+          id: e.id || i + 1,
+          title: libRecipe.title || `Recipe ${i + 1}`,
+          description: libRecipe.description || '',
+          dealIngredients: Array.isArray(e.dealIngredients) ? e.dealIngredients : [],
+          allIngredients,
+          estimatedSaving: typeof e.estimatedSaving === 'number' ? e.estimatedSaving : libRecipe.totalSaving || 0,
+          totalEstimatedCost: typeof e.totalEstimatedCost === 'number' ? e.totalEstimatedCost : 0,
+          prepTime: libRecipe.totalTime || libRecipe.prepTime || 30,
+          servings: libRecipe.servings || 4,
+          steps: libRecipe.steps || [],
+          tags: libRecipe.tags || [],
+          whyThisWeek: e.whyThisWeek || '',
+          dealHighlights: Array.isArray(e.dealHighlights) ? e.dealHighlights : [],
+          matchedDeals: libRecipe.matchedDeals || [],
+          // Backwards compat fields for existing frontend
+          image: libRecipe.image || `https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400`,
+          cookTime: libRecipe.cookTime || libRecipe.totalTime || 30,
+          rating: 4.5,
+          ingredients: allIngredients,
+          instructions: Array.isArray(libRecipe.steps) ? libRecipe.steps.join(' ') : '',
+          sourceUrl: libRecipe.url || '#',
+          nutrition: libRecipe.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 },
+        };
+      });
+
+      this._saveWeeklyRecipes(normalised);
+      console.log(`RecipeService: Enriched and stored ${normalised.length} weekly recipes from library`);
+      return normalised;
+    } catch (error) {
+      console.error('RecipeService: Claude enrichment failed:', error.message);
+      throw error;
+    }
+  }
+
+  // ── Fallback: generate recipes from scratch (no library) ──────────
+
+  async _generateFromScratch(deals) {
+    const dealSummary = deals.map(d => {
+      const saving = d.originalPrice && d.price
+        ? `(was $${d.originalPrice.toFixed(2)}, now $${d.price.toFixed(2)})`
+        : `($${(d.price || 0).toFixed(2)})`;
+      return `- ${d.name} ${saving} [${d.store}] — ${d.category || 'General'}`;
+    }).join('\n');
+
+    const prompt = `You are a helpful Australian meal-planning assistant. Below is this week's supermarket specials from Woolworths, Coles, and IGA.
+
+THIS WEEK'S SPECIALS:
+${dealSummary}
+
+Generate exactly 20 diverse, practical recipes that make good use of these specials. Aim for variety:
+- Mix of quick weeknight dinners (under 30 min), meal-prep friendly dishes, breakfasts, and lunches
+- Range of cuisines (Australian, Asian, Mediterranean, Mexican, etc.)
+- Include vegetarian and meat options
+- Recipes should be achievable for a home cook with basic pantry staples (oil, salt, pepper, garlic, onion, common spices, flour, sugar, eggs, rice, pasta)
+
+For each recipe, return a JSON object with these exact fields:
+- "id": sequential number 1-20
+- "title": recipe name
+- "description": 1-2 sentence appetising description
+- "dealIngredients": array of ingredient names that are on special this week (must match names from the specials list above)
+- "allIngredients": array of ALL ingredients with quantities (e.g. "500g chicken breast", "2 tbsp soy sauce")
+- "estimatedSaving": dollar amount saved by using specials vs regular prices (number, e.g. 8.50)
+- "totalEstimatedCost": estimated total cost of all ingredients (number, e.g. 15.00)
+- "prepTime": total time in minutes (number)
+- "servings": number of servings (number)
+- "steps": array of step-by-step instructions (each step is a string)
+- "tags": array from ["quick", "meal-prep", "vegetarian", "vegan", "gluten-free", "dairy-free", "high-protein", "budget", "breakfast", "lunch", "dinner"]
+
+Respond with ONLY a JSON array of 20 recipe objects. No markdown, no explanation, just the JSON array.`;
+
+    const response = await this.anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const text = response.content[0].text.trim();
+    let jsonText = text;
+    const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenceMatch) jsonText = fenceMatch[1].trim();
+
+    const recipes = JSON.parse(jsonText);
+
+    if (!Array.isArray(recipes) || recipes.length === 0) {
+      throw new Error('Claude returned invalid recipe data');
+    }
+
+    const normalised = recipes.map((r, i) => ({
+      id: r.id || i + 1,
+      title: r.title || `Recipe ${i + 1}`,
+      description: r.description || '',
+      dealIngredients: Array.isArray(r.dealIngredients) ? r.dealIngredients : [],
+      allIngredients: Array.isArray(r.allIngredients) ? r.allIngredients : [],
+      estimatedSaving: typeof r.estimatedSaving === 'number' ? r.estimatedSaving : 0,
+      totalEstimatedCost: typeof r.totalEstimatedCost === 'number' ? r.totalEstimatedCost : 0,
+      prepTime: typeof r.prepTime === 'number' ? r.prepTime : 30,
+      servings: typeof r.servings === 'number' ? r.servings : 4,
+      steps: Array.isArray(r.steps) ? r.steps : [],
+      tags: Array.isArray(r.tags) ? r.tags : [],
+      image: `https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400`,
+      cookTime: typeof r.prepTime === 'number' ? r.prepTime : 30,
+      rating: 4.5,
+      ingredients: Array.isArray(r.allIngredients) ? r.allIngredients : [],
+      instructions: Array.isArray(r.steps) ? r.steps.join(' ') : '',
+      sourceUrl: '#',
+      nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    }));
+
+    this._saveWeeklyRecipes(normalised);
+    console.log(`RecipeService: Generated ${normalised.length} weekly recipes from scratch (no library)`);
+    return normalised;
+  }
+
+  // ── Personalised ranking (per-user Claude call) ───────────────────
+
+  async getPersonalisedRecipes(userPreferences) {
+    const weeklyRecipes = this.getWeeklyRecipes();
+
+    if (!this.anthropic) {
+      console.log('RecipeService: No API key, filtering locally');
+      return this._filterLocally(weeklyRecipes, userPreferences);
+    }
+
+    const recipeSummary = weeklyRecipes.map(r => ({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      tags: r.tags,
+      dealIngredients: r.dealIngredients,
+      allIngredients: r.allIngredients,
+      prepTime: r.prepTime,
+      totalEstimatedCost: r.totalEstimatedCost,
+    }));
+
+    const prompt = `You are a meal-planning assistant. Here are this week's 20 pre-generated recipes:
+
+${JSON.stringify(recipeSummary, null, 2)}
+
+The user has these preferences:
+${JSON.stringify(userPreferences, null, 2)}
+
+Possible preference fields:
+- dietary: array like ["vegetarian", "gluten-free", "dairy-free", "vegan"]
+- maxPrepTime: maximum prep time in minutes
+- servings: preferred serving count
+- budget: "low", "medium", or "high"
+- cuisinePreferences: array of preferred cuisines
+- excludeIngredients: array of ingredients to avoid
+- pantryItems: array of ingredients the user already has at home
+
+Return a JSON array of recipe IDs ranked from best match to worst, with a short reason for each. Format:
+[{"id": 1, "reason": "Great match — vegetarian, under 20 min, uses your pantry spinach"}, ...]
+
+Include only recipes that are compatible with the user's dietary restrictions. Return at most 10 recipes. Respond with ONLY the JSON array.`;
+
+    try {
+      const response = await this.anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      const text = response.content[0].text.trim();
+      let jsonText = text;
+      const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (fenceMatch) jsonText = fenceMatch[1].trim();
+
+      const ranked = JSON.parse(jsonText);
+
+      if (!Array.isArray(ranked)) throw new Error('Invalid ranking response');
+
+      // Map ranked IDs back to full recipe objects
+      const result = [];
+      for (const entry of ranked) {
+        const recipe = weeklyRecipes.find(r => r.id === entry.id);
+        if (recipe) {
+          result.push({ ...recipe, matchReason: entry.reason });
         }
       }
 
-      console.log('RecipeService: Making API request with params:', { 
-        ...params, 
-        apiKey: '[HIDDEN]' 
-      });
-      
-      const response = await axios.get(`${this.baseURL}/complexSearch`, { 
-        params,
-        timeout: 10000 // 10 second timeout
-      });
-      
-      console.log('RecipeService: API response status:', response.status);
-      console.log('RecipeService: Found recipes count:', response.data?.results?.length || 0);
-      
-      if (response.data && response.data.results && response.data.results.length > 0) {
-        const recipes = response.data.results.map(recipe => ({
-          id: recipe.id,
-          title: recipe.title,
-          image: recipe.image || 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400',
-          cookTime: recipe.readyInMinutes || 30,
-          servings: recipe.servings || 4,
-          rating: recipe.spoonacularScore ? Math.round((recipe.spoonacularScore / 20) * 10) / 10 : 4.0,
-          ingredients: recipe.extendedIngredients ? 
-            recipe.extendedIngredients.map(ing => ing.original || ing.name) : [],
-          dealIngredients: this.findDealIngredients(recipe.extendedIngredients, ingredients),
-          description: recipe.summary ? this.stripHtml(recipe.summary).substring(0, 150) + '...' : 
-            'A delicious recipe featuring your deal ingredients',
-          instructions: recipe.analyzedInstructions && recipe.analyzedInstructions[0] ? 
-            recipe.analyzedInstructions[0].steps.map(step => step.step).join(' ') : 
-            'Instructions available on recipe page',
-          nutrition: {
-            calories: recipe.nutrition?.nutrients?.find(n => n.name === 'Calories')?.amount || 0,
-            protein: recipe.nutrition?.nutrients?.find(n => n.name === 'Protein')?.amount || 0,
-            carbs: recipe.nutrition?.nutrients?.find(n => n.name === 'Carbohydrates')?.amount || 0,
-            fat: recipe.nutrition?.nutrients?.find(n => n.name === 'Fat')?.amount || 0
-          },
-          sourceUrl: recipe.sourceUrl,
-          healthScore: recipe.healthScore,
-          cheap: recipe.cheap,
-          dairyFree: recipe.dairyFree,
-          glutenFree: recipe.glutenFree,
-          vegan: recipe.vegan,
-          vegetarian: recipe.vegetarian
-        }));
-        
-        console.log('RecipeService: Successfully processed recipes');
-        return recipes;
-      } else {
-        console.log('RecipeService: No recipes found in API response, using mock data');
-        return this.getMockRecipes(preferences);
-      }
-      
+      return result;
     } catch (error) {
-      console.error('RecipeService: Error finding recipes:', error.message);
-      if (error.response) {
-        console.error('RecipeService: API response status:', error.response.status);
-        console.error('RecipeService: API response data:', error.response.data);
-      }
-      console.log('RecipeService: Falling back to mock data');
-      return this.getMockRecipes(preferences);
+      console.error('RecipeService: Personalisation failed:', error.message);
+      return this._filterLocally(weeklyRecipes, userPreferences);
     }
+  }
+
+  // ── Read stored weekly recipes ────────────────────────────────────
+
+  _readRecipesFile(filePath) {
+    try {
+      if (fs.existsSync(filePath)) {
+        return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      }
+    } catch {}
+    return null;
+  }
+
+  getWeeklyRecipes() {
+    // Try /tmp first (most recently generated on serverless), then deployed file
+    const tmpData = this._readRecipesFile(TMP_RECIPES_PATH);
+    if (tmpData?.recipes?.length > 0) return tmpData.recipes;
+
+    const data = this._readRecipesFile(WEEKLY_RECIPES_PATH);
+    if (data?.recipes?.length > 0) return data.recipes;
+
+    return [];
+  }
+
+  getWeeklyRecipesMeta() {
+    const data = this._readRecipesFile(TMP_RECIPES_PATH) || this._readRecipesFile(WEEKLY_RECIPES_PATH);
+    if (data) {
+      return {
+        generatedAt: data.generatedAt,
+        recipeCount: data.recipes?.length || 0,
+        dealCount: data.dealCount || 0,
+      };
+    }
+    return null;
+  }
+
+  _saveWeeklyRecipes(recipes) {
+    const data = {
+      generatedAt: new Date().toISOString(),
+      dealCount: 0,
+      recipes,
+    };
+    try {
+      const dealService = require('./dealService');
+      data.dealCount = dealService.getCurrentDeals.length || 0;
+    } catch {}
+
+    const json = JSON.stringify(data, null, 2);
+
+    // Try primary path first (works locally)
+    try {
+      fs.mkdirSync(path.dirname(WEEKLY_RECIPES_PATH), { recursive: true });
+      fs.writeFileSync(WEEKLY_RECIPES_PATH, json, 'utf8');
+    } catch {
+      // Read-only filesystem (Vercel) — write to /tmp instead
+      fs.writeFileSync(TMP_RECIPES_PATH, json, 'utf8');
+    }
+  }
+
+  // ── Local filtering fallback (no API call) ────────────────────────
+
+  _filterLocally(recipes, preferences) {
+    let filtered = [...recipes];
+
+    if (preferences.dietary && preferences.dietary.length > 0) {
+      const diets = preferences.dietary.map(d => d.toLowerCase());
+      if (diets.includes('vegetarian')) {
+        filtered = filtered.filter(r =>
+          r.tags?.includes('vegetarian') || r.tags?.includes('vegan') ||
+          !this._hasNonVegIngredient(r)
+        );
+      }
+      if (diets.includes('vegan')) {
+        filtered = filtered.filter(r => r.tags?.includes('vegan'));
+      }
+      if (diets.includes('gluten-free')) {
+        filtered = filtered.filter(r => r.tags?.includes('gluten-free'));
+      }
+      if (diets.includes('dairy-free')) {
+        filtered = filtered.filter(r => r.tags?.includes('dairy-free'));
+      }
+    }
+
+    if (preferences.maxPrepTime) {
+      filtered = filtered.filter(r => (r.prepTime || 30) <= preferences.maxPrepTime);
+    }
+
+    if (preferences.excludeIngredients && preferences.excludeIngredients.length > 0) {
+      const excluded = preferences.excludeIngredients.map(e => e.toLowerCase());
+      filtered = filtered.filter(r => {
+        const allIngs = (r.allIngredients || []).join(' ').toLowerCase();
+        return !excluded.some(ex => allIngs.includes(ex));
+      });
+    }
+
+    return filtered.slice(0, 10);
+  }
+
+  _hasNonVegIngredient(recipe) {
+    const meats = ['chicken', 'beef', 'pork', 'lamb', 'salmon', 'fish', 'prawn', 'bacon', 'mince', 'sausage'];
+    const all = (recipe.allIngredients || recipe.ingredients || []).join(' ').toLowerCase();
+    return meats.some(m => all.includes(m));
+  }
+
+  // ── Legacy methods (kept for backwards compat) ────────────────────
+
+  async findRecipesByIngredients(ingredients, preferences = {}) {
+    // If preferences have dietary/budget/etc, use personalised path
+    const hasPreferences = preferences.dietary?.length > 0 ||
+      preferences.maxPrepTime ||
+      preferences.excludeIngredients?.length > 0;
+
+    if (hasPreferences) {
+      return this.getPersonalisedRecipes(preferences);
+    }
+
+    // Otherwise return stored weekly recipes
+    return this.getWeeklyRecipes();
   }
 
   async getRecipeDetails(recipeId) {
-    try {
-      if (!this.spoonacularApiKey) {
-        return this.getMockRecipeDetails(recipeId);
-      }
-
-      const params = {
-        apiKey: this.spoonacularApiKey,
-        includeNutrition: true,
-        addWinePairing: false,
-        addTasteData: false
-      };
-
-      const response = await axios.get(`${this.baseURL}/${recipeId}/information`, { 
-        params,
-        timeout: 10000
-      });
-      
-      if (response.data) {
-        const recipe = response.data;
-        return {
-          id: recipe.id,
-          title: recipe.title,
-          image: recipe.image,
-          description: this.stripHtml(recipe.summary),
-          instructions: recipe.analyzedInstructions && recipe.analyzedInstructions[0] ? 
-            recipe.analyzedInstructions[0].steps : [],
-          ingredients: recipe.extendedIngredients || [],
-          cookTime: recipe.readyInMinutes,
-          servings: recipe.servings,
-          nutrition: recipe.nutrition,
-          sourceUrl: recipe.sourceUrl,
-          healthScore: recipe.healthScore
-        };
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('RecipeService: Error fetching recipe details:', error.message);
-      return this.getMockRecipeDetails(recipeId);
-    }
+    const recipes = this.getWeeklyRecipes();
+    return recipes.find(r => r.id == recipeId) || null;
   }
 
-  async searchRecipes(query, preferences = {}) {
-    try {
-      if (!this.spoonacularApiKey) {
-        return this.getMockRecipes(preferences);
-      }
-
-      const params = {
-        apiKey: this.spoonacularApiKey,
-        query: query,
-        number: 12,
-        addRecipeInformation: true,
-        fillIngredients: true
-      };
-
-      // Add dietary filters
-      if (preferences.dietary && preferences.dietary.length > 0) {
-        if (preferences.dietary.includes('vegetarian')) params.diet = 'vegetarian';
-        if (preferences.dietary.includes('vegan')) params.diet = 'vegan';
-        if (preferences.dietary.includes('gluten-free')) params.intolerances = 'gluten';
-      }
-
-      const response = await axios.get(`${this.baseURL}/complexSearch`, { 
-        params,
-        timeout: 10000
-      });
-      
-      return response.data.results || [];
-    } catch (error) {
-      console.error('RecipeService: Error searching recipes:', error.message);
-      return [];
-    }
+  async searchRecipes(query) {
+    const recipes = this.getWeeklyRecipes();
+    const q = query.toLowerCase();
+    return recipes.filter(r =>
+      r.title?.toLowerCase().includes(q) ||
+      r.description?.toLowerCase().includes(q) ||
+      r.tags?.some(t => t.includes(q))
+    );
   }
 
-  findDealIngredients(recipeIngredients, dealIngredients) {
-    if (!recipeIngredients || !dealIngredients) return [];
-    
-    const dealIngredientsLower = dealIngredients.map(ing => ing.toLowerCase());
-    const matches = [];
-    
-    recipeIngredients.forEach(ingredient => {
-      const ingredientName = (ingredient.name || ingredient.original || '').toLowerCase();
-      dealIngredientsLower.forEach((dealIng, index) => {
-        if (ingredientName.includes(dealIng.toLowerCase()) || 
-            dealIng.toLowerCase().includes(ingredientName)) {
-          const originalDealIng = dealIngredients[index];
-          if (originalDealIng && !matches.includes(originalDealIng)) {
-            matches.push(originalDealIng);
-          }
-        }
-      });
-    });
-    
-    return matches;
-  }
-
-  stripHtml(html) {
-    return html ? html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim() : '';
-  }
-
-  getMockRecipes(preferences = {}) {
-    let mockRecipes = [
-      {
-        id: 1,
-        title: "Grilled Salmon with Spinach",
-        image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400",
-        cookTime: 25,
-        servings: 4,
-        rating: 4.8,
-        ingredients: ["Atlantic Salmon", "Baby Spinach", "Lemon", "Olive Oil", "Garlic"],
-        dealIngredients: ["Atlantic Salmon", "Baby Spinach"],
-        description: "Fresh salmon grilled to perfection with sautéed spinach and lemon",
-        instructions: "Season salmon with salt and pepper. Heat oil in pan. Cook salmon 4-5 minutes per side. Sauté spinach with garlic. Serve together.",
-        nutrition: { calories: 320, protein: 28, carbs: 8, fat: 20 },
-        sourceUrl: "#"
-      },
-      {
-        id: 2,
-        title: "Chicken Avocado Bowl",
-        image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400",
-        cookTime: 20,
-        servings: 2,
-        rating: 4.6,
-        ingredients: ["Chicken Breast", "Avocados", "Brown Rice", "Greek Yogurt", "Lime"],
-        dealIngredients: ["Chicken Breast", "Avocados", "Greek Yogurt"],
-        description: "Healthy bowl with grilled chicken, creamy avocado and Greek yogurt",
-        instructions: "Cook rice according to package instructions. Season and grill chicken. Slice avocado. Assemble bowl with rice, chicken, avocado, and yogurt.",
-        nutrition: { calories: 450, protein: 35, carbs: 35, fat: 18 },
-        sourceUrl: "#"
-      },
-      {
-        id: 3,
-        title: "Yogurt Berry Parfait",
-        image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400",
-        cookTime: 5,
-        servings: 1,
-        rating: 4.4,
-        ingredients: ["Greek Yogurt", "Mixed Berries", "Granola", "Honey"],
-        dealIngredients: ["Greek Yogurt", "Mixed Berries"],
-        description: "Quick and healthy breakfast parfait with fresh berries",
-        instructions: "Layer yogurt in glass. Add berries. Top with granola. Drizzle with honey.",
-        nutrition: { calories: 280, protein: 15, carbs: 35, fat: 8 },
-        sourceUrl: "#"
-      },
-      {
-        id: 4,
-        title: "Beef and Vegetable Stir Fry",
-        image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",
-        cookTime: 15,
-        servings: 3,
-        rating: 4.5,
-        ingredients: ["Beef Mince", "Mixed Vegetables", "Soy Sauce", "Garlic", "Ginger"],
-        dealIngredients: ["Beef Mince"],
-        description: "Quick and flavorful stir fry with tender beef and fresh vegetables",
-        instructions: "Brown beef mince in hot pan. Add vegetables and stir fry. Season with soy sauce, garlic, and ginger. Serve hot.",
-        nutrition: { calories: 380, protein: 25, carbs: 15, fat: 22 },
-        sourceUrl: "#"
-      },
-      {
-        id: 5,
-        title: "Sweet Potato and Egg Bowl",
-        image: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400",
-        cookTime: 30,
-        servings: 2,
-        rating: 4.3,
-        ingredients: ["Sweet Potato", "Organic Eggs", "Spinach", "Olive Oil"],
-        dealIngredients: ["Sweet Potato", "Organic Eggs"],
-        description: "Nutritious bowl with roasted sweet potato and perfectly cooked eggs",
-        instructions: "Roast sweet potato cubes. Fry or poach eggs. Serve over spinach with olive oil drizzle.",
-        nutrition: { calories: 340, protein: 18, carbs: 28, fat: 16 },
-        sourceUrl: "#"
-      },
-      {
-        id: 6,
-        title: "Greek Yogurt Chicken Marinade",
-        image: "https://images.unsplash.com/photo-1532636721035-f3fc20e4bb12?w=400",
-        cookTime: 35,
-        servings: 4,
-        rating: 4.7,
-        ingredients: ["Free Range Chicken Breast", "Greek Style Yogurt", "Lemon", "Herbs"],
-        dealIngredients: ["Free Range Chicken Breast", "Greek Style Yogurt"],
-        description: "Tender chicken marinated in Greek yogurt with herbs and lemon",
-        instructions: "Marinate chicken in yogurt, lemon and herbs for 2 hours. Grill until cooked through.",
-        nutrition: { calories: 290, protein: 32, carbs: 8, fat: 14 },
-        sourceUrl: "#"
-      }
-    ];
-    
-    // Filter based on preferences
-    if (preferences.dietary && preferences.dietary.length > 0) {
-      if (preferences.dietary.includes('vegetarian')) {
-        mockRecipes = mockRecipes.filter(recipe => 
-          !recipe.ingredients.some(ing => 
-            ['chicken', 'beef', 'salmon', 'fish', 'meat'].some(meat => 
-              ing.toLowerCase().includes(meat)
-            )
-          )
-        );
-      }
-    }
-    
-    console.log('RecipeService: Returning', mockRecipes.length, 'mock recipes');
-    return mockRecipes;
-  }
-
-  getMockRecipeDetails(recipeId) {
-    const mockRecipes = this.getMockRecipes();
-    return mockRecipes.find(recipe => recipe.id == recipeId) || {
-      id: recipeId,
-      title: "Sample Recipe",
-      description: "A delicious recipe",
-      instructions: "Cook it well",
-      ingredients: [],
-      nutrition: {}
-    };
-  }
 }
 
 module.exports = new RecipeService();

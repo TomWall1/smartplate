@@ -26,3 +26,13 @@ Thumbs.db
 # Logs
 logs
 *.log
+
+# Generated files (re-created at runtime)
+backend/data/weekly-recipes.json
+backend/data/matched-test.json
+
+# Claude Code internal files
+.claude/
+
+# Windows artefacts
+nul

@@ -5,6 +5,7 @@ import DealCard from '../components/DealCard';
 const Home = ({ deals, loading, onRefreshDeals, apiStatus }) => {
   const woolworthsDeals = deals.filter(deal => deal.store === 'woolworths');
   const colesDeals = deals.filter(deal => deal.store === 'coles');
+  const igaDeals = deals.filter(deal => deal.store === 'iga');
 
   return (
     <div className="space-y-8">
@@ -31,7 +32,7 @@ const Home = ({ deals, loading, onRefreshDeals, apiStatus }) => {
           <p className="text-gray-600 mt-4">Loading latest deals...</p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <StoreSection
             title="Woolworths"
             deals={woolworthsDeals}
@@ -47,6 +48,14 @@ const Home = ({ deals, loading, onRefreshDeals, apiStatus }) => {
             storeUrl="https://www.coles.com.au"
             brandColor="coles-red"
             storeName="coles"
+          />
+          <StoreSection
+            title="IGA"
+            deals={igaDeals}
+            logo="https://upload.wikimedia.org/wikipedia/en/thumb/5/56/IGA_%28supermarkets%29_logo.svg/320px-IGA_%28supermarkets%29_logo.svg.png"
+            storeUrl="https://www.iga.com.au"
+            brandColor="iga-blue"
+            storeName="iga"
           />
         </div>
       )}

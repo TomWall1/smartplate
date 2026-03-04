@@ -107,6 +107,10 @@ code {
   background-color: #e31837;
 }
 
+.iga-blue {
+  background-color: #003da5;
+}
+
 /* Gradient backgrounds for premium feel */
 .gradient-bg {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -156,6 +160,10 @@ code {
 
 .store-section.coles {
   border-left-color: #e31837;
+}
+
+.store-section.iga {
+  border-left-color: #003da5;
 }
 
 /* Mobile optimizations */

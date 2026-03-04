@@ -47,17 +47,8 @@ function App() {
       console.log(`Loaded ${dealsData.length} deals from API`);
     } catch (error) {
       console.error('Error loading deals:', error);
-      setError('Failed to load deals from server');
-      
-      // Fallback to mock data for demonstration
-      const mockDeals = [
-        { name: "Atlantic Salmon", category: "Seafood", price: 12.99, originalPrice: 18.99, store: "woolworths" },
-        { name: "Chicken Breast", category: "Meat", price: 8.99, originalPrice: 12.99, store: "woolworths" },
-        { name: "Baby Spinach", category: "Vegetables", price: 2.50, originalPrice: 3.99, store: "coles" },
-        { name: "Greek Yogurt", category: "Dairy", price: 4.50, originalPrice: 6.99, store: "coles" },
-        { name: "Avocados", category: "Vegetables", price: 1.99, originalPrice: 2.99, store: "woolworths" }
-      ];
-      setDeals(mockDeals);
+      setError('Failed to load deals from server. Click Refresh Deals to try again.');
+      setDeals([]);
     } finally {
       setLoading(false);
     }
@@ -68,16 +59,10 @@ function App() {
       setLoading(true);
       setError(null);
       
-      if (apiStatus === 'connected') {
-        await dealsApi.refreshDeals();
-        const dealsData = await dealsApi.getCurrentDeals();
-        setDeals(dealsData);
-        console.log('Deals refreshed from API');
-      } else {
-        // Simulate refresh with mock data
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await loadDeals();
-      }
+      await dealsApi.refreshDeals();
+      const dealsData = await dealsApi.getCurrentDeals();
+      setDeals(dealsData);
+      console.log('Deals refreshed from API');
     } catch (error) {
       console.error('Error refreshing deals:', error);
       setError('Failed to refresh deals');

@@ -45,7 +45,7 @@ export const dealsApi = {
 
   refreshDeals: async () => {
     try {
-      const response = await api.post('/api/deals/refresh');
+      const response = await api.post('/api/deals/refresh', {}, { timeout: 120000 });
       return response.data;
     } catch (error) {
       console.error('Error refreshing deals:', error);
@@ -72,7 +72,7 @@ export const recipesApi = {
         dealIngredients,
         preferences,
         pantryItems
-      });
+      }, { timeout: 60000 });
       return response.data;
     } catch (error) {
       console.error('Error fetching recipe suggestions:', error);

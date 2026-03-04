@@ -18,8 +18,9 @@ const DealCard = ({ deal }) => {
         searchUrl = `https://www.woolworths.com.au/shop/search/products?searchTerm=${searchQuery}`;
       } else if (deal.store === 'coles') {
         searchUrl = `https://www.coles.com.au/search?q=${searchQuery}`;
+      } else if (deal.store === 'iga') {
+        searchUrl = `https://www.iga.com.au/search/?q=${searchQuery}`;
       } else {
-        // Generic Google search as ultimate fallback
         searchUrl = `https://www.google.com/search?q=${searchQuery}+${deal.store}+supermarket`;
       }
       
@@ -107,6 +108,7 @@ const DealCard = ({ deal }) => {
         <div className={`mt-2 w-3 h-3 rounded-full ${
           deal.store === 'woolworths' ? 'woolworths-green' :
           deal.store === 'coles' ? 'coles-red' :
+          deal.store === 'iga' ? 'iga-blue' :
           'bg-gray-400'
         }`} title={deal.store}></div>
       </div>
