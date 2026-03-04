@@ -80,9 +80,10 @@ export const recipesApi = {
     }
   },
 
-  getRecipeDetails: async (recipeId) => {
+  getRecipeDetails: async (recipeId, store = null) => {
     try {
-      const response = await api.get(`/api/recipes/${recipeId}`);
+      const params = store ? { store } : {};
+      const response = await api.get(`/api/recipes/${recipeId}`, { params });
       return response.data;
     } catch (error) {
       console.error('Error fetching recipe details:', error);

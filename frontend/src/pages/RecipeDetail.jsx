@@ -10,6 +10,7 @@ import {
   Flame,
 } from 'lucide-react';
 import { recipesApi } from '../services/api';
+import { useApp } from '../App';
 
 // ── Skeleton layout ───────────────────────────────────────────────────────────
 function RecipeDetailSkeleton() {
@@ -44,6 +45,7 @@ function isOnSpecial(ingredientLine, dealIngredients = []) {
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { selectedStore } = useApp();
 
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ export default function RecipeDetail() {
     setLoading(true);
     setError(null);
 
-    recipesApi.getRecipeDetails(id)
+    recipesApi.getRecipeDetails(id, selectedStore)
       .then((data) => {
         if (!data) throw new Error('Recipe not found');
         setRecipe(data);

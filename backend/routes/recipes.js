@@ -121,10 +121,12 @@ router.get('/search', async (req, res) => {
 });
 
 // ── Get detailed recipe by ID (must be AFTER named routes) ──────────
+// Optional ?store=woolworths query param applies store isolation
 router.get('/:recipeId', async (req, res) => {
   try {
     const { recipeId } = req.params;
-    const recipe = await recipeService.getRecipeDetails(recipeId);
+    const { store } = req.query;
+    const recipe = await recipeService.getRecipeDetails(recipeId, store || null);
     if (!recipe) {
       return res.status(404).json({ error: 'Recipe not found' });
     }

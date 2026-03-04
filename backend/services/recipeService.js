@@ -312,19 +312,7 @@ Include only recipes that are compatible with the user's dietary restrictions. R
 
     if (!store) return allRecipes;
 
-    // Filter to recipes with at least one deal from the requested store.
-    // Also strip cross-store deals so savings figures are store-accurate.
-    return allRecipes
-      .map(r => {
-        const storeDeals = (r.matchedDeals || []).filter(
-          d => (d.store || '').toLowerCase() === store.toLowerCase()
-        );
-        if (storeDeals.length === 0) return null;
-        const storeSaving = +storeDeals.reduce((s, d) => s + (d.saving || 0), 0).toFixed(2);
-        return { ...r, matchedDeals: storeDeals, estimatedSaving: storeSaving };
-      })
-      .filter(Boolean)
-      .sort((a, b) => b.matchedDeals.length - a.matchedDeals.length);
+    return this._filterRecipesByStore(allRecipes, store);
   }
 
   getWeeklyRecipesMeta() {
@@ -423,9 +411,51 @@ Include only recipes that are compatible with the user's dietary restrictions. R
     return this.getWeeklyRecipes();
   }
 
-  async getRecipeDetails(recipeId) {
+  /**
+   * Apply store isolation to a list of recipes.
+   * - Keeps only recipes with at least one matchedDeal from the requested store
+   * - Strips cross-store matchedDeals, dealHighlights, and dealIngredients
+   * - Recalculates estimatedSaving from remaining deals
+   */
+  _filterRecipesByStore(recipes, store) {
+    const s = store.toLowerCase();
+    return recipes
+      .map(r => {
+        const storeDeals = (r.matchedDeals || []).filter(
+          d => (d.store || '').toLowerCase() === s
+        );
+        if (storeDeals.length === 0) return null;
+
+        const storeSaving = +storeDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2);
+
+        // dealHighlights are Claude strings like "Chicken $5 at Woolworths (save $2)"
+        // Filter to only highlights that mention this store.
+        const storeHighlights = (r.dealHighlights || []).filter(h =>
+          h.toLowerCase().includes(s)
+        );
+
+        // Reconstruct dealIngredients from the filtered matched deals.
+        const storeDealIngredients = storeDeals.map(d => d.dealName);
+
+        return {
+          ...r,
+          matchedDeals: storeDeals,
+          estimatedSaving: storeSaving,
+          dealHighlights: storeHighlights,
+          dealIngredients: storeDealIngredients,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.matchedDeals.length - a.matchedDeals.length);
+  }
+
+  async getRecipeDetails(recipeId, store = null) {
     const recipes = this.getWeeklyRecipes();
-    return recipes.find(r => r.id == recipeId) || null;
+    const recipe = recipes.find(r => r.id == recipeId) || null;
+    if (!recipe || !store) return recipe;
+    // Apply store isolation so detail page never shows cross-store deal data
+    const filtered = this._filterRecipesByStore([recipe], store);
+    return filtered[0] || recipe;
   }
 
   async searchRecipes(query) {

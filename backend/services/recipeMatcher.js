@@ -246,17 +246,18 @@ class RecipeMatcher {
     console.log(`RecipeMatcher: Matching against ${normalisedDeals.length} food deals (of ${deals.length} total)`);
 
     const scored = recipes.map(recipe => {
-      const matchedDeals = [];
-      const seenIngredients = new Set(); // avoid duplicate ingredient matches
+      const rawMatches = [];
+      const seenPairs = new Set(); // avoid same ingredient+deal pair twice
 
       for (const deal of normalisedDeals) {
         for (const ingredient of recipe.ingredients) {
           const cleanName = this._cleanIngredientName(ingredient.name);
           if (cleanName.length < 3) continue;
-          if (seenIngredients.has(cleanName + ':' + deal.keywords)) continue;
+          const pairKey = cleanName + ':' + deal.keywords;
+          if (seenPairs.has(pairKey)) continue;
 
           if (this._termsMatch(ingredient.name, deal.keywords)) {
-            matchedDeals.push({
+            rawMatches.push({
               dealName: deal.name,
               ingredient: cleanName,
               price: deal.price || null,
@@ -265,11 +266,23 @@ class RecipeMatcher {
                 : null,
               store: deal.store || null,
             });
-            seenIngredients.add(cleanName + ':' + deal.keywords);
+            seenPairs.add(pairKey);
             break; // One match per deal per recipe is enough
           }
         }
       }
+
+      // Deduplicate by ingredient name — keep the best saving per ingredient.
+      // Without this, "olive oil" on special at both Woolworths and Coles
+      // would appear twice and double-count the saving.
+      const bestByIngredient = new Map();
+      for (const md of rawMatches) {
+        const existing = bestByIngredient.get(md.ingredient);
+        if (!existing || (md.saving || 0) > (existing.saving || 0)) {
+          bestByIngredient.set(md.ingredient, md);
+        }
+      }
+      const matchedDeals = Array.from(bestByIngredient.values());
 
       const totalSaving = matchedDeals.reduce((sum, d) => sum + (d.saving || 0), 0);
 
@@ -291,14 +304,17 @@ class RecipeMatcher {
   }
 
   /**
-   * Returns true if the recipe has at least one matched deal that is a protein.
-   * Prevents pantry-only recipes (oil, rice, pasta, flour, condiments) from appearing.
+   * Returns true if the recipe has at least one matched deal where the RECIPE
+   * INGREDIENT ITSELF is a protein (not just the deal product name).
+   *
+   * Checking only deal.ingredient (the cleaned recipe ingredient) prevents
+   * false positives like a condiment deal named "Leggo's Chicken Pasta Sauce"
+   * passing the filter even though no actual protein is on special.
    */
   _hasProteinMatch(recipe) {
     return recipe.matchedDeals.some(deal => {
       const ing = deal.ingredient.toLowerCase();
-      const dn = deal.dealName.toLowerCase();
-      return PROTEIN_KEYWORDS.some(p => ing.includes(p) || dn.includes(p));
+      return PROTEIN_KEYWORDS.some(p => ing.includes(p));
     });
   }
 }
