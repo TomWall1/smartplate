@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Save, Plus, X, Check, User } from 'lucide-react';
+import { Save, Plus, X, Check, User, RefreshCw, AlertCircle } from 'lucide-react';
 import { useApp } from '../App';
+import { recipesApi } from '../services/api';
 
 const DIETARY_OPTIONS = [
   { id: 'vegetarian',  label: 'Vegetarian' },
@@ -28,6 +29,9 @@ export default function Profile() {
   const [newDislike, setNewDislike] = useState('');
   const [saved, setSaved] = useState(false);
   const saveTimerRef = useRef(null);
+
+  const [regenStatus, setRegenStatus] = useState('idle'); // idle | loading | success | error
+  const [regenResult, setRegenResult] = useState(null);
 
   // Sync local state if context preferences change externally
   useEffect(() => {
@@ -87,6 +91,19 @@ export default function Profile() {
     }));
   };
 
+  const handleRegenerate = async () => {
+    setRegenStatus('loading');
+    setRegenResult(null);
+    try {
+      const data = await recipesApi.generateWeekly();
+      setRegenResult({ recipeCount: data.recipeCount });
+      setRegenStatus('success');
+    } catch (err) {
+      setRegenResult({ error: err.message || 'Generation failed' });
+      setRegenStatus('error');
+    }
+  };
+
   const handleSave = () => {
     setPreferences(local);
 
@@ -97,7 +114,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#fef9f0' }}>
+    <div className="min-h-screen" style={{ background: '#ffffff' }}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
         {/* ── Header ───────────────────────────────────────────────────────── */}
@@ -266,6 +283,38 @@ export default function Profile() {
               <p className="text-sm text-stone-400 italic">No dislikes added yet.</p>
             )}
           </div>
+        </section>
+
+        {/* ── Card: Admin — Regenerate Recipes ─────────────────────────────── */}
+        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+          <h2 className="text-base font-bold text-stone-800 mb-1">Recipe Library</h2>
+          <p className="text-sm text-stone-500 mb-4">
+            Fetch the latest supermarket specials and regenerate this week's matched recipes.
+            This takes 2–3 minutes.
+          </p>
+
+          {regenStatus === 'success' && (
+            <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700 mb-4">
+              <Check className="w-4 h-4 flex-shrink-0" />
+              <span>Done! {regenResult?.recipeCount ?? '?'} recipes generated.</span>
+            </div>
+          )}
+
+          {regenStatus === 'error' && (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 mb-4">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{regenResult?.error || 'Generation failed. Check the server logs.'}</span>
+            </div>
+          )}
+
+          <button
+            onClick={handleRegenerate}
+            disabled={regenStatus === 'loading'}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-xl font-semibold text-sm hover:bg-stone-700 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${regenStatus === 'loading' ? 'animate-spin' : ''}`} />
+            {regenStatus === 'loading' ? 'Generating… (2–3 min)' : 'Regenerate Recipes'}
+          </button>
         </section>
 
         {/* ── Save button ───────────────────────────────────────────────────── */}
