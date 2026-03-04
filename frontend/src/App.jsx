@@ -100,7 +100,6 @@ function App() {
         }
       } catch (dealErr) {
         console.warn('Could not load deals:', dealErr.message);
-        setApiStatus('disconnected');
       } finally {
         setLoading(false);
       }
