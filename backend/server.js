@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const cron = require('node-cron');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -71,21 +70,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// Schedule deal updates - runs every day at 6 AM
-// Only run this in production to avoid multiple instances
-if (process.env.NODE_ENV === 'production') {
-  cron.schedule('0 6 * * *', async () => {
-    console.log('Running scheduled deal update...');
-    try {
-      const dealService = require('./services/dealService');
-      await dealService.updateAllDeals();
-      console.log('Deal update completed successfully');
-    } catch (error) {
-      console.error('Deal update failed:', error);
-    }
-  });
-}
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
@@ -106,8 +90,14 @@ app.use('*', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`SmartPlate API running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`CORS origins configured for Vercel deployment`);
-});
+// Local development server (Vercel ignores app.listen and uses module.exports instead)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`SmartPlate API running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`CORS origins configured for Vercel deployment`);
+  });
+}
+
+// Export for Vercel serverless
+module.exports = app;
