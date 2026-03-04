@@ -11,9 +11,11 @@ const PORT = process.env.PORT || 3001;
 const corsOptions = {
   origin: [
     'http://localhost:3000', // Local development
-    'https://smartplate-beryl.vercel.app', // Your Vercel frontend
-    'https://smartplate.vercel.app', // Alternative URL
-    /\.vercel\.app$/ // Any Vercel app subdomain
+    'https://smartplate-beryl.vercel.app', // Vercel frontend
+    'https://smartplate.vercel.app', // Alternative Vercel URL
+    'https://dealtodish.com', // Production domain
+    'https://www.dealtodish.com', // Production domain (www)
+    /\.vercel\.app$/, // Any Vercel app subdomain
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
