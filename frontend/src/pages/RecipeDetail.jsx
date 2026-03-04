@@ -4,8 +4,6 @@ import {
   ArrowLeft,
   Clock,
   Users,
-  DollarSign,
-  TrendingDown,
   ExternalLink,
   Flame,
 } from 'lucide-react';
@@ -32,14 +30,23 @@ function RecipeDetailSkeleton() {
   );
 }
 
-// ── Helper: fuzzy match ingredient name against deal ingredient list ──────────
-function isOnSpecial(ingredientLine, dealIngredients = []) {
+// ── Find which matchedDeal corresponds to a display ingredient line ───────────
+function findMatchedDeal(ingredientLine, matchedDeals = []) {
   const line = ingredientLine.toLowerCase();
-  return dealIngredients.some((d) => {
-    const deal = d.toLowerCase();
-    // check if the ingredient line contains a word from the deal name
-    return line.includes(deal) || deal.split(' ').some((w) => w.length > 3 && line.includes(w));
-  });
+  return matchedDeals.find(deal => {
+    const ing = deal.ingredient.toLowerCase();
+    // exact substring match, or any significant word from the ingredient appears in the line
+    return line.includes(ing) || ing.split(' ').some(w => w.length > 3 && line.includes(w));
+  }) || null;
+}
+
+// ── Build a store search URL for the ingredient ───────────────────────────────
+function getStoreSearchUrl(ingredient, store) {
+  const q = encodeURIComponent(ingredient);
+  if (store === 'woolworths') return `https://www.woolworths.com.au/shop/search/products?searchTerm=${q}`;
+  if (store === 'coles') return `https://www.coles.com.au/search?q=${q}`;
+  if (store === 'iga') return `https://www.iga.com.au/search/?q=${q}`;
+  return `https://www.google.com/search?q=${encodeURIComponent(ingredient + ' supermarket special')}`;
 }
 
 export default function RecipeDetail() {
@@ -103,10 +110,7 @@ export default function RecipeDetail() {
     prepTime,
     cookTime,
     servings,
-    totalEstimatedCost,
-    estimatedSaving,
-    dealHighlights = [],
-    dealIngredients = [],
+    matchedDeals = [],
     allIngredients = [],
     ingredients = [],
     steps = [],
@@ -180,54 +184,19 @@ export default function RecipeDetail() {
           </div>
         )}
 
-        {/* Stats bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white rounded-xl px-4 py-3 shadow-sm flex flex-col items-center">
+        {/* Stats bar — prep time and servings only */}
+        <div className="flex gap-3">
+          <div className="bg-white rounded-xl px-4 py-3 shadow-sm border border-stone-100 flex flex-col items-center min-w-[80px]">
             <Clock className="w-5 h-5 text-stone-400 mb-1" />
             <span className="text-lg font-bold text-stone-800">{totalTime}</span>
             <span className="text-xs text-stone-500">min</span>
           </div>
-          <div className="bg-white rounded-xl px-4 py-3 shadow-sm flex flex-col items-center">
+          <div className="bg-white rounded-xl px-4 py-3 shadow-sm border border-stone-100 flex flex-col items-center min-w-[80px]">
             <Users className="w-5 h-5 text-stone-400 mb-1" />
             <span className="text-lg font-bold text-stone-800">{servings ?? 4}</span>
             <span className="text-xs text-stone-500">servings</span>
           </div>
-          {totalEstimatedCost > 0 && (
-            <div className="bg-white rounded-xl px-4 py-3 shadow-sm flex flex-col items-center">
-              <DollarSign className="w-5 h-5 text-stone-400 mb-1" />
-              <span className="text-lg font-bold text-stone-800">
-                ${totalEstimatedCost.toFixed(2)}
-              </span>
-              <span className="text-xs text-stone-500">total cost</span>
-            </div>
-          )}
-          {estimatedSaving > 0 && (
-            <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 shadow-sm flex flex-col items-center">
-              <TrendingDown className="w-5 h-5 text-green-600 mb-1" />
-              <span className="text-lg font-bold text-green-700">
-                ${estimatedSaving.toFixed(2)}
-              </span>
-              <span className="text-xs text-green-600">you save</span>
-            </div>
-          )}
         </div>
-
-        {/* Deal highlights */}
-        {dealHighlights.length > 0 && (
-          <div>
-            <h2 className="text-lg font-bold text-stone-800 mb-2">Deal Highlights</h2>
-            <div className="flex flex-wrap gap-2">
-              {dealHighlights.map((highlight, i) => (
-                <span
-                  key={i}
-                  className="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-medium"
-                >
-                  {highlight}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Ingredients */}
         {displayIngredients.length > 0 && (
@@ -235,16 +204,20 @@ export default function RecipeDetail() {
             <h2 className="text-lg font-bold text-stone-800 mb-3">Ingredients</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {displayIngredients.map((ing, i) => {
-                const special = isOnSpecial(ing, dealIngredients);
-                return (
-                  <div
-                    key={i}
-                    className={`flex items-start gap-2 text-sm px-3 py-2 rounded-lg ${
-                      special
-                        ? 'bg-green-50 border border-green-100'
-                        : 'bg-white border border-stone-100'
-                    }`}
-                  >
+                const deal = findMatchedDeal(ing, matchedDeals);
+                const special = !!deal;
+                const searchUrl = deal
+                  ? getStoreSearchUrl(deal.ingredient, deal.store)
+                  : null;
+
+                const cardClasses = `flex items-start gap-2 text-sm px-3 py-2 rounded-lg ${
+                  special
+                    ? 'bg-green-50 border border-green-100'
+                    : 'bg-white border border-stone-100'
+                }`;
+
+                const inner = (
+                  <>
                     <span
                       className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0"
                       style={{ background: special ? '#15803d' : '#d6d3d1' }}
@@ -253,10 +226,28 @@ export default function RecipeDetail() {
                       {ing}
                     </span>
                     {special && (
-                      <span className="ml-auto text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded whitespace-nowrap flex-shrink-0">
+                      <span className="ml-auto flex items-center gap-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded whitespace-nowrap flex-shrink-0">
                         on special
+                        <ExternalLink className="w-3 h-3" />
                       </span>
                     )}
+                  </>
+                );
+
+                return special ? (
+                  <a
+                    key={i}
+                    href={searchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${cardClasses} hover:border-green-300 hover:bg-green-100 transition-colors cursor-pointer`}
+                    title={`Search for ${deal.ingredient} at ${deal.store}`}
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <div key={i} className={cardClasses}>
+                    {inner}
                   </div>
                 );
               })}
