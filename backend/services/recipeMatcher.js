@@ -58,14 +58,25 @@ const COMPOUND_BLOCKLIST = {
   milk: ['oat milk', 'almond milk', 'soy milk', 'coconut milk', 'skim milk', 'rice milk'],
 };
 
-// Protein keywords — a recipe must have at least one matched deal from this list
-// to appear in weekly results. Prevents pantry-staple-only matches.
+// Core protein keywords — a recipe must have at least one matched deal whose
+// recipe ingredient is one of these proteins (whole-word match, not substring).
 const PROTEIN_KEYWORDS = [
   'chicken', 'beef', 'lamb', 'pork', 'mince', 'sausage', 'steak',
-  'salmon', 'fish', 'prawn', 'seafood', 'tuna', 'turkey', 'duck', 'veal',
+  'salmon', 'fish', 'prawn', 'shrimp', 'seafood', 'tuna', 'turkey', 'duck', 'veal',
   'bacon', 'ham', 'bream', 'barramundi', 'snapper', 'trout', 'cod',
   'schnitzel', 'rump', 'fillet', 'drumstick', 'wing', 'breast', 'thigh',
 ];
+
+// If a matched ingredient contains a protein keyword BUT ALSO one of these words,
+// it is a condiment or pantry item — NOT a qualifying protein.
+// e.g. "fish sauce" has "fish" but "sauce" disqualifies it.
+// e.g. "chicken stock" has "chicken" but "stock" disqualifies it.
+const PROTEIN_COMPOUND_DISQUALIFIERS = new Set([
+  'sauce', 'stock', 'broth', 'gravy', 'powder', 'seasoning',
+  'flavour', 'flavor', 'flavoured', 'flavored', 'paste', 'extract',
+  'marinade', 'dressing', 'soup', 'base', 'concentrate',
+  'oil', 'butter', 'spread', 'rub',
+]);
 
 // Words to ignore during matching (too generic / cause false positives)
 const STOP_WORDS = new Set([
@@ -305,17 +316,41 @@ class RecipeMatcher {
 
   /**
    * Returns true if the recipe has at least one matched deal where the RECIPE
-   * INGREDIENT ITSELF is a protein (not just the deal product name).
+   * INGREDIENT ITSELF is a core protein — not a condiment or pantry item.
    *
-   * Checking only deal.ingredient (the cleaned recipe ingredient) prevents
-   * false positives like a condiment deal named "Leggo's Chicken Pasta Sauce"
-   * passing the filter even though no actual protein is on special.
+   * Rules (all checked against deal.ingredient, never deal.dealName):
+   *  1. Whole-word match: "fish" must be the word "fish", not a substring of
+   *     "fishcake" or "starfish". Uses singularised word comparison.
+   *  2. Compound disqualifier: if the ingredient also contains a word from
+   *     PROTEIN_COMPOUND_DISQUALIFIERS (sauce, stock, oil, etc.) it is a
+   *     condiment/pantry item and cannot qualify the recipe.
+   *     e.g. "fish sauce" → disqualified; "chicken stock" → disqualified;
+   *          "olive oil"  → no protein anyway, skipped earlier.
+   *  3. Only ingredients with >=2 chars are considered.
    */
   _hasProteinMatch(recipe) {
-    return recipe.matchedDeals.some(deal => {
-      const ing = deal.ingredient.toLowerCase();
-      return PROTEIN_KEYWORDS.some(p => ing.includes(p));
-    });
+    for (const deal of recipe.matchedDeals) {
+      const ing = deal.ingredient.toLowerCase().trim();
+      if (ing.length < 2) continue;
+
+      // Singularise every word for robust plural matching
+      // e.g. "chicken thighs" → ["chicken", "thigh"]
+      const words = ing.split(/\s+/).map(w => this._singularise(w));
+
+      // Must contain a core protein as a whole (singularised) word
+      const proteinWord = PROTEIN_KEYWORDS.find(p => words.includes(p));
+      if (!proteinWord) continue;
+
+      // Reject compound pantry/condiment ingredients like "fish sauce", "chicken stock"
+      if (words.some(w => PROTEIN_COMPOUND_DISQUALIFIERS.has(w))) {
+        console.log(`  [protein-filter] SKIP "${ing}" — "${proteinWord}" present but compound disqualifier found`);
+        continue;
+      }
+
+      console.log(`  [protein-filter] PASS "${deal.ingredient}" via protein "${proteinWord}" (${deal.store || 'unknown store'})`);
+      return true;
+    }
+    return false;
   }
 }
 
