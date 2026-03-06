@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const LIBRARY_PATH = path.join(__dirname, '..', 'data', 'recipe-library.json');
+const LIBRARY_PATH    = path.join(__dirname, '..', 'data', 'recipe-library.json');
+const JO_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'jamie-oliver-recipes.json');
 
 // Common brand/marketing terms to strip from deal names
 const STRIP_PREFIXES = [
@@ -98,21 +99,39 @@ class RecipeMatcher {
   }
 
   /**
-   * Load recipe library from JSON file
+   * Load recipe library from both source files and merge into a single array.
+   * Each recipe gets a `source` field ('recipetineats' or 'jamieoliver') so
+   * we can tell them apart. IDs are reassigned globally after merging.
    */
   loadLibrary() {
     if (this.library) return this.library;
 
+    const allRecipes = [];
+
+    // ── RecipeTinEats library ──────────────────────────────────────────────
     try {
       const data = JSON.parse(fs.readFileSync(LIBRARY_PATH, 'utf8'));
-      this.library = data.recipes || [];
-      console.log(`RecipeMatcher: Loaded ${this.library.length} recipes from library`);
-      return this.library;
+      const rte  = (data.recipes || []).map(r => ({ ...r, source: r.source || 'recipetineats' }));
+      allRecipes.push(...rte);
+      console.log(`RecipeMatcher: Loaded ${rte.length} recipes from RecipeTinEats library`);
     } catch (err) {
-      console.warn(`RecipeMatcher: Could not load library: ${err.message}`);
-      this.library = [];
-      return this.library;
+      console.warn(`RecipeMatcher: Could not load RecipeTinEats library: ${err.message}`);
     }
+
+    // ── Jamie Oliver library (optional — skip if file not generated yet) ────
+    try {
+      const data = JSON.parse(fs.readFileSync(JO_LIBRARY_PATH, 'utf8'));
+      const jo   = (data.recipes || []).map(r => ({ ...r, source: 'jamieoliver' }));
+      allRecipes.push(...jo);
+      console.log(`RecipeMatcher: Loaded ${jo.length} recipes from Jamie Oliver library`);
+    } catch {
+      // File doesn't exist yet — silently skip
+    }
+
+    // Reassign sequential IDs across the merged library
+    this.library = allRecipes.map((r, i) => ({ ...r, id: i + 1 }));
+    console.log(`RecipeMatcher: Combined library: ${this.library.length} recipes`);
+    return this.library;
   }
 
   /**
