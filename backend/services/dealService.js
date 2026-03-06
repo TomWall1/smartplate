@@ -1,110 +1,147 @@
-// Import services
+const fs   = require('fs');
+const path = require('path');
+
+// Import store services
 let woolworthsService, colesService, igaService;
+try { woolworthsService = require('./woolworths'); } catch (e) { console.warn('Woolworths service unavailable:', e.message); }
+try { colesService      = require('./coles');      } catch (e) { console.warn('Coles service unavailable:', e.message); }
+try { igaService        = require('./iga');        } catch (e) { console.warn('IGA service unavailable:', e.message); }
 
-try {
-  woolworthsService = require('./woolworths');
-} catch (error) {
-  console.warn('Failed to load Woolworths service:', error.message);
+const CACHE_PATH = path.join(__dirname, '..', 'data', 'cached-deals.json');
+
+// ── Cache helpers ──────────────────────────────────────────────────────────────
+
+function loadCache() {
+  try {
+    const raw = fs.readFileSync(CACHE_PATH, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 }
 
-try {
-  colesService = require('./coles');
-} catch (error) {
-  console.warn('Failed to load Coles service:', error.message);
+function saveCache(byStore) {
+  const cache = {
+    lastUpdated: new Date().toISOString(),
+    woolworths:  byStore.woolworths || [],
+    coles:       byStore.coles      || [],
+    iga:         byStore.iga        || [],
+  };
+  fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true });
+  fs.writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2), 'utf8');
+  return cache;
 }
 
-try {
-  igaService = require('./iga');
-} catch (error) {
-  console.warn('Failed to load IGA service:', error.message);
+function cacheToFlatArray(cache) {
+  return [
+    ...cache.woolworths,
+    ...cache.coles,
+    ...cache.iga,
+  ];
 }
 
-// In-memory storage for MVP (replace with database later)
-let currentDeals = [];
-let lastUpdate = null;
+// ── Live fetch from Salefinder ─────────────────────────────────────────────────
 
-const getCurrentDeals = async () => {
-  // If no deals or data is older than 24 hours, fetch new data
-  if (!currentDeals.length || !lastUpdate || (Date.now() - lastUpdate) > 24 * 60 * 60 * 1000) {
-    console.log('Deal data is stale, updating...');
-    await updateAllDeals();
-  }
-  return currentDeals;
-};
+async function _fetchLive() {
+  console.log('DealService: Fetching live deals from Salefinder...');
 
-const updateAllDeals = async () => {
-  console.log('Updating deals from all stores...');
+  const tasks = [];
+  if (woolworthsService?.fetchDeals) tasks.push({ store: 'woolworths', fn: woolworthsService.fetchDeals() });
+  if (colesService?.fetchDeals)      tasks.push({ store: 'coles',      fn: colesService.fetchDeals()      });
+  if (igaService?.fetchDeals)        tasks.push({ store: 'iga',        fn: igaService.fetchDeals()        });
 
-  const dealPromises = [];
+  if (tasks.length === 0) throw new Error('No deal services available');
 
-  if (woolworthsService && typeof woolworthsService.fetchDeals === 'function') {
-    dealPromises.push(
-      woolworthsService.fetchDeals().catch(error => {
-        console.error('Woolworths deals failed:', error.message);
-        return [];
-      })
-    );
-  }
+  const results = await Promise.allSettled(tasks.map(t => t.fn));
 
-  if (colesService && typeof colesService.fetchDeals === 'function') {
-    dealPromises.push(
-      colesService.fetchDeals().catch(error => {
-        console.error('Coles deals failed:', error.message);
-        return [];
-      })
-    );
-  }
+  const byStore = { woolworths: [], coles: [], iga: [] };
 
-  if (igaService && typeof igaService.fetchDeals === 'function') {
-    dealPromises.push(
-      igaService.fetchDeals().catch(error => {
-        console.error('IGA deals failed:', error.message);
-        return [];
-      })
-    );
-  }
-
-  if (dealPromises.length === 0) {
-    throw new Error('No deal services available');
-  }
-
-  const dealResults = await Promise.allSettled(dealPromises);
-
-  const allDeals = [];
-  dealResults.forEach((result, index) => {
+  results.forEach((result, i) => {
+    const store = tasks[i].store;
     if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-      allDeals.push(...result.value);
-      console.log(`Service ${index} returned ${result.value.length} deals`);
+      byStore[store] = result.value;
+      console.log(`DealService: ${store} → ${result.value.length} deals`);
     } else {
-      console.error(`Service ${index} failed:`, result.reason?.message || 'Unknown error');
+      console.error(`DealService: ${store} failed:`, result.reason?.message || 'unknown error');
     }
   });
 
-  if (allDeals.length === 0) {
-    throw new Error('All deal services returned empty results');
+  const total = Object.values(byStore).reduce((n, arr) => n + arr.length, 0);
+  if (total === 0) throw new Error('All deal services returned empty results');
+
+  return byStore;
+}
+
+// ── Public API ─────────────────────────────────────────────────────────────────
+
+/**
+ * Return all deals as a flat array, reading from cache.
+ * Falls back to a live fetch + cache-save if the file doesn't exist.
+ */
+const getCurrentDeals = async () => {
+  const cache = loadCache();
+  if (cache) {
+    const deals = cacheToFlatArray(cache);
+    console.log(`DealService: Serving ${deals.length} deals from cache (last updated ${cache.lastUpdated})`);
+    return deals;
   }
 
-  currentDeals = allDeals;
-  lastUpdate = Date.now();
-  console.log(`Successfully updated ${allDeals.length} deals`);
-  return currentDeals;
+  // No cache — do a live fetch and save it for next time
+  console.log('DealService: No cache found, performing initial live fetch...');
+  const byStore = await _fetchLive();
+  saveCache(byStore);
+  return cacheToFlatArray(byStore);
 };
 
-const getDealsByStore = (storeName) => {
-  return currentDeals.filter(deal =>
-    deal.store && deal.store.toLowerCase() === storeName.toLowerCase()
-  );
+/**
+ * Force a live Salefinder fetch, persist to cache, return flat array.
+ * Called by POST /api/deals/refresh and the weekly cron job.
+ */
+const refreshDeals = async () => {
+  const byStore = await _fetchLive();
+  const cache   = saveCache(byStore);
+  console.log(`DealService: Cache refreshed — woolworths:${cache.woolworths.length} coles:${cache.coles.length} iga:${cache.iga.length}`);
+  return { cache, deals: cacheToFlatArray(byStore) };
 };
 
-const getDealsByCategory = (category) => {
-  return currentDeals.filter(deal =>
-    deal.category && deal.category.toLowerCase().includes(category.toLowerCase())
-  );
+/**
+ * Return the raw cache object (for health checks etc.)
+ */
+const getCacheInfo = () => {
+  const cache = loadCache();
+  if (!cache) return null;
+  return {
+    lastUpdated: cache.lastUpdated,
+    counts: {
+      woolworths: cache.woolworths.length,
+      coles:      cache.coles.length,
+      iga:        cache.iga.length,
+      total:      cache.woolworths.length + cache.coles.length + cache.iga.length,
+    },
+  };
+};
+
+const getDealsByStore = async (storeName) => {
+  const deals = await getCurrentDeals();
+  return deals.filter(d => d.store && d.store.toLowerCase() === storeName.toLowerCase());
+};
+
+const getDealsByCategory = async (category) => {
+  const deals = await getCurrentDeals();
+  return deals.filter(d => d.category && d.category.toLowerCase().includes(category.toLowerCase()));
+};
+
+// Keep old name as alias so anything that still calls updateAllDeals() still works
+const updateAllDeals = async () => {
+  const { deals } = await refreshDeals();
+  return deals;
 };
 
 module.exports = {
   getCurrentDeals,
+  refreshDeals,
   updateAllDeals,
   getDealsByStore,
   getDealsByCategory,
+  getCacheInfo,
 };

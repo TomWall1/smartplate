@@ -96,6 +96,23 @@ if (!process.env.VERCEL) {
     console.log(`SmartPlate API running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
+
+  // ── Weekly deals refresh — every Wednesday at 11:00 pm AEST ────────────────
+  // Woolworths and Coles catalogues update Wednesday evening.
+  // node-cron uses the server's local time by default; we set timezone explicitly.
+  const cron = require('node-cron');
+  cron.schedule('0 23 * * 3', async () => {
+    console.log('Cron: Starting scheduled weekly deals refresh...');
+    try {
+      const dealService = require('./services/dealService');
+      const { cache } = await dealService.refreshDeals();
+      console.log(`Cron: Deals refreshed — ${cache.woolworths.length} WW, ${cache.coles.length} Coles, ${cache.iga.length} IGA`);
+    } catch (err) {
+      console.error('Cron: Deals refresh failed:', err.message);
+    }
+  }, { timezone: 'Australia/Sydney' });
+
+  console.log('Cron: Scheduled weekly deals refresh every Wednesday at 11 pm AEST');
 }
 
 // Export for serverless adapters (Vercel etc.)
