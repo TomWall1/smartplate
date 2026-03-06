@@ -49,8 +49,8 @@ function findMatchedDeal(ingredientLine, matchedDeals = []) {
 // ── Build a store search URL for the ingredient ───────────────────────────────
 function getStoreSearchUrl(ingredient, store) {
   const q = encodeURIComponent(ingredient);
-  if (store === 'woolworths') return `https://www.woolworths.com.au/shop/search/products?searchTerm=${q}`;
-  if (store === 'coles') return `https://www.coles.com.au/search?q=${q}`;
+  if (store === 'woolworths') return `https://www.woolworths.com.au/shop/search/products?searchTerm=${q}&isSpecial=true`;
+  if (store === 'coles') return `https://www.coles.com.au/search?q=${q}&filter=specialsOnly`;
   if (store === 'iga') return `https://www.iga.com.au/search/?q=${q}`;
   return `https://www.google.com/search?q=${encodeURIComponent(ingredient + ' supermarket special')}`;
 }
