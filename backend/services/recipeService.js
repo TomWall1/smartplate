@@ -125,6 +125,7 @@ Respond with ONLY a JSON array of ${matched.length} objects. No markdown, no exp
           rating: 4.5,
           ingredients: allIngredients,
           instructions: Array.isArray(libRecipe.steps) ? libRecipe.steps.join(' ') : '',
+          source: libRecipe.source || 'recipetineats',
           sourceUrl: libRecipe.url || '#',
           nutrition: libRecipe.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 },
         };
