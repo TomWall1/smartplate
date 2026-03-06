@@ -7,6 +7,21 @@ const WEEKLY_RECIPES_PATH = path.join(__dirname, '..', 'data', 'weekly-recipes.j
 // Fallback writable path for serverless environments
 const TMP_RECIPES_PATH = path.join('/tmp', 'weekly-recipes.json');
 
+// Decode HTML entities that scrapers sometimes leave in text fields
+function decodeHtml(str) {
+  if (!str) return str;
+  return str
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)));
+}
+
 class RecipeService {
   constructor() {
     this.anthropic = process.env.ANTHROPIC_API_KEY
@@ -107,8 +122,8 @@ Respond with ONLY a JSON array of ${matched.length} objects. No markdown, no exp
         const allIngredients = libIngredients.map(ing => ing.raw || ing.name).filter(Boolean);
         return {
           id: e.id || i + 1,
-          title: libRecipe.title || `Recipe ${i + 1}`,
-          description: libRecipe.description || '',
+          title: decodeHtml(libRecipe.title) || `Recipe ${i + 1}`,
+          description: decodeHtml(libRecipe.description) || '',
           dealIngredients: Array.isArray(e.dealIngredients) ? e.dealIngredients : [],
           allIngredients,
           estimatedSaving: typeof e.estimatedSaving === 'number' ? e.estimatedSaving : libRecipe.totalSaving || 0,
