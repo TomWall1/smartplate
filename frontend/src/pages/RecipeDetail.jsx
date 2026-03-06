@@ -7,6 +7,11 @@ import {
   ExternalLink,
   Flame,
 } from 'lucide-react';
+
+const SOURCE_META = {
+  jamieoliver:   { label: 'Jamie Oliver',   logo: 'https://www.jamieoliver.com/favicon.ico' },
+  recipetineats: { label: 'RecipeTin Eats', logo: 'https://www.recipetineats.com/favicon.ico' },
+};
 import { recipesApi } from '../services/api';
 import { useApp } from '../App';
 
@@ -167,6 +172,21 @@ export default function RecipeDetail() {
         <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 leading-tight">
           {title}
         </h1>
+
+        {/* Source attribution */}
+        {SOURCE_META[recipe.source] && (
+          <div className="flex items-center gap-2">
+            <img
+              src={SOURCE_META[recipe.source].logo}
+              alt={SOURCE_META[recipe.source].label}
+              className="w-4 h-4 rounded-sm object-contain"
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <span className="text-sm text-stone-400">
+              Recipe from <span className="text-stone-500 font-medium">{SOURCE_META[recipe.source].label}</span>
+            </span>
+          </div>
+        )}
 
         {/* Description */}
         {description && (

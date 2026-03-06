@@ -2,6 +2,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Users, DollarSign, Sparkles } from 'lucide-react';
 
+const SOURCE_META = {
+  jamieoliver:  { label: 'Jamie Oliver',   logo: 'https://www.jamieoliver.com/favicon.ico' },
+  recipetineats: { label: 'RecipeTin Eats', logo: 'https://www.recipetineats.com/favicon.ico' },
+};
+
 export default function RecipeCard({ recipe, showMatchReason = false }) {
   const navigate = useNavigate();
 
@@ -119,7 +124,7 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
 
         {/* Tag chips */}
         {visibleTags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 mb-3">
             {visibleTags.map((tag, i) => (
               <span
                 key={i}
@@ -128,6 +133,19 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
                 {tag}
               </span>
             ))}
+          </div>
+        )}
+
+        {/* Source attribution */}
+        {SOURCE_META[recipe.source] && (
+          <div className="flex items-center gap-1.5 pt-2 border-t border-stone-100">
+            <img
+              src={SOURCE_META[recipe.source].logo}
+              alt={SOURCE_META[recipe.source].label}
+              className="w-3.5 h-3.5 rounded-sm object-contain"
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <span className="text-xs text-stone-400">{SOURCE_META[recipe.source].label}</span>
           </div>
         )}
       </div>
