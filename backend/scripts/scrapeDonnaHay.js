@@ -153,10 +153,15 @@ async function scrapeRecipe(url, id) {
   if (!title) return null;
 
   // ── Image ──────────────────────────────────────────────────────────────────
-  const image =
+  // Donna Hay's og:image has a bug: their domain is prepended before the CDN URL,
+  // e.g. "http://donnahay.com.auhttps://cdn.donnahaycdn.com.au/..."
+  // Strip the leading domain if the URL contains a second http(s):// portion.
+  const rawImage =
     $('meta[property="og:image"]').attr('content') ||
     $('meta[name="og:image"]').attr('content') ||
     null;
+  const imageMatch = rawImage && rawImage.match(/https?:\/\/[^/]+(https?:\/\/.+)$/);
+  const image = imageMatch ? imageMatch[1] : rawImage;
 
   // ── Description ────────────────────────────────────────────────────────────
   const description = (
