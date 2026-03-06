@@ -13,6 +13,12 @@ const STORE_COLORS = {
   iga:        { bg: '#003da5', light: '#e8eeff', text: '#ffffff' },
 };
 
+const STORE_LOGOS = {
+  woolworths: 'https://www.woolworths.com.au/favicon.ico',
+  coles:      'https://www.coles.com.au/favicon.ico',
+  iga:        'https://www.iga.com.au/favicon.ico',
+};
+
 function capitalize(str) {
   if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -106,7 +112,16 @@ export default function StorePage() {
         style={{ background: colors.bg, color: colors.text }}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-3">
-          <div>
+          <div className="flex items-center gap-3">
+            {STORE_LOGOS[store] && (
+              <img
+                src={STORE_LOGOS[store]}
+                alt=""
+                className="w-8 h-8 object-contain rounded flex-shrink-0"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            )}
+            <div>
             <h1 className="text-2xl sm:text-3xl font-bold">{storeName}</h1>
             {dealsLoading ? (
               <p className="text-sm opacity-80 mt-0.5">Loading deals...</p>
@@ -115,6 +130,7 @@ export default function StorePage() {
                 {storeDeals.length} deal{storeDeals.length !== 1 ? 's' : ''} this week
               </p>
             )}
+            </div>
           </div>
           <button
             onClick={handleChangeStore}

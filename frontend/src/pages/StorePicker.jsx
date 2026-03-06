@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { UtensilsCrossed, ShoppingBag, RefreshCw } from 'lucide-react';
+import { UtensilsCrossed, RefreshCw } from 'lucide-react';
 import { useApp } from '../App';
 
 const STORES = [
@@ -12,7 +12,7 @@ const STORES = [
     lightBg: '#e8f5e9',
     borderColor: '#007833',
     tagline: 'The fresh food people',
-    logoUrl: 'https://logo.clearbit.com/woolworths.com.au',
+    logoUrl: 'https://www.woolworths.com.au/favicon.ico',
   },
   {
     id: 'coles',
@@ -22,7 +22,7 @@ const STORES = [
     lightBg: '#ffeaed',
     borderColor: '#e31837',
     tagline: 'Good food, great value',
-    logoUrl: 'https://logo.clearbit.com/coles.com.au',
+    logoUrl: 'https://www.coles.com.au/favicon.ico',
   },
   {
     id: 'iga',
@@ -32,7 +32,7 @@ const STORES = [
     lightBg: '#e8eeff',
     borderColor: '#003da5',
     tagline: 'Your local supermarket',
-    logoUrl: 'https://logo.clearbit.com/iga.com.au',
+    logoUrl: 'https://www.iga.com.au/favicon.ico',
   },
 ];
 
@@ -119,29 +119,22 @@ export default function StorePicker() {
             >
               {/* Logo area */}
               <div
-                className="flex items-center justify-center px-4 py-5"
+                className="flex items-center justify-center gap-3 px-4 py-5"
                 style={{ background: store.headerBg }}
               >
                 <img
                   src={store.logoUrl}
-                  alt={store.label}
-                  className="h-10 object-contain"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.parentElement.querySelector('.logo-fallback').style.display = 'flex';
-                  }}
+                  alt=""
+                  className="w-8 h-8 object-contain rounded"
+                  onError={(e) => { e.target.style.display = 'none'; }}
                 />
-                <span
-                  className="logo-fallback items-center gap-2 font-bold text-xl"
-                  style={{ display: 'none', color: store.headerText }}
-                >
-                  <ShoppingBag className="w-6 h-6 opacity-80" />
+                <span className="font-bold text-xl" style={{ color: store.headerText }}>
                   {store.label}
                 </span>
                 {isSelected && (
                   <span className="ml-auto text-xs bg-white/25 px-2 py-0.5 rounded-full font-medium"
                     style={{ color: store.headerText }}>
-                    Selected
+                    ✓
                   </span>
                 )}
               </div>
