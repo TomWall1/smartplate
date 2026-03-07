@@ -1,1 +1,38 @@
-{}
+{
+  "_coles_build_id": {
+    "imageUrl": null,
+    "productUrl": null,
+    "stockcode": null,
+    "lastSeen": "2026-03-07"
+  },
+  "coles:chicken breast fillets": {
+    "imageUrl": "https://productimages.coles.com.au/2/2263179.jpg",
+    "productUrl": "https://www.coles.com.au/product/coles-rspca-approved-chicken-breast-fillets-large-pack-approx-14kg-2263179",
+    "stockcode": "2263179",
+    "lastSeen": "2026-03-07"
+  },
+  "coles:beef mince": {
+    "imageUrl": "https://productimages.coles.com.au/9/9012825.jpg",
+    "productUrl": "https://www.coles.com.au/product/coles-no-added-hormone-beef-3-star-regular-mince-1kg-9012825",
+    "stockcode": "9012825",
+    "lastSeen": "2026-03-07"
+  },
+  "coles:salmon fillets": {
+    "imageUrl": "https://productimages.coles.com.au/7/7507135.jpg",
+    "productUrl": "https://www.coles.com.au/product/coles-frozen-salmon-fillets-1kg-7507135",
+    "stockcode": "7507135",
+    "lastSeen": "2026-03-07"
+  },
+  "coles:full cream milk": {
+    "imageUrl": "https://productimages.coles.com.au/8/8150288.jpg",
+    "productUrl": "https://www.coles.com.au/product/coles-full-cream-milk-3l-8150288",
+    "stockcode": "8150288",
+    "lastSeen": "2026-03-07"
+  },
+  "coles:eggs": {
+    "imageUrl": "https://productimages.coles.com.au/9/9453478.jpg",
+    "productUrl": "https://www.coles.com.au/product/coles-free-range-eggs-12-pack-700g-9453478",
+    "stockcode": "9453478",
+    "lastSeen": "2026-03-07"
+  }
+}
