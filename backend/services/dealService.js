@@ -1,5 +1,6 @@
-const fs   = require('fs');
-const path = require('path');
+const fs         = require('fs');
+const path       = require('path');
+const imageCache = require('./imageCache');
 
 // Import store services
 let woolworthsService, colesService, igaService;
@@ -22,10 +23,14 @@ function loadCache() {
 
 function saveCache(byStore) {
   const cache = {
-    lastUpdated: new Date().toISOString(),
-    woolworths:  byStore.woolworths || [],
-    coles:       byStore.coles      || [],
-    iga:         byStore.iga        || [],
+    lastUpdated:       new Date().toISOString(),
+    woolworths:        byStore.woolworths || [],
+    coles:             byStore.coles      || [],
+    iga:               byStore.iga        || [],
+    imageEnrichStats:  {
+      ...imageCache.getLastRunStats(),
+      totalCacheEntries: imageCache.size(),
+    },
   };
   fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true });
   fs.writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2), 'utf8');
@@ -118,6 +123,7 @@ const getCacheInfo = () => {
       iga:        cache.iga.length,
       total:      cache.woolworths.length + cache.coles.length + cache.iga.length,
     },
+    imageEnrichStats: cache.imageEnrichStats ?? null,
   };
 };
 

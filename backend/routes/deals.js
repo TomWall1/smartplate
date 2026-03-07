@@ -1,6 +1,7 @@
-const express    = require('express');
-const router     = express.Router();
+const express     = require('express');
+const router      = express.Router();
 const dealService = require('../services/dealService');
+const imageCache  = require('../services/imageCache');
 
 // GET /api/deals/current — serve from cache (instant)
 router.get('/current', async (req, res) => {
@@ -46,7 +47,7 @@ router.get('/store/:storeName', async (req, res) => {
   }
 });
 
-// GET /api/deals/health — cache status
+// GET /api/deals/health — cache status + image enrichment stats
 router.get('/health', (req, res) => {
   const info = dealService.getCacheInfo();
   if (!info) {
@@ -56,11 +57,33 @@ router.get('/health', (req, res) => {
       dataSource: 'SaleFinder API',
     });
   }
+
+  const stats = info.imageEnrichStats;
   res.json({
-    status: 'ok',
-    dataSource: 'cached',
+    status:      'ok',
+    dataSource:  'cached',
     lastUpdated: info.lastUpdated,
-    counts: info.counts,
+    counts:      info.counts,
+    imageCache: stats ? {
+      totalEntries:  stats.totalCacheEntries ?? imageCache.size(),
+      lastRunHits:   stats.hits    ?? 0,
+      lastRunMisses: stats.misses  ?? 0,
+      lastRunErrors: stats.errors  ?? 0,
+      hitRate:       `${stats.hitRate ?? 0}%`,
+      withImages:    stats.withImage ?? 0,
+      elapsedSeconds: stats.elapsedSeconds ?? null,
+    } : {
+      totalEntries: imageCache.size(),
+      note: 'No enrichment run recorded yet',
+    },
+  });
+});
+
+// POST /api/deals/clear-image-cache — wipe the image cache so it rebuilds from scratch
+router.post('/clear-image-cache', (req, res) => {
+  imageCache.clear();
+  res.json({
+    message: 'Product image cache cleared. Next deal refresh will rebuild it from the Woolworths API.',
   });
 });
 
