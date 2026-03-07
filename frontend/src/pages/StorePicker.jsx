@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UtensilsCrossed, RefreshCw } from 'lucide-react';
 import { useApp } from '../App';
+import { useAuth } from '../context/AuthContext';
+import { usersApi } from '../services/api';
 
 const STORES = [
   {
@@ -38,13 +40,18 @@ const STORES = [
 
 export default function StorePicker() {
   const { deals, loading, selectedStore, setSelectedStore } = useApp();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const dealCountFor = (storeId) =>
     deals.filter((d) => d.store === storeId).length;
 
-  const handleSelectStore = (storeId) => {
+  const handleSelectStore = async (storeId) => {
     setSelectedStore(storeId);
+    // Persist to Supabase when logged in (fire-and-forget)
+    if (user) {
+      usersApi.updatePreferences({ selected_store: storeId }).catch(() => {});
+    }
     navigate(`/store/${storeId}`);
   };
 

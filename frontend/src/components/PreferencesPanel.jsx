@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus } from 'lucide-react';
 import { useApp } from '../App';
+import { useAuth } from '../context/AuthContext';
+import { usersApi } from '../services/api';
 
 const DIETARY_OPTIONS = [
   { id: 'vegetarian', label: 'Vegetarian' },
@@ -19,6 +21,7 @@ const PREP_TIME_OPTIONS = [
 
 export default function PreferencesPanel({ isOpen, onClose, onApply }) {
   const { preferences, setPreferences } = useApp();
+  const { user } = useAuth();
 
   // Local copy of preferences for editing
   const [local, setLocal] = useState({ ...preferences });
@@ -95,6 +98,13 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
 
   const handleApply = () => {
     setPreferences(local);
+    // Persist dietary + excluded ingredients to Supabase when logged in (fire-and-forget)
+    if (user) {
+      usersApi.updatePreferences({
+        dietary_restrictions: local.dietary ?? [],
+        excluded_ingredients: local.excludeIngredients ?? [],
+      }).catch(() => {});
+    }
     onApply?.(local);
     onClose();
   };

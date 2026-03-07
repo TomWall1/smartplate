@@ -6,7 +6,9 @@ import StorePage from './pages/StorePage';
 import Recipes from './pages/Recipes';
 import RecipeDetail from './pages/RecipeDetail';
 import Profile from './pages/Profile';
-import { dealsApi, recipesApi, healthApi } from './services/api';
+import Auth from './pages/Auth';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { dealsApi, recipesApi, healthApi, usersApi } from './services/api';
 import { WifiOff } from 'lucide-react';
 
 // ── App Context ───────────────────────────────────────────────────────────────
@@ -45,8 +47,10 @@ const DEFAULT_PREFERENCES = {
   excludeIngredients: [],
 };
 
-// ── App ───────────────────────────────────────────────────────────────────────
-function App() {
+// ── Inner app (has access to AuthContext) ─────────────────────────────────────
+function AppInner() {
+  const { user } = useAuth();
+
   const [deals, setDeals] = useState([]);
   const [weeklyRecipes, setWeeklyRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -75,21 +79,47 @@ function App() {
     saveToStorage('smartplate-preferences', prefs);
   };
 
+  // ── Sync user profile from Supabase when auth state changes ───────────────
+  useEffect(() => {
+    if (!user) return;
+
+    usersApi.getProfile()
+      .then((profile) => {
+        // Apply saved store (Supabase wins over localStorage)
+        if (profile.selected_store) {
+          setSelectedStoreState(profile.selected_store);
+          saveToStorage('smartplate-store', profile.selected_store);
+        }
+        // Merge saved dietary/excluded preferences into existing prefs
+        if (profile.dietary_restrictions?.length || profile.excluded_ingredients?.length) {
+          setPreferencesState((prev) => {
+            const merged = {
+              ...prev,
+              dietary:           profile.dietary_restrictions ?? prev.dietary,
+              excludeIngredients: profile.excluded_ingredients ?? prev.excludeIngredients,
+            };
+            saveToStorage('smartplate-preferences', merged);
+            return merged;
+          });
+        }
+      })
+      .catch(() => {
+        // Profile fetch failed — silently fall back to localStorage values
+      });
+  }, [user]);
+
   // ── On mount: health check + deals + weekly recipes ───────────────────────
   useEffect(() => {
     const init = async () => {
-      // Health check (non-blocking)
       healthApi.checkHealth()
         .then(() => setApiStatus('connected'))
         .catch(() => setApiStatus('disconnected'));
 
-      // Load deals
       try {
         const dealsData = await dealsApi.getCurrentDeals();
         const dealList = Array.isArray(dealsData) ? dealsData : (dealsData?.deals ?? []);
         setDeals(dealList);
 
-        // Load weekly recipes using deal ingredients
         try {
           const ingredients = dealList.map((d) => d.name);
           const recipesData = await recipesApi.getRecipeSuggestions(ingredients, {}, []);
@@ -125,7 +155,6 @@ function App() {
   return (
     <AppContext.Provider value={contextValue}>
       <Router>
-        {/* Thin disconnected banner */}
         {apiStatus === 'disconnected' && (
           <div className="flex items-center justify-center gap-2 bg-amber-50 border-b border-amber-200 py-1.5 px-4 text-xs text-amber-800">
             <WifiOff className="w-3.5 h-3.5 flex-shrink-0" />
@@ -142,6 +171,7 @@ function App() {
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/recipes/:id" element={<RecipeDetail />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
@@ -150,4 +180,11 @@ function App() {
   );
 }
 
-export default App;
+// ── Root App — AuthProvider wraps everything ──────────────────────────────────
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppInner />
+    </AuthProvider>
+  );
+}

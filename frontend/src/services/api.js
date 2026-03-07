@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { supabase } from './supabase';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -7,10 +8,16 @@ const api = axios.create({
   timeout: 120000,
 });
 
-// Request interceptor for logging
+// Request interceptor — attach Supabase JWT when logged in
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    if (supabase) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        config.headers.Authorization = `Bearer ${session.access_token}`;
+      }
+    }
     return config;
   },
   (error) => {
@@ -123,6 +130,19 @@ export const recipesApi = {
       console.error('Error generating weekly recipes:', error);
       throw error;
     }
+  },
+};
+
+// User profile / preferences API
+export const usersApi = {
+  getProfile: async () => {
+    const response = await api.get('/api/users/profile');
+    return response.data;
+  },
+
+  updatePreferences: async (prefs) => {
+    const response = await api.put('/api/users/preferences', prefs);
+    return response.data;
   },
 };
 

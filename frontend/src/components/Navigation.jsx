@@ -1,7 +1,8 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { UtensilsCrossed, Home, BookOpen, User, Wifi, WifiOff } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { UtensilsCrossed, Home, BookOpen, User, Wifi, WifiOff, LogIn, LogOut } from 'lucide-react';
 import { useApp } from '../App';
+import { useAuth } from '../context/AuthContext';
 
 // Store display metadata
 const STORE_META = {
@@ -12,20 +13,22 @@ const STORE_META = {
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate  = useNavigate();
   const { selectedStore, apiStatus } = useApp();
+  const { user, signOut } = useAuth();
 
-  // Determine the "Deals" label and color
-  const storeMeta = selectedStore ? STORE_META[selectedStore] : null;
+  const storeMeta  = selectedStore ? STORE_META[selectedStore] : null;
   const dealsLabel = storeMeta ? storeMeta.label : 'Home';
   const dealsPath  = storeMeta ? `/store/${selectedStore}` : '/';
 
-  // Is the current path the deals/home path?
-  const isDealsActive =
-    location.pathname === '/' ||
-    location.pathname.startsWith('/store/');
-
+  const isDealsActive   = location.pathname === '/' || location.pathname.startsWith('/store/');
   const isRecipesActive = location.pathname.startsWith('/recipes');
   const isProfileActive = location.pathname === '/profile';
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/', { replace: true });
+  };
 
   // ── API status dot ────────────────────────────────────────────────────────
   const StatusDot = () => {
@@ -68,9 +71,8 @@ const Navigation = () => {
               </span>
             </Link>
 
-            {/* Desktop nav links — hidden on mobile */}
+            {/* Desktop nav links */}
             <div className="hidden md:flex items-center gap-1">
-              {/* Deals / Home link */}
               <Link
                 to={dealsPath}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -106,9 +108,32 @@ const Navigation = () => {
               </Link>
             </div>
 
-            {/* Status dot */}
-            <div className="hidden md:flex items-center">
+            {/* Right side: status + auth */}
+            <div className="hidden md:flex items-center gap-3">
               <StatusDot />
+
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-stone-500 max-w-[160px] truncate" title={user.email}>
+                    {user.email}
+                  </span>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-stone-600 hover:bg-stone-100 transition-colors"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -120,7 +145,6 @@ const Navigation = () => {
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <div className="flex items-stretch">
-          {/* Home / Deals */}
           <Link
             to={dealsPath}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors ${
@@ -136,7 +160,6 @@ const Navigation = () => {
             </span>
           </Link>
 
-          {/* Recipes */}
           <Link
             to="/recipes"
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors ${
@@ -147,7 +170,6 @@ const Navigation = () => {
             <span>Recipes</span>
           </Link>
 
-          {/* Profile */}
           <Link
             to="/profile"
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors ${
@@ -157,6 +179,27 @@ const Navigation = () => {
             <User className="w-5 h-5" />
             <span>Profile</span>
           </Link>
+
+          {/* Auth button on mobile */}
+          {user ? (
+            <button
+              onClick={handleSignOut}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium text-stone-500 hover:text-stone-800 transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Sign out</span>
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors ${
+                location.pathname === '/auth' ? 'text-amber-600' : 'text-stone-500 hover:text-stone-800'
+              }`}
+            >
+              <LogIn className="w-5 h-5" />
+              <span>Login</span>
+            </Link>
+          )}
         </div>
       </nav>
     </>

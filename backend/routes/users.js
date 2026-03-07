@@ -1,28 +1,70 @@
-const express = require('express');
+const express     = require('express');
+const requireAuth = require('../middleware/requireAuth');
+const { clientForToken } = require('../services/authService');
+
 const router = express.Router();
 
-// Get user preferences (session-based for MVP)
-router.get('/preferences', (req, res) => {
-  // For MVP, we'll use localStorage on frontend
-  // This endpoint is placeholder for when we add user accounts
-  res.json({ message: 'User accounts not implemented yet' });
+// ── GET /api/users/profile ────────────────────────────────────────────────────
+// Returns the current user's profile. Creates the row on first access.
+router.get('/profile', requireAuth, async (req, res) => {
+  const supabase = clientForToken(req.token);
+  if (!supabase) return res.status(503).json({ error: 'Auth service not configured' });
+
+  // Try a plain select first (most common path)
+  const { data: existing, error: selError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', req.user.id)
+    .single();
+
+  if (!selError && existing) return res.json(existing);
+
+  // Row doesn't exist yet — create it
+  const { data, error } = await supabase
+    .from('users')
+    .insert({ id: req.user.id, email: req.user.email })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[users/profile] insert error:', error.message);
+    return res.status(500).json({ error: 'Failed to create profile' });
+  }
+
+  res.json(data);
 });
 
-// Update user preferences
-router.post('/preferences', (req, res) => {
-  // For MVP, we'll use localStorage on frontend
-  // This endpoint is placeholder for when we add user accounts
-  res.json({ message: 'User accounts not implemented yet' });
-});
+// ── PUT /api/users/preferences ────────────────────────────────────────────────
+// Saves selected_store, dietary_restrictions, household_size, excluded_ingredients.
+router.put('/preferences', requireAuth, async (req, res) => {
+  const supabase = clientForToken(req.token);
+  if (!supabase) return res.status(503).json({ error: 'Auth service not configured' });
 
-// Create user account
-router.post('/register', (req, res) => {
-  res.json({ message: 'User registration not implemented yet' });
-});
+  const {
+    selected_store,
+    dietary_restrictions,
+    household_size,
+    excluded_ingredients,
+  } = req.body;
 
-// User login
-router.post('/login', (req, res) => {
-  res.json({ message: 'User login not implemented yet' });
+  const updates = { id: req.user.id, email: req.user.email };
+  if (selected_store       !== undefined) updates.selected_store       = selected_store;
+  if (dietary_restrictions !== undefined) updates.dietary_restrictions = dietary_restrictions;
+  if (household_size       !== undefined) updates.household_size       = household_size;
+  if (excluded_ingredients !== undefined) updates.excluded_ingredients = excluded_ingredients;
+
+  const { data, error } = await supabase
+    .from('users')
+    .upsert(updates, { onConflict: 'id' })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[users/preferences] upsert error:', error.message);
+    return res.status(500).json({ error: 'Failed to save preferences' });
+  }
+
+  res.json(data);
 });
 
 module.exports = router;
