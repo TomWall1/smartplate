@@ -116,6 +116,55 @@ const COMPOUND_BLOCKLIST = {
   milk: ['oat milk', 'almond milk', 'soy milk', 'coconut milk', 'skim milk', 'rice milk'],
 };
 
+// Form disqualifiers — protein keyword → product descriptors that indicate the deal
+// is pre-prepared/processed and should NOT match a recipe requiring fresh protein.
+//
+// Matching rules (applied in _hasFormDisqualifier):
+//   • Single-word terms use whole-word regex (\b) to avoid "strip" blocking "striploin".
+//   • Multi-word phrases (containing a space) use substring match — they're specific enough.
+//   • Form upgrade: if the recipe ingredient itself names the same descriptor, the deal IS
+//     allowed through. e.g. ingredient "chicken schnitzel" may match a schnitzel deal.
+const FORM_DISQUALIFIERS = {
+  chicken: [
+    'crumbed', 'nugget', 'tender', 'strip', 'schnitzel', 'kiev', 'stuffed',
+    'marinated', 'pre-seasoned', 'ready to cook', 'frozen meal',
+    'roast', 'rotisserie', 'canned', 'tinned', 'processed', 'deli',
+    'smoked', 'chargrilled', 'skewer', 'wing', 'drumstick',
+  ],
+  beef: [
+    'burger', 'patty', 'meatball', 'sausage', 'hotdog', 'frank',
+    'canned', 'tinned', 'corned', 'jerky', 'biltong', 'deli', 'smoked',
+    'pastrami', 'salami', 'pepperoni', 'pre-made', 'frozen meal',
+    'ready to cook', 'marinated', 'pre-seasoned',
+  ],
+  pork: [
+    'bacon', 'ham', 'salami', 'pepperoni', 'chorizo', 'prosciutto', 'pancetta',
+    'sausage', 'hotdog', 'frank', 'canned', 'tinned', 'deli', 'smoked',
+    'pulled', 'crackling', 'marinated', 'pre-seasoned', 'frozen meal',
+  ],
+  lamb: [
+    'sausage', 'deli', 'marinated', 'pre-seasoned', 'frozen meal',
+    'ready to cook', 'canned', 'tinned',
+  ],
+  salmon: [
+    'smoked', 'canned', 'tinned', 'flavoured', 'flavored', 'marinated',
+    'pre-seasoned', 'frozen meal', 'crumbed', 'sashimi', 'gravlax', 'dip',
+  ],
+  fish: [
+    'crumbed', 'battered', 'frozen meal', 'fish finger', 'fish cake',
+    'fish pie', 'canned', 'tinned', 'smoked', 'dip', 'paste',
+  ],
+  prawn: [
+    'cooked', 'marinated', 'flavoured', 'flavored', 'frozen meal',
+    'prawn toast', 'prawn cracker', 'paste',
+  ],
+  tuna: ['canned', 'tinned', 'flavoured', 'flavored', 'marinated', 'dip', 'paste', 'smoked'],
+  mince: [
+    'sausage', 'burger', 'patty', 'meatball', 'pre-seasoned', 'marinated',
+    'frozen meal', 'ready to cook',
+  ],
+};
+
 // Core protein keywords — a recipe must have at least one matched deal whose
 // recipe ingredient is one of these proteins (whole-word match, not substring).
 const PROTEIN_KEYWORDS = [
@@ -269,6 +318,52 @@ class RecipeMatcher {
   }
 
   /**
+   * Check whether a deal is disqualified by form for a given protein.
+   *
+   * Returns true  → deal should be REJECTED for this protein.
+   * Returns false → no disqualifying form found; match is fine.
+   *
+   * Form upgrade: if the recipe ingredient itself names the disqualifying form
+   * (e.g. ingredient = "chicken schnitzel" and dq = "schnitzel"), the match is
+   * allowed through because the recipe explicitly calls for that prepared form.
+   *
+   * @param {string} proteinKey - Key into FORM_DISQUALIFIERS (e.g. 'chicken')
+   * @param {string} dealStr    - Lowercased normalised deal keyword string
+   * @param {string} ingStr     - Lowercased cleaned ingredient string
+   */
+  _hasFormDisqualifier(proteinKey, dealStr, ingStr) {
+    const disqualifiers = FORM_DISQUALIFIERS[proteinKey];
+    if (!disqualifiers) return false;
+
+    // Pre-singularise deal and ingredient words once for efficient lookup.
+    // Word-level comparison naturally prevents "strip" from matching "striploin"
+    // (they are different tokens) and handles plurals ("nuggets" → "nugget").
+    const dealWords = new Set(dealStr.split(/\s+/).map(w => this._singularise(w)));
+    const ingWords  = new Set(ingStr.split(/\s+/).map(w => this._singularise(w)));
+
+    for (const dq of disqualifiers) {
+      const isPhrase = dq.includes(' ');
+      let foundInDeal, foundInIng;
+
+      if (isPhrase) {
+        // Multi-word phrases: substring match on the full string (specific enough).
+        foundInDeal = dealStr.includes(dq);
+        foundInIng  = ingStr.includes(dq);
+      } else {
+        // Single words: compare against the singularised word sets.
+        const dqSingular = this._singularise(dq);
+        foundInDeal = dealWords.has(dqSingular);
+        foundInIng  = ingWords.has(dqSingular);
+      }
+
+      if (foundInDeal && !foundInIng) {
+        return true; // disqualified — wrong form for this recipe
+      }
+    }
+    return false;
+  }
+
+  /**
    * Simple singularise: strip trailing "s" where appropriate
    */
   _singularise(word) {
@@ -328,6 +423,18 @@ class RecipeMatcher {
         return false;
       });
       if (!foundInDeal) return false;
+    }
+
+    // Form disqualifier check — reject deals that are processed/pre-prepared versions
+    // of a protein even when the protein keyword itself matches.
+    // e.g. ingredient "chicken" must NOT match "frozen crumbed chicken tenders".
+    // Form upgrade: if the ingredient explicitly names the same prepared form
+    // (e.g. "chicken schnitzel"), the match is allowed through.
+    for (const iw of ingWords) {
+      const iwSingular = this._singularise(iw);
+      if (FORM_DISQUALIFIERS[iwSingular] && this._hasFormDisqualifier(iwSingular, deal, ing)) {
+        return false;
+      }
     }
 
     return true;
