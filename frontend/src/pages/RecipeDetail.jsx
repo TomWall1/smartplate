@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -7,6 +7,7 @@ import {
   ExternalLink,
   Flame,
 } from 'lucide-react';
+import DealPopup from '../components/DealPopup';
 
 const SOURCE_META = {
   jamieoliver:   { label: 'Jamie Oliver',   logo: 'https://www.jamieoliver.com/favicon.ico' },
@@ -46,15 +47,6 @@ function findMatchedDeal(ingredientLine, matchedDeals = []) {
   }) || null;
 }
 
-// ── Build a store search URL for the ingredient ───────────────────────────────
-function getStoreSearchUrl(ingredient, store) {
-  const q = encodeURIComponent(ingredient);
-  if (store === 'woolworths') return `https://www.woolworths.com.au/shop/search/products?searchTerm=${q}&isSpecial=true`;
-  if (store === 'coles') return `https://www.coles.com.au/search?q=${q}&filter=specialsOnly`;
-  if (store === 'iga') return `https://www.iga.com.au/search/?q=${q}`;
-  return `https://www.google.com/search?q=${encodeURIComponent(ingredient + ' supermarket special')}`;
-}
-
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -63,6 +55,10 @@ export default function RecipeDetail() {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openPopupIndex, setOpenPopupIndex] = useState(null);
+  const badgeRefs = useRef({});
+
+  const closePopup = useCallback(() => setOpenPopupIndex(null), []);
 
   useEffect(() => {
     if (!id) return;
@@ -227,9 +223,7 @@ export default function RecipeDetail() {
               {displayIngredients.map((ing, i) => {
                 const deal = findMatchedDeal(ing, matchedDeals);
                 const special = !!deal;
-                const searchUrl = deal
-                  ? getStoreSearchUrl(deal.ingredient, deal.store)
-                  : null;
+                const isOpen = openPopupIndex === i;
 
                 const cardClasses = `flex items-start gap-2 text-sm px-3 py-2 rounded-lg ${
                   special
@@ -237,38 +231,39 @@ export default function RecipeDetail() {
                     : 'bg-white border border-stone-100'
                 }`;
 
-                const inner = (
-                  <>
-                    <span
-                      className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ background: special ? '#15803d' : '#d6d3d1' }}
-                    />
-                    <span className={special ? 'text-green-800 font-medium' : 'text-stone-700'}>
-                      {ing}
-                    </span>
-                    {special && (
+                return special ? (
+                  <div key={i} className="relative">
+                    <button
+                      ref={(el) => { badgeRefs.current[i] = el; }}
+                      onClick={() => setOpenPopupIndex(isOpen ? null : i)}
+                      className={`w-full text-left ${cardClasses} hover:border-green-300 hover:bg-green-100 transition-colors cursor-pointer`}
+                      aria-expanded={isOpen}
+                      aria-haspopup="dialog"
+                    >
+                      <span
+                        className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ background: '#15803d' }}
+                      />
+                      <span className="text-green-800 font-medium">{ing}</span>
                       <span className="ml-auto flex items-center gap-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded whitespace-nowrap flex-shrink-0">
                         on special
-                        <ExternalLink className="w-3 h-3" />
                       </span>
+                    </button>
+                    {isOpen && (
+                      <DealPopup
+                        deal={deal}
+                        anchorRef={{ current: badgeRefs.current[i] }}
+                        onClose={closePopup}
+                      />
                     )}
-                  </>
-                );
-
-                return special ? (
-                  <a
-                    key={i}
-                    href={searchUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${cardClasses} hover:border-green-300 hover:bg-green-100 transition-colors cursor-pointer`}
-                    title={`Search for ${deal.ingredient} at ${deal.store}`}
-                  >
-                    {inner}
-                  </a>
+                  </div>
                 ) : (
                   <div key={i} className={cardClasses}>
-                    {inner}
+                    <span
+                      className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ background: '#d6d3d1' }}
+                    />
+                    <span className="text-stone-700">{ing}</span>
                   </div>
                 );
               })}

@@ -477,6 +477,8 @@ class RecipeMatcher {
               dealName: deal.name,
               ingredient: cleanName,
               price: deal.price || null,
+              originalPrice: deal.originalPrice || null,
+              discountPercentage: deal.discountPercentage || null,
               saving: (deal.originalPrice && deal.price)
                 ? +(deal.originalPrice - deal.price).toFixed(2)
                 : null,
