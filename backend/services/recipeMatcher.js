@@ -41,14 +41,70 @@ const FOOD_KEYWORDS = [
 // Non-food product indicators — if a deal name contains any of these, reject it
 // even if it incidentally contains a food keyword (e.g. "QV Baby Moisturising Cream")
 const NON_FOOD_INDICATORS = [
+  // Skincare / moisturising
   'moisturising', 'moisturizing', 'moisturiser', 'moisturizer',
-  'shampoo', 'conditioner', 'sunscreen', 'sunscream', 'spf',
-  'nappy', 'diaper', 'wipes', 'baby wash', 'body wash', 'face wash',
-  'lotion', 'skincare', 'haircare', 'lip balm', 'deodorant',
-  'laundry', 'detergent', 'dishwash', 'bleach', 'softener', 'cleaning',
+  'serum', 'toner', 'exfoliant', 'concealer', 'foundation', 'mascara', 'lipstick',
+  'skincare', 'haircare', 'lip balm', 'hand wash', 'face wash',
+  'body wash', 'baby wash',
+  // Sun / SPF
+  'sunscreen', 'sunscream', 'spf',
+  // Baby / infant
+  'nappy', 'nappies', 'diaper', 'wipes', 'formula', 'teething', 'dummy', 'rash cream',
+  // Hair
+  'shampoo', 'conditioner', 'hair dye', 'hair colour',
+  // Deodorant / personal care
+  'deodorant', 'antiperspirant', 'razor', 'shaving', 'tampon', 'sanitary pad',
+  // Cleaning / household
+  'laundry', 'detergent', 'dishwash', 'bleach', 'disinfectant', 'softener',
+  'cleaning', 'spray cleaner', 'bin liner', 'garbage bag',
+  // Pharmacy / health
   'toothpaste', 'mouthwash', 'vitamins', 'supplement', 'capsule', 'tablet',
-  'pet food', 'dog food', 'cat food',
+  'bandage', 'paracetamol', 'ibuprofen',
+  // Lotion / general
+  'lotion',
+  // Pet
+  'pet food', 'dog food', 'cat food', 'bird seed', 'cat litter', 'kibble',
+  'flea treatment', 'wormer',
+  // Alcohol — already filtered at category level in salefinder but may sneak through
+  // "Specials" or unmapped categories. Note: 'rum' omitted (false positive: rump steak),
+  // 'gin' omitted (false positive: ginger), 'cider' omitted (false positive: apple cider vinegar).
+  'beer', 'lager', 'wine', 'spirits', 'whiskey', 'whisky',
+  'vodka', 'champagne', 'prosecco', 'tequila', 'brandy',
 ];
+
+// Compound phrases to block regardless of other matching logic.
+// Catches deals where a food word appears alongside a non-food modifier —
+// e.g. "baby cream" incidentally matches recipe ingredient "cream".
+const COMPOUND_NON_FOOD_PHRASES = [
+  // Cream products (personal care / cosmetic)
+  'baby cream', 'face cream', 'body cream', 'hand cream', 'night cream', 'eye cream',
+  // Oil products (personal care / aromatherapy)
+  'baby oil', 'body oil', 'massage oil', 'essential oil',
+  // Milk products (non-dairy drinks / baby)
+  'baby milk', 'body milk', 'chocolate milk',
+  // Confectionery masquerading as cooking ingredients
+  'peanut butter cup',
+  // Supplement forms of food items
+  'fish oil capsule', 'fish oil supplement', 'fish oil tablet',
+  // Seasoning products whose name contains a protein word
+  'chicken salt',
+  // Flavoured snack products
+  'cream cheese flavoured', 'cream cheese flavor',
+  'sour cream dip', 'sour cream chip',
+];
+
+// App-level categories (set by salefinder.js mapCategory) that should never
+// contribute deals to recipe matching, regardless of the deal name.
+const BLOCKED_CATEGORIES = new Set([
+  'Baby',
+  'Health & Beauty',
+  'Household',
+  'Pet',
+  'Liquor',
+  'Vitamins & Supplements',
+  'Personal Care',
+  'Cleaning',
+]);
 
 // Ingredient words that must NOT match deals where that word appears inside a different
 // compound food name. Keyed by the ingredient word, value is a list of deal substrings
@@ -192,11 +248,23 @@ class RecipeMatcher {
   }
 
   /**
-   * Check if a deal name looks like a food product
+   * Check if a deal looks like a food product.
+   * @param {string} dealKeywords - Normalised deal name
+   * @param {string} [category]   - Mapped app category (e.g. 'Baby', 'Dairy')
    */
-  _isFoodDeal(dealKeywords) {
+  _isFoodDeal(dealKeywords, category) {
+    // 1. Hard-block by category
+    if (category && BLOCKED_CATEGORIES.has(category)) return false;
+
     const lower = dealKeywords.toLowerCase();
+
+    // 2. Compound phrase block (food word + non-food modifier)
+    if (COMPOUND_NON_FOOD_PHRASES.some(phrase => lower.includes(phrase))) return false;
+
+    // 3. Individual non-food indicator block
     if (NON_FOOD_INDICATORS.some(kw => lower.includes(kw))) return false;
+
+    // 4. Must contain at least one recognisable food keyword
     return FOOD_KEYWORDS.some(kw => lower.includes(kw));
   }
 
@@ -282,7 +350,7 @@ class RecipeMatcher {
         ...deal,
         keywords: this.normalizeDealName(deal.name),
       }))
-      .filter(deal => deal.keywords && this._isFoodDeal(deal.keywords));
+      .filter(deal => deal.keywords && this._isFoodDeal(deal.keywords, deal.category));
 
     console.log(`RecipeMatcher: Matching against ${normalisedDeals.length} food deals (of ${deals.length} total)`);
 
