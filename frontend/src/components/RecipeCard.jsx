@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Users, DollarSign, Sparkles } from 'lucide-react';
+import { Clock, Users, DollarSign, Sparkles, AlertTriangle } from 'lucide-react';
 
 const SOURCE_META = {
   jamieoliver:   { label: 'Jamie Oliver',   logo: 'https://www.jamieoliver.com/favicon.ico' },
@@ -26,6 +26,7 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
   const cost = recipe.totalEstimatedCost ?? 0;
   const saving = recipe.estimatedSaving ?? 0;
 
+  const excludedWarnings = recipe.excludedWarnings ?? [];
   const visibleDeals = dealIngredients.slice(0, 3);
   const extraDeals = dealIngredients.length > 3 ? dealIngredients.length - 3 : 0;
   const visibleTags = tags.slice(0, 3);
@@ -166,6 +167,34 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
               style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
             >
               {SOURCE_META[recipe.source].label}
+            </span>
+          </div>
+        )}
+
+        {/* Excluded ingredient warning */}
+        {excludedWarnings.length > 0 && (
+          <div
+            className="flex items-start gap-1.5 mt-2 pt-2 border-t rounded-b-lg px-2 py-1.5"
+            style={{
+              borderColor: 'var(--color-honey)',
+              background: 'var(--color-peach)',
+              marginLeft: '-16px',
+              marginRight: '-16px',
+              marginBottom: '-16px',
+              paddingLeft: '16px',
+              paddingRight: '16px',
+            }}
+          >
+            <AlertTriangle
+              className="w-3.5 h-3.5 flex-shrink-0 mt-0.5"
+              style={{ color: 'var(--color-honey)' }}
+            />
+            <span
+              className="text-xs"
+              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif', fontWeight: 600 }}
+            >
+              Contains {excludedWarnings.join(', ')}
+              {excludedWarnings.length === 1 ? ' (your excluded ingredient)' : ' (your excluded ingredients)'}
             </span>
           </div>
         )}

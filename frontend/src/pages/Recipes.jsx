@@ -50,11 +50,13 @@ export default function Recipes() {
 
   const filteredRecipes = useMemo(() => {
     let list = baseRecipes;
+
     if (activeTag !== 'all') {
       list = list.filter((r) =>
         (r.tags ?? []).some((t) => t.toLowerCase().includes(activeTag.toLowerCase()))
       );
     }
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
@@ -64,8 +66,37 @@ export default function Recipes() {
           (r.dealIngredients ?? []).some((i) => i.toLowerCase().includes(q))
       );
     }
+
+    // Apply excluded ingredient soft filter for the default (non-personalised) path.
+    // The personalised path gets this server-side; we apply it here too so the
+    // default weekly view respects the user's stored preferences.
+    const excluded = (preferences.excludeIngredients ?? [])
+      .map((e) => e.toLowerCase().trim())
+      .filter(Boolean);
+
+    if (excluded.length > 0) {
+      list = list.map((r) => {
+        // If the server already tagged this (personalised path), keep it.
+        if (r.excludedWarnings !== undefined) return r;
+
+        const allText = [
+          ...(r.allIngredients ?? []),
+          ...(r.ingredients ?? []),
+        ].join(' ').toLowerCase();
+
+        const warnings = excluded.filter((ex) => allText.includes(ex));
+        return { ...r, excludedWarnings: warnings };
+      });
+
+      // Soft sort: clean recipes first, flagged last (stable)
+      list = [
+        ...list.filter((r) => r.excludedWarnings.length === 0),
+        ...list.filter((r) => r.excludedWarnings.length > 0),
+      ];
+    }
+
     return list;
-  }, [baseRecipes, activeTag, searchQuery]);
+  }, [baseRecipes, activeTag, searchQuery, preferences.excludeIngredients]);
 
   const handleApplyPreferences = async (prefs) => {
     setPersonalisedLoading(true);

@@ -22,6 +22,39 @@ function decodeHtml(str) {
     .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)));
 }
 
+/**
+ * Soft-filter recipes by excluded ingredients.
+ *
+ * - Tags each recipe with `excludedWarnings` (array of matched excluded terms).
+ * - Recipes with NO excluded ingredients come first (preserving their original order).
+ * - Recipes WITH excluded ingredients are pushed to the bottom.
+ * - No recipe is ever fully removed — the frontend shows a warning badge instead.
+ *   This prevents the edge case where all 20 recipes contain the excluded ingredient
+ *   and the user would see an empty list.
+ */
+function applyExcludedIngredientFilter(recipes, excludeIngredients) {
+  if (!excludeIngredients || excludeIngredients.length === 0) return recipes;
+
+  const excluded = excludeIngredients.map(e => e.toLowerCase().trim()).filter(Boolean);
+  if (excluded.length === 0) return recipes;
+
+  const tagged = recipes.map(r => {
+    const allText = [
+      ...(r.allIngredients || []),
+      ...(r.ingredients || []),
+    ].join(' ').toLowerCase();
+
+    const warnings = excluded.filter(ex => allText.includes(ex));
+    return { ...r, excludedWarnings: warnings };
+  });
+
+  // Stable sort: clean recipes first, flagged last
+  return [
+    ...tagged.filter(r => r.excludedWarnings.length === 0),
+    ...tagged.filter(r => r.excludedWarnings.length > 0),
+  ];
+}
+
 class RecipeService {
   constructor() {
     this.anthropic = process.env.ANTHROPIC_API_KEY
@@ -268,6 +301,8 @@ You must respond with valid JSON only. Do not include any text, explanation or c
       totalEstimatedCost: r.totalEstimatedCost,
     }));
 
+    const excluded = (userPreferences.excludeIngredients || []).map(e => e.toLowerCase());
+
     const prompt = `You are a meal-planning assistant. Here are this week's 20 pre-generated recipes:
 
 ${JSON.stringify(recipeSummary, null, 2)}
@@ -281,13 +316,18 @@ Possible preference fields:
 - servings: preferred serving count
 - budget: "low", "medium", or "high"
 - cuisinePreferences: array of preferred cuisines
-- excludeIngredients: array of ingredients to avoid
+- excludeIngredients: array of ingredients the user dislikes and wants to avoid
 - pantryItems: array of ingredients the user already has at home
+
+Rules (apply strictly in this order):
+1. HARD EXCLUDE: Remove any recipe whose allIngredients list contains any ingredient from excludeIngredients. Do not include these recipes in the output at all.
+2. DIETARY: Only include recipes compatible with the user's dietary restrictions.
+3. RANK: Sort remaining recipes from best match to worst match based on all other preferences.
 
 Return a JSON array of recipe IDs ranked from best match to worst, with a short reason for each. Format:
 [{"id": 1, "reason": "Great match — vegetarian, under 20 min, uses your pantry spinach"}, ...]
 
-Include only recipes that are compatible with the user's dietary restrictions. Return at most 10 recipes. Respond with ONLY the JSON array.`;
+Return at most 10 recipes. Respond with ONLY the JSON array.`;
 
     try {
       const response = await this.anthropic.messages.create({
@@ -306,13 +346,17 @@ Include only recipes that are compatible with the user's dietary restrictions. R
       if (!Array.isArray(ranked)) throw new Error('Invalid ranking response');
 
       // Map ranked IDs back to full recipe objects
-      const result = [];
+      const rawResult = [];
       for (const entry of ranked) {
         const recipe = weeklyRecipes.find(r => r.id === entry.id);
         if (recipe) {
-          result.push({ ...recipe, matchReason: entry.reason });
+          rawResult.push({ ...recipe, matchReason: entry.reason });
         }
       }
+
+      // Server-side enforcement: soft sort + warning tagging for excluded ingredients.
+      // Claude may still return recipes containing excluded ingredients — we correct that here.
+      const result = applyExcludedIngredientFilter(rawResult, userPreferences.excludeIngredients);
 
       return result;
     } catch (error) {
@@ -407,13 +451,7 @@ Include only recipes that are compatible with the user's dietary restrictions. R
       filtered = filtered.filter(r => (r.prepTime || 30) <= preferences.maxPrepTime);
     }
 
-    if (preferences.excludeIngredients && preferences.excludeIngredients.length > 0) {
-      const excluded = preferences.excludeIngredients.map(e => e.toLowerCase());
-      filtered = filtered.filter(r => {
-        const allIngs = (r.allIngredients || []).join(' ').toLowerCase();
-        return !excluded.some(ex => allIngs.includes(ex));
-      });
-    }
+    filtered = applyExcludedIngredientFilter(filtered, preferences.excludeIngredients);
 
     return filtered.slice(0, 10);
   }
