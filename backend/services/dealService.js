@@ -84,10 +84,10 @@ function cacheToFlatArray(cache) {
   ];
 }
 
-// ── Live fetch from Salefinder ─────────────────────────────────────────────────
+// ── Raw fetch from Salefinder (no image enrichment) ───────────────────────────
 
-async function _fetchLive() {
-  console.log('DealService: Fetching live deals from Salefinder...');
+async function _fetchRaw() {
+  console.log('DealService: Fetching raw deals from Salefinder...');
 
   const tasks = [];
   if (woolworthsService?.fetchDeals) tasks.push({ store: 'woolworths', fn: woolworthsService.fetchDeals() });
@@ -104,7 +104,7 @@ async function _fetchLive() {
     const store = tasks[i].store;
     if (result.status === 'fulfilled' && Array.isArray(result.value)) {
       byStore[store] = result.value;
-      console.log(`DealService: ${store} → ${result.value.length} deals`);
+      console.log(`DealService: ${store} → ${result.value.length} raw deals`);
     } else {
       console.error(`DealService: ${store} failed:`, result.reason?.message || 'unknown error');
     }
@@ -114,6 +114,58 @@ async function _fetchLive() {
   if (total === 0) throw new Error('All deal services returned empty results');
 
   return byStore;
+}
+
+// ── Phase 2: background image enrichment ──────────────────────────────────────
+
+/**
+ * Update a single store's deals in the on-disk cache.
+ * Called after each store's image enrichment completes so that images
+ * become available progressively without blocking the basic cache.
+ */
+function _updateCacheStore(storeName, enrichedDeals) {
+  try {
+    const cache = loadCache();
+    if (!cache) return;
+    cache[storeName] = enrichedDeals;
+    fs.writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2), 'utf8');
+    console.log(`DealService: ${storeName} cache updated with enriched images`);
+  } catch (err) {
+    console.error(`DealService: Failed to update ${storeName} cache:`, err.message);
+  }
+}
+
+/**
+ * Enrich deals with product images for each store and progressively update
+ * the cache. Runs entirely in the background — callers must not await this.
+ */
+async function _enrichInBackground(byStore) {
+  const woolworthsEnrich = require('./woolworthsEnrich');
+  const colesEnrich      = require('./colesEnrich');
+
+  // Woolworths
+  if (byStore.woolworths.length > 0) {
+    try {
+      const enriched = await woolworthsEnrich.enrichDeals(byStore.woolworths);
+      _updateCacheStore('woolworths', enriched);
+      imageCache.flush();
+    } catch (err) {
+      console.error('DealService: Woolworths enrichment failed:', err.message);
+    }
+  }
+
+  // Coles
+  if (byStore.coles.length > 0) {
+    try {
+      const enriched = await colesEnrich.enrichDeals(byStore.coles);
+      _updateCacheStore('coles', enriched);
+      imageCache.flush();
+    } catch (err) {
+      console.error('DealService: Coles enrichment failed:', err.message);
+    }
+  }
+
+  console.log('DealService: Background image enrichment complete.');
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────────
@@ -136,13 +188,28 @@ const getCurrentDeals = async () => {
 };
 
 /**
- * Force a live Salefinder fetch, persist to cache, return flat array.
- * Called by POST /api/deals/refresh and the weekly cron job.
+ * Fetch deals in two phases:
+ *   Phase 1 — Fetch raw deals from Salefinder, save to cache immediately.
+ *             Returns as soon as the basic cache is written (~30s after start).
+ *   Phase 2 — Enrich with product images in the background.
+ *             Updates the cache store-by-store as enrichment completes.
+ *
+ * Called by POST /api/deals/refresh, the weekly cron job, and server startup.
  */
 const refreshDeals = async () => {
-  const byStore = await _fetchLive();
+  // Phase 1: raw fetch + immediate cache write
+  const byStore = await _fetchRaw();
   const cache   = saveCache(byStore);
-  console.log(`DealService: Cache refreshed — woolworths:${cache.woolworths.length} coles:${cache.coles.length} iga:${cache.iga.length}`);
+  console.log(
+    `Basic deals cached — ${cache.woolworths.length} woolworths, ` +
+    `${cache.coles.length} coles, ${cache.iga.length} IGA deals ready`
+  );
+
+  // Phase 2: image enrichment runs in the background — do not await
+  _enrichInBackground(byStore).catch(err => {
+    console.error('DealService: Background enrichment error:', err.message);
+  });
+
   return { cache, deals: cacheToFlatArray(byStore) };
 };
 
