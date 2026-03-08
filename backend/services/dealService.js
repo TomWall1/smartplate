@@ -81,7 +81,8 @@ async function _fetchLive() {
 
 /**
  * Return all deals as a flat array, reading from cache.
- * Falls back to a live fetch + cache-save if the file doesn't exist.
+ * Returns [] if no cache file exists — call POST /api/deals/refresh to populate it.
+ * Never triggers a live SaleFinder fetch (that belongs in refreshDeals only).
  */
 const getCurrentDeals = async () => {
   const cache = loadCache();
@@ -91,11 +92,8 @@ const getCurrentDeals = async () => {
     return deals;
   }
 
-  // No cache — do a live fetch and save it for next time
-  console.log('DealService: No cache found, performing initial live fetch...');
-  const byStore = await _fetchLive();
-  saveCache(byStore);
-  return cacheToFlatArray(byStore);
+  console.warn('DealService: No cache file found. Returning empty deals. Call POST /api/deals/refresh to populate.');
+  return [];
 };
 
 /**
