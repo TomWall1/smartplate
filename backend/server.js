@@ -95,6 +95,24 @@ if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`SmartPlate API running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+
+    // Non-blocking startup cache check — populate deals if cache is empty
+    (async () => {
+      try {
+        const dealService = require('./services/dealService');
+        const info = dealService.getCacheInfo();
+        const isEmpty = !info || info.counts.total === 0;
+        if (isEmpty) {
+          console.log('Cache empty on startup — fetching live deals...');
+          const { cache } = await dealService.refreshDeals();
+          console.log(`Startup fetch complete — woolworths:${cache.woolworths.length} coles:${cache.coles.length} iga:${cache.iga.length}`);
+        } else {
+          console.log(`Startup: deals cache OK (${info.counts.total} deals, last updated ${info.lastUpdated})`);
+        }
+      } catch (err) {
+        console.error('Startup fetch failed:', err.message);
+      }
+    })();
   });
 
   // ── Weekly deals refresh — every Wednesday at 11:00 pm AEST ────────────────

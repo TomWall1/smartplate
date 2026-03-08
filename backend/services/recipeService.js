@@ -42,6 +42,10 @@ class RecipeService {
     const deals = await dealService.getCurrentDeals();
     console.log(`RecipeService: Matching library recipes against ${deals.length} deals`);
 
+    if (deals.length === 0) {
+      throw new Error('No deals available — please refresh deals first');
+    }
+
     // Step 1: Find top 20 library recipes that match current deals
     const matched = recipeMatcher.matchDeals(deals);
     console.log(`RecipeService: Found ${matched.length} matching library recipes`);
@@ -189,7 +193,7 @@ For each recipe, return a JSON object with these exact fields:
 - "steps": array of step-by-step instructions (each step is a string)
 - "tags": array from ["quick", "meal-prep", "vegetarian", "vegan", "gluten-free", "dairy-free", "high-protein", "budget", "breakfast", "lunch", "dinner"]
 
-Respond with ONLY a JSON array of 20 recipe objects. No markdown, no explanation, just the JSON array.`;
+You must respond with valid JSON only. Do not include any text, explanation or commentary before or after the JSON array. Respond with ONLY a JSON array of 20 recipe objects.`;
 
     const response = await this.anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
