@@ -2,22 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── CSS Variables ─────────────────────────────────────────────────────────── */
+:root {
+  /* Greens — Primary brand */
+  --color-leaf:    #7DB87A;
+  --color-sprout:  #A8D5A2;
+  --color-mist:    #D6EDD4;
+
+  /* Warms — Mascot harmony */
+  --color-honey:   #F4A94E;
+  --color-peach:   #FBDFC3;
+  --color-blush:   #F7EDE2;
+
+  /* Neutrals — Base */
+  --color-parchment: #FDFAF5;
+  --color-stone:     #E8E2D9;
+  --color-bark:      #5C4A35;
+
+  /* Accents */
+  --color-berry:  #D4667A;
+  --color-sky:    #89C4D8;
+  --color-cream:  #FFF8EF;
+
+  /* Text variants */
+  --color-text-muted: #a09080;
+  --color-text-green: #3D7A3A;
+}
+
+/* ── Global base ───────────────────────────────────────────────────────────── */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Nunito', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #ffffff;
+  background: var(--color-parchment);
+  color: var(--color-bark);
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* Custom utility classes */
+/* ── Utility: text clamping ────────────────────────────────────────────────── */
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -32,103 +58,164 @@ code {
   overflow: hidden;
 }
 
-/* Enhanced hover effects for deal cards */
+/* ── Deal card ─────────────────────────────────────────────────────────────── */
 .deal-card {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease;
 }
 
 .deal-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(92, 74, 53, 0.13);
 }
 
-/* Store logo styling */
+.deal-card:active {
+  transform: translateY(0);
+}
+
+/* ── Recipe card ───────────────────────────────────────────────────────────── */
+.recipe-card {
+  transition: all 0.2s ease;
+  border: 1.5px solid var(--color-stone);
+  box-shadow: 0 2px 12px rgba(92, 74, 53, 0.08);
+}
+
+.recipe-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(92, 74, 53, 0.13);
+  border-color: var(--color-sprout);
+}
+
+/* ── Store picker card ─────────────────────────────────────────────────────── */
+.store-card {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.store-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(92, 74, 53, 0.13);
+}
+
+.store-card:active {
+  transform: translateY(0);
+}
+
+/* ── Store logo ────────────────────────────────────────────────────────────── */
 .store-logo {
-  transition: transform 0.2s ease-in-out;
-  filter: brightness(1);
+  transition: transform 0.2s ease;
 }
 
 .store-logo:hover {
   transform: scale(1.05);
-  filter: brightness(1.1);
 }
 
-/* Smooth transitions for interactive elements */
-.interactive-element {
-  transition: all 0.2s ease-in-out;
+/* ── Store brand accent borders ────────────────────────────────────────────── */
+.store-section {
+  border-left: 4px solid transparent;
+  transition: border-color 0.3s ease;
+}
+.store-section.woolworths { border-left-color: #007833; }
+.store-section.coles      { border-left-color: #e31837; }
+.store-section.iga        { border-left-color: #003da5; }
+
+/* ── Store brand dot colours ───────────────────────────────────────────────── */
+.woolworths-green { background-color: #007833; }
+.coles-red        { background-color: #e31837; }
+.iga-blue         { background-color: #003da5; }
+
+/* ── Slide-in panel overlay ────────────────────────────────────────────────── */
+.panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(92, 74, 53, 0.35);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
-  width: 8px;
+.panel-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+/* ── Slide-in panel from right ─────────────────────────────────────────────── */
+.slide-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  max-width: 24rem;
+  background: var(--color-parchment);
+  box-shadow: -4px 0 32px rgba(92, 74, 53, 0.15);
+  z-index: 50;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+.slide-panel.open {
+  transform: translateX(0);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+/* ── Skeleton shimmer ──────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 
-/* Deal card click animation */
-@keyframes dealClick {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.98); }
-  100% { transform: scale(1); }
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-mist) 25%,
+    var(--color-stone) 50%,
+    var(--color-mist) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
 }
 
-.deal-card:active {
-  animation: dealClick 0.1s ease-in-out;
+/* ── Tag / filter chip ─────────────────────────────────────────────────────── */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
 }
 
-/* Loading spinner enhancement */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.tag-chip:hover {
+  filter: brightness(0.95);
 }
 
-.animate-spin {
-  animation: spin 1s linear infinite;
+.tag-chip.inactive {
+  background: var(--color-parchment);
+  border-color: var(--color-stone);
+  color: var(--color-bark);
 }
 
-/* Store brand colors */
-.woolworths-green {
-  background-color: #007833;
+.tag-chip.inactive:hover {
+  border-color: var(--color-leaf);
+  color: var(--color-text-green);
 }
 
-.coles-red {
-  background-color: #e31837;
+.tag-chip.active {
+  background: var(--color-leaf);
+  border-color: var(--color-leaf);
+  color: #ffffff;
 }
 
-.iga-blue {
-  background-color: #003da5;
-}
-
-/* Gradient backgrounds for premium feel */
-.gradient-bg {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-/* Enhanced button styles using @layer for proper Tailwind integration */
-@layer components {
-  .btn-primary {
-    @apply bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600 transition-colors duration-200 focus:ring-2 focus:ring-blue-300 focus:outline-none;
-  }
-
-  .btn-secondary {
-    @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors duration-200 focus:ring-2 focus:ring-gray-300 focus:outline-none;
-  }
-}
-
-/* Deal discount badge */
+/* ── Discount badge shine animation ────────────────────────────────────────── */
 .discount-badge {
   position: relative;
   overflow: hidden;
@@ -149,158 +236,79 @@ code {
   left: 100%;
 }
 
-/* Store section styling */
-.store-section {
-  border-left: 4px solid transparent;
-  transition: border-color 0.3s ease;
+/* ── Spinner ───────────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.store-section.woolworths {
-  border-left-color: #007833;
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
-.store-section.coles {
-  border-left-color: #e31837;
+/* ── Custom scrollbar ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.store-section.iga {
-  border-left-color: #003da5;
+::-webkit-scrollbar-track {
+  background: var(--color-blush);
+  border-radius: 4px;
 }
 
-/* Mobile optimizations */
+::-webkit-scrollbar-thumb {
+  background: var(--color-stone);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ── Mobile optimisations ──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .deal-card {
     padding: 0.75rem;
   }
-
   .store-logo {
     height: 1.5rem;
   }
+}
 
-  .discount-badge {
-    font-size: 0.75rem;
+/* ── Button components ─────────────────────────────────────────────────────── */
+@layer components {
+  .btn-primary {
+    background: var(--color-leaf);
+    color: #ffffff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 12px 24px;
+    border: none;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    cursor: pointer;
   }
-}
 
-/* ── Recipe card hover effect ─────────────────────────────────────── */
-.recipe-card {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  border: 1.5px solid #e7e5e4;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.recipe-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
-  border-color: #d6d3d1;
-}
-
-/* ── Store picker card hover effect ──────────────────────────────── */
-.store-card {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.store-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-}
-
-.store-card:active {
-  transform: translateY(-1px);
-}
-
-/* ── Slide-in panel overlay ───────────────────────────────────────── */
-.panel-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 40;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.panel-overlay.open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ── Slide-in panel from right ────────────────────────────────────── */
-.slide-panel {
-  position: fixed;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  max-width: 24rem;
-  background: #ffffff;
-  box-shadow: -4px 0 32px rgba(0, 0, 0, 0.15);
-  z-index: 50;
-  transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-}
-
-.slide-panel.open {
-  transform: translateX(0);
-}
-
-/* ── Skeleton shimmer loading state ──────────────────────────────── */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
+  .btn-primary:hover {
+    background: #6ba568;
+    transform: translateY(-1px);
   }
-  100% {
-    background-position: 200% 0;
+
+  .btn-secondary {
+    background: var(--color-mist);
+    color: var(--color-text-green);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 12px 24px;
+    border: none;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    cursor: pointer;
   }
-}
 
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    #f3f4f6 25%,
-    #e5e7eb 50%,
-    #f3f4f6 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 0.5rem;
-}
-
-/* ── Tag / filter chip ────────────────────────────────────────────── */
-.tag-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border: 1.5px solid transparent;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  user-select: none;
-}
-
-.tag-chip:hover {
-  filter: brightness(0.95);
-}
-
-.tag-chip.inactive {
-  background: #ffffff;
-  border-color: #d6d3d1;
-  color: #57534e;
-}
-
-.tag-chip.inactive:hover {
-  border-color: #a8a29e;
-  color: #292524;
-}
-
-.tag-chip.active {
-  background: #f59e0b;
-  border-color: #f59e0b;
-  color: #ffffff;
+  .btn-secondary:hover {
+    background: var(--color-sprout);
+    transform: translateY(-1px);
+  }
 }

@@ -11,10 +11,7 @@ const SOURCE_META = {
 export default function RecipeCard({ recipe, showMatchReason = false }) {
   const navigate = useNavigate();
 
-  const handleClick = () => {
-    navigate(`/recipes/${recipe.id}`);
-  };
-
+  const handleClick = () => navigate(`/recipes/${recipe.id}`);
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -29,16 +26,14 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
   const cost = recipe.totalEstimatedCost ?? 0;
   const saving = recipe.estimatedSaving ?? 0;
 
-  // Up to 3 deal ingredient tags, then "+N more"
   const visibleDeals = dealIngredients.slice(0, 3);
   const extraDeals = dealIngredients.length > 3 ? dealIngredients.length - 3 : 0;
-
-  // Up to 3 tag chips
   const visibleTags = tags.slice(0, 3);
 
   return (
     <div
-      className="recipe-card bg-white rounded-2xl shadow-sm hover:shadow-md cursor-pointer overflow-hidden"
+      className="recipe-card rounded-[20px] cursor-pointer overflow-hidden"
+      style={{ background: '#ffffff' }}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -46,7 +41,7 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
       aria-label={`View recipe: ${recipe.title}`}
     >
       {/* Image */}
-      <div className="aspect-video bg-stone-200 overflow-hidden relative">
+      <div className="aspect-video overflow-hidden relative" style={{ background: 'var(--color-mist)' }}>
         {recipe.image ? (
           <img
             src={recipe.image}
@@ -59,8 +54,8 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
           />
         ) : null}
         <div
-          className="fallback-emoji absolute inset-0 flex items-center justify-center text-4xl text-stone-400"
-          style={{ display: recipe.image ? 'none' : 'flex' }}
+          className="fallback-emoji absolute inset-0 flex items-center justify-center text-4xl"
+          style={{ display: recipe.image ? 'none' : 'flex', color: 'var(--color-text-muted)' }}
         >
           🍽️
         </div>
@@ -69,19 +64,28 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
       {/* Body */}
       <div className="p-4">
         {/* Title */}
-        <h3 className="font-semibold text-stone-800 leading-snug line-clamp-2 mb-1">
+        <h3
+          className="leading-snug line-clamp-2 mb-1"
+          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '17px' }}
+        >
           {recipe.title}
         </h3>
 
-        {/* Match reason (personalised) */}
+        {/* Match reason */}
         {showMatchReason && recipe.matchReason && (
-          <p className="text-sm italic text-amber-700 mt-1 mb-2">
+          <p
+            className="text-sm italic mt-1 mb-2"
+            style={{ color: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+          >
             {recipe.matchReason}
           </p>
         )}
 
         {/* Stats row */}
-        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2 mb-3 text-xs text-stone-500">
+        <div
+          className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2 mb-3 text-xs"
+          style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif', fontWeight: 600 }}
+        >
           <span className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />
             {prepTime} min
@@ -97,7 +101,10 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
             </span>
           )}
           {saving > 0 && (
-            <span className="flex items-center gap-1 text-green-700 font-semibold">
+            <span
+              className="flex items-center gap-1 font-bold"
+              style={{ color: 'var(--color-text-green)' }}
+            >
               <Sparkles className="w-3.5 h-3.5" />
               Save ${saving.toFixed(2)}
             </span>
@@ -110,13 +117,17 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
             {visibleDeals.map((ing, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-0.5 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full"
+                className="inline-flex items-center gap-0.5 text-xs font-bold px-3 py-0.5 rounded-full"
+                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
               >
                 • {ing}
               </span>
             ))}
             {extraDeals > 0 && (
-              <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">
+              <span
+                className="text-xs font-bold px-3 py-0.5 rounded-full"
+                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+              >
                 +{extraDeals} more
               </span>
             )}
@@ -129,7 +140,8 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
             {visibleTags.map((tag, i) => (
               <span
                 key={i}
-                className="text-xs bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full"
+                className="text-xs font-bold px-3 py-0.5 rounded-full"
+                style={{ background: 'var(--color-blush)', color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
               >
                 {tag}
               </span>
@@ -137,16 +149,24 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
           </div>
         )}
 
-        {/* Source attribution */}
+        {/* Source */}
         {SOURCE_META[recipe.source] && (
-          <div className="flex items-center gap-1.5 pt-2 border-t border-stone-100">
+          <div
+            className="flex items-center gap-1.5 pt-2 border-t"
+            style={{ borderColor: 'var(--color-stone)' }}
+          >
             <img
               src={SOURCE_META[recipe.source].logo}
               alt={SOURCE_META[recipe.source].label}
               className="w-3.5 h-3.5 rounded-sm object-contain"
               onError={(e) => { e.target.style.display = 'none'; }}
             />
-            <span className="text-xs text-stone-400">{SOURCE_META[recipe.source].label}</span>
+            <span
+              className="text-xs"
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              {SOURCE_META[recipe.source].label}
+            </span>
           </div>
         )}
       </div>

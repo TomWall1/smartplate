@@ -5,22 +5,20 @@ import { recipesApi } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import PreferencesPanel from '../components/PreferencesPanel';
 
-// ── Tag filter options ────────────────────────────────────────────────────────
 const TAG_FILTERS = [
-  { id: 'all',       label: 'All' },
-  { id: 'quick',     label: 'Quick' },
-  { id: 'vegetarian',label: 'Vegetarian' },
-  { id: 'vegan',     label: 'Vegan' },
-  { id: 'meal prep', label: 'Meal prep' },
-  { id: 'breakfast', label: 'Breakfast' },
-  { id: 'lunch',     label: 'Lunch' },
-  { id: 'dinner',    label: 'Dinner' },
+  { id: 'all',        label: 'All' },
+  { id: 'quick',      label: 'Quick' },
+  { id: 'vegetarian', label: 'Vegetarian' },
+  { id: 'vegan',      label: 'Vegan' },
+  { id: 'meal prep',  label: 'Meal prep' },
+  { id: 'breakfast',  label: 'Breakfast' },
+  { id: 'lunch',      label: 'Lunch' },
+  { id: 'dinner',     label: 'Dinner' },
 ];
 
-// ── Skeleton recipe cards ─────────────────────────────────────────────────────
 function RecipeSkeleton() {
   return (
-    <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <div className="rounded-[20px] overflow-hidden border" style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}>
       <div className="skeleton aspect-video w-full" />
       <div className="p-4 space-y-2">
         <div className="skeleton h-4 w-4/5" />
@@ -34,7 +32,6 @@ function RecipeSkeleton() {
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 export default function Recipes() {
   const { weeklyRecipes, deals, preferences } = useApp();
 
@@ -42,29 +39,22 @@ export default function Recipes() {
   const [activeTag, setActiveTag] = useState('all');
   const [panelOpen, setPanelOpen] = useState(false);
 
-  // Personalised recipes: separate local state, not mutating global weeklyRecipes
   const [personalisedRecipes, setPersonalisedRecipes] = useState(null);
   const [personalisedLoading, setPersonalisedLoading] = useState(false);
   const [personalisedError, setPersonalisedError] = useState(null);
   const [isPersonalised, setIsPersonalised] = useState(false);
 
-  // The active recipe list to display
   const baseRecipes = isPersonalised && personalisedRecipes !== null
     ? personalisedRecipes
     : weeklyRecipes;
 
-  // ── Filtering ─────────────────────────────────────────────────────────────
   const filteredRecipes = useMemo(() => {
     let list = baseRecipes;
-
-    // Tag filter
     if (activeTag !== 'all') {
       list = list.filter((r) =>
         (r.tags ?? []).some((t) => t.toLowerCase().includes(activeTag.toLowerCase()))
       );
     }
-
-    // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
@@ -74,15 +64,12 @@ export default function Recipes() {
           (r.dealIngredients ?? []).some((i) => i.toLowerCase().includes(q))
       );
     }
-
     return list;
   }, [baseRecipes, activeTag, searchQuery]);
 
-  // ── Personalise handler ───────────────────────────────────────────────────
   const handleApplyPreferences = async (prefs) => {
     setPersonalisedLoading(true);
     setPersonalisedError(null);
-
     try {
       const ingredients = deals.map((d) => d.name);
       const data = await recipesApi.getRecipeSuggestions(
@@ -111,21 +98,22 @@ export default function Recipes() {
     setPersonalisedError(null);
   };
 
-  const loading = personalisedLoading || (weeklyRecipes.length === 0 && !personalisedLoading);
-  const showLoading = personalisedLoading || (weeklyRecipes.length === 0 && !isPersonalised);
-
   return (
-    <div className="min-h-screen" style={{ background: '#ffffff' }}>
+    <div className="min-h-screen" style={{ background: 'var(--color-parchment)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
         {/* ── Page header ──────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800">
+          <h1
+            className="text-2xl sm:text-3xl"
+            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+          >
             This Week's Recipes
           </h1>
           <button
             onClick={() => setPanelOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
+            style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
           >
             <SlidersHorizontal className="w-4 h-4" />
             Personalise
@@ -134,18 +122,36 @@ export default function Recipes() {
 
         {/* ── Search bar ───────────────────────────────────────────────────── */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+            style={{ color: 'var(--color-text-muted)' }}
+          />
           <input
             type="text"
             placeholder="Search recipes, ingredients or tags..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 py-3 rounded-xl border border-stone-200 bg-white text-stone-700 placeholder-stone-400 text-sm shadow-sm focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+            className="w-full pl-10 pr-10 py-3 rounded-xl text-sm shadow-sm outline-none"
+            style={{
+              background: '#ffffff',
+              border: '1.5px solid var(--color-stone)',
+              color: 'var(--color-bark)',
+              fontFamily: 'Nunito, sans-serif',
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = 'var(--color-leaf)';
+              e.target.style.boxShadow = '0 0 0 3px rgba(125, 184, 122, 0.15)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = 'var(--color-stone)';
+              e.target.style.boxShadow = 'none';
+            }}
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700"
+              className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
+              style={{ color: 'var(--color-text-muted)' }}
               aria-label="Clear search"
             >
               <X className="w-4 h-4" />
@@ -168,16 +174,19 @@ export default function Recipes() {
 
         {/* ── Personalised banner ───────────────────────────────────────────── */}
         {isPersonalised && personalisedRecipes !== null && !personalisedLoading && (
-          <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
+          <div
+            className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm border"
+            style={{ background: 'var(--color-blush)', borderColor: 'var(--color-honey)', color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+          >
             <span className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 flex-shrink-0" />
-              Personalised for you &middot;{' '}
-              <strong>{personalisedRecipes.length}</strong> recipe
+              <Sparkles className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-honey)' }} />
+              Personalised for you · <strong>{personalisedRecipes.length}</strong> recipe
               {personalisedRecipes.length !== 1 ? 's' : ''} matched
             </span>
             <button
               onClick={handleResetPersonalised}
-              className="text-amber-700 underline underline-offset-2 whitespace-nowrap hover:text-amber-900 transition-colors"
+              className="underline underline-offset-2 whitespace-nowrap transition-opacity hover:opacity-70 font-bold"
+              style={{ color: 'var(--color-text-green)' }}
             >
               Show all
             </button>
@@ -186,7 +195,10 @@ export default function Recipes() {
 
         {/* ── Error ────────────────────────────────────────────────────────── */}
         {personalisedError && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+          <div
+            className="rounded-xl px-4 py-3 text-sm border"
+            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+          >
             {personalisedError}
           </div>
         )}
@@ -200,7 +212,6 @@ export default function Recipes() {
           </div>
         ) : (
           <>
-            {/* ── Recipe grid ────────────────────────────────────────────── */}
             {filteredRecipes.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {filteredRecipes.map((recipe) => (
@@ -212,10 +223,17 @@ export default function Recipes() {
                 ))}
               </div>
             ) : (
-              /* ── Empty state ───────────────────────────────────────────── */
-              <div className="text-center py-16 text-stone-500">
+              <div
+                className="text-center py-16"
+                style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              >
                 <p className="text-2xl mb-2">🍽️</p>
-                <p className="text-lg font-medium text-stone-700 mb-1">No recipes found</p>
+                <p
+                  className="text-lg font-bold mb-1"
+                  style={{ color: 'var(--color-bark)' }}
+                >
+                  No recipes found
+                </p>
                 {searchQuery ? (
                   <>
                     <p className="text-sm mb-4">
@@ -223,7 +241,8 @@ export default function Recipes() {
                     </p>
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="text-sm text-amber-600 underline hover:text-amber-800"
+                      className="text-sm underline font-bold transition-opacity hover:opacity-70"
+                      style={{ color: 'var(--color-leaf)' }}
                     >
                       Clear search
                     </button>
@@ -235,7 +254,8 @@ export default function Recipes() {
                     </p>
                     <button
                       onClick={() => setActiveTag('all')}
-                      className="text-sm text-amber-600 underline hover:text-amber-800"
+                      className="text-sm underline font-bold transition-opacity hover:opacity-70"
+                      style={{ color: 'var(--color-leaf)' }}
                     >
                       Show all recipes
                     </button>
@@ -251,7 +271,6 @@ export default function Recipes() {
         )}
       </div>
 
-      {/* ── Preferences slide panel ───────────────────────────────────────── */}
       <PreferencesPanel
         isOpen={panelOpen}
         onClose={() => setPanelOpen(false)}

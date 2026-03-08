@@ -1,19 +1,31 @@
 import React from 'react';
-import { TrendingDown, ExternalLink, MousePointer } from 'lucide-react';
+import { TrendingDown, ExternalLink } from 'lucide-react';
+
+// Category → style guide colour mapping
+const CATEGORY_STYLE = {
+  Meat:      { bg: 'var(--color-peach)',     color: 'var(--color-bark)' },
+  Seafood:   { bg: 'var(--color-sky)',       color: '#1a4a5a' },
+  Vegetables:{ bg: 'var(--color-mist)',      color: 'var(--color-text-green)' },
+  Fruit:     { bg: 'var(--color-peach)',     color: 'var(--color-bark)' },
+  Dairy:     { bg: 'var(--color-cream)',     color: 'var(--color-bark)' },
+  Pantry:    { bg: 'var(--color-blush)',     color: 'var(--color-bark)' },
+};
+
+const DEFAULT_CATEGORY_STYLE = { bg: 'var(--color-mist)', color: 'var(--color-text-green)' };
 
 const DealCard = ({ deal }) => {
-  const discountPercentage = deal.originalPrice 
+  const discountPercentage = deal.originalPrice
     ? Math.round(((deal.originalPrice - deal.price) / deal.originalPrice) * 100)
     : deal.discountPercentage || 0;
+
+  const catStyle = CATEGORY_STYLE[deal.category] ?? DEFAULT_CATEGORY_STYLE;
 
   const handleClick = () => {
     if (deal.productUrl && deal.productUrl !== '#') {
       window.open(deal.productUrl, '_blank', 'noopener,noreferrer');
     } else {
-      // Generate search URL for the store if no direct product URL
       const searchQuery = encodeURIComponent(deal.name);
       let searchUrl;
-      
       if (deal.store === 'woolworths') {
         searchUrl = `https://www.woolworths.com.au/shop/search/products?searchTerm=${searchQuery}`;
       } else if (deal.store === 'coles') {
@@ -23,7 +35,6 @@ const DealCard = ({ deal }) => {
       } else {
         searchUrl = `https://www.google.com/search?q=${searchQuery}+${deal.store}+supermarket`;
       }
-      
       window.open(searchUrl, '_blank', 'noopener,noreferrer');
     }
   };
@@ -37,7 +48,12 @@ const DealCard = ({ deal }) => {
 
   return (
     <div
-      className="deal-card flex items-center justify-between p-3 bg-white rounded-xl cursor-pointer group border border-stone-200 shadow-sm hover:shadow-md hover:border-stone-300 interactive-element focus:ring-2 focus:ring-primary-300"
+      className="deal-card flex items-center justify-between p-3 rounded-[20px] cursor-pointer group"
+      style={{
+        background: '#ffffff',
+        border: '1.5px solid var(--color-stone)',
+        boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)',
+      }}
       onClick={handleClick}
       onKeyPress={handleKeyPress}
       tabIndex={0}
@@ -46,76 +62,80 @@ const DealCard = ({ deal }) => {
       title="Click to view product online"
     >
       <div className="flex-1">
-        <div className="flex items-center space-x-2">
-          <h3 className="font-semibold text-stone-900 group-hover:text-primary-600 transition-colors">
+        <div className="flex items-center gap-2">
+          <h3
+            className="font-bold leading-snug"
+            style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif', fontSize: '14px' }}
+          >
             {deal.name}
           </h3>
-          <ExternalLink className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" style={{ color: 'var(--color-text-muted)' }} />
         </div>
-        
-        <div className="flex items-center space-x-2 mt-1">
-          <span className={`text-xs px-2 py-1 rounded-full ${
-            deal.category === 'Meat' ? 'bg-red-100 text-red-700' :
-            deal.category === 'Seafood' ? 'bg-blue-100 text-blue-700' :
-            deal.category === 'Vegetables' ? 'bg-green-100 text-green-700' :
-            deal.category === 'Fruit' ? 'bg-orange-100 text-orange-700' :
-            deal.category === 'Dairy' ? 'bg-yellow-100 text-yellow-700' :
-            deal.category === 'Pantry' ? 'bg-purple-100 text-purple-700' :
-            'bg-gray-100 text-gray-700'
-          }`}>
-            {deal.category}
-          </span>
-          
+
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+          {deal.category && (
+            <span
+              className="text-xs font-bold px-3 py-0.5 rounded-full"
+              style={{ background: catStyle.bg, color: catStyle.color, fontFamily: 'Nunito, sans-serif' }}
+            >
+              {deal.category}
+            </span>
+          )}
           {deal.unit && (
-            <span className="text-xs text-gray-500">{deal.unit}</span>
+            <span className="text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+              {deal.unit}
+            </span>
           )}
         </div>
-        
+
         {deal.description && (
-          <p className="text-xs text-gray-500 mt-1 line-clamp-1">{deal.description}</p>
+          <p className="text-xs mt-1 line-clamp-1" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            {deal.description}
+          </p>
         )}
-        
+
         {deal.validUntil && (
-          <div className="text-xs text-gray-400 mt-1">
-            Valid until {new Date(deal.validUntil).toLocaleDateString('en-AU', { 
-              month: 'short', 
-              day: 'numeric' 
-            })}
+          <div className="text-xs mt-1" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            Valid until {new Date(deal.validUntil).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}
           </div>
         )}
       </div>
-      
-      <div className="text-right ml-4 flex flex-col items-end">
-        <div className="flex items-center space-x-2 mb-1">
-          <span className="text-xl font-bold text-green-600">
+
+      <div className="text-right ml-4 flex flex-col items-end gap-1">
+        <div className="flex items-baseline gap-2">
+          <span
+            className="text-xl font-bold"
+            style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+          >
             ${deal.price.toFixed(2)}
           </span>
           {deal.originalPrice && (
-            <span className="text-sm text-gray-500 line-through">
+            <span className="text-sm line-through" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
               ${deal.originalPrice.toFixed(2)}
             </span>
           )}
         </div>
-        
+
         {discountPercentage > 0 && (
-          <div className="discount-badge inline-flex items-center bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
-            <TrendingDown className="w-3 h-3 mr-1" />
+          <span
+            className="discount-badge inline-flex items-center gap-1 text-xs font-bold px-3 py-0.5 rounded-full text-white"
+            style={{ background: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+          >
+            <TrendingDown className="w-3 h-3" />
             {discountPercentage}% off
-          </div>
+          </span>
         )}
-        
-        {/* Store indicator */}
-        <div className={`mt-2 w-3 h-3 rounded-full ${
-          deal.store === 'woolworths' ? 'woolworths-green' :
-          deal.store === 'coles' ? 'coles-red' :
-          deal.store === 'iga' ? 'iga-blue' :
-          'bg-gray-400'
-        }`} title={deal.store}></div>
-      </div>
-      
-      {/* Click indicator */}
-      <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <MousePointer className="w-4 h-4 text-gray-400" />
+
+        {/* Store dot */}
+        <div
+          className={`w-2.5 h-2.5 rounded-full mt-1 ${
+            deal.store === 'woolworths' ? 'woolworths-green' :
+            deal.store === 'coles' ? 'coles-red' :
+            deal.store === 'iga' ? 'iga-blue' : ''
+          }`}
+          style={!['woolworths', 'coles', 'iga'].includes(deal.store) ? { background: 'var(--color-stone)' } : {}}
+          title={deal.store}
+        />
       </div>
     </div>
   );

@@ -18,7 +18,6 @@ function getStoreSearchUrl(ingredient, store) {
 export default function DealPopup({ deal, anchorRef, onClose }) {
   const popupRef = useRef(null);
 
-  // Close on outside click or Escape
   useEffect(() => {
     function handleClick(e) {
       if (
@@ -41,7 +40,7 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
     };
   }, [onClose, anchorRef]);
 
-  const storeColor = STORE_COLORS[deal.store] ?? '#92400e';
+  const storeColor = STORE_COLORS[deal.store] ?? 'var(--color-bark)';
   const storeName = deal.store
     ? deal.store.charAt(0).toUpperCase() + deal.store.slice(1)
     : 'Store';
@@ -60,15 +59,25 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-label={`Deal details for ${deal.ingredient}`}
-      className="absolute z-50 w-64 rounded-xl shadow-xl border border-stone-200 bg-white overflow-hidden"
-      style={{ top: '100%', left: 0, marginTop: '6px' }}
+      className="absolute z-50 w-64 rounded-[20px] overflow-hidden"
+      style={{
+        top: '100%',
+        left: 0,
+        marginTop: '6px',
+        background: '#ffffff',
+        border: '1.5px solid var(--color-stone)',
+        boxShadow: '0 6px 24px rgba(92, 74, 53, 0.15)',
+      }}
     >
       {/* Header strip */}
       <div
         className="flex items-center justify-between px-3 py-2"
         style={{ background: storeColor }}
       >
-        <span className="text-white text-xs font-semibold uppercase tracking-wide">
+        <span
+          className="text-white text-xs font-bold uppercase tracking-wide"
+          style={{ fontFamily: 'Nunito, sans-serif' }}
+        >
           {storeName} Special
         </span>
         <button
@@ -82,27 +91,34 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
 
       {/* Body */}
       <div className="px-3 py-3 space-y-2">
-        {/* Product name */}
-        <p className="text-sm font-medium text-stone-800 leading-snug">
+        <p
+          className="text-sm font-semibold leading-snug"
+          style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+        >
           {deal.dealName}
         </p>
 
-        {/* Price row */}
         <div className="flex items-baseline gap-2 flex-wrap">
           {deal.price != null && (
-            <span className="text-xl font-bold" style={{ color: storeColor }}>
+            <span
+              className="text-xl font-bold"
+              style={{ color: storeColor, fontFamily: 'Nunito, sans-serif' }}
+            >
               ${Number(deal.price).toFixed(2)}
             </span>
           )}
           {hasWasNow && (
-            <span className="text-sm text-stone-400 line-through">
+            <span
+              className="text-sm line-through"
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+            >
               ${Number(deal.originalPrice).toFixed(2)}
             </span>
           )}
           {discountLabel && (
             <span
-              className="inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded-full text-white"
-              style={{ background: storeColor }}
+              className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
+              style={{ background: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
             >
               <Tag className="w-3 h-3" />
               {discountLabel}
@@ -110,13 +126,12 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
           )}
         </div>
 
-        {/* View at store link */}
         <a
           href={searchUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-medium underline underline-offset-2 transition-opacity hover:opacity-70"
-          style={{ color: storeColor }}
+          className="inline-flex items-center gap-1.5 text-xs font-bold underline underline-offset-2 transition-opacity hover:opacity-70"
+          style={{ color: storeColor, fontFamily: 'Nunito, sans-serif' }}
         >
           View at {storeName}
           <ExternalLink className="w-3 h-3" />

@@ -156,7 +156,10 @@ function AppInner() {
     <AppContext.Provider value={contextValue}>
       <Router>
         {apiStatus === 'disconnected' && (
-          <div className="flex items-center justify-center gap-2 bg-amber-50 border-b border-amber-200 py-1.5 px-4 text-xs text-amber-800">
+          <div
+            className="flex items-center justify-center gap-2 border-b py-1.5 px-4 text-xs"
+            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-honey)', color: 'var(--color-bark)' }}
+          >
             <WifiOff className="w-3.5 h-3.5 flex-shrink-0" />
             <span>API not connected — some features may be unavailable</span>
           </div>

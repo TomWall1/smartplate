@@ -4,7 +4,7 @@ import { UtensilsCrossed, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext';
 
 export default function Auth() {
-  const [mode, setMode]         = useState('signin'); // 'signin' | 'signup'
+  const [mode, setMode]         = useState('signin');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
@@ -19,7 +19,6 @@ export default function Auth() {
     setError('');
     setMessage('');
     setLoading(true);
-
     try {
       if (mode === 'signup') {
         await signUp(email, password);
@@ -41,43 +40,93 @@ export default function Auth() {
     setLoading(true);
     try {
       await signInWithGoogle();
-      // Supabase redirects the browser; no navigate() needed here
     } catch (err) {
       setError(err.message || 'Google sign-in failed');
       setLoading(false);
     }
   };
 
+  const inputStyle = {
+    background: '#ffffff',
+    border: '1.5px solid var(--color-stone)',
+    borderRadius: '12px',
+    padding: '10px 12px 10px 36px',
+    fontFamily: 'Nunito, sans-serif',
+    fontSize: '14px',
+    color: 'var(--color-bark)',
+    outline: 'none',
+    width: '100%',
+    boxSizing: 'border-box',
+  };
+
+  const handleInputFocus = (e) => {
+    e.target.style.borderColor = 'var(--color-leaf)';
+    e.target.style.boxShadow = '0 0 0 3px rgba(125, 184, 122, 0.15)';
+  };
+  const handleInputBlur = (e) => {
+    e.target.style.borderColor = 'var(--color-stone)';
+    e.target.style.boxShadow = 'none';
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-white">
+    <div
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-12"
+      style={{ background: 'var(--color-parchment)' }}
+    >
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-md">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: 'var(--color-honey)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.15)' }}
+        >
           <UtensilsCrossed className="w-6 h-6 text-white" />
         </div>
-        <span className="text-2xl font-bold text-stone-800 tracking-tight">Deals to Dish</span>
+        <span
+          className="text-2xl"
+          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+        >
+          Deals to Dish
+        </span>
       </Link>
 
       {/* Card */}
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-stone-100 p-8">
-        <h1 className="text-xl font-bold text-stone-800 mb-1">
+      <div
+        className="w-full max-w-sm rounded-[20px] p-8"
+        style={{
+          background: '#ffffff',
+          border: '1.5px solid var(--color-stone)',
+          boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)',
+        }}
+      >
+        <h1
+          className="text-xl mb-1"
+          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+        >
           {mode === 'signin' ? 'Welcome back' : 'Create an account'}
         </h1>
-        <p className="text-sm text-stone-500 mb-6">
+        <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
           {mode === 'signin'
             ? 'Sign in to save your store and preferences.'
             : 'Save your store and preferences across devices.'}
         </p>
 
-        {/* Error / Message */}
+        {/* Error */}
         {error && (
-          <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 text-sm text-red-700 mb-4">
+          <div
+            className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-sm mb-4 border"
+            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+          >
             <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
+
+        {/* Success message */}
         {message && (
-          <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2.5 text-sm text-green-700 mb-4">
+          <div
+            className="rounded-xl px-3 py-2.5 text-sm mb-4 border"
+            style={{ background: 'var(--color-mist)', borderColor: 'var(--color-leaf)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+          >
             {message}
           </div>
         )}
@@ -86,9 +135,16 @@ export default function Auth() {
         <button
           onClick={handleGoogle}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors mb-4 disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors mb-4 disabled:opacity-60"
+          style={{
+            border: '1.5px solid var(--color-stone)',
+            color: 'var(--color-bark)',
+            background: '#ffffff',
+            fontFamily: 'Nunito, sans-serif',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-blush)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#ffffff'}
         >
-          {/* Google SVG icon */}
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -99,32 +155,50 @@ export default function Auth() {
         </button>
 
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex-1 h-px bg-stone-200" />
-          <span className="text-xs text-stone-400">or</span>
-          <div className="flex-1 h-px bg-stone-200" />
+          <div className="flex-1 h-px" style={{ background: 'var(--color-stone)' }} />
+          <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>or</span>
+          <div className="flex-1 h-px" style={{ background: 'var(--color-stone)' }} />
         </div>
 
         {/* Email / Password form */}
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-stone-600 mb-1">Email</label>
+            <label
+              className="block text-xs font-bold mb-1"
+              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              Email
+            </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+              <Mail
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                style={{ color: 'var(--color-text-muted)' }}
+              />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-800 placeholder-stone-400 focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none"
+                style={inputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-stone-600 mb-1">Password</label>
+            <label
+              className="block text-xs font-bold mb-1"
+              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              Password
+            </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+              <Lock
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                style={{ color: 'var(--color-text-muted)' }}
+              />
               <input
                 type="password"
                 value={password}
@@ -132,7 +206,9 @@ export default function Auth() {
                 required
                 minLength={6}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-800 placeholder-stone-400 focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none"
+                style={inputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
               />
             </div>
           </div>
@@ -140,26 +216,30 @@ export default function Auth() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-colors disabled:opacity-60 mt-1"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-sm font-bold transition-all disabled:opacity-60 mt-1 hover:opacity-90 hover:-translate-y-px"
+            style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {mode === 'signin' ? 'Sign in' : 'Create account'}
           </button>
         </form>
 
-        {/* Mode toggle */}
-        <p className="text-center text-sm text-stone-500 mt-5">
+        <p
+          className="text-center text-sm mt-5"
+          style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+        >
           {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
           <button
             onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); }}
-            className="text-amber-600 font-medium hover:underline"
+            className="font-bold underline transition-opacity hover:opacity-70"
+            style={{ color: 'var(--color-leaf)' }}
           >
             {mode === 'signin' ? 'Sign up' : 'Sign in'}
           </button>
         </p>
       </div>
 
-      <p className="mt-6 text-xs text-stone-400">
+      <p className="mt-6 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
         <Link to="/" className="hover:underline">← Back to home</Link>
       </p>
     </div>

@@ -13,13 +13,43 @@ const DIETARY_OPTIONS = [
 ];
 
 const MEAL_TYPE_OPTIONS = [
-  { id: 'quick',          label: 'Quick (under 30 min)' },
-  { id: 'family-friendly',label: 'Family Friendly' },
-  { id: 'batch-cook',     label: 'Good for Batch Cooking' },
-  { id: 'one-pot',        label: 'One Pot Meals' },
-  { id: 'healthy',        label: 'Healthy' },
-  { id: 'comfort',        label: 'Comfort Food' },
+  { id: 'quick',           label: 'Quick (under 30 min)' },
+  { id: 'family-friendly', label: 'Family Friendly' },
+  { id: 'batch-cook',      label: 'Good for Batch Cooking' },
+  { id: 'one-pot',         label: 'One Pot Meals' },
+  { id: 'healthy',         label: 'Healthy' },
+  { id: 'comfort',         label: 'Comfort Food' },
 ];
+
+const cardStyle = {
+  background: '#ffffff',
+  border: '1.5px solid var(--color-stone)',
+  borderRadius: '20px',
+  boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)',
+  padding: '24px',
+};
+
+const inputStyle = {
+  background: '#ffffff',
+  border: '1.5px solid var(--color-stone)',
+  borderRadius: '12px',
+  padding: '10px 12px',
+  fontFamily: 'Nunito, sans-serif',
+  fontSize: '14px',
+  color: 'var(--color-bark)',
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box',
+};
+
+const handleInputFocus = (e) => {
+  e.target.style.borderColor = 'var(--color-leaf)';
+  e.target.style.boxShadow = '0 0 0 3px rgba(125, 184, 122, 0.15)';
+};
+const handleInputBlur = (e) => {
+  e.target.style.borderColor = 'var(--color-stone)';
+  e.target.style.boxShadow = 'none';
+};
 
 export default function Profile() {
   const { preferences, setPreferences } = useApp();
@@ -30,15 +60,13 @@ export default function Profile() {
   const [saved, setSaved] = useState(false);
   const saveTimerRef = useRef(null);
 
-  const [regenStatus, setRegenStatus] = useState('idle'); // idle | loading | success | error
+  const [regenStatus, setRegenStatus] = useState('idle');
   const [regenResult, setRegenResult] = useState(null);
 
-  // Sync local state if context preferences change externally
   useEffect(() => {
     setLocal({ ...preferences });
   }, [preferences]);
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
   const toggleDietary = (id) => {
     setLocal((prev) => ({
       ...prev,
@@ -60,35 +88,23 @@ export default function Profile() {
   const addPantryItem = () => {
     const val = newPantryItem.trim();
     if (!val) return;
-    setLocal((prev) => ({
-      ...prev,
-      pantryItems: [...(prev.pantryItems ?? []), val],
-    }));
+    setLocal((prev) => ({ ...prev, pantryItems: [...(prev.pantryItems ?? []), val] }));
     setNewPantryItem('');
   };
 
   const removePantryItem = (item) => {
-    setLocal((prev) => ({
-      ...prev,
-      pantryItems: (prev.pantryItems ?? []).filter((i) => i !== item),
-    }));
+    setLocal((prev) => ({ ...prev, pantryItems: (prev.pantryItems ?? []).filter((i) => i !== item) }));
   };
 
   const addDislike = () => {
     const val = newDislike.trim();
     if (!val) return;
-    setLocal((prev) => ({
-      ...prev,
-      dislikes: [...(prev.dislikes ?? []), val],
-    }));
+    setLocal((prev) => ({ ...prev, dislikes: [...(prev.dislikes ?? []), val] }));
     setNewDislike('');
   };
 
   const removeDislike = (item) => {
-    setLocal((prev) => ({
-      ...prev,
-      dislikes: (prev.dislikes ?? []).filter((i) => i !== item),
-    }));
+    setLocal((prev) => ({ ...prev, dislikes: (prev.dislikes ?? []).filter((i) => i !== item) }));
   };
 
   const handleRegenerate = async () => {
@@ -106,104 +122,114 @@ export default function Profile() {
 
   const handleSave = () => {
     setPreferences(local);
-
-    // Show success message, fade after 3 seconds
     setSaved(true);
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => setSaved(false), 3000);
   };
 
+  const CheckboxRow = ({ id, label, checked, onToggle }) => (
+    <label className="flex items-center gap-2.5 cursor-pointer group">
+      <div
+        className="w-5 h-5 rounded flex items-center justify-center transition-colors flex-shrink-0"
+        style={{
+          border: `2px solid ${checked ? 'var(--color-leaf)' : 'var(--color-stone)'}`,
+          background: checked ? 'var(--color-leaf)' : 'transparent',
+        }}
+        onClick={() => onToggle(id)}
+      >
+        {checked && <Check className="w-3 h-3 text-white" />}
+      </div>
+      <input type="checkbox" checked={checked} onChange={() => onToggle(id)} className="sr-only" />
+      <span className="text-sm" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+        {label}
+      </span>
+    </label>
+  );
+
   return (
-    <div className="min-h-screen" style={{ background: '#ffffff' }}>
+    <div className="min-h-screen" style={{ background: 'var(--color-parchment)' }}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
         {/* ── Header ───────────────────────────────────────────────────────── */}
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center shadow-sm">
+          <div
+            className="w-12 h-12 rounded-[20px] flex items-center justify-center"
+            style={{ background: 'var(--color-honey)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.1)' }}
+          >
             <User className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-stone-800">Your Preferences</h1>
-            <p className="text-sm text-stone-500">Customise your recipe recommendations</p>
+            <h1 style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '24px' }}>
+              Your Preferences
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+              Customise your recipe recommendations
+            </p>
           </div>
         </div>
 
-        {/* ── Saved confirmation ────────────────────────────────────────────── */}
+        {/* ── Saved confirmation ─────────────────────────────────────────────── */}
         <div
-          className={`flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700 transition-all duration-300 ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm border transition-all duration-300 ${
             saved ? 'opacity-100 max-h-12' : 'opacity-0 max-h-0 overflow-hidden border-0 p-0'
           }`}
+          style={{ background: 'var(--color-mist)', borderColor: 'var(--color-leaf)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
           aria-live="polite"
         >
           <Check className="w-4 h-4 flex-shrink-0" />
           <span>Preferences saved!</span>
         </div>
 
-        {/* ── Card: Dietary ─────────────────────────────────────────────────── */}
-        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
-          <h2 className="text-base font-bold text-stone-800 mb-4">Dietary Restrictions</h2>
+        {/* ── Dietary ──────────────────────────────────────────────────────── */}
+        <section style={cardStyle}>
+          <h2
+            className="mb-4"
+            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
+          >
+            Dietary Restrictions
+          </h2>
           <div className="grid grid-cols-2 gap-3">
-            {DIETARY_OPTIONS.map(({ id, label }) => {
-              const checked = (local.dietary ?? []).includes(id);
-              return (
-                <label key={id} className="flex items-center gap-2.5 cursor-pointer group">
-                  <div
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                      checked
-                        ? 'bg-amber-500 border-amber-500'
-                        : 'border-stone-300 group-hover:border-amber-400'
-                    }`}
-                    onClick={() => toggleDietary(id)}
-                  >
-                    {checked && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggleDietary(id)}
-                    className="sr-only"
-                  />
-                  <span className="text-sm text-stone-700 select-none">{label}</span>
-                </label>
-              );
-            })}
+            {DIETARY_OPTIONS.map(({ id, label }) => (
+              <CheckboxRow
+                key={id}
+                id={id}
+                label={label}
+                checked={(local.dietary ?? []).includes(id)}
+                onToggle={toggleDietary}
+              />
+            ))}
           </div>
         </section>
 
-        {/* ── Card: Meal types ──────────────────────────────────────────────── */}
-        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
-          <h2 className="text-base font-bold text-stone-800 mb-4">Preferred Meal Types</h2>
+        {/* ── Meal types ───────────────────────────────────────────────────── */}
+        <section style={cardStyle}>
+          <h2
+            className="mb-4"
+            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
+          >
+            Preferred Meal Types
+          </h2>
           <div className="grid grid-cols-2 gap-3">
-            {MEAL_TYPE_OPTIONS.map(({ id, label }) => {
-              const checked = (local.mealTypes ?? []).includes(id);
-              return (
-                <label key={id} className="flex items-center gap-2.5 cursor-pointer group">
-                  <div
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                      checked
-                        ? 'bg-amber-500 border-amber-500'
-                        : 'border-stone-300 group-hover:border-amber-400'
-                    }`}
-                    onClick={() => toggleMealType(id)}
-                  >
-                    {checked && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggleMealType(id)}
-                    className="sr-only"
-                  />
-                  <span className="text-sm text-stone-700 select-none">{label}</span>
-                </label>
-              );
-            })}
+            {MEAL_TYPE_OPTIONS.map(({ id, label }) => (
+              <CheckboxRow
+                key={id}
+                id={id}
+                label={label}
+                checked={(local.mealTypes ?? []).includes(id)}
+                onToggle={toggleMealType}
+              />
+            ))}
           </div>
         </section>
 
-        {/* ── Card: Pantry items ────────────────────────────────────────────── */}
-        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
-          <h2 className="text-base font-bold text-stone-800 mb-4">Pantry Items I Have</h2>
+        {/* ── Pantry items ─────────────────────────────────────────────────── */}
+        <section style={cardStyle}>
+          <h2
+            className="mb-4"
+            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
+          >
+            Pantry Items I Have
+          </h2>
           <div className="flex gap-2 mb-3">
             <input
               type="text"
@@ -211,11 +237,14 @@ export default function Profile() {
               onChange={(e) => setNewPantryItem(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addPantryItem()}
               placeholder="Add pantry item..."
-              className="flex-1 px-3 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-400 focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <button
               onClick={addPantryItem}
-              className="p-2.5 rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+              className="p-2.5 rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-px flex-shrink-0"
+              style={{ background: 'var(--color-leaf)' }}
               aria-label="Add pantry item"
             >
               <Plus className="w-4 h-4" />
@@ -225,12 +254,14 @@ export default function Profile() {
             {(local.pantryItems ?? []).map((item, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 text-sm px-3 py-1 rounded-full border border-amber-200"
+                className="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full border font-semibold"
+                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', borderColor: 'var(--color-sprout)', fontFamily: 'Nunito, sans-serif' }}
               >
                 {item}
                 <button
                   onClick={() => removePantryItem(item)}
-                  className="text-amber-500 hover:text-amber-800 transition-colors"
+                  className="transition-opacity hover:opacity-60"
+                  style={{ color: 'var(--color-text-green)' }}
                   aria-label={`Remove ${item}`}
                 >
                   <X className="w-3.5 h-3.5" />
@@ -238,14 +269,21 @@ export default function Profile() {
               </span>
             ))}
             {(local.pantryItems ?? []).length === 0 && (
-              <p className="text-sm text-stone-400 italic">No pantry items added yet.</p>
+              <p className="text-sm italic" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+                No pantry items added yet.
+              </p>
             )}
           </div>
         </section>
 
-        {/* ── Card: Dislikes ────────────────────────────────────────────────── */}
-        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
-          <h2 className="text-base font-bold text-stone-800 mb-4">Ingredients I Don't Like</h2>
+        {/* ── Dislikes ─────────────────────────────────────────────────────── */}
+        <section style={cardStyle}>
+          <h2
+            className="mb-4"
+            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
+          >
+            Ingredients I Don't Like
+          </h2>
           <div className="flex gap-2 mb-3">
             <input
               type="text"
@@ -253,11 +291,14 @@ export default function Profile() {
               onChange={(e) => setNewDislike(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addDislike()}
               placeholder="Add disliked ingredient..."
-              className="flex-1 px-3 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-400 focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <button
               onClick={addDislike}
-              className="p-2.5 rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+              className="p-2.5 rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-px flex-shrink-0"
+              style={{ background: 'var(--color-leaf)' }}
               aria-label="Add disliked ingredient"
             >
               <Plus className="w-4 h-4" />
@@ -267,12 +308,14 @@ export default function Profile() {
             {(local.dislikes ?? []).map((item, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center gap-1.5 bg-red-50 text-red-800 text-sm px-3 py-1 rounded-full border border-red-100"
+                className="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full border font-semibold"
+                style={{ background: 'var(--color-peach)', color: 'var(--color-bark)', borderColor: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
               >
                 {item}
                 <button
                   onClick={() => removeDislike(item)}
-                  className="text-red-400 hover:text-red-700 transition-colors"
+                  className="transition-opacity hover:opacity-60"
+                  style={{ color: 'var(--color-bark)' }}
                   aria-label={`Remove ${item}`}
                 >
                   <X className="w-3.5 h-3.5" />
@@ -280,28 +323,41 @@ export default function Profile() {
               </span>
             ))}
             {(local.dislikes ?? []).length === 0 && (
-              <p className="text-sm text-stone-400 italic">No dislikes added yet.</p>
+              <p className="text-sm italic" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+                No dislikes added yet.
+              </p>
             )}
           </div>
         </section>
 
-        {/* ── Card: Admin — Regenerate Recipes ─────────────────────────────── */}
-        <section className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
-          <h2 className="text-base font-bold text-stone-800 mb-1">Recipe Library</h2>
-          <p className="text-sm text-stone-500 mb-4">
+        {/* ── Admin: Regenerate Recipes ─────────────────────────────────────── */}
+        <section style={cardStyle}>
+          <h2
+            className="mb-1"
+            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
+          >
+            Recipe Library
+          </h2>
+          <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
             Fetch the latest supermarket specials and regenerate this week's matched recipes.
             This takes 2–3 minutes.
           </p>
 
           {regenStatus === 'success' && (
-            <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700 mb-4">
+            <div
+              className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm mb-4 border"
+              style={{ background: 'var(--color-mist)', borderColor: 'var(--color-leaf)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+            >
               <Check className="w-4 h-4 flex-shrink-0" />
               <span>Done! {regenResult?.recipeCount ?? '?'} recipes generated.</span>
             </div>
           )}
 
           {regenStatus === 'error' && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 mb-4">
+            <div
+              className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm mb-4 border"
+              style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+            >
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{regenResult?.error || 'Generation failed. Check the server logs.'}</span>
             </div>
@@ -310,7 +366,8 @@ export default function Profile() {
           <button
             onClick={handleRegenerate}
             disabled={regenStatus === 'loading'}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-xl font-semibold text-sm hover:bg-stone-700 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 hover:-translate-y-px shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ background: 'var(--color-bark)', color: '#ffffff', fontFamily: 'Nunito, sans-serif' }}
           >
             <RefreshCw className={`w-4 h-4 ${regenStatus === 'loading' ? 'animate-spin' : ''}`} />
             {regenStatus === 'loading' ? 'Generating… (2–3 min)' : 'Regenerate Recipes'}
@@ -321,7 +378,8 @@ export default function Profile() {
         <div className="flex justify-end pb-4">
           <button
             onClick={handleSave}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white rounded-xl font-semibold text-sm hover:bg-amber-600 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
+            style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
           >
             <Save className="w-4 h-4" />
             Save Preferences
