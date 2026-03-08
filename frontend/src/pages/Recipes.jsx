@@ -67,28 +67,40 @@ export default function Recipes() {
       );
     }
 
-    // Apply excluded ingredient soft filter for the default (non-personalised) path.
-    // The personalised path gets this server-side; we apply it here too so the
-    // default weekly view respects the user's stored preferences.
+    // ── Client-side preference filters (cover the default non-personalised path) ──
+
+    // 1. mealTypes — soft sort: recipes matching a preferred meal type come first.
+    //    The personalised path does this server-side via Claude; we do it here for
+    //    the default weekly view so preferences are always respected.
+    const mealTypes = (preferences.mealTypes ?? []).map((m) => m.toLowerCase());
+    if (mealTypes.length > 0 && !isPersonalised) {
+      list = [
+        ...list.filter((r) =>
+          (r.tags ?? []).some((t) => mealTypes.includes(t.toLowerCase()))
+        ),
+        ...list.filter((r) =>
+          !(r.tags ?? []).some((t) => mealTypes.includes(t.toLowerCase()))
+        ),
+      ];
+    }
+
+    // 2. excludeIngredients — soft sort + warning tag.
+    //    Server already does this for the personalised path; we apply it here for both
+    //    paths so the warning badges always appear.
     const excluded = (preferences.excludeIngredients ?? [])
       .map((e) => e.toLowerCase().trim())
       .filter(Boolean);
 
     if (excluded.length > 0) {
       list = list.map((r) => {
-        // If the server already tagged this (personalised path), keep it.
-        if (r.excludedWarnings !== undefined) return r;
-
+        if (r.excludedWarnings !== undefined) return r; // already tagged server-side
         const allText = [
           ...(r.allIngredients ?? []),
           ...(r.ingredients ?? []),
         ].join(' ').toLowerCase();
-
         const warnings = excluded.filter((ex) => allText.includes(ex));
         return { ...r, excludedWarnings: warnings };
       });
-
-      // Soft sort: clean recipes first, flagged last (stable)
       list = [
         ...list.filter((r) => r.excludedWarnings.length === 0),
         ...list.filter((r) => r.excludedWarnings.length > 0),
@@ -96,7 +108,7 @@ export default function Recipes() {
     }
 
     return list;
-  }, [baseRecipes, activeTag, searchQuery, preferences.excludeIngredients]);
+  }, [baseRecipes, activeTag, searchQuery, preferences.mealTypes, preferences.excludeIngredients, isPersonalised]);
 
   const handleApplyPreferences = async (prefs) => {
     setPersonalisedLoading(true);
@@ -106,11 +118,12 @@ export default function Recipes() {
       const data = await recipesApi.getRecipeSuggestions(
         ingredients,
         {
-          dietary: prefs.dietary ?? [],
-          maxPrepTime: prefs.maxPrepTime ? parseInt(prefs.maxPrepTime) : undefined,
+          dietary:            prefs.dietary ?? [],
+          mealTypes:          prefs.mealTypes ?? [],
+          maxPrepTime:        prefs.maxPrepTime ? parseInt(prefs.maxPrepTime) : undefined,
           excludeIngredients: prefs.excludeIngredients ?? [],
         },
-        prefs.pantryItems ?? []
+        [] // pantryItems removed
       );
       const list = Array.isArray(data) ? data : (data?.recipes ?? []);
       setPersonalisedRecipes(list);

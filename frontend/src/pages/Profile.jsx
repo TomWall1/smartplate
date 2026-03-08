@@ -55,7 +55,6 @@ export default function Profile() {
   const { preferences, setPreferences } = useApp();
 
   const [local, setLocal] = useState({ ...preferences });
-  const [newPantryItem, setNewPantryItem] = useState('');
   const [newDislike, setNewDislike] = useState('');
   const [saved, setSaved] = useState(false);
   const saveTimerRef = useRef(null);
@@ -83,17 +82,6 @@ export default function Profile() {
         ? (prev.mealTypes ?? []).filter((m) => m !== id)
         : [...(prev.mealTypes ?? []), id],
     }));
-  };
-
-  const addPantryItem = () => {
-    const val = newPantryItem.trim();
-    if (!val) return;
-    setLocal((prev) => ({ ...prev, pantryItems: [...(prev.pantryItems ?? []), val] }));
-    setNewPantryItem('');
-  };
-
-  const removePantryItem = (item) => {
-    setLocal((prev) => ({ ...prev, pantryItems: (prev.pantryItems ?? []).filter((i) => i !== item) }));
   };
 
   const addDislike = () => {
@@ -219,60 +207,6 @@ export default function Profile() {
                 onToggle={toggleMealType}
               />
             ))}
-          </div>
-        </section>
-
-        {/* ── Pantry items ─────────────────────────────────────────────────── */}
-        <section style={cardStyle}>
-          <h2
-            className="mb-4"
-            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
-          >
-            Pantry Items I Have
-          </h2>
-          <div className="flex gap-2 mb-3">
-            <input
-              type="text"
-              value={newPantryItem}
-              onChange={(e) => setNewPantryItem(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addPantryItem()}
-              placeholder="Add pantry item..."
-              style={inputStyle}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-            />
-            <button
-              onClick={addPantryItem}
-              className="p-2.5 rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-px flex-shrink-0"
-              style={{ background: 'var(--color-leaf)' }}
-              aria-label="Add pantry item"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(local.pantryItems ?? []).map((item, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full border font-semibold"
-                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', borderColor: 'var(--color-sprout)', fontFamily: 'Nunito, sans-serif' }}
-              >
-                {item}
-                <button
-                  onClick={() => removePantryItem(item)}
-                  className="transition-opacity hover:opacity-60"
-                  style={{ color: 'var(--color-text-green)' }}
-                  aria-label={`Remove ${item}`}
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            ))}
-            {(local.pantryItems ?? []).length === 0 && (
-              <p className="text-sm italic" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
-                No pantry items added yet.
-              </p>
-            )}
           </div>
         </section>
 

@@ -11,6 +11,15 @@ const DIETARY_OPTIONS = [
   { id: 'dairy-free', label: 'Dairy-free' },
 ];
 
+const MEAL_TYPE_OPTIONS = [
+  { id: 'quick',           label: 'Quick (under 30 min)' },
+  { id: 'family-friendly', label: 'Family Friendly' },
+  { id: 'healthy',         label: 'Healthy' },
+  { id: 'comfort',         label: 'Comfort Food' },
+  { id: 'batch-cook',      label: 'Batch Cooking' },
+  { id: 'one-pot',         label: 'One Pot' },
+];
+
 const PREP_TIME_OPTIONS = [
   { value: '',   label: 'Any' },
   { value: '15', label: '15 min' },
@@ -46,13 +55,11 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
   const { user } = useAuth();
 
   const [local, setLocal] = useState({ ...preferences });
-  const [pantryInput, setPantryInput] = useState('');
   const [excludeInput, setExcludeInput] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setLocal({ ...preferences });
-      setPantryInput('');
       setExcludeInput('');
     }
   }, [isOpen, preferences]);
@@ -60,21 +67,19 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
   const toggleDietary = (id) => {
     setLocal((prev) => ({
       ...prev,
-      dietary: prev.dietary?.includes(id)
-        ? prev.dietary.filter((d) => d !== id)
+      dietary: (prev.dietary ?? []).includes(id)
+        ? (prev.dietary ?? []).filter((d) => d !== id)
         : [...(prev.dietary ?? []), id],
     }));
   };
 
-  const addPantryItem = () => {
-    const val = pantryInput.trim();
-    if (!val) return;
-    setLocal((prev) => ({ ...prev, pantryItems: [...(prev.pantryItems ?? []), val] }));
-    setPantryInput('');
-  };
-
-  const removePantryItem = (idx) => {
-    setLocal((prev) => ({ ...prev, pantryItems: (prev.pantryItems ?? []).filter((_, i) => i !== idx) }));
+  const toggleMealType = (id) => {
+    setLocal((prev) => ({
+      ...prev,
+      mealTypes: (prev.mealTypes ?? []).includes(id)
+        ? (prev.mealTypes ?? []).filter((m) => m !== id)
+        : [...(prev.mealTypes ?? []), id],
+    }));
   };
 
   const addExclude = () => {
@@ -85,11 +90,20 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
   };
 
   const removeExclude = (idx) => {
-    setLocal((prev) => ({ ...prev, excludeIngredients: (prev.excludeIngredients ?? []).filter((_, i) => i !== idx) }));
+    setLocal((prev) => ({
+      ...prev,
+      excludeIngredients: (prev.excludeIngredients ?? []).filter((_, i) => i !== idx),
+    }));
   };
 
   const handleClear = () => {
-    setLocal({ dietary: [], dislikes: [], pantryItems: [], mealTypes: [], maxPrepTime: '', excludeIngredients: [] });
+    setLocal({
+      dietary: [],
+      dislikes: [],
+      mealTypes: [],
+      maxPrepTime: '',
+      excludeIngredients: [],
+    });
   };
 
   const handleApply = () => {
@@ -104,38 +118,39 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
     onClose();
   };
 
+  const SectionLabel = ({ children }) => (
+    <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+      {children}
+    </p>
+  );
+
+  const CheckOption = ({ id, label, checked, onToggle }) => (
+    <label className="flex items-center gap-2 cursor-pointer text-sm" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={() => onToggle(id)}
+        className="rounded"
+        style={{ accentColor: 'var(--color-leaf)' }}
+      />
+      {label}
+    </label>
+  );
+
   return (
     <>
       {/* Backdrop */}
-      <div
-        className={`panel-overlay ${isOpen ? 'open' : ''}`}
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className={`panel-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} aria-hidden="true" />
 
       {/* Slide-in panel */}
-      <div
-        className={`slide-panel ${isOpen ? 'open' : ''}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Personalise Recipes"
-      >
+      <div className={`slide-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-modal="true" aria-label="Personalise Recipes">
+
         {/* Header */}
-        <div
-          className="flex items-center justify-between px-5 py-4 flex-shrink-0 border-b"
-          style={{ borderColor: 'var(--color-stone)' }}
-        >
-          <h2
-            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '20px' }}
-          >
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0 border-b" style={{ borderColor: 'var(--color-stone)' }}>
+          <h2 style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '20px' }}>
             Personalise Recipes
           </h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-xl transition-colors hover:opacity-70"
-            style={{ color: 'var(--color-text-muted)' }}
-            aria-label="Close panel"
-          >
+          <button onClick={onClose} className="p-1.5 rounded-xl transition-colors hover:opacity-70" style={{ color: 'var(--color-text-muted)' }} aria-label="Close panel">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -143,43 +158,41 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
 
-          {/* Dietary */}
+          {/* ── Dietary ──────────────────────────────────────────────── */}
           <div>
-            <p
-              className="text-sm font-bold mb-2"
-              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              Dietary
-            </p>
+            <SectionLabel>Dietary</SectionLabel>
             <div className="grid grid-cols-2 gap-2">
-              {DIETARY_OPTIONS.map(({ id, label }) => {
-                const checked = (local.dietary ?? []).includes(id);
-                return (
-                  <label
-                    key={id}
-                    className="flex items-center gap-2 cursor-pointer text-sm"
-                    style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleDietary(id)}
-                      className="rounded"
-                      style={{ accentColor: 'var(--color-leaf)' }}
-                    />
-                    {label}
-                  </label>
-                );
-              })}
+              {DIETARY_OPTIONS.map(({ id, label }) => (
+                <CheckOption
+                  key={id}
+                  id={id}
+                  label={label}
+                  checked={(local.dietary ?? []).includes(id)}
+                  onToggle={toggleDietary}
+                />
+              ))}
             </div>
           </div>
 
-          {/* Max prep time */}
+          {/* ── Meal types ───────────────────────────────────────────── */}
           <div>
-            <label
-              className="block text-sm font-bold mb-2"
-              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-            >
+            <SectionLabel>Meal Types</SectionLabel>
+            <div className="grid grid-cols-2 gap-2">
+              {MEAL_TYPE_OPTIONS.map(({ id, label }) => (
+                <CheckOption
+                  key={id}
+                  id={id}
+                  label={label}
+                  checked={(local.mealTypes ?? []).includes(id)}
+                  onToggle={toggleMealType}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* ── Max prep time ────────────────────────────────────────── */}
+          <div>
+            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
               Max prep time
             </label>
             <select
@@ -195,63 +208,9 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
             </select>
           </div>
 
-          {/* Pantry items */}
+          {/* ── Ingredients to avoid ─────────────────────────────────── */}
           <div>
-            <p
-              className="text-sm font-bold mb-2"
-              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              Ingredients I have at home
-            </p>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={pantryInput}
-                onChange={(e) => setPantryInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addPantryItem()}
-                placeholder="e.g. rice, eggs..."
-                style={inputStyle}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-              />
-              <button
-                onClick={addPantryItem}
-                className="p-2 rounded-xl text-white transition-all hover:opacity-90 flex-shrink-0"
-                style={{ background: 'var(--color-leaf)' }}
-                aria-label="Add pantry item"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {(local.pantryItems ?? []).map((item, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
-                  style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
-                >
-                  {item}
-                  <button
-                    onClick={() => removePantryItem(i)}
-                    className="transition-opacity hover:opacity-60"
-                    style={{ color: 'var(--color-text-green)' }}
-                    aria-label={`Remove ${item}`}
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Exclude ingredients */}
-          <div>
-            <p
-              className="text-sm font-bold mb-2"
-              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              Ingredients to avoid
-            </p>
+            <SectionLabel>Ingredients to avoid</SectionLabel>
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
@@ -295,10 +254,7 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
         </div>
 
         {/* Footer */}
-        <div
-          className="flex gap-3 px-5 py-4 flex-shrink-0 border-t"
-          style={{ borderColor: 'var(--color-stone)' }}
-        >
+        <div className="flex gap-3 px-5 py-4 flex-shrink-0 border-t" style={{ borderColor: 'var(--color-stone)' }}>
           <button
             onClick={handleClear}
             className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-80"

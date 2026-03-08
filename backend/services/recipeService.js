@@ -303,31 +303,30 @@ You must respond with valid JSON only. Do not include any text, explanation or c
 
     const excluded = (userPreferences.excludeIngredients || []).map(e => e.toLowerCase());
 
-    const prompt = `You are a meal-planning assistant. Here are this week's 20 pre-generated recipes:
+    const prompt = `You are a meal-planning assistant. Here are this week's pre-generated recipes:
 
 ${JSON.stringify(recipeSummary, null, 2)}
 
 The user has these preferences:
 ${JSON.stringify(userPreferences, null, 2)}
 
-Possible preference fields:
-- dietary: array like ["vegetarian", "gluten-free", "dairy-free", "vegan"]
-- maxPrepTime: maximum prep time in minutes
-- servings: preferred serving count
-- budget: "low", "medium", or "high"
-- cuisinePreferences: array of preferred cuisines
-- excludeIngredients: array of ingredients the user dislikes and wants to avoid
-- pantryItems: array of ingredients the user already has at home
+Preference fields explained:
+- dietary: dietary requirements like ["vegetarian", "gluten-free", "dairy-free", "vegan"]
+- mealTypes: preferred meal styles like ["quick", "family-friendly", "healthy", "comfort", "batch-cook", "one-pot"] — match against recipe tags
+- maxPrepTime: maximum prep time in minutes — exclude recipes where prepTime exceeds this
+- excludeIngredients: ingredients the user dislikes and must not appear in results
+- cuisinePreferences: preferred cuisine styles
 
-Rules (apply strictly in this order):
-1. HARD EXCLUDE: Remove any recipe whose allIngredients list contains any ingredient from excludeIngredients. Do not include these recipes in the output at all.
-2. DIETARY: Only include recipes compatible with the user's dietary restrictions.
-3. RANK: Sort remaining recipes from best match to worst match based on all other preferences.
+Apply these rules strictly in order:
+1. HARD EXCLUDE — Remove any recipe whose allIngredients contains any word from excludeIngredients. Do not include these at all.
+2. DIETARY — Remove any recipe incompatible with the dietary array (e.g. vegetarian recipes must have no meat).
+3. PREP TIME — Remove any recipe where prepTime exceeds maxPrepTime (if set).
+4. RANK — From the remaining recipes, rank best-to-worst. Recipes whose tags include items from mealTypes should rank higher. Mention matching meal types in the reason.
 
-Return a JSON array of recipe IDs ranked from best match to worst, with a short reason for each. Format:
-[{"id": 1, "reason": "Great match — vegetarian, under 20 min, uses your pantry spinach"}, ...]
+Return a JSON array ranked best to worst, at most 10 entries. Format:
+[{"id": 1, "reason": "Quick weeknight meal under 20 min — matches your family-friendly preference"}, ...]
 
-Return at most 10 recipes. Respond with ONLY the JSON array.`;
+Respond with ONLY the JSON array.`;
 
     try {
       const response = await this.anthropic.messages.create({
@@ -428,30 +427,53 @@ Return at most 10 recipes. Respond with ONLY the JSON array.`;
   _filterLocally(recipes, preferences) {
     let filtered = [...recipes];
 
+    // 1. Dietary — hard filter
     if (preferences.dietary && preferences.dietary.length > 0) {
       const diets = preferences.dietary.map(d => d.toLowerCase());
       if (diets.includes('vegetarian')) {
         filtered = filtered.filter(r =>
-          r.tags?.includes('vegetarian') || r.tags?.includes('vegan') ||
+          r.tags?.some(t => ['vegetarian', 'vegan'].includes(t.toLowerCase())) ||
           !this._hasNonVegIngredient(r)
         );
       }
       if (diets.includes('vegan')) {
-        filtered = filtered.filter(r => r.tags?.includes('vegan'));
+        filtered = filtered.filter(r =>
+          r.tags?.some(t => t.toLowerCase() === 'vegan')
+        );
       }
       if (diets.includes('gluten-free')) {
-        filtered = filtered.filter(r => r.tags?.includes('gluten-free'));
+        filtered = filtered.filter(r =>
+          r.tags?.some(t => t.toLowerCase() === 'gluten-free')
+        );
       }
       if (diets.includes('dairy-free')) {
-        filtered = filtered.filter(r => r.tags?.includes('dairy-free'));
+        filtered = filtered.filter(r =>
+          r.tags?.some(t => t.toLowerCase() === 'dairy-free')
+        );
       }
     }
 
+    // 2. maxPrepTime — hard filter
     if (preferences.maxPrepTime) {
-      filtered = filtered.filter(r => (r.prepTime || 30) <= preferences.maxPrepTime);
+      filtered = filtered.filter(r =>
+        (r.prepTime || 30) <= parseInt(preferences.maxPrepTime, 10)
+      );
     }
 
+    // 3. excludeIngredients — soft sort (pushes flagged recipes to bottom, never removes)
     filtered = applyExcludedIngredientFilter(filtered, preferences.excludeIngredients);
+
+    // 4. mealTypes — soft sort: recipes matching a preferred type come first
+    if (preferences.mealTypes && preferences.mealTypes.length > 0) {
+      const types = preferences.mealTypes.map(t => t.toLowerCase());
+      const matches = filtered.filter(r =>
+        (r.tags ?? []).some(tag => types.includes(tag.toLowerCase()))
+      );
+      const rest = filtered.filter(r =>
+        !(r.tags ?? []).some(tag => types.includes(tag.toLowerCase()))
+      );
+      filtered = [...matches, ...rest];
+    }
 
     return filtered.slice(0, 10);
   }

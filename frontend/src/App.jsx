@@ -41,8 +41,7 @@ function saveToStorage(key, value) {
 const DEFAULT_PREFERENCES = {
   dietary: [],
   dislikes: [],
-  pantryItems: [],
-  mealTypes: ['quick', 'family-friendly'],
+  mealTypes: [],
   maxPrepTime: '',
   excludeIngredients: [],
 };

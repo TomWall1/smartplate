@@ -31,6 +31,7 @@ router.post('/suggestions', async (req, res) => {
 
     const hasPreferences =
       (preferences?.dietary && preferences.dietary.length > 0) ||
+      (preferences?.mealTypes && preferences.mealTypes.length > 0) ||
       preferences?.maxPrepTime ||
       preferences?.budget ||
       preferences?.cuisinePreferences?.length > 0 ||
