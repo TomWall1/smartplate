@@ -96,7 +96,9 @@ if (!process.env.VERCEL) {
     console.log(`SmartPlate API running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 
-    // Non-blocking startup cache check — populate deals if cache is empty
+    // Non-blocking startup cache check — populate deals if cache is empty.
+    // Registers the fetch promise with dealService so other endpoints can
+    // wait for it rather than failing immediately with "no deals".
     (async () => {
       try {
         const dealService = require('./services/dealService');
@@ -104,7 +106,9 @@ if (!process.env.VERCEL) {
         const isEmpty = !info || info.counts.total === 0;
         if (isEmpty) {
           console.log('Cache empty on startup — fetching live deals...');
-          const { cache } = await dealService.refreshDeals();
+          const fetchPromise = dealService.refreshDeals();
+          dealService.setStartupFetch(fetchPromise);
+          const { cache } = await fetchPromise;
           console.log(`Startup fetch complete — woolworths:${cache.woolworths.length} coles:${cache.coles.length} iga:${cache.iga.length}`);
         } else {
           console.log(`Startup: deals cache OK (${info.counts.total} deals, last updated ${info.lastUpdated})`);

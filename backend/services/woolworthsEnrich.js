@@ -20,8 +20,28 @@ const recipeMatcher = require('./recipeMatcher');
 
 const WOO_BASE = 'https://www.woolworths.com.au';
 
+const SESSION_HEADERS = {
+  'User-Agent':
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+  'Accept-Language': 'en-AU,en;q=0.9',
+  'sec-ch-ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+  'sec-ch-ua-mobile': '?0',
+  'sec-ch-ua-platform': '"Windows"',
+  'sec-fetch-dest': 'document',
+  'sec-fetch-mode': 'navigate',
+  'sec-fetch-site': 'none',
+  'Upgrade-Insecure-Requests': '1',
+};
+
+const SEARCH_USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
 // ── In-process session cache (avoids homepage fetch per deal) ─────────────────
 let _session = null; // { cookies: string, expiresAt: number }
+
+const MAX_SESSION_RETRIES   = 3;
+const SESSION_RETRY_DELAY   = 5000; // ms
 
 async function _getSessionCookies() {
   if (_session && Date.now() < _session.expiresAt) {
@@ -29,23 +49,37 @@ async function _getSessionCookies() {
   }
 
   console.log('[WoolworthsEnrich] Fetching new session cookies...');
-  const res = await axios.get(WOO_BASE, {
-    timeout: 15000,
-    headers: {
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml',
-      'Accept-Language': 'en-AU,en;q=0.9',
-    },
-  });
 
-  const cookies = (res.headers['set-cookie'] ?? [])
-    .map(c => c.split(';')[0])
-    .join('; ');
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_SESSION_RETRIES; attempt++) {
+    try {
+      const res = await axios.get(WOO_BASE, {
+        timeout: 15000,
+        headers: SESSION_HEADERS,
+      });
 
-  // Cache session for 20 minutes
-  _session = { cookies, expiresAt: Date.now() + 20 * 60 * 1000 };
-  return cookies;
+      const cookies = (res.headers['set-cookie'] ?? [])
+        .map(c => c.split(';')[0])
+        .join('; ');
+
+      // Cache session for 20 minutes
+      _session = { cookies, expiresAt: Date.now() + 20 * 60 * 1000 };
+      return cookies;
+    } catch (err) {
+      lastErr = err;
+      const status = err.response?.status;
+      if (status === 403 && attempt < MAX_SESSION_RETRIES) {
+        console.warn(
+          `[WoolworthsEnrich] Session fetch 403 (attempt ${attempt}/${MAX_SESSION_RETRIES}) — retrying in ${SESSION_RETRY_DELAY / 1000}s...`
+        );
+        await new Promise(r => setTimeout(r, SESSION_RETRY_DELAY));
+      } else {
+        break;
+      }
+    }
+  }
+
+  throw lastErr;
 }
 
 // ── Woolworths product search API ─────────────────────────────────────────────
@@ -61,8 +95,7 @@ async function _searchWoolworthsProduct(keyword, cookies) {
     ExcludeSearchTypes:   ['UntraceableVendors'],
   };
   const headers = {
-    'User-Agent':
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'User-Agent':     SEARCH_USER_AGENT,
     'Content-Type':   'application/json',
     'Accept':         'application/json, text/plain, */*',
     'Accept-Language':'en-AU,en;q=0.9',
@@ -124,11 +157,16 @@ async function enrichDeals(deals) {
   let errors  = 0;
   let cookies = '';
 
-  // Fetch session cookies once for all API calls in this run
+  // Fetch session cookies once for all API calls in this run.
+  // If all retries fail, skip enrichment — deals are returned without images.
   try {
     cookies = await _getSessionCookies();
   } catch (err) {
-    console.warn(`[WoolworthsEnrich] Could not fetch session cookies: ${err.message}. API calls may fail.`);
+    console.warn(
+      `[WoolworthsEnrich] Could not fetch session cookies after ${MAX_SESSION_RETRIES} attempts: ${err.message}. ` +
+      'Skipping image enrichment — deals will load without product images.'
+    );
+    return deals;
   }
 
   const enriched = [];

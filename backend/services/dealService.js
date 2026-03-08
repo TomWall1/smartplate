@@ -10,6 +10,45 @@ try { igaService        = require('./iga');        } catch (e) { console.warn('I
 
 const CACHE_PATH = path.join(__dirname, '..', 'data', 'cached-deals.json');
 
+// ── Startup fetch tracking ─────────────────────────────────────────────────────
+// Lets other services wait for the initial background fetch to complete
+// rather than immediately failing with "no deals".
+
+let _startupLoading  = false;
+let _startupDone     = null; // Promise that resolves when the startup fetch finishes
+
+/**
+ * Register the promise returned by the startup refreshDeals() call.
+ * Must be called before awaiting that promise so _startupLoading is true
+ * for any concurrent request that arrives while the fetch runs.
+ */
+function setStartupFetch(fetchPromise) {
+  _startupLoading = true;
+  _startupDone = new Promise((resolve) => {
+    fetchPromise.then(resolve, resolve); // resolve on both fulfil and reject
+  }).then(() => {
+    _startupLoading = false;
+  });
+}
+
+/** Returns true while the startup fetch is in progress. */
+function isLoading() {
+  return _startupLoading;
+}
+
+/**
+ * Wait up to timeoutMs for the startup fetch to complete.
+ * Resolves immediately if no startup fetch is running.
+ */
+async function waitForDeals(timeoutMs = 180000) {
+  if (!_startupLoading || !_startupDone) return;
+  console.log(`DealService: waiting up to ${timeoutMs / 1000}s for startup fetch...`);
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Startup deals fetch timed out')), timeoutMs)
+  );
+  await Promise.race([_startupDone, timeout]);
+}
+
 // ── Cache helpers ──────────────────────────────────────────────────────────────
 
 function loadCache() {
@@ -148,4 +187,7 @@ module.exports = {
   getDealsByStore,
   getDealsByCategory,
   getCacheInfo,
+  setStartupFetch,
+  isLoading,
+  waitForDeals,
 };

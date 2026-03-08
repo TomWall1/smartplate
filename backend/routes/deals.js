@@ -79,6 +79,17 @@ router.get('/health', (req, res) => {
   });
 });
 
+// GET /api/deals/status — loading state + cache summary (for frontend loading screens)
+router.get('/status', (req, res) => {
+  const loading = dealService.isLoading();
+  const info    = dealService.getCacheInfo();
+  res.json({
+    loading,
+    lastUpdated: info?.lastUpdated ?? null,
+    counts: info?.counts ?? { woolworths: 0, coles: 0, iga: 0, total: 0 },
+  });
+});
+
 // POST /api/deals/clear-image-cache — wipe the image cache so it rebuilds from scratch
 router.post('/clear-image-cache', (req, res) => {
   imageCache.clear();

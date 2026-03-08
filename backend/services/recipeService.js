@@ -39,7 +39,16 @@ class RecipeService {
     const dealService = require('./dealService');
     const recipeMatcher = require('./recipeMatcher');
 
-    const deals = await dealService.getCurrentDeals();
+    let deals = await dealService.getCurrentDeals();
+
+    // If cache is empty but a startup fetch is still running, wait for it
+    // (up to 3 min) rather than immediately failing.
+    if (deals.length === 0 && dealService.isLoading()) {
+      console.log('RecipeService: Deals cache empty — waiting for startup fetch to complete...');
+      await dealService.waitForDeals(180000);
+      deals = await dealService.getCurrentDeals();
+    }
+
     console.log(`RecipeService: Matching library recipes against ${deals.length} deals`);
 
     if (deals.length === 0) {
