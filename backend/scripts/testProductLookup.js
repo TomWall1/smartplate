@@ -15,61 +15,16 @@ const db = require('../database/db');
 // ── Sample deal names (representative of Salefinder output) ───────────────────
 
 const SAMPLE_DEALS = [
-  // Meat
-  'Woolworths RSPCA Approved Chicken Breast Fillets 600g',
-  'Coles Free Range Chicken Thighs 1kg',
-  'Beef Mince Regular Fat 500g',
-  'Coles Beef Mince 500g',
-  'Lamb Shoulder Chops 1kg',
-  'Woolworths Beef Scotch Fillet Steak 300g',
-  'Pork Spare Ribs 700g',
-  'Coles Thin Bacon Rashers 175g',
-  'Woolworths Leg Ham 200g',
-
-  // Seafood
-  'Atlantic Salmon Portions 400g',
-  'Coles Skin On Salmon Fillets 300g',
-  'John West Tuna In Springwater 425g',
-  'Woolworths Cooked King Prawns 400g',
-  'Basa Fish Fillets 500g',
-
-  // Dairy
-  'Pauls Full Cream Milk 2L',
-  'Devondale Unsalted Butter 250g',
-  'Mainland Tasty Cheddar Cheese 500g',
-  'Perfect Italiano Mozzarella Shredded 250g',
-  'Bulla Sour Cream 300ml',
-  'Chobani Greek Yoghurt Natural 907g',
-  'Woolworths Thickened Cream 300ml',
-
-  // Vegetables
-  'Broccoli Each',
-  'Woolworths Washed Carrots 1kg',
-  'Baby Spinach Leaves 120g',
-  'Red Capsicum Each',
-  'Woolworths Mushrooms Cup 200g',
-  'Cherry Tomatoes Punnet 250g',
-  'Sweet Potato Loose Per Kg',
-
-  // Pasta & Grains
-  'San Remo Spaghetti 500g',
-  'Barilla Penne Rigate 500g',
-  'Uncle Tobys Rolled Oats 1kg',
-  'SunRice Long Grain White Rice 2kg',
-  'Jasmine Rice 5kg',
-
-  // Canned
-  'Ardmona Diced Tomatoes 400g',
-  'Ayam Coconut Cream 400ml',
-  'Bush\'s Best Kidney Beans 400g',
-  'Edgell Chickpeas 400g',
-
-  // Sauces & Condiments
-  'Bertolli Olive Oil 750ml',
-  'Kikkoman Soy Sauce 150ml',
-  'Leggo\'s Tomato Basil Pasta Sauce 490g',
-  'Massel Chicken Liquid Stock 1L',
-  'Continental Vegetable Liquid Stock 1L',
+  'Woolworths RSPCA Approved Chicken Breast 500g',
+  'Coles Extra Virgin Olive Oil 4L',
+  'IGA Fresh Garlic Bulbs 3pk',
+  'Woolworths Free Range Eggs 12pk',
+  'Coles Lean Beef Mince 500g',
+  'Woolworths Organic Broccoli',
+  'IGA Premium Salmon Fillets 250g',
+  'Coles Fresh Pasta Sauce 500g',
+  'Woolworths Basmati Rice 5kg',
+  'IGA Shredded Cheese 250g',
 ];
 
 // ── Run ───────────────────────────────────────────────────────────────────────

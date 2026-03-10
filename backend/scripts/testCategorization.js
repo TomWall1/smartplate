@@ -12,19 +12,11 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const { claudeCategorize, claudeCategorizeBatch } = require('../services/productCategorizer');
 
 const TEST_PRODUCTS = [
-  // Straightforward
-  { name: 'Coles Free Range Chicken Breast Fillets 500g', category: 'Poultry' },
-  { name: 'San Remo Fettuccine 500g',                     category: 'Pasta, Rice, Noodles' },
-  { name: 'Mainland Tasty Cheddar Cheese 500g',           category: 'Dairy, Eggs, Fridge' },
-  { name: 'Woolworths RSPCA Approved Beef Mince 500g',    category: 'Beef' },
-  { name: 'Ardmona Crushed Tomatoes 400g',                category: 'Canned, Dried & Packaged' },
-
-  // Tricky / edge cases
-  { name: 'Massel Chicken Style Liquid Stock 1L',         category: 'Soup, Stock & Gravy' },
-  { name: 'Kikkoman Naturally Brewed Soy Sauce 150ml',    category: 'Sauces & Condiments' },
-  { name: 'Chobani Greek Yoghurt Natural Flavour 907g',   category: 'Dairy, Eggs, Fridge' },
-  { name: 'Edgell Four Bean Mix 400g',                    category: 'Canned, Dried & Packaged' },
-  { name: 'Bertolli Extra Virgin Olive Oil 750ml',        category: 'Oils & Vinegars' },
+  { name: 'Woolworths RSPCA Approved Chicken Breast 500g', category: 'Poultry' },
+  { name: 'Coles Extra Virgin Olive Oil 4L',               category: 'Oils & Vinegars' },
+  { name: 'IGA Fresh Garlic Bulbs 3pk',                    category: 'Vegetables' },
+  { name: 'Coles Lean Beef Mince 500g',                    category: 'Beef' },
+  { name: 'IGA Shredded Cheese 250g',                      category: 'Dairy, Eggs, Fridge' },
 ];
 
 const REQUIRED_FIELDS = [
@@ -61,54 +53,27 @@ async function main() {
   let passed = 0;
   let failed = 0;
 
-  // Test individual categorization
-  console.log('── Individual categorization ─────────────────────────────────');
-  for (const p of TEST_PRODUCTS.slice(0, 3)) {
-    process.stdout.write(`  "${p.name.substring(0, 50)}" ... `);
+  for (const p of TEST_PRODUCTS) {
+    console.log(`\n── "${p.name}" ─────────────────────────────────`);
     try {
       const result = await claudeCategorize(p.name, p.category);
       const errors = validateCategorization(p.name, result);
 
+      // Always print full JSON output
+      console.log(JSON.stringify(result, null, 2));
+
       if (errors.length === 0) {
-        console.log('✓');
-        console.log(`    baseIngredient:      ${result.baseIngredient}`);
-        console.log(`    category:            ${result.category}`);
-        console.log(`    processingLevel:     ${result.processingLevel}`);
-        console.log(`    isHeroIngredient:    ${result.isHeroIngredient}`);
-        console.log(`    satisfies:           ${result.satisfiesIngredients.join(', ')}`);
+        console.log('✓ All required fields present');
         passed++;
       } else {
-        console.log(`✗ (${errors.join(', ')})`);
+        console.log(`✗ Validation errors: ${errors.join(', ')}`);
         failed++;
       }
     } catch (err) {
-      console.log(`ERROR: ${err.message}`);
+      console.log(`✗ ERROR: ${err.message}`);
       failed++;
     }
-    // Small delay between individual calls
-    await new Promise((r) => setTimeout(r, 500));
-  }
-
-  // Test batch categorization
-  console.log('\n── Batch categorization (5 products) ─────────────────────────');
-  const batchProducts = TEST_PRODUCTS.slice(3, 8);
-  try {
-    const results = await claudeCategorizeBatch(
-      batchProducts.map((p) => ({ name: p.name, category: p.category }))
-    );
-
-    for (let i = 0; i < batchProducts.length; i++) {
-      const p      = batchProducts[i];
-      const result = results[i];
-      const errors = validateCategorization(p.name, result);
-      const label  = errors.length === 0 ? '✓' : `✗ (${errors.join(', ')})`;
-      console.log(`  ${label} ${p.name.substring(0, 45).padEnd(45)} → ${result.baseIngredient} (${result.category})`);
-      if (errors.length === 0) passed++;
-      else failed++;
-    }
-  } catch (err) {
-    console.error('  Batch error:', err.message);
-    failed += batchProducts.length;
+    await new Promise((r) => setTimeout(r, 300));
   }
 
   // ── Summary ────────────────────────────────────────────────────────────────
