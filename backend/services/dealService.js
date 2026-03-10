@@ -176,7 +176,7 @@ async function enrichDealWithProduct(deal) {
         base_ingredient:       cat.baseIngredient        ?? null,
         category:              cat.category              ?? null,
         sub_category:          cat.subCategory           ?? null,
-        processing_level:      cat.processingLevel       ?? null,
+        processing_level:      ['unprocessed','minimally_processed','processed','ultra_processed'].includes(cat.processingLevel) ? cat.processingLevel : null,
         is_hero_ingredient:    cat.isHeroIngredient      ?? false,
         typical_use_case:      cat.typicalUseCase        ?? null,
         purchase_reasonability: cat.purchaseReasonability ?? null,

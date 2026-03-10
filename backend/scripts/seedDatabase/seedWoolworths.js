@@ -71,13 +71,12 @@ const SEARCH_TERMS = [
 // ── Woolworths API ────────────────────────────────────────────────────────────
 
 const WW_HEADERS = {
-  'User-Agent':   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-  'Accept':       'application/json, text/plain, */*',
-  'Referer':      'https://www.woolworths.com.au/',
-  'x-requested-with': 'XMLHttpRequest',
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+  'Accept':     'application/json, text/plain, */*',
+  'Referer':    'https://www.woolworths.com.au/',
 };
 
-function fetchWoolworths(searchTerm, pageSize = 48) {
+function fetchWoolworths(searchTerm, pageSize = 36) {
   const url = `https://www.woolworths.com.au/apis/ui/Search/products?` +
     `searchTerm=${encodeURIComponent(searchTerm)}&pageSize=${pageSize}&pageNumber=1`;
 
@@ -190,7 +189,7 @@ async function processAndSave(rawProducts) {
         base_ingredient:       cat.baseIngredient        ?? null,
         category:              cat.category              ?? null,
         sub_category:          cat.subCategory           ?? null,
-        processing_level:      cat.processingLevel       ?? null,
+        processing_level:      ['unprocessed','minimally_processed','processed','ultra_processed'].includes(cat.processingLevel) ? cat.processingLevel : null,
         is_hero_ingredient:    cat.isHeroIngredient      ?? false,
         typical_use_case:      cat.typicalUseCase        ?? null,
         purchase_reasonability: cat.purchaseReasonability ?? null,
