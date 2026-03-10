@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Users, ExternalLink, Flame } from 'lucide-react';
 import DealPopup from '../components/DealPopup';
+import SavingsBreakdown from '../components/SavingsBreakdown';
 import { recipesApi } from '../services/api';
 import { useApp } from '../App';
 
@@ -113,6 +114,8 @@ export default function RecipeDetail() {
     sourceUrl,
     nutrition,
     tags = [],
+    totalMealSaving,
+    totalPerServingSaving,
   } = recipe;
 
   const displayIngredients = allIngredients.length > 0 ? allIngredients : ingredients;
@@ -231,6 +234,86 @@ export default function RecipeDetail() {
             </div>
           ))}
         </div>
+
+        {/* Savings breakdown */}
+        {totalMealSaving > 0 && (
+          <SavingsBreakdown
+            totalMealSaving={totalMealSaving}
+            totalPerServingSaving={totalPerServingSaving}
+            servings={servings ?? 4}
+            matchedDeals={matchedDeals}
+            collapsed={false}
+          />
+        )}
+
+        {/* Deal highlights (shopping tip) */}
+        {matchedDeals.length > 0 && (
+          <div
+            className="rounded-[20px] px-5 py-4"
+            style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}
+          >
+            <h2
+              className="mb-3"
+              style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
+            >
+              This week's deals used
+            </h2>
+            <div className="space-y-2">
+              {matchedDeals.slice(0, 6).map((deal, i) => (
+                <div key={i} className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p
+                      className="text-sm font-semibold leading-snug truncate"
+                      style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                    >
+                      {deal.dealName}
+                    </p>
+                    <p
+                      className="text-xs"
+                      style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                    >
+                      {deal.store && (
+                        <span
+                          className="inline-block mr-1.5 px-1.5 py-0.5 rounded-full text-white text-xs font-bold"
+                          style={{ background: deal.store === 'woolworths' ? '#00843D' : deal.store === 'coles' ? '#E32726' : '#003087', fontSize: '10px' }}
+                        >
+                          {deal.store.charAt(0).toUpperCase() + deal.store.slice(1)}
+                        </span>
+                      )}
+                      for recipe ingredient: {deal.ingredient}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0 text-right">
+                    {deal.price > 0 && (
+                      <p
+                        className="text-sm font-bold"
+                        style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                      >
+                        ${deal.price.toFixed(2)}
+                      </p>
+                    )}
+                    {deal.saving > 0 && (
+                      <p
+                        className="text-xs font-bold"
+                        style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                      >
+                        save ${deal.saving.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {totalMealSaving > 0 && (
+              <p
+                className="text-sm font-bold mt-4 pt-3"
+                style={{ borderTop: '1px solid var(--color-stone)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                🛒 Buy these specials to save ${totalMealSaving.toFixed(2)} on this meal
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Ingredients */}
         {displayIngredients.length > 0 && (

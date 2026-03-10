@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Users, DollarSign, Sparkles, AlertTriangle } from 'lucide-react';
+import { Clock, Users, DollarSign, Sparkles, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import SavingsBreakdown from './SavingsBreakdown';
 
 const SOURCE_META = {
   jamieoliver:   { label: 'Jamie Oliver',   logo: 'https://www.jamieoliver.com/favicon.ico' },
@@ -10,6 +11,7 @@ const SOURCE_META = {
 
 export default function RecipeCard({ recipe, showMatchReason = false }) {
   const navigate = useNavigate();
+  const [breakdownOpen, setBreakdownOpen] = useState(false);
 
   const handleClick = () => navigate(`/recipes/${recipe.id}`);
   const handleKeyDown = (e) => {
@@ -25,6 +27,9 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
   const servings = recipe.servings ?? 4;
   const cost = recipe.totalEstimatedCost ?? 0;
   const saving = recipe.estimatedSaving ?? 0;
+  const totalMealSaving = recipe.totalMealSaving ?? null;
+  const totalPerServingSaving = recipe.totalPerServingSaving ?? null;
+  const matchedDeals = recipe.matchedDeals ?? [];
 
   const excludedWarnings = recipe.excludedWarnings ?? [];
   const visibleDeals = dealIngredients.slice(0, 3);
@@ -101,14 +106,26 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
               ${cost.toFixed(2)}
             </span>
           )}
-          {saving > 0 && (
-            <span
-              className="flex items-center gap-1 font-bold"
-              style={{ color: 'var(--color-text-green)' }}
+          {(totalMealSaving ?? saving) > 0 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setBreakdownOpen((o) => !o); }}
+              className="inline-flex items-center gap-1 font-bold rounded-full px-2 py-0.5 transition-colors"
+              style={{
+                background: breakdownOpen ? 'var(--color-mist)' : 'transparent',
+                color: 'var(--color-text-green)',
+                border: breakdownOpen ? '1px solid var(--color-sprout)' : '1px solid transparent',
+                fontFamily: 'Nunito, sans-serif',
+                fontSize: '12px',
+              }}
+              aria-label="Show savings breakdown"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Save ${saving.toFixed(2)}
-            </span>
+              Save ${(totalMealSaving ?? saving).toFixed(2)}/meal
+              {breakdownOpen
+                ? <ChevronUp  className="w-3 h-3 ml-0.5" />
+                : <ChevronDown className="w-3 h-3 ml-0.5" />
+              }
+            </button>
           )}
         </div>
 
@@ -132,6 +149,19 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
                 +{extraDeals} more
               </span>
             )}
+          </div>
+        )}
+
+        {/* Inline savings breakdown (expanded from badge) */}
+        {breakdownOpen && totalMealSaving > 0 && (
+          <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+            <SavingsBreakdown
+              totalMealSaving={totalMealSaving}
+              totalPerServingSaving={totalPerServingSaving}
+              servings={servings}
+              matchedDeals={matchedDeals}
+              collapsed={false}
+            />
           </div>
         )}
 

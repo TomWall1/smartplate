@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Save, Plus, X, Check, User, RefreshCw, AlertCircle } from 'lucide-react';
+import { Save, Check, User, RefreshCw, AlertCircle } from 'lucide-react';
 import { useApp } from '../App';
 import { recipesApi } from '../services/api';
+import AllergenSelector from '../components/AllergenSelector';
 
 const DIETARY_OPTIONS = [
   { id: 'vegetarian',  label: 'Vegetarian' },
@@ -29,33 +30,11 @@ const cardStyle = {
   padding: '24px',
 };
 
-const inputStyle = {
-  background: '#ffffff',
-  border: '1.5px solid var(--color-stone)',
-  borderRadius: '12px',
-  padding: '10px 12px',
-  fontFamily: 'Nunito, sans-serif',
-  fontSize: '14px',
-  color: 'var(--color-bark)',
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box',
-};
-
-const handleInputFocus = (e) => {
-  e.target.style.borderColor = 'var(--color-leaf)';
-  e.target.style.boxShadow = '0 0 0 3px rgba(125, 184, 122, 0.15)';
-};
-const handleInputBlur = (e) => {
-  e.target.style.borderColor = 'var(--color-stone)';
-  e.target.style.boxShadow = 'none';
-};
 
 export default function Profile() {
   const { preferences, setPreferences } = useApp();
 
   const [local, setLocal] = useState({ ...preferences });
-  const [newDislike, setNewDislike] = useState('');
   const [saved, setSaved] = useState(false);
   const saveTimerRef = useRef(null);
 
@@ -84,15 +63,8 @@ export default function Profile() {
     }));
   };
 
-  const addDislike = () => {
-    const val = newDislike.trim();
-    if (!val) return;
-    setLocal((prev) => ({ ...prev, dislikes: [...(prev.dislikes ?? []), val] }));
-    setNewDislike('');
-  };
-
-  const removeDislike = (item) => {
-    setLocal((prev) => ({ ...prev, dislikes: (prev.dislikes ?? []).filter((i) => i !== item) }));
+  const handleDislikesChange = (newDislikes) => {
+    setLocal((prev) => ({ ...prev, dislikes: newDislikes }));
   };
 
   const handleRegenerate = async () => {
@@ -210,58 +182,21 @@ export default function Profile() {
           </div>
         </section>
 
-        {/* ── Dislikes ─────────────────────────────────────────────────────── */}
+        {/* ── Allergens & Exclusions ───────────────────────────────────────── */}
         <section style={cardStyle}>
           <h2
-            className="mb-4"
+            className="mb-1"
             style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
           >
-            Ingredients I Don't Like
+            Allergens &amp; Exclusions
           </h2>
-          <div className="flex gap-2 mb-3">
-            <input
-              type="text"
-              value={newDislike}
-              onChange={(e) => setNewDislike(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addDislike()}
-              placeholder="Add disliked ingredient..."
-              style={inputStyle}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-            />
-            <button
-              onClick={addDislike}
-              className="p-2.5 rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-px flex-shrink-0"
-              style={{ background: 'var(--color-leaf)' }}
-              aria-label="Add disliked ingredient"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(local.dislikes ?? []).map((item, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full border font-semibold"
-                style={{ background: 'var(--color-peach)', color: 'var(--color-bark)', borderColor: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
-              >
-                {item}
-                <button
-                  onClick={() => removeDislike(item)}
-                  className="transition-opacity hover:opacity-60"
-                  style={{ color: 'var(--color-bark)' }}
-                  aria-label={`Remove ${item}`}
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            ))}
-            {(local.dislikes ?? []).length === 0 && (
-              <p className="text-sm italic" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
-                No dislikes added yet.
-              </p>
-            )}
-          </div>
+          <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            Select allergens or ingredients you want to avoid. Recipes containing these will be flagged or filtered out.
+          </p>
+          <AllergenSelector
+            selected={local.dislikes ?? []}
+            onChange={handleDislikesChange}
+          />
         </section>
 
         {/* ── Admin: Regenerate Recipes ─────────────────────────────────────── */}
