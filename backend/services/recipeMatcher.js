@@ -1,6 +1,35 @@
 const fs = require('fs');
 const path = require('path');
 
+// ── Feature flag ──────────────────────────────────────────────────────────────
+// Set to false to revert to pure text-based matching (useful for A/B comparison).
+const USE_PRODUCT_INTELLIGENCE = true;
+
+// ── Weighted scoring — maps product category → importance weight ──────────────
+// Protein on special → recipe is much more valuable than garnish on special.
+const CATEGORY_WEIGHTS = {
+  meat:             10,
+  seafood:          10,
+  deli:              8,
+  dairy:             3,
+  eggs:              3,
+  vegetables:        5,
+  fruit:             5,
+  legumes:           2,
+  frozen:            2,
+  grains:            1,
+  canned_preserved:  1,
+  baked_goods:       1,
+  nuts_seeds:        1,
+  oils_fats:         0.5,
+  condiments:        0.5,
+  sauces:            0.5,
+  snacks:            0.5,
+  beverages:         0.5,
+  herbs_spices:      0.1,
+  other:             1,
+};
+
 const LIBRARY_PATH    = path.join(__dirname, '..', 'data', 'recipe-library.json');
 const JO_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'jamie-oliver-recipes.json');
 const DH_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'donna-hay-recipes.json');
@@ -375,6 +404,108 @@ class RecipeMatcher {
     return word;
   }
 
+  // ── Product intelligence matching ──────────────────────────────────────────
+
+  /**
+   * Match a recipe ingredient against an enriched deal using product intelligence.
+   *
+   * Returns:
+   *   true  — PI confirms a match
+   *   false — PI confirms NO match (skip text fallback for this pair)
+   *   null  — No PI data available; caller should fall back to text matching
+   */
+  _ingredientMatchesDeal(ingredientName, enrichedDeal) {
+    const pi = enrichedDeal.productIntelligence;
+    if (!pi?.satisfiesIngredients?.length) return null; // signal: use text fallback
+
+    const cleanIng = this._cleanIngredientName(ingredientName);
+    if (cleanIng.length < 2) return false;
+
+    const ingWords  = cleanIng.split(/\s+/).filter(w => w.length >= 3 && !STOP_WORDS.has(w));
+    if (ingWords.length === 0) return false;
+
+    const satisfies = pi.satisfiesIngredients.map(s => s.toLowerCase().trim());
+
+    // If the ingredient is a compound with a disqualifying context word (sauce, stock,
+    // oil, butter, paste, etc.) require a full exact phrase match.
+    // Prevents "fish" (in satisfies for salmon) matching recipe ingredient "fish sauce".
+    const hasDisqualifier = ingWords.some(w => PROTEIN_COMPOUND_DISQUALIFIERS.has(w));
+
+    if (hasDisqualifier) {
+      // Only exact full-phrase match qualifies
+      return satisfies.includes(cleanIng);
+    }
+
+    // Rule 1: Exact match on full cleaned ingredient name
+    if (satisfies.includes(cleanIng)) return true;
+
+    // Rule 2: Any satisfies entry appears as a whole-word substring of the ingredient
+    //   "chicken" in satisfies → matches ingredient "diced chicken breast"
+    for (const sat of satisfies) {
+      if (sat.length >= 3 && cleanIng.includes(sat)) return true;
+    }
+
+    // Rule 3: Any significant ingredient word exactly in satisfies
+    //   ingredient "chicken" → word "chicken" in satisfies ["chicken breast","chicken","poultry"]
+    for (const w of ingWords) {
+      if (satisfies.includes(w)) return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Return the importance weight for a matched deal.
+   * Uses product intelligence category when available; falls back to text detection.
+   */
+  _getIngredientWeight(matchedDeal) {
+    const piCategory = matchedDeal.productCategory;
+    if (piCategory && CATEGORY_WEIGHTS[piCategory] !== undefined) {
+      return CATEGORY_WEIGHTS[piCategory];
+    }
+
+    // Text-based fallback: detect weight from recipe ingredient name
+    const ing = (matchedDeal.ingredient || '').toLowerCase();
+    const ingWords = ing.split(/\s+/).map(w => this._singularise(w));
+
+    if (PROTEIN_KEYWORDS.some(p => ingWords.includes(p))) {
+      // Compound disqualifiers (fish sauce, chicken stock, etc.) → condiment weight
+      if (ingWords.some(w => PROTEIN_COMPOUND_DISQUALIFIERS.has(w))) return CATEGORY_WEIGHTS.condiments;
+      return CATEGORY_WEIGHTS.meat;
+    }
+
+    const dairyWords = ['milk', 'cheese', 'butter', 'cream', 'yoghurt', 'yogurt', 'egg'];
+    if (dairyWords.some(d => ing.includes(d))) return CATEGORY_WEIGHTS.dairy;
+
+    const veggieWords = ['broccoli', 'carrot', 'spinach', 'onion', 'potato', 'tomato', 'capsicum',
+      'zucchini', 'pumpkin', 'mushroom', 'lettuce', 'cabbage', 'cauliflower'];
+    if (veggieWords.some(v => ing.includes(v))) return CATEGORY_WEIGHTS.vegetables;
+
+    const oilWords = ['oil', 'sauce', 'vinegar', 'soy', 'stock', 'paste'];
+    if (oilWords.some(o => ing.includes(o))) return CATEGORY_WEIGHTS.condiments;
+
+    const spiceWords = ['garlic', 'ginger', 'herb', 'spice', 'pepper', 'salt', 'chilli', 'cumin',
+      'paprika', 'oregano', 'basil', 'thyme', 'lemon', 'lime'];
+    if (spiceWords.some(s => ing.includes(s))) return CATEGORY_WEIGHTS.herbs_spices;
+
+    return CATEGORY_WEIGHTS.other;
+  }
+
+  /**
+   * Weighted recipe score: sum of (ingredient_weight × saving_amount) for each matched deal.
+   * A protein deal on special is worth 10× more than a garnish deal on special.
+   */
+  _calculateRecipeScore(recipe) {
+    let score = 0;
+    for (const deal of recipe.matchedDeals) {
+      const weight  = this._getIngredientWeight(deal);
+      const saving  = deal.saving || 0;
+      // Add weight even if saving is $0 so recipes with protein deals rank above those without
+      score += weight * (1 + saving);
+    }
+    return score;
+  }
+
   /**
    * Check if an ingredient matches a deal keyword (strict matching)
    */
@@ -442,16 +573,24 @@ class RecipeMatcher {
 
   /**
    * Match deals against the recipe library.
-   * Returns top 20 recipes ranked by deal overlap score.
+   * Returns top 50 recipes ranked by weighted score.
    *
-   * @param {Array} deals - Array of deal objects with at least {name, price, originalPrice, store}
-   * @returns {Array} Top 20 matched recipes with matchedDeals, matchScore, totalSaving
+   * Deal matching uses two tiers:
+   *   1. Product intelligence (satisfiesIngredients) — precise, avoids false positives
+   *   2. Text-based matching (_termsMatch) — fallback when PI unavailable
+   *
+   * Scoring weights protein deals (10×) over garnish deals (0.1×) so that
+   * recipes featuring on-special main proteins rank first.
+   *
+   * @param {Array} deals - Deal objects; enriched deals include a `productIntelligence` field
+   * @returns {Array} Top 50 matched recipes with matchedDeals, matchScore, totalSaving, weightedScore
    */
   matchDeals(deals) {
     const recipes = this.loadLibrary();
     if (recipes.length === 0) return [];
 
-    // Normalise all deal names upfront and filter to food deals only
+    // Normalise all deal names upfront and filter to food deals only.
+    // The spread preserves productIntelligence if present on the original deal.
     const normalisedDeals = deals
       .map(deal => ({
         ...deal,
@@ -459,40 +598,68 @@ class RecipeMatcher {
       }))
       .filter(deal => deal.keywords && this._isFoodDeal(deal.keywords, deal.category));
 
-    console.log(`RecipeMatcher: Matching against ${normalisedDeals.length} food deals (of ${deals.length} total)`);
+    const piCount   = normalisedDeals.filter(d => d.productIntelligence?.satisfiesIngredients?.length > 0).length;
+    const textCount = normalisedDeals.length - piCount;
+    console.log(
+      `RecipeMatcher: ${normalisedDeals.length} food deals ` +
+      `(${piCount} with product intelligence, ${textCount} text-only) of ${deals.length} total`
+    );
 
     const scored = recipes.map(recipe => {
       const rawMatches = [];
-      const seenPairs = new Set(); // avoid same ingredient+deal pair twice
+      const seenPairs  = new Set(); // avoid same ingredient+deal pair twice
 
       for (const deal of normalisedDeals) {
         for (const ingredient of recipe.ingredients) {
           const cleanName = this._cleanIngredientName(ingredient.name);
           if (cleanName.length < 3) continue;
-          const pairKey = cleanName + ':' + deal.keywords;
+
+          // Unique key distinguishes PI and text paths for the same deal
+          const pathKey = deal.productIntelligence ? 'pi' : 'txt';
+          const pairKey = `${cleanName}:${pathKey}:${deal.keywords || deal.name}`;
           if (seenPairs.has(pairKey)) continue;
 
-          if (this._termsMatch(ingredient.name, deal.keywords)) {
+          let matched = false;
+
+          // ── Tier 1: Product Intelligence matching ────────────────────────
+          if (USE_PRODUCT_INTELLIGENCE && deal.productIntelligence?.satisfiesIngredients?.length > 0) {
+            const piResult = this._ingredientMatchesDeal(ingredient.name, deal);
+            if (piResult === true) {
+              matched = true;
+            } else if (piResult === false) {
+              // PI explicitly rejects this pair — skip text fallback
+              seenPairs.add(pairKey);
+              continue;
+            }
+            // piResult === null → no usable PI data, fall through to text matching
+          }
+
+          // ── Tier 2: Text-based matching (fallback) ───────────────────────
+          if (!matched && deal.keywords) {
+            matched = this._termsMatch(ingredient.name, deal.keywords);
+          }
+
+          if (matched) {
             rawMatches.push({
-              dealName: deal.name,
-              ingredient: cleanName,
-              price: deal.price || null,
-              originalPrice: deal.originalPrice || null,
-              discountPercentage: deal.discountPercentage || null,
+              dealName:            deal.name,
+              ingredient:          cleanName,
+              price:               deal.price               ?? null,
+              originalPrice:       deal.originalPrice       ?? null,
+              discountPercentage:  deal.discountPercentage  ?? null,
               saving: (deal.originalPrice && deal.price)
                 ? +(deal.originalPrice - deal.price).toFixed(2)
                 : null,
-              store: deal.store || null,
+              store:              deal.store               ?? null,
+              productCategory:    deal.productIntelligence?.category ?? null,
+              productIntelligence: deal.productIntelligence ?? null,
             });
             seenPairs.add(pairKey);
-            break; // One match per deal per recipe is enough
+            break; // One match per deal per recipe
           }
         }
       }
 
-      // Deduplicate by ingredient name — keep the best saving per ingredient.
-      // Without this, "olive oil" on special at both Woolworths and Coles
-      // would appear twice and double-count the saving.
+      // Deduplicate by ingredient — keep the best saving per ingredient.
       const bestByIngredient = new Map();
       for (const md of rawMatches) {
         const existing = bestByIngredient.get(md.ingredient);
@@ -501,24 +668,28 @@ class RecipeMatcher {
         }
       }
       const matchedDeals = Array.from(bestByIngredient.values());
-
-      const totalSaving = matchedDeals.reduce((sum, d) => sum + (d.saving || 0), 0);
+      const totalSaving  = matchedDeals.reduce((sum, d) => sum + (d.saving || 0), 0);
 
       return {
         ...recipe,
         matchedDeals,
-        matchScore: matchedDeals.length,
-        totalSaving: +totalSaving.toFixed(2),
+        matchScore:    matchedDeals.length,
+        totalSaving:   +totalSaving.toFixed(2),
       };
     });
 
-    // Sort by match score (desc), then total saving (desc)
-    scored.sort((a, b) => b.matchScore - a.matchScore || b.totalSaving - a.totalSaving);
+    // Primary sort: weighted score (protein deals > garnish deals)
+    // Secondary: match count, then raw saving
+    scored.sort((a, b) => {
+      const sa = this._calculateRecipeScore(a);
+      const sb = this._calculateRecipeScore(b);
+      return sb - sa || b.matchScore - a.matchScore || b.totalSaving - a.totalSaving;
+    });
 
-    // Filter to recipes with at least 1 match AND at least 1 protein deal
     return scored
       .filter(r => r.matchScore > 0 && this._hasProteinMatch(r))
-      .slice(0, 20);
+      .map(r => ({ ...r, weightedScore: +this._calculateRecipeScore(r).toFixed(2) }))
+      .slice(0, 50);
   }
 
   /**
@@ -537,18 +708,21 @@ class RecipeMatcher {
    */
   _hasProteinMatch(recipe) {
     for (const deal of recipe.matchedDeals) {
+      // ── Fast path: product intelligence category ─────────────────────────
+      if (deal.productCategory === 'meat' || deal.productCategory === 'seafood') {
+        console.log(`  [protein-filter] PASS "${deal.ingredient}" via PI category "${deal.productCategory}" (${deal.store || 'unknown store'})`);
+        return true;
+      }
+
+      // ── Text-based path ──────────────────────────────────────────────────
       const ing = deal.ingredient.toLowerCase().trim();
       if (ing.length < 2) continue;
 
-      // Singularise every word for robust plural matching
-      // e.g. "chicken thighs" → ["chicken", "thigh"]
       const words = ing.split(/\s+/).map(w => this._singularise(w));
 
-      // Must contain a core protein as a whole (singularised) word
       const proteinWord = PROTEIN_KEYWORDS.find(p => words.includes(p));
       if (!proteinWord) continue;
 
-      // Reject compound pantry/condiment ingredients like "fish sauce", "chicken stock"
       if (words.some(w => PROTEIN_COMPOUND_DISQUALIFIERS.has(w))) {
         console.log(`  [protein-filter] SKIP "${ing}" — "${proteinWord}" present but compound disqualifier found`);
         continue;

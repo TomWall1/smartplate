@@ -1,6 +1,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs');
 const path = require('path');
+const { enrichMatchedDealsWithSavings } = require('./savingsCalculator');
 
 // Primary path (works locally, read-only on Vercel but included in deploy)
 const WEEKLY_RECIPES_PATH = path.join(__dirname, '..', 'data', 'weekly-recipes.json');
@@ -88,8 +89,19 @@ class RecipeService {
       throw new Error('No deals available — please refresh deals first');
     }
 
-    // Step 1: Find top 20 library recipes that match current deals
-    const matched = recipeMatcher.matchDeals(deals);
+    // Step 1a: Enrich deals with product intelligence (DB lookup + Claude for unknowns).
+    // Runs synchronously so the matcher can use product categorization.
+    // After seeding this is mostly fast DB hits; first-run may be slower due to Claude calls.
+    let enrichedDeals = deals;
+    try {
+      const { enrichDealsWithProducts } = require('./dealService');
+      enrichedDeals = await enrichDealsWithProducts([...deals]);
+    } catch (enrichErr) {
+      console.warn('RecipeService: Deal enrichment unavailable — using text matching:', enrichErr.message);
+    }
+
+    // Step 1b: Find top 50 library recipes that match current deals
+    const matched = recipeMatcher.matchDeals(enrichedDeals);
     console.log(`RecipeService: Found ${matched.length} matching library recipes`);
 
     // If no matches (library empty or no overlap), fall back to pure generation
@@ -98,10 +110,15 @@ class RecipeService {
       return this._generateFromScratch(deals);
     }
 
+    // Step 1c: Attach per-serving savings to each matched recipe's deals.
+    const matchedWithSavings = matched.map(r =>
+      enrichMatchedDealsWithSavings(r, r.matchedDeals)
+    );
+
     // Step 2: Send matched recipes to Claude for enrichment.
     // Slim payload — drop the full deal list and cap matchedDeals to top 5 per recipe
-    // so the prompt stays under ~6k input tokens and completes in ~15-20s.
-    const recipeSummary = matched.map((r, i) => {
+    // so the prompt stays manageable.
+    const recipeSummary = matchedWithSavings.map((r, i) => {
       // Best deal per unique ingredient (deduped), then top 5 by saving.
       // Without dedup, "rice" can match 4+ rice products and Claude sums them all,
       // making estimatedSaving exceed totalEstimatedCost.
@@ -128,7 +145,7 @@ class RecipeService {
       };
     });
 
-    const prompt = `You are a helpful Australian meal-planning assistant. Below are ${matched.length} real recipes with their top on-special ingredients this week.
+    const prompt = `You are a helpful Australian meal-planning assistant. Below are ${matchedWithSavings.length} real recipes with their top on-special ingredients this week.
 
 MATCHED RECIPES:
 ${JSON.stringify(recipeSummary, null, 2)}
@@ -140,7 +157,7 @@ For each recipe return a JSON object with:
 - "dealIngredients": array of dealName strings from topDeals
 - "dealHighlights": array of strings formatted as "Ingredient $X.XX at Store (save $Y.YY)" — one per deal in topDeals
 
-Respond with ONLY a JSON array of ${matched.length} objects. No markdown, no explanation.`;
+Respond with ONLY a JSON array of ${matchedWithSavings.length} objects. No markdown, no explanation.`;
 
     try {
       const response = await this.anthropic.messages.create({
@@ -163,7 +180,7 @@ Respond with ONLY a JSON array of ${matched.length} objects. No markdown, no exp
       // Merge Claude enrichment with full library recipe data.
       // Claude only returns the deal-aware fields; everything else comes from the library.
       const normalised = enriched.map((e, i) => {
-        const libRecipe = matched[i] || {};
+        const libRecipe = matchedWithSavings[i] || {};
         const libIngredients = libRecipe.ingredients || [];
         const allIngredients = libIngredients.map(ing => ing.raw || ing.name).filter(Boolean);
         return {
@@ -179,7 +196,10 @@ Respond with ONLY a JSON array of ${matched.length} objects. No markdown, no exp
           steps: libRecipe.steps || [],
           tags: libRecipe.tags || [],
           dealHighlights: Array.isArray(e.dealHighlights) ? e.dealHighlights : [],
-          matchedDeals: libRecipe.matchedDeals || [],
+          matchedDeals:          libRecipe.matchedDeals         || [],
+          weightedScore:         libRecipe.weightedScore         ?? null,
+          totalMealSaving:       libRecipe.totalMealSaving       ?? null,
+          totalPerServingSaving: libRecipe.totalPerServingSaving ?? null,
           // Backwards compat fields for existing frontend
           image: libRecipe.image || `https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400`,
           cookTime: libRecipe.cookTime || libRecipe.totalTime || 30,
@@ -216,14 +236,14 @@ Respond with ONLY a JSON array of ${matched.length} objects. No markdown, no exp
 THIS WEEK'S SPECIALS:
 ${dealSummary}
 
-Generate exactly 20 diverse, practical recipes that make good use of these specials. Aim for variety:
+Generate exactly 50 diverse, practical recipes that make good use of these specials. Aim for variety:
 - Mix of quick weeknight dinners (under 30 min), meal-prep friendly dishes, breakfasts, and lunches
 - Range of cuisines (Australian, Asian, Mediterranean, Mexican, etc.)
 - Include vegetarian and meat options
 - Recipes should be achievable for a home cook with basic pantry staples (oil, salt, pepper, garlic, onion, common spices, flour, sugar, eggs, rice, pasta)
 
 For each recipe, return a JSON object with these exact fields:
-- "id": sequential number 1-20
+- "id": sequential number 1-50
 - "title": recipe name
 - "description": 1-2 sentence appetising description
 - "dealIngredients": array of ingredient names that are on special this week (must match names from the specials list above)
@@ -235,7 +255,7 @@ For each recipe, return a JSON object with these exact fields:
 - "steps": array of step-by-step instructions (each step is a string)
 - "tags": array from ["quick", "meal-prep", "vegetarian", "vegan", "gluten-free", "dairy-free", "high-protein", "budget", "breakfast", "lunch", "dinner"]
 
-You must respond with valid JSON only. Do not include any text, explanation or commentary before or after the JSON array. Respond with ONLY a JSON array of 20 recipe objects.`;
+You must respond with valid JSON only. Do not include any text, explanation or commentary before or after the JSON array. Respond with ONLY a JSON array of 50 recipe objects.`;
 
     const response = await this.anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -276,7 +296,7 @@ You must respond with valid JSON only. Do not include any text, explanation or c
     }));
 
     this._saveWeeklyRecipes(normalised);
-    console.log(`RecipeService: Generated ${normalised.length} weekly recipes from scratch (no library)`);
+    console.log(`RecipeService: Generated ${normalised.length} weekly recipes from scratch (no library, target 50)`);
     return normalised;
   }
 
