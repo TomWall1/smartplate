@@ -2,6 +2,20 @@ const fs         = require('fs');
 const path       = require('path');
 const imageCache = require('./imageCache');
 
+// ── Product intelligence (lazy-loaded so DB is optional) ──────────────────────
+let productLookup, productCategorizer, db;
+try {
+  productLookup     = require('./productLookup');
+  productCategorizer = require('./productCategorizer');
+  db                = require('../database/db');
+  // Verify DB is reachable
+  db.countProducts();
+  console.log(`[DealService] Product DB ready (${db.countProducts()} products)`);
+} catch (e) {
+  console.warn('[DealService] Product DB unavailable — enrichment disabled:', e.message);
+  productLookup = productCategorizer = db = null;
+}
+
 // Import store services
 let woolworthsService, colesService, igaService;
 try { woolworthsService = require('./woolworths'); } catch (e) { console.warn('Woolworths service unavailable:', e.message); }
@@ -116,6 +130,110 @@ async function _fetchRaw() {
   return byStore;
 }
 
+// ── Product intelligence enrichment ───────────────────────────────────────────
+
+let _enrichStats = { hits: 0, misses: 0, errors: 0 };
+
+/**
+ * Enrich a single deal with product categorization data.
+ * Mutates the deal object in-place and returns it.
+ *
+ * Priority:
+ *   1. Look up in knowledge base (cache hit)
+ *   2. If not found, call Claude → save to DB (cache miss)
+ *   3. If DB unavailable, skip silently
+ */
+async function enrichDealWithProduct(deal) {
+  if (!productLookup || !productCategorizer || !db) return deal;
+
+  try {
+    const result = await productLookup.lookupAndRecord(deal.name, deal.store);
+
+    if (result) {
+      // Cache hit — attach categorization
+      _enrichStats.hits++;
+      const p = result.product;
+      deal.productIntelligence = {
+        productId:            p.id,
+        productType:          p.product_type,
+        baseIngredient:       p.base_ingredient,
+        category:             p.category,
+        processingLevel:      p.processing_level,
+        isHeroIngredient:     p.is_hero_ingredient,
+        satisfiesIngredients: p.satisfies_ingredients,
+        matchType:            result.matchType,
+      };
+    } else {
+      // Cache miss — categorize via Claude and save
+      _enrichStats.misses++;
+      const cat = await productCategorizer.claudeCategorize(deal.name, deal.category, deal.price);
+
+      const { normalizeName } = productLookup;
+      const inserted = db.insertProduct({
+        name:                  deal.name,
+        normalized_name:       normalizeName(deal.name),
+        product_type:          cat.productType          ?? null,
+        base_ingredient:       cat.baseIngredient        ?? null,
+        category:              cat.category              ?? null,
+        sub_category:          cat.subCategory           ?? null,
+        processing_level:      cat.processingLevel       ?? null,
+        is_hero_ingredient:    cat.isHeroIngredient      ?? false,
+        typical_use_case:      cat.typicalUseCase        ?? null,
+        purchase_reasonability: cat.purchaseReasonability ?? null,
+        satisfies_ingredients: cat.satisfiesIngredients  ?? [],
+        source:                'claude',
+      });
+
+      // Create alias for fast future lookups
+      const newId = inserted.lastInsertRowid;
+      if (newId) {
+        db.insertAlias(newId, deal.name, normalizeName(deal.name), 'manual');
+        db.recordMatch(deal.name, newId, 'claude', deal.store);
+      }
+
+      deal.productIntelligence = {
+        productId:            newId ?? null,
+        productType:          cat.productType,
+        baseIngredient:       cat.baseIngredient,
+        category:             cat.category,
+        processingLevel:      cat.processingLevel,
+        isHeroIngredient:     cat.isHeroIngredient,
+        satisfiesIngredients: cat.satisfiesIngredients,
+        matchType:            'claude',
+      };
+    }
+  } catch (err) {
+    _enrichStats.errors++;
+    console.warn(`[DealService] Enrichment failed for "${deal.name}":`, err.message);
+  }
+
+  return deal;
+}
+
+/**
+ * Enrich all deals in a flat array with product intelligence.
+ * Runs sequentially to avoid hammering Claude API.
+ */
+async function enrichDealsWithProducts(deals) {
+  if (!productLookup) return deals;
+
+  console.log(`[DealService] Enriching ${deals.length} deals with product intelligence...`);
+  _enrichStats = { hits: 0, misses: 0, errors: 0 };
+
+  for (let i = 0; i < deals.length; i++) {
+    await enrichDealWithProduct(deals[i]);
+    if ((i + 1) % 25 === 0) {
+      console.log(`[DealService] Enrichment progress: ${i + 1}/${deals.length} (hits: ${_enrichStats.hits}, misses: ${_enrichStats.misses})`);
+    }
+  }
+
+  const total   = _enrichStats.hits + _enrichStats.misses;
+  const hitRate = total > 0 ? ((_enrichStats.hits / total) * 100).toFixed(1) : '0';
+  console.log(`[DealService] Enrichment complete — ${_enrichStats.hits} hits, ${_enrichStats.misses} misses (${hitRate}% hit rate), ${_enrichStats.errors} errors`);
+
+  return deals;
+}
+
 // ── Phase 2: background image enrichment ──────────────────────────────────────
 
 /**
@@ -210,6 +328,14 @@ const refreshDeals = async () => {
     console.error('DealService: Background enrichment error:', err.message);
   });
 
+  // Phase 3: product intelligence enrichment in the background — do not await
+  if (productLookup) {
+    const flatDeals = cacheToFlatArray(byStore);
+    enrichDealsWithProducts(flatDeals).catch(err => {
+      console.error('DealService: Product enrichment error:', err.message);
+    });
+  }
+
   return { cache, deals: cacheToFlatArray(byStore) };
 };
 
@@ -257,4 +383,6 @@ module.exports = {
   setStartupFetch,
   isLoading,
   waitForDeals,
+  enrichDealWithProduct,
+  enrichDealsWithProducts,
 };
