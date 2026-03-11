@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChefHat } from 'lucide-react';
+import { ArrowLeft, ChefHat, LayoutGrid, List } from 'lucide-react';
 import { useApp } from '../App';
 import { dealsApi, recipesApi } from '../services/api';
 import DealCard from '../components/DealCard';
 import RecipeCard from '../components/RecipeCard';
+import CategorizedDeals from '../components/CategorizedDeals';
 
 const STORE_COLORS = {
   woolworths: { bg: '#007833', light: '#e8f5e9', text: '#ffffff' },
@@ -60,6 +61,7 @@ export default function StorePage() {
   const [storeDeals, setStoreDeals] = useState([]);
   const [dealsLoading, setDealsLoading] = useState(true);
   const [dealsError, setDealsError] = useState(null);
+  const [viewMode, setViewMode] = useState('categorized'); // 'categorized' | 'list'
 
   const [storeRecipes, setStoreRecipes] = useState([]);
   const [recipesLoading, setRecipesLoading] = useState(true);
@@ -199,12 +201,49 @@ export default function StorePage() {
 
         {/* ── Section 2: Deals ──────────────────────────────────────────────── */}
         <section>
-          <h2
-            className="text-xl mb-4"
-            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
-          >
-            This Week's Deals at {storeName}
-          </h2>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2
+              className="text-xl"
+              style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+            >
+              This Week's Deals at {storeName}
+            </h2>
+
+            {/* View mode toggle */}
+            {!dealsLoading && storeDeals.length > 0 && (
+              <div
+                className="flex items-center rounded-xl overflow-hidden"
+                style={{ border: '1.5px solid var(--color-stone)', background: '#ffffff' }}
+              >
+                <button
+                  onClick={() => setViewMode('categorized')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold transition-colors"
+                  style={{
+                    fontFamily: 'Nunito, sans-serif',
+                    background: viewMode === 'categorized' ? 'var(--color-leaf)' : 'transparent',
+                    color:      viewMode === 'categorized' ? '#ffffff' : 'var(--color-text-muted)',
+                  }}
+                  aria-pressed={viewMode === 'categorized'}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  Categories
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold transition-colors"
+                  style={{
+                    fontFamily: 'Nunito, sans-serif',
+                    background: viewMode === 'list' ? 'var(--color-leaf)' : 'transparent',
+                    color:      viewMode === 'list' ? '#ffffff' : 'var(--color-text-muted)',
+                  }}
+                  aria-pressed={viewMode === 'list'}
+                >
+                  <List className="w-3.5 h-3.5" />
+                  All deals
+                </button>
+              </div>
+            )}
+          </div>
 
           {dealsError && (
             <div
@@ -229,6 +268,8 @@ export default function StorePage() {
               <p className="text-lg mb-1">No deals found for {storeName}.</p>
               <p className="text-sm">Check back later or try refreshing.</p>
             </div>
+          ) : viewMode === 'categorized' ? (
+            <CategorizedDeals deals={storeDeals} />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {storeDeals.map((deal, idx) => (

@@ -44,6 +44,9 @@ export default function Recipes() {
   const [personalisedError, setPersonalisedError] = useState(null);
   const [isPersonalised, setIsPersonalised] = useState(false);
 
+  const RECIPES_PER_PAGE = 6;
+  const [displayCount, setDisplayCount] = useState(RECIPES_PER_PAGE);
+
   const baseRecipes = isPersonalised && personalisedRecipes !== null
     ? personalisedRecipes
     : weeklyRecipes;
@@ -140,7 +143,16 @@ export default function Recipes() {
     setIsPersonalised(false);
     setPersonalisedRecipes(null);
     setPersonalisedError(null);
+    setDisplayCount(RECIPES_PER_PAGE);
   };
+
+  // Reset pagination whenever the visible list changes
+  const prevFilterKey = React.useRef('');
+  const filterKey = `${activeTag}|${searchQuery}|${isPersonalised}`;
+  if (prevFilterKey.current !== filterKey) {
+    prevFilterKey.current = filterKey;
+    if (displayCount !== RECIPES_PER_PAGE) setDisplayCount(RECIPES_PER_PAGE);
+  }
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-parchment)' }}>
@@ -257,15 +269,37 @@ export default function Recipes() {
         ) : (
           <>
             {filteredRecipes.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {filteredRecipes.map((recipe) => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    showMatchReason={isPersonalised}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {filteredRecipes.slice(0, displayCount).map((recipe) => (
+                    <RecipeCard
+                      key={recipe.id}
+                      recipe={recipe}
+                      showMatchReason={isPersonalised}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination controls */}
+                {displayCount < filteredRecipes.length ? (
+                  <div className="flex flex-col items-center gap-2 pt-2">
+                    <button
+                      onClick={() => setDisplayCount((n) => Math.min(n + RECIPES_PER_PAGE, filteredRecipes.length))}
+                      className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
+                      style={{ background: 'var(--color-leaf)', color: '#ffffff', fontFamily: 'Nunito, sans-serif' }}
+                    >
+                      Show more recipes ({filteredRecipes.length - displayCount} remaining)
+                    </button>
+                  </div>
+                ) : filteredRecipes.length > RECIPES_PER_PAGE ? (
+                  <p
+                    className="text-center text-sm pt-2"
+                    style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                  >
+                    Showing all {filteredRecipes.length} recipes
+                  </p>
+                ) : null}
+              </>
             ) : (
               <div
                 className="text-center py-16"

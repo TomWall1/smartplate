@@ -170,21 +170,35 @@ export default function RecipeDetail() {
           {title}
         </h1>
 
-        {/* Source */}
+        {/* Source + original link */}
         {SOURCE_META[recipe.source] && (
-          <div className="flex items-center gap-2">
-            <img
-              src={SOURCE_META[recipe.source].logo}
-              alt={SOURCE_META[recipe.source].label}
-              className="w-4 h-4 rounded-sm object-contain"
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <span className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
-              Recipe from{' '}
-              <span style={{ color: 'var(--color-bark)', fontWeight: 700 }}>
-                {SOURCE_META[recipe.source].label}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <img
+                src={SOURCE_META[recipe.source].logo}
+                alt={SOURCE_META[recipe.source].label}
+                className="w-4 h-4 rounded-sm object-contain"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <span className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+                Recipe from{' '}
+                <span style={{ color: 'var(--color-bark)', fontWeight: 700 }}>
+                  {SOURCE_META[recipe.source].label}
+                </span>
               </span>
-            </span>
+            </div>
+            {sourceUrl && sourceUrl !== '#' && (
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-bold underline underline-offset-2 transition-opacity hover:opacity-70"
+                style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                View original recipe
+              </a>
+            )}
           </div>
         )}
 
@@ -242,7 +256,7 @@ export default function RecipeDetail() {
             totalPerServingSaving={totalPerServingSaving}
             servings={servings ?? 4}
             matchedDeals={matchedDeals}
-            collapsed={false}
+            collapsed={true}
           />
         )}
 
@@ -309,7 +323,7 @@ export default function RecipeDetail() {
                 className="text-sm font-bold mt-4 pt-3"
                 style={{ borderTop: '1px solid var(--color-stone)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
               >
-                🛒 Buy these specials to save ${totalMealSaving.toFixed(2)} on this meal
+                🛒 Up to ${matchedDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2)} off full price on all items
               </p>
             )}
           </div>
@@ -465,21 +479,8 @@ export default function RecipeDetail() {
           </div>
         )}
 
-        {/* Original recipe link */}
-        {sourceUrl && sourceUrl !== '#' && (
-          <div className="pt-2 pb-4">
-            <a
-              href={sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-bold underline underline-offset-2 transition-opacity hover:opacity-70"
-              style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              <ExternalLink className="w-4 h-4" />
-              View original recipe
-            </a>
-          </div>
-        )}
+        {/* bottom spacer */}
+        <div className="pb-4" />
       </div>
     </div>
   );
