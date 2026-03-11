@@ -92,7 +92,7 @@ app.use('*', (req, res) => {
 
 // Start server (skipped on Vercel which uses module.exports instead)
 if (!process.env.VERCEL) {
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`SmartPlate API running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 
@@ -115,6 +115,25 @@ if (!process.env.VERCEL) {
         }
       } catch (err) {
         console.error('Startup fetch failed:', err.message);
+      }
+    })();
+
+    // Auto-generate weekly recipes on startup if they don't exist
+    // Runs in background - won't block server from serving other endpoints
+    (async () => {
+      try {
+        const recipeService = require('./services/recipeService');
+        const meta = recipeService.getWeeklyRecipesMeta();
+        
+        if (!meta || !meta.recipeCount || meta.recipeCount === 0) {
+          console.log('Startup: no weekly recipes found — generating in background...');
+          const recipes = await recipeService.generateWeeklyRecipes();
+          console.log(`Startup: generated ${recipes.length} weekly recipes`);
+        } else {
+          console.log(`Startup: weekly recipes OK (${meta.recipeCount} recipes)`);
+        }
+      } catch (err) {
+        console.error('Startup: recipe generation failed (server continues):', err.message);
       }
     })();
   });
