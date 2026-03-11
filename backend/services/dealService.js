@@ -8,9 +8,16 @@ try {
   productLookup     = require('./productLookup');
   productCategorizer = require('./productCategorizer');
   db                = require('../database/db');
-  // Verify DB is reachable
-  db.countProducts();
-  console.log(`[DealService] Product DB ready (${db.countProducts()} products)`);
+  
+  // Initialize and show product count asynchronously
+  (async () => {
+    try {
+      const count = await db.countProducts();
+      console.log(`[DealService] Product DB ready (${count} products)`);
+    } catch (err) {
+      console.warn('[DealService] Could not count products:', err.message);
+    }
+  })();
 } catch (e) {
   console.warn('[DealService] Product DB unavailable — enrichment disabled:', e.message);
   productLookup = productCategorizer = db = null;
@@ -169,7 +176,7 @@ async function enrichDealWithProduct(deal) {
       const cat = await productCategorizer.claudeCategorize(deal.name, deal.category, deal.price);
 
       const { normalizeName } = productLookup;
-      const inserted = db.insertProduct({
+      const inserted = await db.insertProduct({
         name:                  deal.name,
         normalized_name:       normalizeName(deal.name),
         product_type:          cat.productType          ?? null,
@@ -185,10 +192,10 @@ async function enrichDealWithProduct(deal) {
       });
 
       // Create alias for fast future lookups
-      const newId = inserted.lastInsertRowid;
+      const newId = inserted?.id;
       if (newId) {
-        db.insertAlias(newId, deal.name, normalizeName(deal.name), 'manual');
-        db.recordMatch(deal.name, newId, 'claude', deal.store);
+        await db.insertAlias(newId, deal.name, 'manual');
+        await db.recordMatch(deal.name, newId, 'claude');
       }
 
       deal.productIntelligence = {
