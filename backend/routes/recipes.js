@@ -3,23 +3,18 @@ const router = express.Router();
 const recipeService = require('../services/recipeService');
 
 // ── Manually trigger weekly recipe generation ───────────────────────
-router.post('/generate-weekly', async (req, res) => {
-  try {
-    console.log('Manual weekly recipe generation triggered');
-    const recipes = await recipeService.generateWeeklyRecipes();
-    res.json({
-      success: true,
-      recipeCount: recipes.length,
-      generatedAt: new Date().toISOString(),
-      recipes,
-    });
-  } catch (error) {
-    console.error('Error generating weekly recipes:', error.message);
-    res.status(500).json({
-      error: 'Failed to generate weekly recipes',
-      message: error.message,
-    });
-  }
+// Returns 202 immediately; generation runs in background.
+router.post('/generate-weekly', (req, res) => {
+  console.log('Manual weekly recipe generation triggered (background)');
+  res.status(202).json({
+    success: true,
+    message: 'Recipe generation started in background. Check /api/recipes/suggestions in ~2 minutes.',
+    startedAt: new Date().toISOString(),
+  });
+  // Fire-and-forget
+  recipeService.generateWeeklyRecipes()
+    .then((recipes) => console.log(`Recipe generation complete: ${recipes.length} recipes`))
+    .catch((err) => console.error('Recipe generation failed:', err.message));
 });
 
 // ── Get recipe suggestions ──────────────────────────────────────────

@@ -46,20 +46,21 @@ app.use('/api/recipes', recipesRoutes);
 app.use('/api/users', usersRoutes);
 
 // External cron trigger — used by cron-job.org / GitHub Actions for weekly refresh
-app.post('/api/admin/refresh-deals', async (req, res) => {
-  try {
-    console.log('External cron: triggered deal refresh');
-    const dealService = require('./services/dealService');
-    const { cache } = await dealService.refreshDeals();
-    res.json({
-      success: true,
-      dealCount: cache.woolworths.length + cache.coles.length + cache.iga.length,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (err) {
-    console.error('External cron: deal refresh error:', err.message);
-    res.status(500).json({ error: err.message });
-  }
+// Returns 202 immediately; refresh runs in background to avoid proxy timeouts.
+app.post('/api/admin/refresh-deals', (req, res) => {
+  console.log('External cron: triggered deal refresh (background)');
+  res.status(202).json({
+    success: true,
+    message: 'Deal refresh started in background.',
+    timestamp: new Date().toISOString(),
+  });
+  const dealService = require('./services/dealService');
+  dealService.refreshDeals()
+    .then(({ cache }) => {
+      const total = (cache.woolworths?.length || 0) + (cache.coles?.length || 0) + (cache.iga?.length || 0);
+      console.log(`External cron: deal refresh complete — ${total} deals`);
+    })
+    .catch((err) => console.error('External cron: deal refresh error:', err.message));
 });
 
 // Health check
