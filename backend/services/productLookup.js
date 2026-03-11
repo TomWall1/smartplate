@@ -84,20 +84,20 @@ async function findProduct(dealName) {
 
   // Tier 1: Exact name match (case-insensitive, stored as lowercase)
   {
-    const product = db.getProductByNormalizedName(normalized);
+    const product = await db.getProductByNormalizedName(normalized);
     if (product) return { product, matchType: 'exact' };
   }
 
   // Tier 2: Alias lookup
   {
-    const product = db.getAlias(normalized);
+    const product = await db.getAlias(normalized);
     if (product) return { product, matchType: 'alias' };
   }
 
   // Tier 3: Normalized name contains match (substring)
   {
     if (normalized.length >= 4) {
-      const candidates = db.getProductsByNormalizedNameLike(normalized);
+      const candidates = await db.getProductsByNormalizedNameLike(normalized);
       if (candidates.length > 0) {
         // Pick closest
         const scored = candidates.map((p) => ({
@@ -117,7 +117,7 @@ async function findProduct(dealName) {
     // Use first significant word as search key
     const firstWord = normalized.split(' ').find((w) => w.length >= 4);
     if (firstWord) {
-      const candidates = db.getProductsByNormalizedNameLike(firstWord);
+      const candidates = await db.getProductsByNormalizedNameLike(firstWord);
       if (candidates.length > 0) {
         const scored = candidates.map((p) => ({
           product: p,
@@ -135,7 +135,7 @@ async function findProduct(dealName) {
   {
     const barcode = extractBarcode(dealName);
     if (barcode) {
-      const product = db.getProductByBarcode(barcode);
+      const product = await db.getProductByBarcode(barcode);
       if (product) return { product, matchType: 'barcode' };
     }
   }
@@ -150,6 +150,7 @@ async function findProduct(dealName) {
  * an alias so the next lookup for this deal name is instant.
  */
 function recordMatch(dealName, productId, matchType, store = null) {
+  // Fire-and-forget: don't block the caller on DB writes
   db.recordMatch(dealName, productId, matchType, store);
 
   if (productId && (matchType === 'fuzzy' || matchType === 'normalized')) {

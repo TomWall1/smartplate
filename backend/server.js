@@ -45,13 +45,31 @@ app.use('/api/deals', dealsRoutes);
 app.use('/api/recipes', recipesRoutes);
 app.use('/api/users', usersRoutes);
 
+// External cron trigger — used by cron-job.org / GitHub Actions for weekly refresh
+app.post('/api/admin/refresh-deals', async (req, res) => {
+  try {
+    console.log('External cron: triggered deal refresh');
+    const dealService = require('./services/dealService');
+    const { cache } = await dealService.refreshDeals();
+    res.json({
+      success: true,
+      dealCount: cache.woolworths.length + cache.coles.length + cache.iga.length,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('External cron: deal refresh error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     timestamp: new Date().toISOString(),
     message: 'SmartPlate API is running',
-    version: '1.0.0'
+    version: '1.0.0',
+    database: process.env.USE_POSTGRESQL === 'true' || process.env.NODE_ENV === 'production' ? 'PostgreSQL' : 'SQLite',
   });
 });
 
@@ -115,6 +133,34 @@ if (!process.env.VERCEL) {
         }
       } catch (err) {
         console.error('Startup fetch failed:', err.message);
+      }
+    })();
+
+    // ── Weekly recipes check — generate in background if missing ───────────────
+    (async () => {
+      try {
+        const recipeService = require('./services/recipeService');
+        const fs   = require('fs');
+        const path = require('path');
+
+        const tmpPath  = '/tmp/weekly-recipes.json';
+        const dataPath = path.join(__dirname, 'data', 'weekly-recipes.json');
+
+        const existing =
+          (fs.existsSync(tmpPath)  && JSON.parse(fs.readFileSync(tmpPath,  'utf8')).recipes?.length) ||
+          (fs.existsSync(dataPath) && JSON.parse(fs.readFileSync(dataPath, 'utf8')).recipes?.length) ||
+          0;
+
+        if (existing > 0) {
+          console.log(`Startup: weekly recipes OK (${existing} recipes)`);
+        } else {
+          console.log('Startup: no weekly recipes found — generating in background...');
+          recipeService.generateWeeklyRecipes()
+            .then(recipes => console.log(`Startup: generated ${recipes.length} weekly recipes`))
+            .catch(err  => console.error('Startup: recipe generation failed:', err.message));
+        }
+      } catch (err) {
+        console.error('Startup: recipe check failed:', err.message);
       }
     })();
   });

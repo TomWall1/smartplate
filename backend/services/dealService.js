@@ -8,9 +8,12 @@ try {
   productLookup     = require('./productLookup');
   productCategorizer = require('./productCategorizer');
   db                = require('../database/db');
-  // Verify DB is reachable
-  db.countProducts();
-  console.log(`[DealService] Product DB ready (${db.countProducts()} products)`);
+  // Verify DB is reachable (async-safe: works with both SQLite and PostgreSQL)
+  Promise.resolve(db.countProducts()).then(n => {
+    console.log(`[DealService] Product DB ready (${n} products)`);
+  }).catch(err => {
+    console.warn('[DealService] DB count failed:', err.message);
+  });
 } catch (e) {
   console.warn('[DealService] Product DB unavailable — enrichment disabled:', e.message);
   productLookup = productCategorizer = db = null;
@@ -169,7 +172,7 @@ async function enrichDealWithProduct(deal) {
       const cat = await productCategorizer.claudeCategorize(deal.name, deal.category, deal.price);
 
       const { normalizeName } = productLookup;
-      const inserted = db.insertProduct({
+      const inserted = await db.insertProduct({
         name:                  deal.name,
         normalized_name:       normalizeName(deal.name),
         product_type:          cat.productType          ?? null,
@@ -187,8 +190,8 @@ async function enrichDealWithProduct(deal) {
       // Create alias for fast future lookups
       const newId = inserted.lastInsertRowid;
       if (newId) {
-        db.insertAlias(newId, deal.name, normalizeName(deal.name), 'manual');
-        db.recordMatch(deal.name, newId, 'claude', deal.store);
+        await db.insertAlias(newId, deal.name, normalizeName(deal.name), 'manual');
+        await db.recordMatch(deal.name, newId, 'claude', deal.store);
       }
 
       deal.productIntelligence = {
@@ -234,56 +237,96 @@ async function enrichDealsWithProducts(deals) {
   return deals;
 }
 
-// ── Phase 2: background image enrichment ──────────────────────────────────────
+// ── Phase 2 & 3: background enrichment helpers ────────────────────────────────
 
 /**
- * Update a single store's deals in the on-disk cache.
- * Called after each store's image enrichment completes so that images
- * become available progressively without blocking the basic cache.
+ * Write one store's deals back into the on-disk cache.
+ * Always re-reads the cache file first so concurrent writes (images + PI)
+ * don't overwrite each other's data.
  */
-function _updateCacheStore(storeName, enrichedDeals) {
+function _updateCacheStore(storeName, enrichedDeals, label = '') {
   try {
     const cache = loadCache();
     if (!cache) return;
     cache[storeName] = enrichedDeals;
     fs.writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2), 'utf8');
-    console.log(`DealService: ${storeName} cache updated with enriched images`);
+    console.log(`DealService: ${storeName} cache updated${label ? ` (${label})` : ''} — ${enrichedDeals.length} deals`);
   } catch (err) {
     console.error(`DealService: Failed to update ${storeName} cache:`, err.message);
   }
 }
 
 /**
- * Enrich deals with product images for each store and progressively update
- * the cache. Runs entirely in the background — callers must not await this.
+ * Phase 2: Enrich deals with product images, then hand off to Phase 3 (PI).
+ * Runs entirely in the background — callers must not await this.
  */
 async function _enrichInBackground(byStore) {
   const woolworthsEnrich = require('./woolworthsEnrich');
   const colesEnrich      = require('./colesEnrich');
 
-  // Woolworths
+  // Keep a mutable copy so Phase 3 sees image-enriched deals
+  const imageEnriched = {
+    woolworths: byStore.woolworths,
+    coles:      byStore.coles,
+    iga:        byStore.iga,
+  };
+
+  // Woolworths images
   if (byStore.woolworths.length > 0) {
     try {
-      const enriched = await woolworthsEnrich.enrichDeals(byStore.woolworths);
-      _updateCacheStore('woolworths', enriched);
+      imageEnriched.woolworths = await woolworthsEnrich.enrichDeals(byStore.woolworths);
+      _updateCacheStore('woolworths', imageEnriched.woolworths, 'images');
       imageCache.flush();
     } catch (err) {
-      console.error('DealService: Woolworths enrichment failed:', err.message);
+      console.error('DealService: Woolworths image enrichment failed:', err.message);
     }
   }
 
-  // Coles
+  // Coles images
   if (byStore.coles.length > 0) {
     try {
-      const enriched = await colesEnrich.enrichDeals(byStore.coles);
-      _updateCacheStore('coles', enriched);
+      imageEnriched.coles = await colesEnrich.enrichDeals(byStore.coles);
+      _updateCacheStore('coles', imageEnriched.coles, 'images');
       imageCache.flush();
     } catch (err) {
-      console.error('DealService: Coles enrichment failed:', err.message);
+      console.error('DealService: Coles image enrichment failed:', err.message);
     }
   }
 
-  console.log('DealService: Background image enrichment complete.');
+  console.log('DealService: Image enrichment complete — starting PI enrichment...');
+
+  // Phase 3: PI enrichment runs AFTER images so both sets of data land in cache
+  // without race conditions (sequential, not concurrent).
+  await _enrichPIAndPersist(imageEnriched);
+}
+
+/**
+ * Phase 3: Enrich deals in byStore with Product Intelligence and write each
+ * store back to the cache file as it completes.
+ * Safe to call standalone (e.g. from /enrich-pi endpoint).
+ */
+async function _enrichPIAndPersist(byStore) {
+  if (!productLookup) {
+    console.log('DealService: PI enrichment skipped — product DB unavailable');
+    return;
+  }
+
+  console.log('DealService: PI enrichment starting...');
+  const start = Date.now();
+
+  for (const storeName of ['woolworths', 'coles', 'iga']) {
+    const storeDeals = byStore[storeName];
+    if (!storeDeals?.length) continue;
+    try {
+      const enriched = await enrichDealsWithProducts([...storeDeals]);
+      _updateCacheStore(storeName, enriched, 'PI');
+    } catch (err) {
+      console.error(`DealService: PI enrichment failed for ${storeName}:`, err.message);
+    }
+  }
+
+  const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+  console.log(`DealService: PI enrichment complete in ${elapsed}s`);
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────────
@@ -323,18 +366,12 @@ const refreshDeals = async () => {
     `${cache.coles.length} coles, ${cache.iga.length} IGA deals ready`
   );
 
-  // Phase 2: image enrichment runs in the background — do not await
+  // Phase 2 + 3: image enrichment → PI enrichment, both in background.
+  // _enrichInBackground hands off to _enrichPIAndPersist once images are done,
+  // so both sets of data persist to cache without race conditions.
   _enrichInBackground(byStore).catch(err => {
     console.error('DealService: Background enrichment error:', err.message);
   });
-
-  // Phase 3: product intelligence enrichment in the background — do not await
-  if (productLookup) {
-    const flatDeals = cacheToFlatArray(byStore);
-    enrichDealsWithProducts(flatDeals).catch(err => {
-      console.error('DealService: Product enrichment error:', err.message);
-    });
-  }
 
   return { cache, deals: cacheToFlatArray(byStore) };
 };
@@ -380,9 +417,11 @@ module.exports = {
   getDealsByStore,
   getDealsByCategory,
   getCacheInfo,
+  loadCache,
   setStartupFetch,
   isLoading,
   waitForDeals,
   enrichDealWithProduct,
   enrichDealsWithProducts,
+  enrichPIAndPersist: _enrichPIAndPersist,
 };

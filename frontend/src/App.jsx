@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import Auth from './pages/Auth';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { dealsApi, recipesApi, healthApi, usersApi } from './services/api';
+import { filterFoodDeals } from './utils/dealFilters';
 import { WifiOff } from 'lucide-react';
 
 // ── App Context ───────────────────────────────────────────────────────────────
@@ -117,7 +118,7 @@ function AppInner() {
       try {
         const dealsData = await dealsApi.getCurrentDeals();
         const dealList = Array.isArray(dealsData) ? dealsData : (dealsData?.deals ?? []);
-        setDeals(dealList);
+        setDeals(filterFoodDeals(dealList));
 
         try {
           const ingredients = dealList.map((d) => d.name);

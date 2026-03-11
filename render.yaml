@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: smartplate-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: USE_POSTGRESQL
+        value: "true"
+      - key: DATABASE_URL
+        sync: false  # Set in Render dashboard: Supabase connection string
+      - key: ANTHROPIC_API_KEY
+        sync: false  # Set in Render dashboard
+      - key: SUPABASE_URL
+        sync: false  # Set in Render dashboard
+      - key: SUPABASE_ANON_KEY
+        sync: false  # Set in Render dashboard
+    healthCheckPath: /health
+    autoDeploy: true

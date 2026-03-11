@@ -1,0 +1,23 @@
+name: Weekly Deal Refresh
+
+on:
+  schedule:
+    - cron: '0 13 * * 3'  # Wednesday 1pm UTC = Wednesday 11pm AEST
+  workflow_dispatch:       # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger weekly deal refresh
+        run: |
+          echo "Triggering SmartPlate deal refresh at $(date)"
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            https://smartplate-api.onrender.com/api/admin/refresh-deals)
+          echo "Response status: $response"
+          if [ "$response" != "200" ]; then
+            echo "❌ Refresh failed with status $response"
+            exit 1
+          fi
+          echo "✅ Refresh triggered successfully"
