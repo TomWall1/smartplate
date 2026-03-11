@@ -47,11 +47,40 @@ Rules for satisfiesIngredients:
 - Maximum 8 items, most specific first
 - Only include names that would appear in recipe ingredient lists
 
+CRITICAL RULES — these override all other rules:
+
+1. COMPOUND BAKED GOODS: If the product is a baked/prepared item containing a food ingredient
+   (e.g. garlic bread, onion rings, corn chips), do NOT include the raw ingredient alone.
+   - "Garlic Bread" → ["garlic bread"] NOT ["garlic bread", "garlic"]
+   - "Onion Rings" → ["onion rings"] NOT ["onion rings", "onion"]
+
+2. COMPOUND CONDIMENTS/PANTRY: If the product is a sauce, paste, powder, stock, oil, or spread,
+   do NOT include the raw base ingredient alone.
+   - "Tomato Paste" → ["tomato paste"] NOT ["tomato paste", "tomato"]
+   - "Chicken Stock" → ["chicken stock"] NOT ["chicken stock", "chicken"]
+   - "Garlic Paste" → ["garlic paste"] NOT ["garlic paste", "garlic"]
+
+3. SPECIFIC PROTEIN CUTS: Always include the specific cut. Do NOT include just the bare protein
+   when a specific cut is named — different cuts are not interchangeable in recipes.
+   - "Lamb Shoulder" → ["lamb shoulder", "shoulder of lamb"] NOT just ["lamb"]
+   - "Lamb Midloin Chops" → ["lamb chops", "lamb midloin chops"] NOT just ["lamb"]
+   - "Beef Rump Steak" → ["beef rump", "rump steak"] — "beef" alone OK since cuts are less specific
+   - "Chicken Thigh Fillet" → ["chicken thigh", "chicken thigh fillet", "chicken"] (thigh is generic enough)
+
+4. SPECIFIC CHEESE VARIETIES: Named cheese varieties do NOT satisfy a generic "cheese" requirement.
+   Do NOT include bare "cheese" for named varieties.
+   - "Devondale Feta Cheese" → ["feta cheese", "feta"] NOT ["feta cheese", "feta", "cheese"]
+   - "Bega Brie" → ["brie", "brie cheese"] NOT ["brie", "cheese"]
+   - "Mainland Tasty Cheddar" → ["cheddar cheese", "cheddar", "tasty cheese", "cheese"] ← "cheese" OK for generic varieties
+
 Examples of satisfiesIngredients:
 - "Free Range Chicken Breast 500g" → ["chicken breast", "chicken", "poultry"]
 - "San Remo Fettuccine 500g" → ["fettuccine", "pasta", "fettuccini"]
 - "Mainland Tasty Cheddar 500g" → ["cheddar cheese", "cheddar", "tasty cheese", "cheese"]
-- "Woolworths RSPCA Approved Beef Mince 500g" → ["beef mince", "ground beef", "mince", "beef"]`;
+- "Woolworths RSPCA Approved Beef Mince 500g" → ["beef mince", "ground beef", "mince", "beef"]
+- "Coles Garlic Bread 400g" → ["garlic bread"]
+- "Lamb Shoulder Roast 1kg" → ["lamb shoulder", "shoulder of lamb", "lamb roast"]
+- "Devondale Feta Cheese 200g" → ["feta cheese", "feta"]`;
 }
 
 // ── Categorize ─────────────────────────────────────────────────────────────────
@@ -117,7 +146,13 @@ Return ONLY a JSON array (no markdown) with ${products.length} objects in the sa
   "typicalUseCase": "how it is used in cooking",
   "purchaseReasonability": "why buy on special",
   "satisfiesIngredients": ["array of ingredient names this satisfies in recipes, max 8"]
-}`;
+}
+
+CRITICAL RULES for satisfiesIngredients — these override all other logic:
+1. COMPOUND BAKED GOODS: Do NOT include the raw ingredient. "Garlic Bread" → ["garlic bread"] NOT ["garlic bread","garlic"]
+2. COMPOUND CONDIMENTS: Do NOT include bare base ingredient. "Tomato Paste" → ["tomato paste"] NOT ["tomato paste","tomato"]
+3. PROTEIN CUTS: Always include the specific cut. "Lamb Shoulder" → ["lamb shoulder","shoulder of lamb"] NOT just ["lamb"]
+4. NAMED CHEESE VARIETIES: Do NOT include bare "cheese". "Feta Cheese" → ["feta cheese","feta"] NOT ["feta","cheese"]`;
 
   try {
     const message = await client.messages.create({

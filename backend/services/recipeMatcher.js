@@ -145,6 +145,26 @@ const COMPOUND_BLOCKLIST = {
   milk: ['oat milk', 'almond milk', 'soy milk', 'coconut milk', 'skim milk', 'rice milk'],
 };
 
+// Protein cut/form words — if a recipe ingredient contains one of these, the deal
+// must ALSO contain that cut in its satisfiesIngredients or deal name.
+// Prevents "lamb shoulder" from matching "Lamb Midloin Chops".
+const PROTEIN_CUT_WORDS = new Set([
+  'shoulder', 'midloin', 'loin', 'fillet', 'filet', 'rump', 'rack',
+  'chop', 'cutlet', 'shank', 'brisket', 'chuck', 'blade', 'flank',
+  'sirloin', 'tenderloin', 'scotch', 'striploin', 'knuckle', 'backstrap',
+  'leg', 'breast', 'thigh', 'drumstick', 'wing',
+]);
+
+// Specific cheese variety names — if a recipe ingredient specifies one of these,
+// a generic "cheese" deal is not an acceptable substitute.
+// Prevents "feta cheese" from matching "Devondale Cheese Block".
+const SPECIFIC_CHEESE_TYPES = new Set([
+  'feta', 'parmesan', 'parmigiano', 'mozzarella', 'brie', 'camembert',
+  'ricotta', 'gouda', 'edam', 'gruyere', 'emmental', 'manchego',
+  'haloumi', 'halloumi', 'pecorino', 'gorgonzola', 'stilton', 'roquefort',
+  'burrata', 'raclette', 'provolone', 'colby', 'jarlsberg',
+]);
+
 // Form disqualifiers — protein keyword → product descriptors that indicate the deal
 // is pre-prepared/processed and should NOT match a recipe requiring fresh protein.
 //
@@ -426,6 +446,18 @@ class RecipeMatcher {
 
     const satisfies = pi.satisfiesIngredients.map(s => s.toLowerCase().trim());
 
+    // Category guard: baked_goods deals (garlic bread, crumpets, etc.) only match recipe
+    // ingredients that are themselves baked goods. Prevents "garlic bread" from satisfying
+    // a recipe that simply calls for "garlic".
+    if (pi.category === 'baked_goods') {
+      const BAKED_GOOD_WORDS = new Set([
+        'bread', 'loaf', 'roll', 'bun', 'muffin', 'bagel', 'wrap',
+        'tortilla', 'croissant', 'pita', 'naan', 'flatbread', 'crumpet',
+        'scone', 'focaccia', 'sourdough', 'rye', 'brioche',
+      ]);
+      if (!ingWords.some(w => BAKED_GOOD_WORDS.has(w))) return false;
+    }
+
     // If the ingredient is a compound with a disqualifying context word (sauce, stock,
     // oil, butter, paste, etc.) require a full exact phrase match.
     // Prevents "fish" (in satisfies for salmon) matching recipe ingredient "fish sauce".
@@ -436,19 +468,37 @@ class RecipeMatcher {
       return satisfies.includes(cleanIng);
     }
 
-    // Rule 1: Exact match on full cleaned ingredient name
+    // Specificity requirements extracted from the recipe ingredient.
+    // If a recipe requests a specific protein cut or cheese variety, the deal must
+    // confirm that cut/variety in its satisfiesIngredients or deal name.
+    const dealNameLower = (enrichedDeal.name || enrichedDeal.dealName || '').toLowerCase();
+    const ingCutWords    = ingWords.filter(w => PROTEIN_CUT_WORDS.has(w));
+    const ingCheeseWords = ingWords.filter(w => SPECIFIC_CHEESE_TYPES.has(w));
+
+    // Returns true if the given satisfies entry covers the ingredient's specificity.
+    const specificityCovered = (sat) => {
+      if (ingCutWords.length > 0) {
+        if (!ingCutWords.some(cut => sat.includes(cut) || dealNameLower.includes(cut))) return false;
+      }
+      if (ingCheeseWords.length > 0) {
+        if (!ingCheeseWords.some(ct => sat.includes(ct) || dealNameLower.includes(ct))) return false;
+      }
+      return true;
+    };
+
+    // Rule 1: Exact match on full cleaned ingredient name (always passes specificity)
     if (satisfies.includes(cleanIng)) return true;
 
     // Rule 2: Any satisfies entry appears as a whole-word substring of the ingredient
     //   "chicken" in satisfies → matches ingredient "diced chicken breast"
     for (const sat of satisfies) {
-      if (sat.length >= 3 && cleanIng.includes(sat)) return true;
+      if (sat.length >= 3 && cleanIng.includes(sat) && specificityCovered(sat)) return true;
     }
 
     // Rule 3: Any significant ingredient word exactly in satisfies
     //   ingredient "chicken" → word "chicken" in satisfies ["chicken breast","chicken","poultry"]
     for (const w of ingWords) {
-      if (satisfies.includes(w)) return true;
+      if (satisfies.includes(w) && specificityCovered(w)) return true;
     }
 
     return false;
