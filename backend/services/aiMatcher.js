@@ -75,11 +75,16 @@ STRICT MATCHING RULES:
 - "chicken thighs" ≠ "marinated chicken kebabs" — raw cuts ≠ pre-marinated/prepared
 - "frozen peas" ≠ "prawns" — completely different ingredients
 - "banana prawns" = "prawns" — banana prawns ARE prawns, this is a valid match
-- Pre-marinated, crumbed, pre-seasoned, or pre-cooked products do NOT match raw ingredient requirements
-- Different seafood types do NOT match each other (prawns ≠ fish ≠ salmon)
 - Generic cuts (e.g. "chicken") CAN match specific raw cuts (e.g. "chicken thigh fillet")
+- Different seafood types do NOT match each other (prawns ≠ fish ≠ salmon)
 - If no deal is a good match, use null for dealIndex
 - When in doubt, prefer no match over a wrong match
+
+AUTOMATIC DISQUALIFIERS — if a deal name contains ANY of these words, it CANNOT match a plain raw protein ingredient:
+- "BBQ", "marinated", "crumbed", "battered", "seasoned", "pre-seasoned", "stuffed", "flavoured", "glazed", "smoked" (for fresh chicken/pork/beef — smoked salmon IS acceptable for salmon)
+- "nibble", "nugget", "tender", "strip", "schnitzel", "kiev", "ready to cook", "frozen meal"
+- "cracker", "crumbed", "battered", "lemon pepper" (for seafood)
+EXAMPLE: "free-range chicken wings" recipe ingredient — "Woolworths BBQ Marinated Chicken Wing Nibble" FAILS because it contains "BBQ", "Marinated", and "Nibble". Return dealIndex: null.
 
 Return ONLY valid JSON (no markdown, no explanation):
 [
