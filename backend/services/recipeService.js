@@ -100,7 +100,7 @@ class RecipeService {
       console.warn('RecipeService: Deal enrichment unavailable — using text matching:', enrichErr.message);
     }
 
-    // Step 1b: Find top 50 library recipes that match current deals
+    // Step 1b: Find top 50 library recipes that match current deals (text + PI matching)
     const matched = recipeMatcher.matchDeals(enrichedDeals);
     console.log(`RecipeService: Found ${matched.length} matching library recipes`);
 
@@ -110,8 +110,57 @@ class RecipeService {
       return this._generateFromScratch(deals);
     }
 
+    // Step 1b-AI: Refine deal matching with Claude AI for each candidate recipe.
+    // Runs once per weekly generation; results are cached with the recipes.
+    // 500ms delay between recipes to stay within rate limits.
+    let aiRefined = matched;
+    if (this.anthropic) {
+      try {
+        const aiMatcher = require('./aiMatcher');
+        aiMatcher.resetMatchStats();
+
+        // Pre-filter to food deals only — same filtering as recipeMatcher uses internally
+        const foodDeals = enrichedDeals.filter(d => {
+          const kw = recipeMatcher.normalizeDealName(d.name || '');
+          return kw && recipeMatcher._isFoodDeal(kw, d.category);
+        });
+        console.log(`RecipeService: AI matching ${matched.length} recipes against ${foodDeals.length} food deals`);
+
+        const aiResults = [];
+        for (let i = 0; i < matched.length; i++) {
+          if (i > 0) await new Promise(resolve => setTimeout(resolve, 500));
+          const recipe = matched[i];
+          try {
+            const aiDeals = await aiMatcher.matchRecipeToDeals(recipe, foodDeals);
+            // Use AI deals if it found any; otherwise keep text-matched deals as fallback
+            aiResults.push({
+              ...recipe,
+              matchedDeals: aiDeals.length > 0 ? aiDeals : recipe.matchedDeals,
+              aiMatched: aiDeals.length > 0,
+            });
+          } catch (recipeErr) {
+            console.warn(`RecipeService: AI match failed for "${recipe.title}": ${recipeErr.message}`);
+            aiResults.push(recipe); // keep text-matched result
+          }
+        }
+
+        // Drop recipes where AI matched but found no deals (genuine no-match)
+        aiRefined = aiResults.filter(r => r.matchedDeals.length > 0);
+
+        const stats = aiMatcher.getMatchStats();
+        console.log(
+          `RecipeService: AI matching complete — ` +
+          `${stats.totalCalls} API calls, ${stats.totalIngredients} ingredients checked, ` +
+          `est. cost $${stats.estimatedCost.toFixed(2)}`
+        );
+      } catch (aiErr) {
+        console.warn('RecipeService: AI matching unavailable — using text matching:', aiErr.message);
+        aiRefined = matched;
+      }
+    }
+
     // Step 1c: Attach per-serving savings to each matched recipe's deals.
-    const matchedWithSavings = matched.map(r =>
+    const matchedWithSavings = aiRefined.map(r =>
       enrichMatchedDealsWithSavings(r, r.matchedDeals)
     );
 

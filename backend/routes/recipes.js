@@ -83,6 +83,59 @@ router.get('/matched', async (req, res) => {
   }
 });
 
+// ── Cached recipes with query-param filtering (no AI calls) ─────────
+// Reads from weekly-recipes.json; all filtering runs server-side.
+// Query params: allergens (comma-separated), mealType, maxCookTime
+router.get('/matched-filtered', async (req, res) => {
+  try {
+    const { allergens, mealType, maxCookTime, store } = req.query;
+
+    let recipes = recipeService.getWeeklyRecipes(store || null);
+
+    if (allergens) {
+      const allergenList = allergens.split(',').map(a => a.toLowerCase().trim());
+      recipes = recipes.filter(r => {
+        const text = [...(r.allIngredients || []), ...(r.ingredients || [])].join(' ').toLowerCase();
+        return !allergenList.some(a => text.includes(a));
+      });
+    }
+
+    if (mealType) {
+      recipes = recipes.filter(r =>
+        r.tags?.some(t => t.toLowerCase() === mealType.toLowerCase()) ||
+        r.mealType?.toLowerCase() === mealType.toLowerCase()
+      );
+    }
+
+    if (maxCookTime) {
+      const maxMin = parseInt(maxCookTime, 10);
+      if (!isNaN(maxMin)) {
+        recipes = recipes.filter(r => (r.cookTime || r.prepTime || 0) <= maxMin);
+      }
+    }
+
+    res.json({
+      recipes,
+      total: recipes.length,
+      cached: true,
+      generatedAt: recipes[0]?.generatedAt ?? null,
+    });
+  } catch (error) {
+    console.error('Error in matched-filtered:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── AI match cost monitoring ─────────────────────────────────────────
+router.get('/match-stats', (req, res) => {
+  try {
+    const aiMatcher = require('../services/aiMatcher');
+    res.json(aiMatcher.getMatchStats());
+  } catch {
+    res.json({ totalCalls: 0, totalIngredients: 0, estimatedCost: 0, note: 'aiMatcher not loaded yet' });
+  }
+});
+
 // ── Health check (must be before /:recipeId) ────────────────────────
 router.get('/health', async (req, res) => {
   const meta = recipeService.getWeeklyRecipesMeta();
