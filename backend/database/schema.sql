@@ -63,6 +63,17 @@ CREATE TABLE IF NOT EXISTS match_history (
   matched_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- ── Weekly Recipes Cache ──────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS weekly_recipes_cache (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  recipes      TEXT     NOT NULL,  -- JSON array
+  generated_at TEXT     NOT NULL DEFAULT (datetime('now')),
+  deal_count   INTEGER  NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_weekly_recipes_generated_at ON weekly_recipes_cache(generated_at DESC);
+
 -- ── Indexes ───────────────────────────────────────────────────────────────────
 
 CREATE INDEX IF NOT EXISTS idx_products_normalized_name  ON products(normalized_name);

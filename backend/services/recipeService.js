@@ -261,7 +261,7 @@ Respond with ONLY a JSON array of ${matchedWithSavings.length} objects. No markd
         };
       });
 
-      this._saveWeeklyRecipes(normalised);
+      await this._saveWeeklyRecipes(normalised);
       console.log(`RecipeService: Enriched and stored ${normalised.length} weekly recipes from library`);
       return normalised;
     } catch (error) {
@@ -344,7 +344,7 @@ You must respond with valid JSON only. Do not include any text, explanation or c
       nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 },
     }));
 
-    this._saveWeeklyRecipes(normalised);
+    await this._saveWeeklyRecipes(normalised);
     console.log(`RecipeService: Generated ${normalised.length} weekly recipes from scratch (no library, target 50)`);
     return normalised;
   }
@@ -445,15 +445,42 @@ Respond with ONLY the JSON array.`;
   }
 
   getWeeklyRecipes(store = null) {
-    // Try /tmp first (most recently generated on serverless), then deployed file
+    // Synchronous path — return cached in-memory or filesystem data.
+    // DB reads happen in the async startup loader (loadWeeklyRecipesFromDb).
     const tmpData = this._readRecipesFile(TMP_RECIPES_PATH);
     const allRecipes = (tmpData?.recipes?.length > 0)
       ? tmpData.recipes
       : (this._readRecipesFile(WEEKLY_RECIPES_PATH)?.recipes ?? []);
 
     if (!store) return allRecipes;
-
     return this._filterRecipesByStore(allRecipes, store);
+  }
+
+  /**
+   * Load persisted recipes from the database into the local /tmp cache.
+   * Called once at startup so getWeeklyRecipes() can remain synchronous.
+   */
+  async loadWeeklyRecipesFromDb() {
+    try {
+      const db = require('../database/db');
+      const cached = await db.getWeeklyRecipes();
+      if (!cached?.recipes?.length) return false;
+
+      // Populate /tmp so the synchronous getWeeklyRecipes() can read it
+      const data = {
+        generatedAt: cached.generatedAt instanceof Date
+          ? cached.generatedAt.toISOString()
+          : cached.generatedAt,
+        dealCount: cached.dealCount || 0,
+        recipes: cached.recipes,
+      };
+      fs.writeFileSync(TMP_RECIPES_PATH, JSON.stringify(data, null, 2), 'utf8');
+      console.log(`RecipeService: Loaded ${cached.recipes.length} recipes from DB (generated ${data.generatedAt})`);
+      return true;
+    } catch (err) {
+      console.warn('RecipeService: Could not load recipes from DB:', err.message);
+      return false;
+    }
   }
 
   getWeeklyRecipesMeta() {
@@ -468,26 +495,40 @@ Respond with ONLY the JSON array.`;
     return null;
   }
 
-  _saveWeeklyRecipes(recipes) {
-    const data = {
-      generatedAt: new Date().toISOString(),
-      dealCount: 0,
-      recipes,
-    };
+  async _saveWeeklyRecipes(recipes) {
+    let dealCount = 0;
     try {
       const dealService = require('./dealService');
-      data.dealCount = dealService.getCurrentDeals.length || 0;
+      const deals = await dealService.getCurrentDeals();
+      dealCount = deals.length || 0;
     } catch {}
 
-    const json = JSON.stringify(data, null, 2);
+    // ── Primary: persist to database (survives deploys) ──────────────
+    try {
+      const db = require('../database/db');
+      await db.saveWeeklyRecipes(recipes, dealCount);
+      console.log(`RecipeService: Saved ${recipes.length} recipes to database`);
+    } catch (dbErr) {
+      console.warn('RecipeService: DB save failed, falling back to filesystem:', dbErr.message);
+    }
 
-    // Try primary path first (works locally)
+    // ── Fallback / local: write to filesystem ─────────────────────────
+    const data = {
+      generatedAt: new Date().toISOString(),
+      dealCount,
+      recipes,
+    };
+    const json = JSON.stringify(data, null, 2);
     try {
       fs.mkdirSync(path.dirname(WEEKLY_RECIPES_PATH), { recursive: true });
       fs.writeFileSync(WEEKLY_RECIPES_PATH, json, 'utf8');
     } catch {
-      // Read-only filesystem (Vercel) — write to /tmp instead
+      // Read-only filesystem (production) — /tmp is always writable
+    }
+    try {
       fs.writeFileSync(TMP_RECIPES_PATH, json, 'utf8');
+    } catch (err) {
+      console.warn('RecipeService: Could not write /tmp recipes file:', err.message);
     }
   }
 

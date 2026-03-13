@@ -137,13 +137,23 @@ if (!process.env.VERCEL) {
       }
     })();
 
-    // ── Weekly recipes check — generate in background if missing ───────────────
+    // ── Weekly recipes check — load from DB, then generate if still missing ────
     (async () => {
       try {
         const recipeService = require('./services/recipeService');
+
+        // Step 1: Try to restore persisted recipes from the database into /tmp.
+        // This is the key fix for Render deploys wiping /tmp on every restart.
+        const loadedFromDb = await recipeService.loadWeeklyRecipesFromDb();
+
+        if (loadedFromDb) {
+          // DB had recipes — /tmp is now populated; nothing more to do.
+          return;
+        }
+
+        // Step 2: Check if /tmp or the bundled data file has recipes (local dev fallback).
         const fs   = require('fs');
         const path = require('path');
-
         const tmpPath  = '/tmp/weekly-recipes.json';
         const dataPath = path.join(__dirname, 'data', 'weekly-recipes.json');
 
@@ -153,7 +163,7 @@ if (!process.env.VERCEL) {
           0;
 
         if (existing > 0) {
-          console.log(`Startup: weekly recipes OK (${existing} recipes)`);
+          console.log(`Startup: weekly recipes OK from filesystem (${existing} recipes)`);
         } else {
           console.log('Startup: no weekly recipes found — generating in background...');
           recipeService.generateWeeklyRecipes()

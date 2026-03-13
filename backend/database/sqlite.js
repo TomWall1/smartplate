@@ -198,6 +198,42 @@ function getMatchStats() {
   return { total, byType };
 }
 
+// ── Weekly Recipes Cache ──────────────────────────────────────────────────────
+
+function saveWeeklyRecipes(recipes, dealCount = 0) {
+  const db = getDb();
+  const result = db.prepare(`
+    INSERT INTO weekly_recipes_cache (recipes, deal_count)
+    VALUES (?, ?)
+  `).run(JSON.stringify(recipes), dealCount);
+
+  // Keep only the 3 most recent entries
+  db.prepare(`
+    DELETE FROM weekly_recipes_cache
+    WHERE id NOT IN (
+      SELECT id FROM weekly_recipes_cache ORDER BY generated_at DESC LIMIT 3
+    )
+  `).run();
+
+  return { id: result.lastInsertRowid };
+}
+
+function getWeeklyRecipes() {
+  const db = getDb();
+  const row = db.prepare(`
+    SELECT recipes, generated_at, deal_count
+    FROM weekly_recipes_cache
+    ORDER BY generated_at DESC
+    LIMIT 1
+  `).get();
+  if (!row) return null;
+  return {
+    recipes:     JSON.parse(row.recipes || '[]'),
+    generatedAt: row.generated_at,
+    dealCount:   row.deal_count,
+  };
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 function deserializeProduct(row) {
@@ -219,6 +255,8 @@ function getStats() {
 module.exports = {
   getDb,
   closeDb,
+  saveWeeklyRecipes,
+  getWeeklyRecipes,
   insertProduct,
   insertProductBatch,
   getProductById,

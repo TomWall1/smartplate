@@ -21,6 +21,28 @@ pool.on('error', (err) => {
   console.error('[PG] Unexpected pool error:', err.message);
 });
 
+// ── Auto-migrate: ensure weekly_recipes_cache table exists ────────────────────
+// Runs once per process start. Safe — uses CREATE TABLE IF NOT EXISTS.
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS weekly_recipes_cache (
+        id           SERIAL PRIMARY KEY,
+        recipes      JSONB     NOT NULL,
+        generated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        deal_count   INTEGER   NOT NULL DEFAULT 0
+      )
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_weekly_recipes_generated_at
+      ON weekly_recipes_cache(generated_at DESC)
+    `);
+  } catch (err) {
+    // Non-fatal — log and continue. Server still works; recipes fall back to filesystem.
+    console.warn('[PG] weekly_recipes_cache auto-migrate warning:', err.message);
+  }
+})();
+
 // ── Schema init ───────────────────────────────────────────────────────────────
 
 async function initSchema() {
@@ -220,6 +242,42 @@ async function getMatchStats() {
   return { total, byType: byTypeResult.rows };
 }
 
+// ── Weekly Recipes Cache ──────────────────────────────────────────────────────
+
+async function saveWeeklyRecipes(recipes, dealCount = 0) {
+  const result = await pool.query(`
+    INSERT INTO weekly_recipes_cache (recipes, deal_count)
+    VALUES ($1, $2)
+    RETURNING id, generated_at
+  `, [JSON.stringify(recipes), dealCount]);
+
+  // Keep only the 3 most recent entries
+  await pool.query(`
+    DELETE FROM weekly_recipes_cache
+    WHERE id NOT IN (
+      SELECT id FROM weekly_recipes_cache ORDER BY generated_at DESC LIMIT 3
+    )
+  `);
+
+  return result.rows[0] ?? null;
+}
+
+async function getWeeklyRecipes() {
+  const result = await pool.query(`
+    SELECT recipes, generated_at, deal_count
+    FROM weekly_recipes_cache
+    ORDER BY generated_at DESC
+    LIMIT 1
+  `);
+  if (!result.rows[0]) return null;
+  const row = result.rows[0];
+  return {
+    recipes:     typeof row.recipes === 'string' ? JSON.parse(row.recipes) : row.recipes,
+    generatedAt: row.generated_at,
+    dealCount:   row.deal_count,
+  };
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 async function getStats() {
@@ -231,6 +289,8 @@ module.exports = {
   getDb,
   closeDb,
   initSchema,
+  saveWeeklyRecipes,
+  getWeeklyRecipes,
   insertProduct,
   insertProductBatch,
   getProductById,
