@@ -7,9 +7,10 @@ import { recipesApi } from '../services/api';
 import { useApp } from '../App';
 
 const SOURCE_META = {
-  jamieoliver:   { label: 'Jamie Oliver',   logo: 'https://www.jamieoliver.com/favicon.ico' },
-  recipetineats: { label: 'RecipeTin Eats', logo: 'https://www.recipetineats.com/favicon.ico' },
-  donnahay:      { label: 'Donna Hay',      logo: 'https://www.donnahay.com.au/favicon.ico' },
+  jamieoliver:   { label: 'Jamie Oliver',       logo: 'https://www.jamieoliver.com/favicon.ico' },
+  recipetineats: { label: 'RecipeTin Eats',     logo: 'https://www.recipetineats.com/favicon.ico' },
+  donnahay:      { label: 'Donna Hay',          logo: 'https://www.donnahay.com.au/favicon.ico' },
+  womensweekly:  { label: "Women's Weekly Food", logo: 'https://www.womensweeklyfood.com.au/favicon.ico' },
 };
 
 function RecipeDetailSkeleton() {

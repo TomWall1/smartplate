@@ -33,6 +33,7 @@ const CATEGORY_WEIGHTS = {
 const LIBRARY_PATH    = path.join(__dirname, '..', 'data', 'recipe-library.json');
 const JO_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'jamie-oliver-recipes.json');
 const DH_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'donna-hay-recipes.json');
+const WW_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'womensweekly-recipes.json');
 
 // Common brand/marketing terms to strip from deal names
 const STRIP_PREFIXES = [
@@ -289,6 +290,16 @@ class RecipeMatcher {
       const dh   = (data.recipes || []).map(r => ({ ...r, source: 'donnahay' }));
       allRecipes.push(...dh);
       console.log(`RecipeMatcher: Loaded ${dh.length} recipes from Donna Hay library`);
+    } catch {
+      // File doesn't exist yet — silently skip
+    }
+
+    // ── Women's Weekly Food library (optional — skip if file not generated yet) ──
+    try {
+      const data = JSON.parse(fs.readFileSync(WW_LIBRARY_PATH, 'utf8'));
+      const ww   = (data.recipes || []).map(r => ({ ...r, source: 'womensweekly' }));
+      allRecipes.push(...ww);
+      console.log(`RecipeMatcher: Loaded ${ww.length} recipes from Women's Weekly library`);
     } catch {
       // File doesn't exist yet — silently skip
     }
