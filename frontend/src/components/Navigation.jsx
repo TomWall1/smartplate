@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { UtensilsCrossed, Home, BookOpen, User, Wifi, WifiOff, LogIn, LogOut } from 'lucide-react';
+import { UtensilsCrossed, Home, BookOpen, User, Wifi, WifiOff, LogIn, LogOut, Heart, Calendar, ShoppingCart, Crown, Bell, Shield } from 'lucide-react';
 import { useApp } from '../App';
 import { useAuth } from '../context/AuthContext';
+import { usePremium } from '../context/PremiumContext';
 
 const STORE_META = {
   woolworths: { label: 'Woolworths', color: '#007833' },
@@ -15,14 +16,23 @@ const Navigation = () => {
   const navigate  = useNavigate();
   const { selectedStore, apiStatus } = useApp();
   const { user, signOut } = useAuth();
+  const { isPremium } = usePremium();
+
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  const isAdmin    = user && adminEmail && user.email === adminEmail;
 
   const storeMeta  = selectedStore ? STORE_META[selectedStore] : null;
   const dealsLabel = storeMeta ? storeMeta.label : 'Home';
   const dealsPath  = storeMeta ? `/store/${selectedStore}` : '/';
 
-  const isDealsActive   = location.pathname === '/' || location.pathname.startsWith('/store/');
-  const isRecipesActive = location.pathname.startsWith('/recipes');
-  const isProfileActive = location.pathname === '/profile';
+  const isDealsActive     = location.pathname === '/' || location.pathname.startsWith('/store/');
+  const isRecipesActive   = location.pathname.startsWith('/recipes');
+  const isProfileActive   = location.pathname === '/profile';
+  const isFavoritesActive = location.pathname === '/favorites';
+  const isPlannerActive   = location.pathname === '/meal-planner';
+  const isListActive      = location.pathname === '/shopping-list';
+  const isPremiumActive   = location.pathname === '/premium';
+  const isAdminActive     = location.pathname === '/admin';
 
   const handleSignOut = async () => {
     await signOut();
@@ -102,6 +112,41 @@ const Navigation = () => {
               >
                 Recipes
               </Link>
+              {isPremium && (
+                <>
+                  <Link
+                    to="/favorites"
+                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    style={activeLinkStyle(isFavoritesActive)}
+                  >
+                    Favourites
+                  </Link>
+                  <Link
+                    to="/meal-planner"
+                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    style={activeLinkStyle(isPlannerActive)}
+                  >
+                    Meal Plan
+                  </Link>
+                  <Link
+                    to="/shopping-list"
+                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    style={activeLinkStyle(isListActive)}
+                  >
+                    Shopping
+                  </Link>
+                </>
+              )}
+              {!isPremium && (
+                <Link
+                  to="/premium"
+                  className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#FBDFC3]"
+                  style={activeLinkStyle(isPremiumActive)}
+                >
+                  <Crown className="w-3.5 h-3.5" style={{ color: 'var(--color-honey)' }} />
+                  Premium
+                </Link>
+              )}
               <Link
                 to="/profile"
                 className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
@@ -109,6 +154,15 @@ const Navigation = () => {
               >
                 Profile
               </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                  style={activeLinkStyle(isAdminActive)}
+                >
+                  Admin
+                </Link>
+              )}
             </div>
 
             {/* Right side: status + auth */}
@@ -149,60 +203,72 @@ const Navigation = () => {
 
       {/* ── Mobile bottom bar ────────────────────────────────────────────── */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t overflow-x-auto"
         style={{
           background: 'var(--color-parchment)',
           borderColor: 'var(--color-stone)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        <div className="flex items-stretch">
+        <div className="flex items-stretch min-w-max w-full">
           <Link
             to={dealsPath}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+            className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
             style={{ color: isDealsActive ? (storeMeta?.color || 'var(--color-leaf)') : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
           >
             <Home className="w-5 h-5" />
-            <span>{dealsLabel}</span>
+            <span>{storeMeta ? storeMeta.label.slice(0, 4) : 'Home'}</span>
           </Link>
 
           <Link
             to="/recipes"
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+            className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
             style={{ color: isRecipesActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
           >
             <BookOpen className="w-5 h-5" />
             <span>Recipes</span>
           </Link>
 
+          {isPremium && (
+            <>
+              <Link
+                to="/favorites"
+                className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+                style={{ color: isFavoritesActive ? 'var(--color-berry)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                <Heart className="w-5 h-5" />
+                <span>Saved</span>
+              </Link>
+              <Link
+                to="/shopping-list"
+                className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+                style={{ color: isListActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span>List</span>
+              </Link>
+            </>
+          )}
+
+          {!isPremium && (
+            <Link
+              to="/premium"
+              className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+              style={{ color: isPremiumActive ? 'var(--color-honey)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <Crown className="w-5 h-5" />
+              <span>Premium</span>
+            </Link>
+          )}
+
           <Link
             to="/profile"
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+            className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
             style={{ color: isProfileActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
           >
             <User className="w-5 h-5" />
             <span>Profile</span>
           </Link>
-
-          {user ? (
-            <button
-              onClick={handleSignOut}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
-              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Sign out</span>
-            </button>
-          ) : (
-            <Link
-              to="/auth"
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
-              style={{ color: location.pathname === '/auth' ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              <LogIn className="w-5 h-5" />
-              <span>Login</span>
-            </Link>
-          )}
         </div>
       </nav>
     </>

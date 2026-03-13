@@ -36,14 +36,18 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Import routes
-const dealsRoutes = require('./routes/deals');
+const dealsRoutes   = require('./routes/deals');
 const recipesRoutes = require('./routes/recipes');
-const usersRoutes = require('./routes/users');
+const usersRoutes   = require('./routes/users');
+const premiumRoutes = require('./routes/premium');
+const adminRoutes   = require('./routes/admin');
 
 // Routes
-app.use('/api/deals', dealsRoutes);
+app.use('/api/deals',   dealsRoutes);
 app.use('/api/recipes', recipesRoutes);
-app.use('/api/users', usersRoutes);
+app.use('/api/users',   usersRoutes);
+app.use('/api/premium', premiumRoutes);
+app.use('/api/admin',   adminRoutes);
 
 // External cron trigger — used by cron-job.org / GitHub Actions for weekly refresh
 // Returns 202 immediately; refresh runs in background to avoid proxy timeouts.

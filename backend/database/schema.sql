@@ -74,6 +74,76 @@ CREATE TABLE IF NOT EXISTS weekly_recipes_cache (
 
 CREATE INDEX IF NOT EXISTS idx_weekly_recipes_generated_at ON weekly_recipes_cache(generated_at DESC);
 
+-- ── Favorites ─────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS favorite_recipes (
+  id          INTEGER   PRIMARY KEY AUTOINCREMENT,
+  user_id     TEXT      NOT NULL,
+  recipe_id   TEXT      NOT NULL,
+  recipe_data TEXT,  -- JSON snapshot
+  saved_at    TEXT      NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, recipe_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorite_recipes(user_id);
+
+-- ── Meal Plans ─────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS meal_plans (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     TEXT    NOT NULL,
+  date        TEXT    NOT NULL,  -- ISO date YYYY-MM-DD
+  meal_type   TEXT    NOT NULL CHECK(meal_type IN ('breakfast','lunch','dinner')),
+  recipe_id   TEXT    NOT NULL,
+  recipe_data TEXT,  -- JSON snapshot
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, date, meal_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_meal_plans_user_id ON meal_plans(user_id);
+CREATE INDEX IF NOT EXISTS idx_meal_plans_date    ON meal_plans(date);
+
+-- ── Shopping Lists ─────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS shopping_lists (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    TEXT    NOT NULL,
+  name       TEXT    NOT NULL DEFAULT 'My Shopping List',
+  items      TEXT    NOT NULL DEFAULT '[]',  -- JSON array
+  created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_shopping_lists_user_id ON shopping_lists(user_id);
+
+-- ── Price History ──────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS price_history (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_name   TEXT    NOT NULL,
+  store          TEXT    NOT NULL,
+  price          REAL    NOT NULL,
+  original_price REAL,
+  recorded_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_history_product     ON price_history(product_name, store);
+CREATE INDEX IF NOT EXISTS idx_price_history_recorded_at ON price_history(recorded_at DESC);
+
+-- ── Price Alerts ───────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS price_alerts (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id      TEXT    NOT NULL,
+  product_name TEXT    NOT NULL,
+  target_price REAL    NOT NULL,
+  store        TEXT,
+  active       INTEGER NOT NULL DEFAULT 1,
+  created_at   TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_alerts_user_id ON price_alerts(user_id);
+
 -- ── Indexes ───────────────────────────────────────────────────────────────────
 
 CREATE INDEX IF NOT EXISTS idx_products_normalized_name  ON products(normalized_name);

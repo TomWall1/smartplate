@@ -159,4 +159,89 @@ export const healthApi = {
   },
 };
 
+// Premium API
+export const premiumApi = {
+  getStatus: async () => {
+    const response = await api.get('/api/premium/status');
+    return response.data;
+  },
+  getFavorites: async () => {
+    const response = await api.get('/api/premium/favorites');
+    return response.data;
+  },
+  addFavorite: async (recipeId, recipeData) => {
+    const response = await api.post(`/api/premium/favorites/${recipeId}`, { recipe_data: recipeData });
+    return response.data;
+  },
+  removeFavorite: async (recipeId) => {
+    const response = await api.delete(`/api/premium/favorites/${recipeId}`);
+    return response.data;
+  },
+  getMealPlan: async (startDate, endDate) => {
+    const response = await api.get('/api/premium/meal-plan', { params: { startDate, endDate } });
+    return response.data;
+  },
+  addToMealPlan: async (date, mealType, recipeId, recipeData) => {
+    const response = await api.post('/api/premium/meal-plan', {
+      date,
+      meal_type: mealType,
+      recipe_id: recipeId,
+      recipe_data: recipeData,
+    });
+    return response.data;
+  },
+  removeFromMealPlan: async (id) => {
+    const response = await api.delete(`/api/premium/meal-plan/${id}`);
+    return response.data;
+  },
+  getShoppingLists: async () => {
+    const response = await api.get('/api/premium/shopping-lists');
+    return response.data;
+  },
+  createShoppingList: async (name, items) => {
+    const response = await api.post('/api/premium/shopping-lists', { name, items });
+    return response.data;
+  },
+  updateShoppingList: async (id, updates) => {
+    const response = await api.put(`/api/premium/shopping-lists/${id}`, updates);
+    return response.data;
+  },
+  deleteShoppingList: async (id) => {
+    const response = await api.delete(`/api/premium/shopping-lists/${id}`);
+    return response.data;
+  },
+  getPriceAlerts: async () => {
+    const response = await api.get('/api/premium/price-alerts');
+    return response.data;
+  },
+  createPriceAlert: async (productName, targetPrice, store) => {
+    const response = await api.post('/api/premium/price-alerts', {
+      product_name: productName,
+      target_price: targetPrice,
+      store,
+    });
+    return response.data;
+  },
+  deletePriceAlert: async (id) => {
+    const response = await api.delete(`/api/premium/price-alerts/${id}`);
+    return response.data;
+  },
+};
+
+// Admin API
+export const adminApi = {
+  getUsers: async () => {
+    const response = await api.get('/api/admin/users');
+    return response.data;
+  },
+  togglePremium: async (userId) => {
+    const response = await api.post(`/api/admin/users/${userId}/toggle-premium`);
+    return response.data;
+  },
+  getStats: async () => {
+    const response = await api.get('/api/admin/stats');
+    return response.data;
+  },
+};
+
 export default api;

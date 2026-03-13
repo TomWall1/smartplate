@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const recipeService = require('../services/recipeService');
+const { supabase: authSupabase, clientForToken } = require('../services/authService');
 
 // ── Manually trigger weekly recipe generation ───────────────────────
 // Returns 202 immediately; generation runs in background.
@@ -35,6 +36,40 @@ router.post('/suggestions', async (req, res) => {
     let recipes;
 
     if (hasPreferences) {
+      // Premium gate — personalization requires a premium account
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
+        return res.status(403).json({
+          error: 'Premium required',
+          message: 'Sign in and upgrade to Premium to personalise your recipes',
+          upgradeUrl: '/premium',
+        });
+      }
+      const token = authHeader.slice(7);
+      if (authSupabase) {
+        const { data: { user } } = await authSupabase.auth.getUser(token);
+        if (!user) {
+          return res.status(403).json({
+            error: 'Premium required',
+            message: 'Sign in to use personalised recommendations',
+            upgradeUrl: '/premium',
+          });
+        }
+        const userClient = clientForToken(token);
+        const { data: profile } = await userClient
+          .from('users')
+          .select('is_premium')
+          .eq('id', user.id)
+          .single();
+        if (!profile?.is_premium) {
+          return res.status(403).json({
+            error: 'Premium required',
+            message: 'Upgrade to SmartPlate Premium to get personalised recipe recommendations',
+            upgradeUrl: '/premium',
+          });
+        }
+      }
+
       // Personalised path — Claude API call with user prefs
       const fullPreferences = {
         ...preferences,

@@ -71,6 +71,81 @@ CREATE TABLE IF NOT EXISTS weekly_recipes_cache (
 
 CREATE INDEX IF NOT EXISTS idx_weekly_recipes_generated_at ON weekly_recipes_cache(generated_at DESC);
 
+-- ── Premium: Users extension ──────────────────────────────────────────────────
+-- Adds premium status columns to the existing users table.
+-- Run addPremiumTables.js migration to apply to production.
+
+-- ── Favorites ─────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS favorite_recipes (
+  id          SERIAL PRIMARY KEY,
+  user_id     UUID        NOT NULL,
+  recipe_id   TEXT        NOT NULL,
+  recipe_data JSONB,
+  saved_at    TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, recipe_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_favorites_user_id  ON favorite_recipes(user_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_saved_at ON favorite_recipes(saved_at DESC);
+
+-- ── Meal Plans ─────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS meal_plans (
+  id          SERIAL PRIMARY KEY,
+  user_id     UUID      NOT NULL,
+  date        DATE      NOT NULL,
+  meal_type   TEXT      NOT NULL CHECK(meal_type IN ('breakfast','lunch','dinner')),
+  recipe_id   TEXT      NOT NULL,
+  recipe_data JSONB,
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, date, meal_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_meal_plans_user_id ON meal_plans(user_id);
+CREATE INDEX IF NOT EXISTS idx_meal_plans_date    ON meal_plans(date);
+
+-- ── Shopping Lists ─────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS shopping_lists (
+  id         SERIAL PRIMARY KEY,
+  user_id    UUID      NOT NULL,
+  name       TEXT      NOT NULL DEFAULT 'My Shopping List',
+  items      JSONB     NOT NULL DEFAULT '[]',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_shopping_lists_user_id ON shopping_lists(user_id);
+
+-- ── Price History ──────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS price_history (
+  id             SERIAL PRIMARY KEY,
+  product_name   TEXT          NOT NULL,
+  store          TEXT          NOT NULL,
+  price          NUMERIC(10,2) NOT NULL,
+  original_price NUMERIC(10,2),
+  recorded_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_history_product     ON price_history(product_name, store);
+CREATE INDEX IF NOT EXISTS idx_price_history_recorded_at ON price_history(recorded_at DESC);
+
+-- ── Price Alerts ───────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS price_alerts (
+  id           SERIAL PRIMARY KEY,
+  user_id      UUID          NOT NULL,
+  product_name TEXT          NOT NULL,
+  target_price NUMERIC(10,2) NOT NULL,
+  store        TEXT,
+  active       BOOLEAN       NOT NULL DEFAULT TRUE,
+  created_at   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_alerts_user_id ON price_alerts(user_id);
+
 -- ── Indexes ───────────────────────────────────────────────────────────────────
 
 CREATE INDEX IF NOT EXISTS idx_products_normalized_name ON products(normalized_name);

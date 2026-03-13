@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Users, DollarSign, Sparkles, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, Users, DollarSign, Sparkles, AlertTriangle, ChevronDown, ChevronUp, Heart } from 'lucide-react';
 import SavingsBreakdown from './SavingsBreakdown';
+import { usePremium } from '../context/PremiumContext';
+import { useAuth } from '../context/AuthContext';
+import { premiumApi } from '../services/api';
 
 const SOURCE_META = {
   jamieoliver:   { label: 'Jamie Oliver',       logo: 'https://www.jamieoliver.com/favicon.ico' },
@@ -10,9 +13,44 @@ const SOURCE_META = {
   womensweekly:  { label: "Women's Weekly Food", logo: 'https://www.womensweeklyfood.com.au/favicon.ico' },
 };
 
-export default function RecipeCard({ recipe, showMatchReason = false }) {
+export default function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFavoriteChange }) {
   const navigate = useNavigate();
+  const { isPremium } = usePremium();
+  const { user } = useAuth();
   const [breakdownOpen, setBreakdownOpen] = useState(false);
+  const [favorited, setFavorited] = useState(isFavorited);
+  const [favLoading, setFavLoading] = useState(false);
+  const [showFavTooltip, setShowFavTooltip] = useState(false);
+
+  const handleFavorite = useCallback(async (e) => {
+    e.stopPropagation();
+    if (!user) { navigate('/auth'); return; }
+    if (!isPremium) { navigate('/premium'); return; }
+
+    setFavLoading(true);
+    try {
+      if (favorited) {
+        await premiumApi.removeFavorite(recipe.id);
+        setFavorited(false);
+      } else {
+        const snapshot = {
+          title:    recipe.title,
+          image:    recipe.image,
+          tags:     recipe.tags,
+          prepTime: recipe.prepTime ?? recipe.cookTime,
+          servings: recipe.servings,
+          source:   recipe.source,
+        };
+        await premiumApi.addFavorite(recipe.id, snapshot);
+        setFavorited(true);
+      }
+      onFavoriteChange?.(recipe.id, !favorited);
+    } catch (err) {
+      console.error('Favorite toggle failed:', err.message);
+    } finally {
+      setFavLoading(false);
+    }
+  }, [favorited, recipe, user, isPremium, navigate, onFavoriteChange]);
 
   const handleClick = () => navigate(`/recipes/${recipe.id}`);
   const handleKeyDown = (e) => {
@@ -66,6 +104,22 @@ export default function RecipeCard({ recipe, showMatchReason = false }) {
         >
           🍽️
         </div>
+        {/* Favourite button — shown when logged in */}
+        {user && (
+          <button
+            onClick={handleFavorite}
+            disabled={favLoading}
+            className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+            style={{ background: favorited ? 'var(--color-berry)' : 'rgba(255,255,255,0.9)' }}
+            aria-label={favorited ? 'Remove from favourites' : 'Save to favourites'}
+          >
+            <Heart
+              className="w-4 h-4"
+              style={{ color: favorited ? '#ffffff' : 'var(--color-berry)' }}
+              fill={favorited ? '#ffffff' : 'none'}
+            />
+          </button>
+        )}
       </div>
 
       {/* Body */}

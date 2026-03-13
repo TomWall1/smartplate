@@ -7,7 +7,14 @@ import Recipes from './pages/Recipes';
 import RecipeDetail from './pages/RecipeDetail';
 import Profile from './pages/Profile';
 import Auth from './pages/Auth';
+import Favorites from './pages/Favorites';
+import MealPlanner from './pages/MealPlanner';
+import ShoppingList from './pages/ShoppingList';
+import PriceAlerts from './pages/PriceAlerts';
+import Premium from './pages/Premium';
+import Admin from './pages/Admin';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { PremiumProvider } from './context/PremiumContext';
 import { dealsApi, recipesApi, healthApi, usersApi } from './services/api';
 import { filterFoodDeals } from './utils/dealFilters';
 import { WifiOff } from 'lucide-react';
@@ -175,6 +182,12 @@ function AppInner() {
             <Route path="/recipes/:id" element={<RecipeDetail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/favorites" element={<Favorites />} />
+            <Route path="/meal-planner" element={<MealPlanner />} />
+            <Route path="/shopping-list" element={<ShoppingList />} />
+            <Route path="/price-alerts" element={<PriceAlerts />} />
+            <Route path="/premium" element={<Premium />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
@@ -183,11 +196,13 @@ function AppInner() {
   );
 }
 
-// ── Root App — AuthProvider wraps everything ──────────────────────────────────
+// ── Root App — AuthProvider + PremiumProvider wrap everything ────────────────
 export default function App() {
   return (
     <AuthProvider>
-      <AppInner />
+      <PremiumProvider>
+        <AppInner />
+      </PremiumProvider>
     </AuthProvider>
   );
 }

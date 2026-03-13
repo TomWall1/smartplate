@@ -2,6 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const SUPABASE_URL  = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.warn('AuthService: SUPABASE_URL or SUPABASE_ANON_KEY not set — auth endpoints will not work.');
@@ -10,6 +11,11 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 // Singleton Supabase client used for JWT validation
 const supabase = SUPABASE_URL && SUPABASE_ANON_KEY
   ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+// Service-role client — bypasses RLS, for admin operations only
+const adminSupabase = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
   : null;
 
 /**
@@ -24,4 +30,4 @@ function clientForToken(token) {
   });
 }
 
-module.exports = { supabase, clientForToken };
+module.exports = { supabase, adminSupabase, clientForToken };

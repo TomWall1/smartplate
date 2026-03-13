@@ -1,9 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, Sparkles, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Sparkles, X, Crown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useApp } from '../App';
 import { recipesApi } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import PreferencesPanel from '../components/PreferencesPanel';
+import { usePremium } from '../context/PremiumContext';
+import { useAuth } from '../context/AuthContext';
 
 const TAG_FILTERS = [
   { id: 'all',        label: 'All' },
@@ -34,10 +37,13 @@ function RecipeSkeleton() {
 
 export default function Recipes() {
   const { weeklyRecipes, deals, preferences } = useApp();
+  const { isPremium } = usePremium();
+  const { user } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTag, setActiveTag] = useState('all');
   const [panelOpen, setPanelOpen] = useState(false);
+  const [showPremiumNudge, setShowPremiumNudge] = useState(false);
 
   const [personalisedRecipes, setPersonalisedRecipes] = useState(null);
   const [personalisedLoading, setPersonalisedLoading] = useState(false);
@@ -133,7 +139,13 @@ export default function Recipes() {
       setIsPersonalised(true);
     } catch (err) {
       console.error('Personalisation failed:', err);
-      setPersonalisedError('Could not personalise recipes. Showing all results.');
+      const status = err?.response?.status;
+      if (status === 403) {
+        setPersonalisedError('Personalised recommendations require a Premium account. Upgrade to unlock this feature.');
+        setShowPremiumNudge(true);
+      } else {
+        setPersonalisedError('Could not personalise recipes. Showing all results.');
+      }
     } finally {
       setPersonalisedLoading(false);
     }
@@ -167,14 +179,47 @@ export default function Recipes() {
             This Week's Recipes
           </h1>
           <button
-            onClick={() => setPanelOpen(true)}
+            onClick={() => {
+              if (!isPremium) { setShowPremiumNudge(true); return; }
+              setPanelOpen(true);
+            }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
-            style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: isPremium ? 'var(--color-leaf)' : 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
           >
-            <SlidersHorizontal className="w-4 h-4" />
+            {isPremium
+              ? <SlidersHorizontal className="w-4 h-4" />
+              : <Crown className="w-4 h-4" />}
             Personalise
           </button>
         </div>
+
+        {/* ── Premium nudge (shown when non-premium clicks Personalise) ────── */}
+        {showPremiumNudge && !isPremium && (
+          <div
+            className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm border"
+            style={{ background: '#fffbf0', borderColor: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+          >
+            <span className="flex items-center gap-2" style={{ color: 'var(--color-bark)' }}>
+              <Crown className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-honey)' }} />
+              Personalised recommendations are a <strong>Premium</strong> feature ($7.99/month).
+            </span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Link
+                to="/premium"
+                className="text-xs font-bold underline underline-offset-2"
+                style={{ color: 'var(--color-honey)' }}
+              >
+                Upgrade
+              </Link>
+              <button
+                onClick={() => setShowPremiumNudge(false)}
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ── Search bar ───────────────────────────────────────────────────── */}
         <div className="relative">
