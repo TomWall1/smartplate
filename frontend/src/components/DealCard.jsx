@@ -46,6 +46,8 @@ const DealCard = ({ deal }) => {
     }
   };
 
+  const imgSrc = deal.productImage || deal.image || null;
+
   return (
     <div
       className="deal-card flex items-center justify-between p-3 rounded-[20px] cursor-pointer group"
@@ -61,7 +63,18 @@ const DealCard = ({ deal }) => {
       aria-label={`View ${deal.name} - $${deal.price.toFixed(2)} at ${deal.store}`}
       title="Click to view product online"
     >
-      <div className="flex-1">
+      {/* Product image thumbnail */}
+      {imgSrc && (
+        <img
+          src={imgSrc}
+          alt={deal.name}
+          className="w-16 h-16 object-contain rounded-xl flex-shrink-0 mr-3"
+          style={{ border: '1px solid var(--color-stone)' }}
+          onError={(e) => { e.target.style.display = 'none'; }}
+        />
+      )}
+
+      <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <h3
             className="font-bold leading-snug"

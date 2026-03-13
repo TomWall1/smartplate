@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChefHat, LayoutGrid, List } from 'lucide-react';
+import { ArrowLeft, ChefHat } from 'lucide-react';
 import { useApp } from '../App';
 import { dealsApi, recipesApi } from '../services/api';
-import DealCard from '../components/DealCard';
 import RecipeCard from '../components/RecipeCard';
 import CategorizedDeals from '../components/CategorizedDeals';
 
@@ -61,10 +60,11 @@ export default function StorePage() {
   const [storeDeals, setStoreDeals] = useState([]);
   const [dealsLoading, setDealsLoading] = useState(true);
   const [dealsError, setDealsError] = useState(null);
-  const [viewMode, setViewMode] = useState('categorized'); // 'categorized' | 'list'
 
   const [storeRecipes, setStoreRecipes] = useState([]);
   const [recipesLoading, setRecipesLoading] = useState(true);
+  const [displayCount, setDisplayCount] = useState(6);
+  const RECIPES_PER_PAGE = 6;
 
   const colors = STORE_COLORS[store] || { bg: '#78716c', light: 'var(--color-blush)', text: '#ffffff' };
   const storeName = capitalize(store);
@@ -175,7 +175,7 @@ export default function StorePage() {
           </div>
 
           {recipesLoading ? (
-            <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0 -mx-4 sm:mx-0 px-4 sm:px-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <RecipeSkeleton key={i} />
               ))}
@@ -189,60 +189,43 @@ export default function StorePage() {
               <p className="mt-1 text-xs">Check back after recipes are generated for the week.</p>
             </div>
           ) : (
-            <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0 -mx-4 sm:mx-0 px-4 sm:px-0">
-              {storeRecipes.map((recipe) => (
-                <div key={recipe.id} className="flex-shrink-0 w-64 sm:w-auto">
-                  <RecipeCard recipe={recipe} />
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {storeRecipes.slice(0, displayCount).map((recipe) => (
+                  <RecipeCard key={recipe.id} recipe={recipe} />
+                ))}
+              </div>
+              {displayCount < storeRecipes.length ? (
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={() => setDisplayCount((n) => Math.min(n + RECIPES_PER_PAGE, storeRecipes.length))}
+                    className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
+                    style={{ background: 'var(--color-leaf)', color: '#ffffff', fontFamily: 'Nunito, sans-serif' }}
+                  >
+                    Show more recipes ({storeRecipes.length - displayCount} remaining)
+                  </button>
                 </div>
-              ))}
-            </div>
+              ) : storeRecipes.length > RECIPES_PER_PAGE ? (
+                <p
+                  className="text-center text-sm mt-4"
+                  style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                >
+                  Showing all {storeRecipes.length} recipes
+                </p>
+              ) : null}
+            </>
           )}
         </section>
 
         {/* ── Section 2: Deals ──────────────────────────────────────────────── */}
         <section>
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div className="mb-4">
             <h2
               className="text-xl"
               style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
             >
               This Week's Deals at {storeName}
             </h2>
-
-            {/* View mode toggle */}
-            {!dealsLoading && storeDeals.length > 0 && (
-              <div
-                className="flex items-center rounded-xl overflow-hidden"
-                style={{ border: '1.5px solid var(--color-stone)', background: '#ffffff' }}
-              >
-                <button
-                  onClick={() => setViewMode('categorized')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold transition-colors"
-                  style={{
-                    fontFamily: 'Nunito, sans-serif',
-                    background: viewMode === 'categorized' ? 'var(--color-leaf)' : 'transparent',
-                    color:      viewMode === 'categorized' ? '#ffffff' : 'var(--color-text-muted)',
-                  }}
-                  aria-pressed={viewMode === 'categorized'}
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                  Categories
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold transition-colors"
-                  style={{
-                    fontFamily: 'Nunito, sans-serif',
-                    background: viewMode === 'list' ? 'var(--color-leaf)' : 'transparent',
-                    color:      viewMode === 'list' ? '#ffffff' : 'var(--color-text-muted)',
-                  }}
-                  aria-pressed={viewMode === 'list'}
-                >
-                  <List className="w-3.5 h-3.5" />
-                  All deals
-                </button>
-              </div>
-            )}
           </div>
 
           {dealsError && (
@@ -268,14 +251,8 @@ export default function StorePage() {
               <p className="text-lg mb-1">No deals found for {storeName}.</p>
               <p className="text-sm">Check back later or try refreshing.</p>
             </div>
-          ) : viewMode === 'categorized' ? (
-            <CategorizedDeals deals={storeDeals} />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {storeDeals.map((deal, idx) => (
-                <DealCard key={deal.id ?? idx} deal={deal} />
-              ))}
-            </div>
+            <CategorizedDeals deals={storeDeals} />
           )}
         </section>
       </div>

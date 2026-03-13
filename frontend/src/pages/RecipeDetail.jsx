@@ -48,6 +48,7 @@ export default function RecipeDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openPopupIndex, setOpenPopupIndex] = useState(null);
+  const [isDealsExpanded, setIsDealsExpanded] = useState(false);
   const badgeRefs = useRef({});
 
   const closePopup = useCallback(() => setOpenPopupIndex(null), []);
@@ -260,71 +261,103 @@ export default function RecipeDetail() {
           />
         )}
 
-        {/* Deal highlights (shopping tip) */}
+        {/* Deal highlights (shopping tip) — collapsed by default */}
         {matchedDeals.length > 0 && (
           <div
-            className="rounded-[20px] px-5 py-4"
+            className="rounded-[20px] overflow-hidden"
             style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}
           >
-            <h2
-              className="mb-3"
-              style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
+            <button
+              onClick={() => setIsDealsExpanded((v) => !v)}
+              className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-stone-50"
+              style={{ fontFamily: 'Nunito, sans-serif' }}
+              aria-expanded={isDealsExpanded}
             >
-              This week's deals used
-            </h2>
-            <div className="space-y-2">
-              {matchedDeals.slice(0, 6).map((deal, i) => (
-                <div key={i} className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p
-                      className="text-sm font-semibold leading-snug truncate"
-                      style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-                    >
-                      {deal.dealName}
-                    </p>
-                    <p
-                      className="text-xs"
-                      style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
-                    >
-                      {deal.store && (
-                        <span
-                          className="inline-block mr-1.5 px-1.5 py-0.5 rounded-full text-white text-xs font-bold"
-                          style={{ background: deal.store === 'woolworths' ? '#00843D' : deal.store === 'coles' ? '#E32726' : '#003087', fontSize: '10px' }}
-                        >
-                          {deal.store.charAt(0).toUpperCase() + deal.store.slice(1)}
-                        </span>
-                      )}
-                      for recipe ingredient: {deal.ingredient}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0 text-right">
-                    {deal.price > 0 && (
-                      <p
-                        className="text-sm font-bold"
-                        style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-                      >
-                        ${deal.price.toFixed(2)}
-                      </p>
-                    )}
-                    {deal.saving > 0 && (
-                      <p
-                        className="text-xs font-bold"
-                        style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
-                      >
-                        save ${deal.saving.toFixed(2)}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            {totalMealSaving > 0 && (
-              <p
-                className="text-sm font-bold mt-4 pt-3"
-                style={{ borderTop: '1px solid var(--color-stone)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+              <h2
+                style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
               >
-                🛒 Up to ${matchedDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2)} off full price on all items
-              </p>
+                This week's deals used
+                <span
+                  className="ml-2 text-sm font-bold px-2 py-0.5 rounded-full align-middle"
+                  style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                >
+                  {matchedDeals.length}
+                </span>
+              </h2>
+              <span
+                className="text-lg transition-transform duration-200"
+                style={{ color: 'var(--color-text-muted)', transform: isDealsExpanded ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}
+              >
+                ▾
+              </span>
+            </button>
+
+            {isDealsExpanded && (
+              <div className="px-5 pb-4">
+                <div className="space-y-2">
+                  {matchedDeals.slice(0, 6).map((deal, i) => (
+                    <div key={i} className="flex items-start justify-between gap-3">
+                      {(deal.productImage || deal.image) && (
+                        <img
+                          src={deal.productImage || deal.image}
+                          alt={deal.dealName}
+                          className="w-12 h-12 rounded-xl object-contain flex-shrink-0"
+                          style={{ border: '1px solid var(--color-stone)' }}
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="text-sm font-semibold leading-snug truncate"
+                          style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                        >
+                          {deal.dealName}
+                        </p>
+                        <p
+                          className="text-xs"
+                          style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                        >
+                          {deal.store && (
+                            <span
+                              className="inline-block mr-1.5 px-1.5 py-0.5 rounded-full text-white text-xs font-bold"
+                              style={{ background: deal.store === 'woolworths' ? '#00843D' : deal.store === 'coles' ? '#E32726' : '#003087', fontSize: '10px' }}
+                            >
+                              {deal.store.charAt(0).toUpperCase() + deal.store.slice(1)}
+                            </span>
+                          )}
+                          for recipe ingredient: {deal.ingredient}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0 text-right">
+                        {deal.price > 0 && (
+                          <p
+                            className="text-sm font-bold"
+                            style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                          >
+                            ${deal.price.toFixed(2)}
+                          </p>
+                        )}
+                        {deal.saving > 0 && (
+                          <p
+                            className="text-xs font-bold"
+                            style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                          >
+                            save ${deal.saving.toFixed(2)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {totalMealSaving > 0 && (
+                  <p
+                    className="text-sm font-bold mt-4 pt-3"
+                    style={{ borderTop: '1px solid var(--color-stone)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                  >
+                    🛒 Up to ${matchedDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2)} off full price on all items
+                  </p>
+                )}
+              </div>
             )}
           </div>
         )}
