@@ -34,6 +34,7 @@ const LIBRARY_PATH    = path.join(__dirname, '..', 'data', 'recipe-library.json'
 const JO_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'jamie-oliver-recipes.json');
 const DH_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'donna-hay-recipes.json');
 const WW_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'womensweekly-recipes.json');
+const JG_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'juliegoodwin-recipes.json');
 
 // Common brand/marketing terms to strip from deal names
 const STRIP_PREFIXES = [
@@ -300,6 +301,16 @@ class RecipeMatcher {
       const ww   = (data.recipes || []).map(r => ({ ...r, source: 'womensweekly' }));
       allRecipes.push(...ww);
       console.log(`RecipeMatcher: Loaded ${ww.length} recipes from Women's Weekly library`);
+    } catch {
+      // File doesn't exist yet — silently skip
+    }
+
+    // ── Julie Goodwin library (optional — skip if file not generated yet) ────
+    try {
+      const data = JSON.parse(fs.readFileSync(JG_LIBRARY_PATH, 'utf8'));
+      const jg   = (data.recipes || []).map(r => ({ ...r, source: 'juliegoodwin' }));
+      allRecipes.push(...jg);
+      console.log(`RecipeMatcher: Loaded ${jg.length} recipes from Julie Goodwin library`);
     } catch {
       // File doesn't exist yet — silently skip
     }

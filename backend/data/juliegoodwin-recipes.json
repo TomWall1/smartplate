@@ -1,0 +1,3661 @@
+{
+  "scrapedAt": "2026-03-14T12:30:47.354Z",
+  "source": "juliegoodwin.com.au",
+  "recipeCount": 36,
+  "recipes": [
+    {
+      "id": 1,
+      "source": "juliegoodwin",
+      "title": "Greek-style Dinner Bowl",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/greek-style-dinner-bowl/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2026/03/greek-bowl-2-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "chicken thigh fillets, skin on",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 chicken thigh fillets, skin on (if you can’t find these, buy chicken thigh cutlets with the bone in and remove the bone, or you can just use skinless boneless chicken fillets)"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons olive oil"
+        },
+        {
+          "name": "spice blend",
+          "quantity": null,
+          "unit": null,
+          "original": "Spice Blend"
+        },
+        {
+          "name": "combine equal parts:",
+          "quantity": null,
+          "unit": null,
+          "original": "Combine equal parts:  (For this recipe 2 teaspoons of each will suffice, but I recommend using a couple of tablespoons and storing the leftovers for next time.)"
+        },
+        {
+          "name": "smoked paprika",
+          "quantity": null,
+          "unit": null,
+          "original": "Smoked paprika"
+        },
+        {
+          "name": "ground cumin seed",
+          "quantity": null,
+          "unit": null,
+          "original": "Ground cumin seed"
+        },
+        {
+          "name": "dried oregano leaves",
+          "quantity": null,
+          "unit": null,
+          "original": "Dried oregano leaves"
+        },
+        {
+          "name": "garlic powder",
+          "quantity": null,
+          "unit": null,
+          "original": "Garlic powder"
+        },
+        {
+          "name": "onion powder",
+          "quantity": null,
+          "unit": null,
+          "original": "Onion powder"
+        },
+        {
+          "name": "table salt",
+          "quantity": null,
+          "unit": null,
+          "original": "Table salt"
+        },
+        {
+          "name": "punnet cherry or baby roma tomatoes, halved",
+          "quantity": "1/2",
+          "unit": null,
+          "original": "½ punnet cherry or baby Roma tomatoes, halved"
+        },
+        {
+          "name": "red onions, very finely diced",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 red onions, very finely diced"
+        },
+        {
+          "name": "lebanese cucumbers, quartered lengthways and cut into 1cm pieces",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 Lebanese cucumbers, quartered lengthways and cut into 1cm pieces"
+        },
+        {
+          "name": "feta, cubed",
+          "quantity": "100",
+          "unit": "g",
+          "original": "100 g feta, cubed"
+        },
+        {
+          "name": "mixed marinated pitted olives",
+          "quantity": "100",
+          "unit": "g",
+          "original": "100 g mixed marinated pitted olives"
+        },
+        {
+          "name": "parsley, chopped",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch parsley, chopped"
+        },
+        {
+          "name": "mint, chopped",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch mint, chopped"
+        },
+        {
+          "name": "salad dressing",
+          "quantity": null,
+          "unit": null,
+          "original": "Salad Dressing"
+        },
+        {
+          "name": "extra virgin olive oil",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup extra virgin olive oil"
+        },
+        {
+          "name": "dried oregano leaves",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon dried oregano leaves"
+        },
+        {
+          "name": "red wine vinegar",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons red wine vinegar"
+        },
+        {
+          "name": "sea salt flakes",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon sea salt flakes"
+        },
+        {
+          "name": "ground black pepper",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon ground black pepper"
+        },
+        {
+          "name": "rice",
+          "quantity": null,
+          "unit": null,
+          "original": "Rice"
+        },
+        {
+          "name": "packet cooked brown rice",
+          "quantity": "250",
+          "unit": "g",
+          "original": "250 g packet cooked brown rice"
+        },
+        {
+          "name": "parsley, chopped",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch parsley, chopped"
+        },
+        {
+          "name": "mint, leaves chopped",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch mint, leaves chopped"
+        },
+        {
+          "name": "dill, leaved chopped",
+          "quantity": "1",
+          "unit": "bunch",
+          "original": "1 bunch dill, leaved chopped"
+        },
+        {
+          "name": "spring onions, finely sliced",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 spring onions, finely sliced"
+        },
+        {
+          "name": "lemon, zested and juiced",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 lemon, zested and juiced"
+        },
+        {
+          "name": "extra virgin olive oil",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup extra virgin olive oil"
+        },
+        {
+          "name": "sea salt flakes",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon sea salt flakes"
+        },
+        {
+          "name": "a few grinds of black pepper",
+          "quantity": null,
+          "unit": null,
+          "original": "A few grinds of black pepper"
+        }
+      ],
+      "steps": [
+        "Sprinkle the skin side of the chicken generously with the spice blend.",
+        "In a non-stick chef pan over medium-high heat, pour a generous amount of olive oil.",
+        "Cook the chicken for around 6 minutes or until the skin is deeply golden.",
+        "Turn and cook for a further 3 minutes or until cooked all the way through.",
+        "Turn off the heat and allow the chicken to rest in the pan before slicing 1-2cm thick.",
+        "Combine all ingredients except feta and olives together in a bowl.",
+        "Combine all ingredients together in a bowl.",
+        "Pour the pan juices from the chicken over the rice and stir through.",
+        "Divide the rice into 4 bowls.",
+        "Place the sliced chicken on top.",
+        "Put the salad to one side of the bowl and top with the feta and olives.",
+        "This can be served while the chicken is hot, or chilled if there are leftovers for the next day."
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 2,
+      "source": "juliegoodwin",
+      "title": "Chicken Wings with Chilli Plum Sauce",
+      "description": "Chicken wings with chilli plum sauce by Julie Goodwin—tender, juicy wings coated in a tangy and mildly spicy glaze. Perfect for parties or easy dinners.",
+      "url": "https://juliegoodwin.com.au/recipe/chicken-wings-with-chilli-plum-sauce/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2026/02/Chicken-Wings-with-Chilli-Plum-Sauce-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "chicken wings",
+          "quantity": null,
+          "unit": null,
+          "original": "Chicken Wings"
+        },
+        {
+          "name": "cooking salt",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon cooking salt"
+        },
+        {
+          "name": "plain flour",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup plain flour"
+        },
+        {
+          "name": "tapioca starch",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup tapioca starch"
+        },
+        {
+          "name": "smoked paprika",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons smoked paprika"
+        },
+        {
+          "name": "garlic powder",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon garlic powder"
+        },
+        {
+          "name": "onion powder",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon onion powder"
+        },
+        {
+          "name": "ground dried oregano",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons ground dried oregano"
+        },
+        {
+          "name": "ground chillies",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon ground chillies"
+        },
+        {
+          "name": "finely ground white pepper",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon finely ground white pepper"
+        },
+        {
+          "name": "freshly ground black pepper",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon freshly ground black pepper"
+        },
+        {
+          "name": "fine table salt",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon fine table salt"
+        },
+        {
+          "name": "eggs, beaten",
+          "quantity": "3",
+          "unit": null,
+          "original": "3 eggs, beaten"
+        },
+        {
+          "name": "chicken wings",
+          "quantity": "1",
+          "unit": "kg",
+          "original": "1 kg chicken wings (drumettes and wingettes, or whole wings jointed)"
+        },
+        {
+          "name": "oil for deep frying",
+          "quantity": null,
+          "unit": null,
+          "original": "Oil for deep frying"
+        },
+        {
+          "name": "chili plum sauce",
+          "quantity": null,
+          "unit": null,
+          "original": "Chili Plum Sauce"
+        },
+        {
+          "name": "plum jam",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup plum jam"
+        },
+        {
+          "name": "hot chilli sauce",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup hot chilli sauce"
+        },
+        {
+          "name": "rice wine vinegar",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup (60ml) rice wine vinegar (can use white vinegar)"
+        },
+        {
+          "name": "light soy sauce",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup (125ml) light soy sauce"
+        },
+        {
+          "name": "cm piece of ginger, peeled and finely julienned",
+          "quantity": "3",
+          "unit": null,
+          "original": "3 cm piece of ginger, peeled and finely julienned"
+        },
+        {
+          "name": "garlic cloves, finely chopped",
+          "quantity": "3",
+          "unit": null,
+          "original": "3 garlic cloves, finely chopped"
+        },
+        {
+          "name": "cracked black pepper",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons cracked black pepper"
+        }
+      ],
+      "steps": [
+        "Place the chicken in a large pot with a tablespoon of cooking salt. Cover with cold water. Place over medium-high heat and bring up to the boil. Reduce the heat to a simmer and simmer for around 5 minutes, until the chicken is almost cooked through. Remove the chicken from the heat and let it cool in the water for a further 10 minutes. Remove to a colander and drain thoroughly.",
+        "Preheat the deep fryer to 180*C. In a large mixing bowl, combine the flour and all the dried spices.",
+        "One by one, dip each piece of the chicken into the spiced flour mixture. Dip it into the egg, and allow the excess egg to drain back into its bowl. Dip the chicken in the flour once more and set aside on a plate. Repeat with the rest of the chicken.",
+        "Fry the chicken in 2 batches for 6-8 minutes or until the batter is golden brown and crunchy. Serve with chilli plum sauce scattered with sesame seeds.",
+        "Place all the ingredients in a saucepan over medium-high heat and bring to the boil.",
+        "Cook for 5 minutes, making sure it does not boil over. The sauce should be slightly thickened."
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 3,
+      "source": "juliegoodwin",
+      "title": "Thai Green Chicken Curry",
+      "description": "A fragrant Thai green chicken curry by Julie Goodwin, made with tender chicken, coconut milk, and fresh herbs. A quick, flavour-packed dinner recipe.",
+      "url": "https://juliegoodwin.com.au/recipe/thai-green-chicken-curry/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2026/02/Thai-Green-Chicken-Curry-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "coriander",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch coriander"
+        },
+        {
+          "name": "lemongrass, white part finely chopped",
+          "quantity": "1",
+          "unit": "stalk",
+          "original": "1 stalk lemongrass, white part finely chopped"
+        },
+        {
+          "name": "small red chillies, seeded and chopped",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 small red chillies, seeded and chopped (use Thai green chillies if available)"
+        },
+        {
+          "name": "garlic",
+          "quantity": "2",
+          "unit": "cloves",
+          "original": "2 cloves garlic"
+        },
+        {
+          "name": "cm piece ginger, chopped",
+          "quantity": "5",
+          "unit": null,
+          "original": "5 cm piece ginger, chopped"
+        },
+        {
+          "name": "peanut oil",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons peanut oil"
+        },
+        {
+          "name": "chicken thigh fillets, sliced",
+          "quantity": "600",
+          "unit": "g",
+          "original": "600 g chicken thigh fillets, sliced"
+        },
+        {
+          "name": "makrut lime leaves, spine of the leaf removed and remainder sliced into fine threads",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 makrut lime leaves, spine of the leaf removed and remainder sliced into fine threads"
+        },
+        {
+          "name": "can coconut cream",
+          "quantity": "400",
+          "unit": "ml",
+          "original": "400 ml can coconut cream"
+        },
+        {
+          "name": "small zucchini, sliced into ribbons",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 small zucchini, sliced into ribbons"
+        },
+        {
+          "name": "green beans, topped, tailed and sliced",
+          "quantity": "50",
+          "unit": "g",
+          "original": "50 g green beans, topped, tailed and sliced"
+        },
+        {
+          "name": "brown sugar",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon brown sugar"
+        },
+        {
+          "name": "fish sauce",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons fish sauce"
+        },
+        {
+          "name": "lime juice",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons lime juice"
+        }
+      ],
+      "steps": [
+        "Wash the coriander thoroughly. Scrape and chop the roots, and chop the stems. Reserve the leaves for serving. Place in the bowl of a mini food processor with lemongrass, chillies, garlic and ginger and grind into a paste.",
+        "Place ¼ teaspoon peanut oil in a chef pan over high heat and quickly stir fry ¼ of the chicken until starting to brown. Remove to a bowl and repeat with the remaining chicken and oil.",
+        "Put a few drops of oil in the wok and stir fry the curry paste for 2 minutes or until fragrant. Add the chicken back into the wok and toss to coat in curry. Add kaffir lime leaves and coconut cream. Reduce the heat and simmer for 7-8 minutes or until chicken is cooked through. Add brown sugar, fish sauce and lime juice. Taste and add more of any of these things as your taste dictates. In the last minute of cooking, add the zucchini and beans.",
+        "Serve scattered with coriander leaves."
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 4,
+      "source": "juliegoodwin",
+      "title": "Southern-Style Fried Chicken",
+      "description": "We love a takeaway as much as the next family, but it can be expensive when you have a crowd or giant-sized children with appetites to match. This is my version of a takeaway favourite, at a fraction of the cost. It is — as described by my Season 14 MasterChef colleagues — “finger-lickin’ Goodwin.”",
+      "url": "https://juliegoodwin.com.au/recipe/southern-style-fried-chicken/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/SouthernStyleChicken-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "chicken drumsticks",
+          "quantity": "16",
+          "unit": null,
+          "original": "16 chicken drumsticks (about 3 kg)"
+        },
+        {
+          "name": "plain flour",
+          "quantity": "2",
+          "unit": "cups",
+          "original": "2 cups (300 g) plain flour"
+        },
+        {
+          "name": "tapioca starch",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup (250 g) tapioca starch"
+        },
+        {
+          "name": "garlic powder",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon garlic powder"
+        },
+        {
+          "name": "onion powder",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon onion powder"
+        },
+        {
+          "name": "smoked paprika",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon smoked paprika"
+        },
+        {
+          "name": "salt",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon salt"
+        },
+        {
+          "name": "finely ground",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon finely ground"
+        },
+        {
+          "name": "white pepper",
+          "quantity": null,
+          "unit": null,
+          "original": "White pepper"
+        },
+        {
+          "name": "eggs vegetable oil, for deep frying",
+          "quantity": "3",
+          "unit": null,
+          "original": "3 eggs vegetable oil, for deep frying"
+        }
+      ],
+      "steps": [
+        "Place the chicken drumsticks in a large pot. Cover with salted water. Place over a medium heat until the pot comes to a simmer. Simmer very gently for 10–12 minutes. The chicken should be just cooked through to the bone but still tender. Remove the chicken from the pot. This step can be done in advance and the chicken kept in the fridge until it’s time to fry.",
+        "In a large shallow dish, place the flour, tapioca starch, garlic powder, onion powder, paprika, salt and pepper. Using a wire whisk, stir to mix evenly. In a second dish, beat the eggs with ¹⁄³ cup (80 ml) water.",
+        "Fill a deep-fryer to the recommended level with clean vegetable oil and heat to 190°C. Preheat the oven to 100°C.",
+        "Dip a drumstick into the flour and toss to coat. Shake off the excess, then dip into the egg mixture, coating the whole thing. Dip back into the flour and\ncoat again. Repeat with three more drumsticks. Place four drumsticks carefully into the oil and fry for about 5 minutes or until golden brown and crunchy. While they are frying, prepare the next four drumsticks. Once fried, place the chicken on a tray in the oven to keep warm while you cook the rest.",
+        "Note: Tapioca starch can be found in Asian grocery stores or in the international aisle of the supermarket."
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 5,
+      "source": "juliegoodwin",
+      "title": "Chicken and Cheese Strudel",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/chicken-and-cheese-strudel/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Chicken-1-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "olive oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon olive oil"
+        },
+        {
+          "name": "chicken thigh fillets, cut into 3 cm cubes",
+          "quantity": "800",
+          "unit": "g",
+          "original": "800 g chicken thigh fillets, cut into 3 cm cubes"
+        },
+        {
+          "name": "button mushrooms, sliced",
+          "quantity": "200",
+          "unit": "g",
+          "original": "200 g button mushrooms, sliced"
+        },
+        {
+          "name": "garlic",
+          "quantity": "3",
+          "unit": "cloves",
+          "original": "3 cloves garlic"
+        },
+        {
+          "name": "plain flour",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons plain flour"
+        },
+        {
+          "name": "milk",
+          "quantity": "1 1/4",
+          "unit": "cups",
+          "original": "1 ¼ cups milk"
+        },
+        {
+          "name": "dijon or french mustard",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon Dijon or French mustard"
+        },
+        {
+          "name": "sea salt",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon sea salt"
+        },
+        {
+          "name": "ground white pepper",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon ground white pepper"
+        },
+        {
+          "name": "grated tasty cheese",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup grated tasty cheese"
+        },
+        {
+          "name": "sheets frozen puff pastry",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 sheets frozen puff pastry"
+        },
+        {
+          "name": "egg, beaten",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 egg, beaten"
+        },
+        {
+          "name": "shallots , finely sliced",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 shallots (spring onions), finely sliced"
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 200°C. Heat 1 teaspoon of oil in a large, heavy-based frypan over medium-high heat and brown half of the chicken. Remove it to a bowl and repeat with another teaspoon of oil and the remaining chicken. The chicken only needs to have some golden color; it doesn’t need to be cooked all the way through at this stage.",
+        "Heat the remaining oil in the pan and sauté the mushrooms and garlic until the garlic is fragrant and translucent, and the mushrooms are a light golden color. The mushrooms will release liquid as they cook, so continue to cook until this liquid evaporates.",
+        "Return the chicken to the pan and sprinkle the flour over the top. Stir to coat the chicken. Stir in the milk, ¼ cup at a time, allowing the sauce to cook and thicken between each addition. When all the milk is added, bring the sauce to a simmer and stir in the mustard, salt, pepper, and two-thirds of the cheese. Simmer for a few minutes or until the chicken is cooked through. Remove to a bowl and allow to cool.",
+        "On a sheet of baking paper on a large cutting board, place 2 sheets of puff pastry. Brush 1 cm of the edge of one sheet with a little beaten egg, and overlap another sheet over it. Press the edge to join the sheets together into a large rectangle. Turn the rectangle so it is vertical on the bench. Using the back of a butter knife or a skewer, make faint lines on the pastry to divide it into equal thirds lengthwise. Cut off the top two corners of the large rectangle to form a point. At the base of the large rectangle, cut a square out of the left and right thirds of the pastry. It should now resemble the shape of a big, straight Christmas tree.",
+        "On the left and right thirds of the large rectangle (not the middle third), make incisions about 1.5 cm apart, following the angle of the upper point of the pastry and going to each edge. These will form your pastry braids for the strudel. Once the pastry is cut, lift it, still on the baking paper, onto a large baking tray.",
+        "Place the cooled chicken mixture along the middle third of the pastry, stopping short of the pointy and square-cut end. Sprinkle with the sliced shallots and the remaining cheese. Fold the pointy end over the chicken mixture, then fold the square end of the pastry over. Then, alternating from left to right, fold the strips of pastry over the chicken mixture. It will look a bit like a braid. Brush liberally with egg and bake for 20–25 minutes or until a deep golden brown. This is lovely served hot or at room temperature."
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 6,
+      "source": "juliegoodwin",
+      "title": "Butter Chicken",
+      "description": "Butter Chicken - a Julie Goodwin Recipe - this is a quick and easy version of butter chicken - just right for weeknight dinners.",
+      "url": "https://juliegoodwin.com.au/recipe/butter-chicken/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Indian-Butter-Chicken-scaled.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "olive oil",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons olive oil"
+        },
+        {
+          "name": "butter or ghee",
+          "quantity": "80",
+          "unit": "g",
+          "original": "80 g butter or ghee"
+        },
+        {
+          "name": "chicken thighs, trimmed and cut into thirds",
+          "quantity": "1.6",
+          "unit": "kg",
+          "original": "1.6 kg chicken thighs, trimmed and cut into thirds (see note)"
+        },
+        {
+          "name": "whole cumin seeds",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon whole cumin seeds"
+        },
+        {
+          "name": "fresh ginger, grated",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons fresh ginger, grated"
+        },
+        {
+          "name": "garlic, chopped",
+          "quantity": "2",
+          "unit": "cloves",
+          "original": "2 cloves garlic, chopped"
+        },
+        {
+          "name": "ground coriander seed",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon ground coriander seed"
+        },
+        {
+          "name": "ground cardamom",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon ground cardamom"
+        },
+        {
+          "name": "ground allspice",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon ground allspice"
+        },
+        {
+          "name": "chilli powder",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon chilli powder"
+        },
+        {
+          "name": "tomato paste",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "⅓  cup tomato paste"
+        },
+        {
+          "name": "tomato puree",
+          "quantity": "1 1/2",
+          "unit": "cups",
+          "original": "1 ½ cups tomato puree"
+        },
+        {
+          "name": "natural yoghurt",
+          "quantity": "2/3",
+          "unit": "cup",
+          "original": "⅔ cup natural yoghurt"
+        },
+        {
+          "name": "thickened cream",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup thickened cream"
+        },
+        {
+          "name": "sugar",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons sugar"
+        },
+        {
+          "name": "salt",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons salt"
+        },
+        {
+          "name": "extra yoghurt",
+          "quantity": null,
+          "unit": null,
+          "original": "Extra yoghurt"
+        }
+      ],
+      "steps": [
+        "In a large non-stick chef’s pan, heat ¼ the oil and a ¼ of the butter over medium-high heat. Brown ¼ of chicken pieces for about 3 minutes, then remove from the pan and set aside. Repeat with the rest of the oil, butter and chicken.",
+        "Reduce the heat to medium-low. In the oil left in the pan, saute the cumin seeds for about a minute until fragrant. Add the ginger and garlic and stir for a minute or two, then add the ground spices and cook for a further minute. Add tomato paste to the mixture and cook for another minute.",
+        "Return chicken to the pan, along with tomato puree, yoghurt, cream, sugar and salt. Simmer for 10 minutes or until chicken has cooked through. Serve topped with a swirl of the extra yoghurt.",
+        "Note: Butter chicken is traditionally cooked using chicken tikka. You can omit the chicken thigh from this recipe, make the sauce without the chicken, and add in the chicken tikka from (pxxx) instead if you prefer."
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 7,
+      "source": "juliegoodwin",
+      "title": "Chicken Tawouk",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/chicken-tawouk/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Chicken-Tawouk-scaled.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "olive oil",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup olive oil"
+        },
+        {
+          "name": "chilli powder",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons chilli powder"
+        },
+        {
+          "name": "sumac",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons sumac"
+        },
+        {
+          "name": "garlic, finely chopped or crushed",
+          "quantity": "4",
+          "unit": "cloves",
+          "original": "4 cloves garlic, finely chopped or crushed"
+        },
+        {
+          "name": "zest of 1 lemon",
+          "quantity": null,
+          "unit": null,
+          "original": "Zest of 1 lemon"
+        },
+        {
+          "name": "dried oregano leaves",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon dried oregano leaves"
+        },
+        {
+          "name": "chicken thigh fillets, cut into strips",
+          "quantity": "6",
+          "unit": null,
+          "original": "6 chicken thigh fillets, cut into strips"
+        },
+        {
+          "name": "salt",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt"
+        }
+      ],
+      "steps": [
+        "In a large snap-lock bag, place all the ingredients except for the salt. Seal and squish the bag around to make sure all the ingredients are well combined and all the chicken is coated. Place in the fridge and marinate for at least half an hour, preferably overnight.",
+        "Heat a grill pan or BBQ to a fairly high heat. Thread the chicken onto metal skewers and cook on the grill until there are char marks and the chicken is cooked through. Season with salt and rest the chicken under foil."
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 8,
+      "source": "juliegoodwin",
+      "title": "Chicken Parmigiana",
+      "description": "Although this dish can be seen sitting sadly in a bain-marie across the country, it really is at its absolute best when it’s served straight after being cooked – hot, crispy, bubbling with rich tomato sauce and golden cheese.",
+      "url": "https://juliegoodwin.com.au/recipe/chicken-parmigiana/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Chicken-Parmigiana.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "olive oil",
+          "quantity": "2",
+          "unit": "tsp",
+          "original": "2 tsp olive oil"
+        },
+        {
+          "name": "onion, chopped",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 onion, chopped"
+        },
+        {
+          "name": "garlic cloves, crushed",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 garlic cloves, crushed"
+        },
+        {
+          "name": "can chopped tomatoes",
+          "quantity": "800",
+          "unit": "g",
+          "original": "800 g can chopped tomatoes"
+        },
+        {
+          "name": "tbs sugar",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 tbs sugar"
+        },
+        {
+          "name": "⁄2 tsp salt",
+          "quantity": "1",
+          "unit": null,
+          "original": "1⁄2 tsp salt"
+        },
+        {
+          "name": "⁄4 cup chopped basil leaves",
+          "quantity": "1",
+          "unit": null,
+          "original": "1⁄4 cup chopped basil leaves"
+        },
+        {
+          "name": "single chicken breasts",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 single chicken breasts (small)"
+        },
+        {
+          "name": "plain flour",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup (150 g) plain flour"
+        },
+        {
+          "name": "salt and white pepper",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt and white pepper"
+        },
+        {
+          "name": "eggs",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 eggs"
+        },
+        {
+          "name": "esh breadcrumbs",
+          "quantity": "3",
+          "unit": "cups",
+          "original": "3 cups (120 g) esh breadcrumbs"
+        },
+        {
+          "name": "vegetable oil for frying",
+          "quantity": null,
+          "unit": null,
+          "original": "Vegetable oil for frying"
+        },
+        {
+          "name": "finely grated parmesan cheese",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup (80 g) finely grated Parmesan cheese"
+        }
+      ],
+      "steps": [
+        "Heat the oil in a medium saucepan and sauté the onion and garlic over medium heat until soft. Add the tomatoes, sugar, and salt. Bring to the boil, then reduce the heat slightly and simmer for 20 minutes, until reduced to about two-thirds of its original volume. The sauce should be quite thick. Taste it and add more salt if required. Remove from the heat and stir through the basil.",
+        "Meanwhile, cut the chicken breasts in half horizontally to make two equally thick pieces. Place the flour in a shallow bowl and season with salt and pepper, then beat the eggs in a second shallow bowl with 1 tbsp water. Put the breadcrumbs into a third shallow bowl.",
+        "Line up the flour, egg, and breadcrumb bowls in a row. Dip each piece of chicken into the flour, then the egg, then the breadcrumbs, shaking off the excess.",
+        "Heat 5 mm oil in a large ying pan or chef’s pan over medium heat. Fry the chicken pieces in batches – don’t overcrowd the pan. Cook for about 3 minutes each side, by which time they will be golden brown and cooked through but still juicy inside. If the heat is too high, they will colour too quickly and not be cooked enough in the middle. Use fresh oil after each batch to avoid loose breadcrumbs burning and sticking to the fillets.",
+        "Preheat a grill to hot and arrange the chicken on a baking tray. Spoon the tomato sauce over the top, then sprinkle with a generous handful of Parmesan cheese. Put the baking tray under the grill for about a minute, or until the parmesan starts to turn golden. Serve piping hot with steamed seasonal vegetables or salad, or as pictured, right, on bed of so polenta."
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 9,
+      "source": "juliegoodwin",
+      "title": "Apricot Chicken Tagine",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/apricot-chicken-tagine/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Apricot.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "sea salt",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons sea salt"
+        },
+        {
+          "name": "ground turmeric",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon ground turmeric"
+        },
+        {
+          "name": "ground cumin seeds",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon ground cumin seeds"
+        },
+        {
+          "name": "ground cinnamon",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon ground cinnamon"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "⅓ cup olive oil"
+        },
+        {
+          "name": "large onion, peeled and quartered",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 large onion, peeled and quartered"
+        },
+        {
+          "name": "garlic, peeled",
+          "quantity": "3",
+          "unit": "cloves",
+          "original": "3 cloves garlic, peeled"
+        },
+        {
+          "name": "cm knob ginger, peeled and cut into 1 cm pieces",
+          "quantity": "5",
+          "unit": null,
+          "original": "5 cm knob ginger, peeled and cut into 1 cm pieces"
+        },
+        {
+          "name": "chicken marylands, cut into drumsticks and thigh cutlets",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 chicken marylands, cut into drumsticks and thigh cutlets"
+        },
+        {
+          "name": "chicken stock  or store bought",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup chicken stock (see page 152) or store bought"
+        },
+        {
+          "name": "apricot nectar",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup apricot nectar"
+        },
+        {
+          "name": "dried turkish apricots, chopped",
+          "quantity": "12",
+          "unit": null,
+          "original": "12 dried Turkish apricots, chopped"
+        },
+        {
+          "name": "pearl  couscous",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup pearl (Israeli) couscous"
+        },
+        {
+          "name": "parsley, roughly chopped",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch parsley, roughly chopped"
+        },
+        {
+          "name": "slivered almonds, toasted crusty bread and green salad, for serving",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup slivered almonds, toasted Crusty bread and green salad, for serving"
+        }
+      ],
+      "steps": [
+        "Place the salt, turmeric, cumin, cinnamon, 3 tablespoons oil, onion, garlic\nand ginger into a food processor and blitz until a smooth thick paste is\nachieved. Place in a large snap-lock bag with the chicken and massage to\nensure all the chicken is coated.",
+        "Place the remaining olive oil in the tagine base (see note) over medium-high\nheat. Add the chicken pieces, skin side down, and cook for about 3 minutes\nwithout turning or until they are a lovely caramel brown. Turn the chicken\nover, and pour in the chicken stock and apricot nectar. Scatter the chopped\napricots around the tagine. Bring to the boil then reduce the heat to low.\nPlace the tagine on a heat diffuser if you have one, to ensure a very low heat.\n(Alternatively place the tagine in an oven preheated to 160°C.) Cook for 40\nminutes.",
+        "Remove the tagine lid, and carefully lift the chicken pieces one by one\nand scatter the couscous around and under them. Turn off the heat. After 5\nminutes the couscous will swell and be ready to eat. Scatter the parsley and\nalmonds over the tagine and serve to the table with crusty bread and salad.",
+        "Note: Chicken maryland is the drumstick with the thigh cutlet still attached.\nThey are very inexpensive to buy. Thigh fllets can also be used but reduce\nthe cooking time by 15–20 minutes. If a tagine is not available, a large\nchef pan with a ftted lid or tented foil over the top will work"
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 10,
+      "source": "juliegoodwin",
+      "title": "Spiced Flattened Chicken",
+      "description": "Spiced Chicken with Potatoes - a Julie Goodwin recipe",
+      "url": "https://juliegoodwin.com.au/recipe/spiced-flattened-chicken/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/spiced-chicken-scaled.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Poultry"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "x 1.9 kg whole chicken",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 x 1.9 kg whole chicken"
+        },
+        {
+          "name": "butter at room temperature",
+          "quantity": "60",
+          "unit": "g",
+          "original": "60 g butter at room temperature"
+        },
+        {
+          "name": "sweet paprika",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon sweet paprika"
+        },
+        {
+          "name": "ground hot chillies",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon ground hot chillies"
+        },
+        {
+          "name": "garlic, crushed",
+          "quantity": "3",
+          "unit": "cloves",
+          "original": "3 cloves garlic, crushed"
+        },
+        {
+          "name": "flat leaf parsley, chopped",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup flat leaf parsley, chopped"
+        },
+        {
+          "name": "fresh oregano, chopped",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup fresh oregano, chopped"
+        },
+        {
+          "name": "sea salt",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon sea salt"
+        },
+        {
+          "name": "ground black pepper",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon ground black pepper"
+        },
+        {
+          "name": "lemon, zested",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 lemon, zested"
+        },
+        {
+          "name": "potatoes, peeled and cut into wedges",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 potatoes, peeled and cut into wedges"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon olive oil"
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C.",
+        "To butterfly the chicken, us a sharp knife or kitchen scissors to cut down either side of the backbone. Remove the backbone. Open the chicken outwards and using a sharp knife, remove the rib bones. Wipe out the bird with paper towel.",
+        "Turn the chicken over and, starting at the neck end, insert your fingers between the skin and the flesh of the breast. Carefully create a pocket in the breasts, thighs and drumsticks.",
+        "Mix the butter with paprika, chilli, garlic, parsley, oregano, salt, pepper and lemon zest. Spread the butter under the skin.",
+        "Cut the lemon in half, and place cut side down in a baking dish. Place the chicken on top of the lemons, and put the potatoes around the sides. Roast for 45-50 minutes or until the skin is richly golden.",
+        "Carefully remove the chicken and lemon from the pan. Pour most of the pan juices into a cup and toss the potatoes gently in the remaining pan juices.",
+        "Put the potatoes back into the oven until the pan juices reduce down and the potatoes have a rich golden colour. Please note that these are not crunchy potatoes, they are soft and sticky and rich with a spicy, lemony flavour.",
+        "Brush the chicken with the reserved pan juices before serving. Serve with salad and chilli salt"
+      ],
+      "nutrition": {},
+      "tags": [
+        "chicken"
+      ]
+    },
+    {
+      "id": 11,
+      "source": "juliegoodwin",
+      "title": "Barramundi Fillet with Pineapple Salsa",
+      "description": "Here’s a dinner that’s fast, tasty, healthy, and just right for a summer evening. If there’s no barramundi available you can choose whatever’s fresh and local from the fish shop. The pineapple salsa is really versatile, too. Try it with grilled chicken or fish in a soft taco shell for another quick and delicious dinner.",
+      "url": "https://juliegoodwin.com.au/recipe/barramundi-fillet-with-pineapple-salsa/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/BarramundiFillet-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Seafood"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "fresh pineapple, peeled and finely diced",
+          "quantity": "1/2",
+          "unit": null,
+          "original": "½ fresh pineapple, peeled and finely diced"
+        },
+        {
+          "name": "small red chillies, deseeded and finely sliced",
+          "quantity": "3",
+          "unit": null,
+          "original": "3 small red chillies, deseeded and finely sliced"
+        },
+        {
+          "name": "small red onion, finely diced",
+          "quantity": "1/2",
+          "unit": null,
+          "original": "½ small red onion, finely diced"
+        },
+        {
+          "name": "coriander leaves, chopped",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup coriander leaves, chopped"
+        },
+        {
+          "name": "mint leaves, finely chopped",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "⅓ cup mint leaves, finely chopped"
+        },
+        {
+          "name": "lime, zested and juiced",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 lime, zested and juiced"
+        },
+        {
+          "name": "caster sugar",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon caster sugar"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons olive oil"
+        },
+        {
+          "name": "butter",
+          "quantity": "25",
+          "unit": "g",
+          "original": "25 g butter"
+        },
+        {
+          "name": "barramundi fillets , skin on",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 barramundi fillets (about 1 kg), skin on"
+        }
+      ],
+      "steps": [
+        "In a medium bowl combine the pineapple, chilli, onion, coriander, mint and lime zest. In a separate bowl, stir the lime juice and sugar together until the sugar has dissolved. Toss the dressing through the salsa.",
+        "To cook the barramundi, heat the flat plate of the barbecue (or a chef’s pan on the stove) to medium–high and drizzle the oil over. Add the butter – it should foam straight away, and start to go brown, but not burn.",
+        "Place the fish on the plate skin-side down and cook for 2–3 minutes. Using a spatula, very carefully turn the fish over. Handle with care so the fish doesn’t break up. It should have some lovely golden brown bits. Cook for a further 1–2 minutes and lift carefully onto a serving platter. Serve with the pineapple salsa.",
+        "Note: You can make the salsa ahead of time, and refrigerate until needed. Return to room temperature to serve."
+      ],
+      "nutrition": {},
+      "tags": [
+        "seafood"
+      ]
+    },
+    {
+      "id": 12,
+      "source": "juliegoodwin",
+      "title": "Salmon Quiche",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/salmon-quiche/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Salmon-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Seafood"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "quantity savoury shortcrust pastry  or two sheets plain frozen shortcrust",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 quantity savoury shortcrust pastry (see recipe on page 232) or two sheets plain frozen shortcrust (if you have it in the freezer)"
+        },
+        {
+          "name": "grated mozzarella cheese",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup grated mozzarella cheese"
+        },
+        {
+          "name": "baby spinach leaves",
+          "quantity": "50",
+          "unit": "g",
+          "original": "50 g baby spinach leaves"
+        },
+        {
+          "name": "skinless, boneless salmon fillet, cut into 2 cm cubes",
+          "quantity": "400",
+          "unit": "g",
+          "original": "400 g skinless, boneless salmon fillet, cut into 2 cm cubes"
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 170°C. Grease a 26 cm loose-based fan tin with butter or spray oil. Lay the pastry into the fan tin and trim the edges. Prick the pastry with a fork. Place a sheet of baking paper over the pastry and fll with pastry weights or rice. Bake for 15 minutes or until starting to turn golden. Remove from the oven and take out the weights and paper.",
+        "Arrange half the mozzarella cheese evenly over the base of the pastry case. Arrange the spinach over the top, followed by the salmon cubes, then scatter with the shallots and half of the dill leaves.",
+        "In a bowl, beat the eggs then add the cream and beat well. Season with salt and pepper. Carefully pour the egg mixture into the pastry case and top with the remaining mozzarella.",
+        "Bake for 25 minutes or until golden brown on top and just frm in the middle. Remove from the oven and set aside to cool a little before serving."
+      ],
+      "nutrition": {},
+      "tags": [
+        "seafood"
+      ]
+    },
+    {
+      "id": 13,
+      "source": "juliegoodwin",
+      "title": "Potato and Poached Salmon Salad",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/potato-and-poached-salmon-salad/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Potato-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Seafood"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "small or 8 medium chat potatoes , unpeeled",
+          "quantity": "12",
+          "unit": null,
+          "original": "12 small or 8 medium chat potatoes (about 600 g), unpeeled"
+        },
+        {
+          "name": "eggs",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 eggs"
+        },
+        {
+          "name": "skinless salmon àllets",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 skinless salmon Àllets (about 180 g each)"
+        },
+        {
+          "name": "sour cream",
+          "quantity": "2/3",
+          "unit": "cup",
+          "original": "⅔ cup sour cream"
+        },
+        {
+          "name": "good-quality mayonnaise",
+          "quantity": "2/3",
+          "unit": "cup",
+          "original": "⅔ cup good-quality mayonnaise"
+        },
+        {
+          "name": "whole grain mustard",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons whole grain mustard"
+        },
+        {
+          "name": "juice and zest from 1/2 lemon",
+          "quantity": null,
+          "unit": null,
+          "original": "Juice and zest from ½ lemon"
+        },
+        {
+          "name": "dill, chopped",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons dill, chopped"
+        },
+        {
+          "name": "shallots , finely sliced",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup shallots (spring onions), finely sliced"
+        },
+        {
+          "name": "large dill pickles , finely chopped",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 large dill pickles (gherkins), finely chopped"
+        },
+        {
+          "name": "baby capers, rinsed",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons baby capers, rinsed"
+        },
+        {
+          "name": "lemon, cut into 8 wedges",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 lemon, cut into 8 wedges"
+        }
+      ],
+      "steps": [
+        "In a large pot of salted water, boil the potatoes until tender, then drain. (Time will depend on size.) While the potatoes are boiling, cook the eggs for 4 minutes in the same water. Remove and allow to cool before peeling and chopping roughly.",
+        "Reduce the temperature of the water to a gentle simmer and poach the salmon fillets for 8–10 minutes. Remove and allow to cool before gently faking the fish apart.",
+        "In a large bowl, combine the sour cream, mayonnaise, mustard, lemon juice and zest. Fold through the dill, shallots, dill pickles, capers and boiled egg.",
+        "Cut the cooled potatoes into quarters if small, sixths if medium sized, and stir into the dressing. Stir through the faked salmon and serve with lemon wedges.",
+        "Note: If not serving immediately, keep the salad in the fridge. It will seize up a bit and needs to be brought back to room temperature before serving."
+      ],
+      "nutrition": {},
+      "tags": [
+        "seafood"
+      ]
+    },
+    {
+      "id": 14,
+      "source": "juliegoodwin",
+      "title": "Chinese Prawn Omelette",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/chinese-prawn-omelette/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Chinese.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Seafood"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "cornflour",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons cornflour"
+        },
+        {
+          "name": "shaoxing wine",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons Shaoxing wine (Chinese cooking wine)"
+        },
+        {
+          "name": "soy sauce",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon soy sauce"
+        },
+        {
+          "name": "white pepper",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon white pepper"
+        },
+        {
+          "name": "green  banana prawns, shelled and deveined",
+          "quantity": "24",
+          "unit": null,
+          "original": "24 green (raw) banana prawns, shelled and deveined"
+        },
+        {
+          "name": "peanut oil",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup peanut oil"
+        },
+        {
+          "name": "red capsicum, seeded and cut into thin strips",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 red capsicum, seeded and cut into thin strips"
+        },
+        {
+          "name": "shallots , cut into 3 cm lengths",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch shallots (spring onions), cut into 3 cm lengths"
+        },
+        {
+          "name": "eggs",
+          "quantity": "8",
+          "unit": null,
+          "original": "8 eggs"
+        },
+        {
+          "name": "ground white pepper",
+          "quantity": null,
+          "unit": null,
+          "original": "Ground white pepper (optional)"
+        },
+        {
+          "name": "oyster sauce, bean sprouts, coriander leaves and crispy fried shallots, to serve",
+          "quantity": null,
+          "unit": null,
+          "original": "Oyster sauce, bean sprouts, coriander leaves and crispy fried shallots, to serve"
+        }
+      ],
+      "steps": [
+        "In a bowl, combine the cornflour, cooking wine, soy sauce, and white pepper. Add the prawns and marinate, covered, in the fridge for 1 hour.",
+        "Heat a quarter of the oil in a 28 cm frypan over high heat and stir-fry 8 prawns, then remove them to a bowl. Repeat twice more.",
+        "Add a dash more oil and stir-fry the capsicum and shallots for 1 minute, or until soft. Remove and set aside.",
+        "Beat 2 eggs together with 1 tablespoon of water. Heat ½ teaspoon of oil in the frypan, then pour in the egg and swirl to coat the base of the pan. Reduce the heat to medium.",
+        "When the egg has almost set (after 2–3 minutes), place 6 prawns and a quarter of the vegetable mixture over half of the omelette. Season with ground white pepper, if desired. Using a spatula, carefully fold the omelette in half. Cook for a further minute or so. Invert onto a plate, then repeat for the remaining 3 omelettes.",
+        "Serve with oyster sauce on the side, and top with bean sprouts, coriander, and crispy fried shallots."
+      ],
+      "nutrition": {},
+      "tags": [
+        "seafood"
+      ]
+    },
+    {
+      "id": 15,
+      "source": "juliegoodwin",
+      "title": "Salmon Fillet with Rich Lemon Sauce",
+      "description": "This is just one of a thousand things to do with beautiful fresh salmon fillets. Serve them with zucchini ribbons and chat potatoes, or on a bed of homemade linguine with a salad of green leaves.",
+      "url": "https://juliegoodwin.com.au/recipe/salmon-fillet-with-rich-lemon-sauce/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Salmon-Fillet-with-Rich-Lemon-Sauce.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Seafood"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "olive oil",
+          "quantity": "1",
+          "unit": "tsp",
+          "original": "1 tsp olive oil"
+        },
+        {
+          "name": "× 180 g fresh salmon fillets, skin on",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 × 180 g fresh salmon fillets, skin on"
+        },
+        {
+          "name": "salt and freshly ground black pepper",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt and freshly ground black pepper"
+        },
+        {
+          "name": "⁄2 cup  thickened cream",
+          "quantity": "1",
+          "unit": null,
+          "original": "1⁄2 cup (125 ml) thickened cream"
+        },
+        {
+          "name": "finely grated lemon zest",
+          "quantity": "1",
+          "unit": "tbsp",
+          "original": "1 tbsp finely grated lemon zest"
+        },
+        {
+          "name": "butter",
+          "quantity": "2",
+          "unit": "tsp",
+          "original": "2 tsp butter"
+        },
+        {
+          "name": "lemon juice",
+          "quantity": "1",
+          "unit": "tbsp",
+          "original": "1 tbsp lemon juice"
+        },
+        {
+          "name": "egg yolk",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 egg yolk"
+        },
+        {
+          "name": "chopped dill",
+          "quantity": "2",
+          "unit": "tbsp",
+          "original": "2 tbsp chopped dill"
+        }
+      ],
+      "steps": [
+        "Heat a large non-stick frying pan over medium-high heat and add the olive oil. Place the salmon in the pan, skin side down. Season the top with a little salt and freshly ground black pepper. Using a spatula or an egg flip, press the fish gently so the skin has even contact with the surface – if left alone, it will curl up.",
+        "After about 3 minutes, turn the fish over and cook for another 2 minutes. Remove it from the pan and let it rest, covered, in a warm place.",
+        "Meanwhile, in a separate pan, heat the cream and lemon zest over low heat until warm. Add the butter and lemon juice and stir to combine, then add the egg yolk and whisk until the sauce thickens. Just before serving, stir through the dill.",
+        "Serve the salmon drizzled with the sauce and whatever accompaniments you choose."
+      ],
+      "nutrition": {},
+      "tags": [
+        "seafood"
+      ]
+    },
+    {
+      "id": 16,
+      "source": "juliegoodwin",
+      "title": "Scallops with Cauliflower Puree and Bacon Crumble",
+      "description": "The combination of cauliflower, bacon and scallop is just gorgeous. This is a lovely dinner-party dish. The puree and the crumble can be prepared ahead, leaving only the puree to be reheated, the crumble refreshed in the pan and the scallops to be sautéed at the last minute.",
+      "url": "https://juliegoodwin.com.au/recipe/scallops-with-cauliflower-puree-and-bacon-crumble/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Scallops-with-cauliflower-puree-and-bacon-crumble-scaled.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Seafood"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "cauliflower, grated",
+          "quantity": "1/2",
+          "unit": null,
+          "original": "½ cauliflower, grated (or processed)"
+        },
+        {
+          "name": "butter",
+          "quantity": "250",
+          "unit": "g",
+          "original": "250 g butter"
+        },
+        {
+          "name": "milk",
+          "quantity": "2/3",
+          "unit": "cup",
+          "original": "2/3 cup milk"
+        },
+        {
+          "name": "salt",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon salt"
+        },
+        {
+          "name": "bacon, cut into an extremely fine dice",
+          "quantity": "3",
+          "unit": "rashers",
+          "original": "3 rashers bacon, cut into an extremely fine dice"
+        },
+        {
+          "name": "coarse fresh breadcrumbs",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup coarse fresh breadcrumbs"
+        },
+        {
+          "name": "butter",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon butter"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon olive oil"
+        },
+        {
+          "name": "fat scallops, preferably on the half-shell, roe removed",
+          "quantity": "12",
+          "unit": null,
+          "original": "12 fat scallops, preferably on the half-shell, roe removed"
+        }
+      ],
+      "steps": [
+        "Place cauliflower in a saucepan with milk and bring to the boil. Boil rapidly for (??) minutes or until it disintegrates when rubbed between your fingers.",
+        "Strain, reserving the milk. Put into a food processor with butter and half the salt, and process until smooth. Add reserved milk until the required consistency is reached. Taste and add more salt if required. Push through a fine metal sieve to remove any lumps. Set aside.",
+        "In a frypan, sauté the finely diced bacon. The bacon pieces should not be more than 2mm across. When the bacon is starting to cook and release its fat, add the breadcrumbs. Stir continually, until the breadcrumbs are golden and the bacon pieces are crunchy. Taste and season with salt if required – this will depend on how salty the bacon is. Drain on a paper towel.",
+        "In a hot frypan add butter and olive oil. When foaming, place scallops in and cook for1-2 minutes until golden brown and turning opaque. Turn and cook for a further 30 seconds-1 minute.",
+        "In the half shells, (or on the dish if no half-shell), dollop roughly 1 tablespoon cauliflower puree. Settle a scallop on top of the puree, and finish with a generous sprinkle of the bacon crumble."
+      ],
+      "nutrition": {},
+      "tags": [
+        "seafood"
+      ]
+    },
+    {
+      "id": 17,
+      "source": "juliegoodwin",
+      "title": "Dukkah Crusted Salmon",
+      "description": "Dukkah Crusted Salmon Fillet - a Julie Goodwin recipe",
+      "url": "https://juliegoodwin.com.au/recipe/dukkah-crusted-salmon/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/dukkah-crusted-salmon.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Seafood"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "roasted salted almonds",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "1/3 cup roasted salted almonds"
+        },
+        {
+          "name": "sesame seeds",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "1/3 cup sesame seeds"
+        },
+        {
+          "name": "coriander seeds",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons coriander seeds"
+        },
+        {
+          "name": "cumin seeds",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons cumin seeds"
+        },
+        {
+          "name": "white peppercorns",
+          "quantity": "12",
+          "unit": null,
+          "original": "12 white peppercorns"
+        },
+        {
+          "name": "ground hot chillies",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon ground hot chillies (optional)"
+        },
+        {
+          "name": "salt",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon salt"
+        },
+        {
+          "name": "x 180 g boneless salmon fillets, skin on",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 x 180 g boneless salmon fillets, skin on"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon olive oil"
+        }
+      ],
+      "steps": [
+        "Place almonds in the bowl of a food processor and process until mostly about the size of sesame seeds. There will be some bigger pieces and some powder, this is ok. Heat a large non-stick frypan or chef’s pan over medium-high heat and dry-roast the almonds until golden and aromatic. Remove to a bowl. Place the sesame seeds in the hot pan and toast until golden, then remove to the bowl.",
+        "Place the coriander seeds, cumin seeds and peppercorns into the pan and toast until starting to colour, and aromatic. Place into the bowl of the processor and process to a coarse powder. Place in the bowl with the almonds and sesame seeds, and add the chilli. Taste and add salt if required – this will depend on how salty the almonds are. Mix well.",
+        "Put half of the dukkah mixture in a shallow dish. Press the top (skinless) side of the salmon firmly into the mixture.",
+        "Wipe out the frypan and add the olive oil. Heat to a medium-high heat and place the fish skin-side down in the pan. Leave for 3-4 minutes, or until you can see the fish turning opaque from the bottom to about ¼ of the way up. Carefully turn the salmon over and cook for a further 2-3 minutes, ot until the dukkah is golden and the fish has cooked through to your liking.",
+        "Serve with a couscous salad or steamed chat potatoes, lemon wedges and steamed greens.",
+        "Note: Store-bought dukkah can be used if you prefer. This recipe makes about ¾ cup – whatever you don’t use for the salmon can be stored in an airtight container and eaten with bread and olive oil."
+      ],
+      "nutrition": {},
+      "tags": [
+        "seafood"
+      ]
+    },
+    {
+      "id": 18,
+      "source": "juliegoodwin",
+      "title": "Italian Ricotta and Spinach Ravioli with Burnt Butter and Sage",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/italian-ricotta-and-spinach-ravioli-with-burnt-butter-and-sage/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Italian-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "quantity fresh pasta",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 quantity fresh pasta"
+        },
+        {
+          "name": "garlic clove, finely chopped",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 garlic clove, finely chopped"
+        },
+        {
+          "name": "brown onion, finely chopped",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 brown onion, finely chopped"
+        },
+        {
+          "name": "ricotta cheese",
+          "quantity": "400",
+          "unit": "g",
+          "original": "400 g ricotta cheese"
+        },
+        {
+          "name": "bag baby spinach, finely chopped",
+          "quantity": "100",
+          "unit": "g",
+          "original": "100 g bag baby spinach, finely chopped"
+        },
+        {
+          "name": "pine nuts, toasted",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "1/3 cup pine nuts, toasted"
+        },
+        {
+          "name": "grated parmesan",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup grated parmesan"
+        },
+        {
+          "name": "salt",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon salt"
+        },
+        {
+          "name": "ground white pepper",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon ground white pepper"
+        },
+        {
+          "name": "butter",
+          "quantity": "125",
+          "unit": "g",
+          "original": "125 g butter"
+        },
+        {
+          "name": "sage, leaves picked",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch sage, leaves picked"
+        },
+        {
+          "name": "juice and zest of 1 lemon",
+          "quantity": null,
+          "unit": null,
+          "original": "Juice and zest of 1 lemon"
+        },
+        {
+          "name": "sea salt flakes",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon sea salt flakes"
+        },
+        {
+          "name": "parmesan to serve",
+          "quantity": null,
+          "unit": null,
+          "original": "Parmesan to serve"
+        }
+      ],
+      "steps": [
+        "Heat olive oil over medium low heat in a small fry pan. Sauté garlic and onion until translucent.",
+        "Place ricotta, spinach, garlic, onion, pine nuts, parmesan, salt and pepper in a large bowl and mix well.",
+        "Lay a long sheet of pasta on the bench and place tablespoonsful of mixture at even intervals along the strip. Lay a second sheet on top and press closely around the filling, making sure not to leave any air trapped inside. Use a 6cm cookie cutter to cut around the filling.",
+        "Place the butter in the frypan and add the sage leaves. Cook until the milk solids turn brown and the sage leaves crisp. Just before serving, add the lemon zest and juice, and salt.",
+        "Bring a large pot of salted water to a rapid boil. Cook the ravioli for around 2 minutes or until the pasta is cooked but still al dente. Remove with a slotted spoon and serve into bowls and top with the sage and burnt butter. Serve with a block of parmesan and a fine grater for everyone to help themselves."
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 19,
+      "source": "juliegoodwin",
+      "title": "Lebanese Fattoush Salad",
+      "description": "This is a traditional Middle Eastern salad – vibrant, fresh and lovely, with the crunch of toasted Lebanese bread.",
+      "url": "https://juliegoodwin.com.au/recipe/lebanese-fattoush-salad/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Lebanese-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "round of lebanese bread",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 round of Lebanese bread (or yoghurt flatbread)"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons olive oil"
+        },
+        {
+          "name": "sumac",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon sumac"
+        },
+        {
+          "name": "salt and pepper",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt and pepper"
+        },
+        {
+          "name": "lebanese cucumbers, seeded and finely diced",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 Lebanese cucumbers, seeded and finely diced"
+        },
+        {
+          "name": "punnet of very ripe cherry tomatoes, halved",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 punnet of very ripe cherry tomatoes, halved (or 3 ripe tomatoes seeded and chopped)"
+        },
+        {
+          "name": "radish, finely diced",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch radish, finely diced"
+        },
+        {
+          "name": "green capsicum, seeded and finely diced",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 green capsicum, seeded and finely diced"
+        },
+        {
+          "name": "small red onion, finely diced",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 small red onion, finely diced"
+        },
+        {
+          "name": "mint, coarsely chopped",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch mint, coarsely chopped"
+        },
+        {
+          "name": "parsley, coarsely chopped",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch parsley, coarsely chopped"
+        },
+        {
+          "name": "juice of 1 lemon",
+          "quantity": null,
+          "unit": null,
+          "original": "Juice of 1 lemon"
+        },
+        {
+          "name": "extra virgin olive oil",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup extra virgin olive oil"
+        },
+        {
+          "name": "sumac",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon sumac"
+        },
+        {
+          "name": "salt and pepper",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt and pepper (a pinch each)"
+        }
+      ],
+      "steps": [
+        "Preheat oven 180 °C (160°C fan forced) and brush the Lebanese bread evenly with oil, sprinkle with sumac, salt and pepper and bake for 10 minutes or until crisp. Alternatively, fry the bread in a deep fryer at 180*C and sprinkle with salt and sumac while still hot.Cool completely and crumple in your hands into pieces.",
+        "Combine the rest of the salad ingredients and place onto a serving platter or bowl.",
+        "Whisk lemon juice and oil together and season with sumac, salt and pepper.",
+        "Just before serving, drizzle over ¾ of the dressing and toss to mix well. Scatter over toasted bread and finish with remaining dressing. Serve immediately"
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 20,
+      "source": "juliegoodwin",
+      "title": "Lentil Dahl",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/lentil-dahl/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Lentil-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "split red lentils",
+          "quantity": "2",
+          "unit": "cups",
+          "original": "2 cups split red lentils"
+        },
+        {
+          "name": "tbs oil or ghee *",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 tbs oil or ghee *(see note)"
+        },
+        {
+          "name": "dark mustard seeds",
+          "quantity": "1",
+          "unit": "tsp",
+          "original": "1 tsp dark mustard seeds"
+        },
+        {
+          "name": "large onion, finely sliced",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 large onion, finely sliced"
+        },
+        {
+          "name": "branches fresh curry leaves",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 branches fresh curry leaves"
+        },
+        {
+          "name": "tbs ground turmeric",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 tbs ground turmeric"
+        },
+        {
+          "name": "tin coconut milk",
+          "quantity": "270",
+          "unit": "ml",
+          "original": "270 ml tin coconut milk"
+        },
+        {
+          "name": "salt",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt"
+        }
+      ],
+      "steps": [
+        "Place the lentils in a sieve and wash under cold water until it runs clear. Remove any discoloured lentils. Place the lentils and 4 cups (1 L) water into a large saucepan. Cover and bring to the boil, then uncover and cook over low heat for about 15 minutes, until the lentils are very soft. Stir often to prevent them catching on the bottom and sticking.",
+        "Meanwhile, heat the oil or ghee in a frying pan and fry the mustard seeds on high heat until they start to pop. Add the onions, curry leaves and turmeric and continue frying for about 10 minutes over medium heat until the onions are very soft.",
+        "Add the onion mixture and coconut milk to the lentils, and stir to combine and heat through. The mixture should have a soft, runny consistency. Season with salt to taste."
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 21,
+      "source": "juliegoodwin",
+      "title": "Roast Pumpkin Spinach and Ricotta Pie",
+      "description": "This is one of those surprising dishes, an “impossible pie” that needs no separate crust. It lends itself well to gluten-free flour being substituted, though it won’t go quite as golden and takes a little longer to cook. This lovely pie works well for dinner, but also holds very nicely in a packed lunch.",
+      "url": "https://juliegoodwin.com.au/recipe/roast-pumpkin-spinach-and-ricotta-pie/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/RoastPumpkinSpinachAndRicottaPie-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "large butternut pumpkin , peeled and cut into 2 cm cubes",
+          "quantity": "1/2",
+          "unit": null,
+          "original": "½ large butternut pumpkin (about 750 g), peeled and cut into 2 cm cubes"
+        },
+        {
+          "name": "light olive or vegetable oil",
+          "quantity": "2/3",
+          "unit": "cup",
+          "original": "⅔ cup (165 ml) light olive or vegetable oil"
+        },
+        {
+          "name": "ground nutmeg",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon ground nutmeg"
+        },
+        {
+          "name": "salt",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon salt"
+        },
+        {
+          "name": "black pepper",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon black pepper"
+        },
+        {
+          "name": "brown onions, sliced",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 brown onions, sliced"
+        },
+        {
+          "name": "garlic cloves, chopped",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 garlic cloves, chopped"
+        },
+        {
+          "name": "baby spinach",
+          "quantity": "100",
+          "unit": "g",
+          "original": "100 g baby spinach"
+        },
+        {
+          "name": "eggs",
+          "quantity": "6",
+          "unit": null,
+          "original": "6 eggs"
+        },
+        {
+          "name": "self-raising flour",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup (150 g) self-raising flour"
+        },
+        {
+          "name": "grated tasty cheese",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup (125 g) grated tasty cheese"
+        },
+        {
+          "name": "ricotta",
+          "quantity": "250",
+          "unit": "g",
+          "original": "250 g ricotta"
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 200°C. Grease and flour a 24 cm springform cake tin. Toss the pumpkin cubes with 1 tablespoon of the oil, the nutmeg, salt and pepper. Roast in a baking tray for 30 minutes or until soft and golden brown.",
+        "Meanwhile, in a large, deep frying pan over medium heat, sauté the onion and garlic in 1 tablespoon oil until soft. Take the pan off the heat and, using tongs, toss the spinach through until wilted slightly. Set aside. Beat the eggs in a bowl. Add the remaining oil and mix well. Add the flour and whisk until there are no lumps. Stir through the tasty cheese, and season with salt and pepper. Set aside.",
+        "Remove the pumpkin from the oven and reduce the temperature to 180°C. Toss the pumpkin through the onion and spinach mixture. The spinach will wilt further.",
+        "Place half the vegetable mixture in the base of the prepared tin and pour half the egg mixture over it. Shake the tin to make sure the egg sinks all around the vegetables. Put the other half of the vegetable mixture on top and pour in the remaining egg mixture.",
+        "Dollop the ricotta over the top, and, using a spoon, burrow down a little so that there is some ricotta nestled inside the pie as well. Bake for 45 minutes, or until golden brown on top and firm in the middle."
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 22,
+      "source": "juliegoodwin",
+      "title": "Eggplant and Sweet Potato Curry",
+      "description": "Eggplant and sweet potato curry - a Julie Goodwin recipe - cook. live. love - recipes, books and blog",
+      "url": "https://juliegoodwin.com.au/recipe/eggplant-and-sweet-potato-curry/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/EggplantAndSweetPotatoCurry-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "vegetable oil",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons vegetable oil"
+        },
+        {
+          "name": "red onion, cut into wedges",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 red onion, cut into wedges"
+        },
+        {
+          "name": "garlic cloves, finely chopped",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 garlic cloves, finely chopped"
+        },
+        {
+          "name": "thai red curry paste",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup (65 g) Thai red curry paste"
+        },
+        {
+          "name": "sweet potato, peeled and cut into 2 cm cubes",
+          "quantity": "1/2",
+          "unit": null,
+          "original": "½ sweet potato, peeled and cut into 2 cm cubes (about 2 cups)"
+        },
+        {
+          "name": "large eggplant, peeled and cut into 2 cm cubes",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 large eggplant, peeled and cut into 2 cm cubes (about 4 cups)"
+        },
+        {
+          "name": "can chopped tomatoes",
+          "quantity": "400",
+          "unit": "g",
+          "original": "400 g can chopped tomatoes"
+        },
+        {
+          "name": "can coconut milk",
+          "quantity": "400",
+          "unit": "ml",
+          "original": "400 ml can coconut milk"
+        },
+        {
+          "name": "brown sugar",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon brown sugar"
+        },
+        {
+          "name": "salt",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon salt"
+        },
+        {
+          "name": "coriander leaves",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup coriander leaves"
+        }
+      ],
+      "steps": [
+        "Place the oil in a wok over a medium heat, and stir-fry the onion and garlic until softened. Add the curry paste and stir for another minute, until fragrant.",
+        "Add the sweet potato and eggplant and toss to coat in the curry paste. Add the tomato, coconut milk, brown sugar and salt. Bring to the boil and reduce the heat. Leave on a high simmer, stirring occasionally, until the sweet potato is tender and all the vegetables have cooked through. Taste and add more salt or sugar if required. Remove from the heat and stir through the coriander leaves. Serve with jasmine rice."
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 23,
+      "source": "juliegoodwin",
+      "title": "Mushroom Soup",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/mushroom-soup/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Mushroom.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "unsalted butter",
+          "quantity": "25",
+          "unit": "g",
+          "original": "25 g unsalted butter"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons olive oil"
+        },
+        {
+          "name": "garlic, crushed",
+          "quantity": "2",
+          "unit": "cloves",
+          "original": "2 cloves garlic, crushed"
+        },
+        {
+          "name": "button mushrooms, stalks removed, finely sliced",
+          "quantity": "1",
+          "unit": "kg",
+          "original": "1 kg button mushrooms, stalks removed, finely sliced"
+        },
+        {
+          "name": "plain flour",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup plain flour"
+        },
+        {
+          "name": "chicken stock",
+          "quantity": "1",
+          "unit": "litre",
+          "original": "1 litre chicken stock (or vegetable stock for vegetarian option)"
+        },
+        {
+          "name": "finely ground white pepper",
+          "quantity": "1/4",
+          "unit": "teaspoon",
+          "original": "¼ teaspoon finely ground white pepper"
+        },
+        {
+          "name": "salt",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon salt"
+        },
+        {
+          "name": "thickened cream",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup thickened cream"
+        }
+      ],
+      "steps": [
+        "In a large, heavy-based pot, heat the butter and oil over a medium heat. Add the garlic and gently sauté until translucent, soft and fragrant.",
+        "Add the mushrooms and stir through. Increase the heat and sauté until the mushrooms are soft and brown. This will take about 10 minutes – the mushrooms firstly will take up all the moisture from the oil, then they will exude their own juices, and eventually those will evaporate and the mushrooms will start to brown. This is the point that you want to reach before proceeding.",
+        "Add the flour and stir well. Add the stock, about ½ cup at a time, stirring continuously. When all the stock is added, bring to the simmer and cook for 2–3 minutes. Remove from the heat, season with pepper and salt, and finish with the cream."
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 24,
+      "source": "juliegoodwin",
+      "title": "Big Green Breakfast Plate",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/big-green-breakfast-plate/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Big.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "sourdough bread",
+          "quantity": "4",
+          "unit": "slices",
+          "original": "4 slices sourdough bread"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons olive oil"
+        },
+        {
+          "name": "ripe avocados",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 ripe avocados"
+        },
+        {
+          "name": "quinoa, cooked to packet directions",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup quinoa, cooked to packet directions"
+        },
+        {
+          "name": "baby spinach leaves, finely chopped",
+          "quantity": "100",
+          "unit": "g",
+          "original": "100 g baby spinach leaves, finely chopped"
+        },
+        {
+          "name": "shallots , finely sliced",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 shallots (spring onions), finely sliced"
+        },
+        {
+          "name": "herbs from the salsa verde",
+          "quantity": null,
+          "unit": "Handful",
+          "original": "Handful of herbs from the salsa verde"
+        },
+        {
+          "name": "salt",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon salt"
+        },
+        {
+          "name": "juice and zest of 1 lemon",
+          "quantity": null,
+          "unit": null,
+          "original": "Juice and zest of 1 lemon"
+        },
+        {
+          "name": "eggs",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 eggs"
+        },
+        {
+          "name": "salsa verde",
+          "quantity": null,
+          "unit": null,
+          "original": "Salsa verde (see page 138)"
+        },
+        {
+          "name": "pistachio kernels, roughly chopped",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup pistachio kernels, roughly chopped"
+        }
+      ],
+      "steps": [
+        "Fill a chef pan with 5 cm of salted water and bring to a gentle simmer over medium heat. Toast the sourdough in a toaster, drizzle with olive oil, and set aside.",
+        "Prepare the avocado by running a knife around its circumference and cutting it in half. Remove the seed by lodging the knife in it and giving it a gentle twist. While the avocado is still in its half-shell, run a knife lengthways through the flesh down to the skin. Use a spoon to scoop out the flesh, which will be neatly sliced. Arrange the avocado slices on the sourdough on 4 plates.",
+        "In a bowl, mix the prepared quinoa, spinach, shallots, herbs, salt, and lemon juice and zest. Spoon evenly over the avocado.",
+        "Poach the eggs following the directions on page 2. Drain the eggs and place them on top of the toast.",
+        "Spoon the salsa verde generously over the plates, scatter with chopped pistachios, and serve."
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 25,
+      "source": "juliegoodwin",
+      "title": "Adam’s Favourite Caesar Salad",
+      "description": "Regardless of what’s in vogue and what isn’t, some things just stay favourites. My mate, Adam, always asks me to make my Caesar salad when we go to their place or they are coming to ours. If I’m taking my caesar salad to Adam’s place or anywhere else, I put all the separate components into […]",
+      "url": "https://juliegoodwin.com.au/recipe/adams-favourite-caesar-salad/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Caesar-Salad-scaled.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "caesar salad",
+          "quantity": null,
+          "unit": null,
+          "original": "Caesar Salad"
+        },
+        {
+          "name": "large cos lettuce",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 large cos lettuce"
+        },
+        {
+          "name": "bacon",
+          "quantity": "4",
+          "unit": "rashers",
+          "original": "4 rashers of bacon"
+        },
+        {
+          "name": "bread, crusts removed, cubed",
+          "quantity": "6",
+          "unit": "slices",
+          "original": "6 slices of bread, crusts removed, cubed"
+        },
+        {
+          "name": "olive oil, to drizzle",
+          "quantity": null,
+          "unit": null,
+          "original": "Olive oil, to drizzle"
+        },
+        {
+          "name": "salt, to taste",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt, to taste"
+        },
+        {
+          "name": "quantity of adam’s favourite caesar salad dressing",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 quantity of Adam’s favourite Caesar salad dressing (see overleaf)"
+        },
+        {
+          "name": "red onion, finely sliced",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 red onion, finely sliced"
+        },
+        {
+          "name": "eggs, boiled and sliced",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 eggs, boiled and sliced (I like it when the yolk is still a little bit so in the middle)"
+        },
+        {
+          "name": "parmesan cheese, shaved with a potato peeler",
+          "quantity": "100",
+          "unit": "g",
+          "original": "100g Parmesan cheese, shaved with a potato peeler"
+        },
+        {
+          "name": "caesar salad dressing",
+          "quantity": null,
+          "unit": null,
+          "original": "Caesar Salad Dressing"
+        },
+        {
+          "name": "tbs white wine vinegar",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 tbs white wine vinegar"
+        },
+        {
+          "name": "garlic clove, crushed",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 garlic clove, crushed"
+        },
+        {
+          "name": "tbs dijon mustard",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 tbs Dijon mustard"
+        },
+        {
+          "name": "anchovy fillets, finely chopped",
+          "quantity": "6",
+          "unit": null,
+          "original": "6 anchovy fillets, finely chopped"
+        },
+        {
+          "name": "tbs worcestershire sauce",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 tbs Worcestershire sauce"
+        },
+        {
+          "name": "egg yolk",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 egg yolk"
+        },
+        {
+          "name": "light olive oil",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup (250 ml) light olive oil"
+        },
+        {
+          "name": "lemon juice, to taste",
+          "quantity": null,
+          "unit": null,
+          "original": "Lemon juice, to taste"
+        },
+        {
+          "name": "salt and white pepper, to taste",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt and white pepper, to taste"
+        }
+      ],
+      "steps": [
+        "Caesar Salad",
+        "Remove any shabby outer leaves from the lettuce and any leathery leaf tips. Cut the lettuce crossways into 3–4 cm wide strips.",
+        "Remove the rind from the bacon and cut it into thin strips, then fry it in a large non-stick pan over high heat until it begins to crisp up. Remove with a slotted spatula, and drain it on paper towels.",
+        "Reduce the heat to medium-low and add the bread cubes. Drizzle them with olive oil and toss them around the pan until they are coated in the combined oil and bacon fat, then season lightly with salt. Cook, tossing occasionally, until the bread is brown and crisp. Remove and drain on paper towels.",
+        "Just before serving, toss almost all of the dressing with the red onions and the lettuce. Toss through the remaining dressing if you find you need it (this will depend on the size of your lettuce). Arrange the lettuce and onion on a large flat platter and then top with the egg, bacon, croutons, and parmesan. Serve straight away.",
+        "Caesar Salad Dressing",
+        "To make the dressing, combine the vinegar, garlic, mustard, anchovies, Worcestershire sauce and egg yolk in a large mixing bowl. Using electric beaters, beat until well combined.",
+        "Add the olive oil a few drops at a time, beating constantly, until the dressing starts to thicken. The oil can then be added in a stream. When the dressing is thick and smooth, add lemon juice, salt and white pepper to taste, and mix well."
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 26,
+      "source": "juliegoodwin",
+      "title": "Brussels Sprouts with Lemon Burnt Butter and Almonds",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/brussels-sprouts-with-lemon-burnt-butter-and-almonds/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Brussle.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "brussels sprouts – as small as possible",
+          "quantity": "400",
+          "unit": "g",
+          "original": "400 g Brussels sprouts – as small as possible"
+        },
+        {
+          "name": "slivered almonds",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup slivered almonds"
+        },
+        {
+          "name": "butter",
+          "quantity": "40",
+          "unit": "g",
+          "original": "40 g butter"
+        },
+        {
+          "name": "juice and zest of 1 lemon",
+          "quantity": null,
+          "unit": null,
+          "original": "Juice and zest of 1 lemon"
+        },
+        {
+          "name": "salt and ground black pepper",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt and ground black pepper"
+        }
+      ],
+      "steps": [
+        "Steam or microwave the Brussels sprouts until they are just tender. Check every couple of minutes. They should be bright green. Cut in half.",
+        "In a medium frypan over medium-high heat, dry-fry the almonds until golden. Watch carefully as they burn easily. Remove from pan and set aside.",
+        "Add the butter to the pan. It will start to foam up. Use a spatula to stir the butter around and keep an eye on the colour. When this becomes a good deep golden brown, add the lemon zest and juice to the pan. It will spit a bit. Toss the Brussels sprouts through the butter. Season with salt and pepper. Serve with any remaining butter from the pan drizzled over the top and scatter with the toasted almonds."
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 27,
+      "source": "juliegoodwin",
+      "title": "Antipasti Pizza",
+      "description": "Note: For this recipe, I tried a few different pre-made pizza bases. I had the best success with the ones that were fresh (from the bread section or the baker), not refrigerated or frozen. The ones I liked best weren’t the cheapest but still fit into the $20-budget.",
+      "url": "https://juliegoodwin.com.au/recipe/antipasti-pizza/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Antipasti-pizza.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Vegetables"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "pizza bases",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 pizza bases (about 20 cm)"
+        },
+        {
+          "name": "tomato pizza sauce",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup tomato pizza sauce"
+        },
+        {
+          "name": "grated mozzarella cheese",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup grated mozzarella cheese"
+        },
+        {
+          "name": "grated tasty cheese",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup grated tasty cheese"
+        },
+        {
+          "name": "red onion",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 red onion"
+        },
+        {
+          "name": "a 260 g jar chargrilled capsicum",
+          "quantity": "1/2",
+          "unit": null,
+          "original": "½ of a 260 g jar chargrilled capsicum"
+        },
+        {
+          "name": "sliced, pitted kalamata olives",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup sliced, pitted kalamata olives"
+        },
+        {
+          "name": "feta",
+          "quantity": "50",
+          "unit": "g",
+          "original": "50 g feta"
+        },
+        {
+          "name": "lebanese cucumber",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 Lebanese cucumber"
+        },
+        {
+          "name": "shallots",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 shallots"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon olive oil"
+        },
+        {
+          "name": "balsamic vinegar",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon balsamic vinegar"
+        },
+        {
+          "name": "baby spinach",
+          "quantity": "100",
+          "unit": "g",
+          "original": "100 g baby spinach"
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 200°C. Line the baking trays with baking paper and place 2 bases on each.",
+        "With the back of a spoon, spread pizza sauce on each base. Top with the grated mozzarella and tasty cheese.",
+        "Peel and roughly chop the onion. Divide the onion, capsicum and olives between the pizzas, then crumble a little feta over each one. Place in the oven for 4 minutes. (Set the timer.) Swap the top and bottom trays and cook for a further 4–6 minutes.",
+        "While the pizzas cook, cut the cucumber into quarters lengthways, then into 2 cm lengths. Peel and chop the shallots. Place the olive oil and balsamic vinegar in the large mixing bowl and whisk lightly with a fork. Toss through the spinach, cucumber and shallots and place on the serving platter on the table.",
+        "Slide the pizzas onto a board and serve to the table with the cutter"
+      ],
+      "nutrition": {},
+      "tags": [
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 28,
+      "source": "juliegoodwin",
+      "title": "Mick’s Favourite Lasagna",
+      "description": "I credit this recipe with landing me a boyfriend back in the 1980s, when I was just a teenager. Decades later, he’s still my best boyfriend, and he still gets starry-eyed when I cook it for him.",
+      "url": "https://juliegoodwin.com.au/recipe/micks-favourite-lasagna/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/MicksFavouriteLasagne-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Meat"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "quantity spaggy bol sauce",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 quantity spaggy bol sauce (see page 70)"
+        },
+        {
+          "name": "packet dried lasagne sheets",
+          "quantity": "370",
+          "unit": "g",
+          "original": "370 g packet dried lasagne sheets"
+        },
+        {
+          "name": "quantity cheese sauce",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 quantity cheese sauce (see page 302)"
+        },
+        {
+          "name": "grated tasty cheese",
+          "quantity": "250",
+          "unit": "g",
+          "original": "250 g grated tasty cheese"
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 180°C. Ladle a little bolognese sauce over the base of a 4 litre capacity baking dish (roughly 25 × 35 cm, and 6 cm deep). There needs to be enough sauce to cover the base, but keep it a thin layer (about 5 mm). Over this, lay the lasagne sheets, snapping them to fit where necessary.",
+        "Ladle half the remaining bolognese sauce over the pasta, then ladle a third of the cheese sauce on top. Carefully spread the cheese sauce to cover the meat. Scatter a third of the grated cheese over this. Place another layer of pasta on top and repeat the bolognese and cheese sauces, then scatter over another handful of cheese.",
+        "Arrange the final layer of pasta, then ladle the remaining cheese sauce over the top. Generously cover this with the rest of the cheese. Cover with foil and bake for 45 minutes, then uncover and cook a further 15 minutes or until golden brown and bubbling on top. I like to serve this lasagne with parmesan cheese, a salad of mixed greens, and garlic bread (see page 77).",
+        "Note: This dish reheats beautifully. You can also cut the cooled lasagne into individual portions to freeze."
+      ],
+      "nutrition": {},
+      "tags": []
+    },
+    {
+      "id": 29,
+      "source": "juliegoodwin",
+      "title": "Fillet Mignon with Mushrooms",
+      "description": "When Mick and I first bought a home together, we worked all hours — as many do — to pay the mortgage and the bills. I was waitressing as a second job at the time, at a steak restaurant called The Black Stump in Pennant Hills. As I cleared the plates, I would save leftover […]",
+      "url": "https://juliegoodwin.com.au/recipe/fillet-mignon-with-mushrooms/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/FilletMignon-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Meat"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "middle bacon, rind removed",
+          "quantity": "4",
+          "unit": "rashers",
+          "original": "4 rashers middle bacon, rind removed"
+        },
+        {
+          "name": "thick eye fillet steaks",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 thick eye fillet steaks (about 300 g each)"
+        },
+        {
+          "name": "vegetable oil, salt, black pepper",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon vegetable oil, salt, black pepper"
+        },
+        {
+          "name": "butter",
+          "quantity": "20",
+          "unit": "g",
+          "original": "20 g butter"
+        },
+        {
+          "name": "button mushrooms, sliced",
+          "quantity": "300",
+          "unit": "g",
+          "original": "300 g button mushrooms, sliced"
+        },
+        {
+          "name": "brandy",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup (60 ml) brandy"
+        },
+        {
+          "name": "pouring cream",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup (60 ml) pouring cream"
+        }
+      ],
+      "steps": [
+        "Preheat the oven to 200°C. Trim the bacon to match the thickness of the steak, and wrap a rasher around the edge of each fillet, securing with toothpicks. Heat the oil in a large non-stick frying pan with an ovenproof handle. Season the steaks with salt and pepper and sear over high heat on all sides (including the bacon). This should take 3–4 minutes.",
+        "Place the pan containing the steaks in the oven for around 15 minutes depending on the way you like it cooked.",
+        "Meanwhile, melt the butter in another frying pan and sauté the mushrooms over medium–high heat until soft. Season with salt and pepper.",
+        "Remove the pan from the oven, being very careful with the hot handle! Take the steaks out of the pan and remove the toothpicks. Set aside under foil to rest. Place the pan over medium heat, pour the brandy in and cook for a couple of minutes until reduced and the raw alcohol smell is gone. Pour in the cream and toss in the mushrooms. Serve on top of the steak, alongside some roasted chat potatoes and steamed asparagus.",
+        "Note: You can sear the meat several hours in advance, then finish it in the oven just before serving. Be sure to remove the meat from the fridge well beforehand to allow it to come back to room temperature before placing it in the oven. If you don’t have brandy, use a little beef stock or water to deglaze the pan."
+      ],
+      "nutrition": {},
+      "tags": [
+        "beef",
+        "pork"
+      ]
+    },
+    {
+      "id": 30,
+      "source": "juliegoodwin",
+      "title": "Korean Barbecue Beef",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/korean-barbecue-beef/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Korean-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Meat"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "kiwi fruit or 1 small pear, peeled",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 kiwi fruit or 1 small pear, peeled"
+        },
+        {
+          "name": "beef eye fillet, sliced 3–4 mm thick",
+          "quantity": "800",
+          "unit": "g",
+          "original": "800 g beef eye fillet, sliced 3–4 mm thick"
+        },
+        {
+          "name": "garlic, crushed",
+          "quantity": "3",
+          "unit": "cloves",
+          "original": "3 cloves garlic, crushed"
+        },
+        {
+          "name": "soy sauce",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons soy sauce"
+        },
+        {
+          "name": "sesame oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon sesame oil"
+        },
+        {
+          "name": "shaoxing wine",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons Shaoxing wine (Chinese cooking wine)"
+        },
+        {
+          "name": "brown sugar",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons brown sugar"
+        },
+        {
+          "name": "freshly ground black pepper",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon freshly ground black pepper"
+        },
+        {
+          "name": "peanut oil",
+          "quantity": "2",
+          "unit": "tablespoons",
+          "original": "2 tablespoons peanut oil"
+        }
+      ],
+      "steps": [
+        "For serving: oak leaf lettuce leaves, cooked jasmine rice, thinly sliced long red chillies, lime wedges",
+        "Place the kiwi fruit or pear into the bowl of a mini food processor and blitz until it forms a paste. Toss the paste through the beef and allow to stand for 10 minutes.",
+        "In a small bowl, combine the garlic, soy sauce, sesame and peanut oil, Shaoxing wine, brown sugar and pepper. Stir through the beef and marinate for 30 minutes.",
+        "Heat a barbecue or grill pan to a very high heat. When the grill is smoking, cook the beef for 1 minute on each side. You should get good char marks. 4 Serve the beef in a lettuce leaf with a little rice and sliced chillies and a squeeze of lime."
+      ],
+      "nutrition": {},
+      "tags": [
+        "beef"
+      ]
+    },
+    {
+      "id": 31,
+      "source": "juliegoodwin",
+      "title": "Honey Mustard Glazed Pork Chops",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/honey-mustard-glazed-pork-chops/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Honey-scaled.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Meat"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "honey",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "⅓ cup honey"
+        },
+        {
+          "name": "whole grain mustard",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "⅓ cup whole grain mustard"
+        },
+        {
+          "name": "white wine",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "⅓ cup white wine"
+        },
+        {
+          "name": "garlic, crushed",
+          "quantity": "2",
+          "unit": "cloves",
+          "original": "2 cloves garlic, crushed"
+        },
+        {
+          "name": "pork loin chops",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 pork loin chops (about 250 g each)"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon olive oil"
+        },
+        {
+          "name": "cream",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "⅓ cup cream"
+        }
+      ],
+      "steps": [
+        "Combine the honey, mustard, wine and garlic in a bowl. Add the pork chops, ensuring they are coated all over, and marinate for 10 minutes.",
+        "Heat the oil in a large chef pan over medium-high heat. Remove the chops from the bowl, reserving the marinade, and cook for about 4–5 minutes on each side or until golden and just cooked through. Remove from the pan and rest under foil.",
+        "Place the reserved marinade in a small saucepan and bring to the boil. Cook for 2–3 minutes until reduced by half. Stir in the cream and simmer for about 2 minutes or until thickened to a saucy consistency.",
+        "Drizzle the chops with the honey mustard sauce and serve."
+      ],
+      "nutrition": {},
+      "tags": [
+        "pork"
+      ]
+    },
+    {
+      "id": 32,
+      "source": "juliegoodwin",
+      "title": "Cheese Stuffed Meatballs",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/cheese-stuffed-meatballs/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Cheese-1.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Meat"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "for the meatballs",
+          "quantity": null,
+          "unit": null,
+          "original": "For the meatballs"
+        },
+        {
+          "name": "pork mince",
+          "quantity": "750",
+          "unit": "g",
+          "original": "750 g pork mince"
+        },
+        {
+          "name": "premium beef mince",
+          "quantity": "250",
+          "unit": "g",
+          "original": "250 g premium beef mince"
+        },
+        {
+          "name": "eggs",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 eggs"
+        },
+        {
+          "name": "grated parmesan",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup grated parmesan"
+        },
+        {
+          "name": "large garlic clove, crushed",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 large garlic clove, crushed"
+        },
+        {
+          "name": "fresh breadcrumbs",
+          "quantity": "1 1/2",
+          "unit": "cups",
+          "original": "1 ½ cups fresh breadcrumbs"
+        },
+        {
+          "name": "salt and freshly ground black pepper",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt and freshly ground black pepper"
+        },
+        {
+          "name": "mozzarella cheese, cut into 1 cm cubes",
+          "quantity": "200",
+          "unit": "g",
+          "original": "200 g mozzarella cheese, cut into 1 cm cubes"
+        },
+        {
+          "name": "vegetable oil, for frying",
+          "quantity": null,
+          "unit": null,
+          "original": "Vegetable oil, for frying"
+        },
+        {
+          "name": "spaghetti, for serving",
+          "quantity": null,
+          "unit": null,
+          "original": "Spaghetti, for serving"
+        },
+        {
+          "name": "for the sauce",
+          "quantity": null,
+          "unit": null,
+          "original": "For the sauce"
+        },
+        {
+          "name": "olive oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon olive oil"
+        },
+        {
+          "name": "garlic, ànely chopped",
+          "quantity": "2",
+          "unit": "cloves",
+          "original": "2 cloves garlic, Ànely chopped"
+        },
+        {
+          "name": "brown onions, ànely chopped",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 brown onions, Ànely chopped"
+        },
+        {
+          "name": "x 600 ml jars tomato passata",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 x 600 ml jars tomato passata"
+        },
+        {
+          "name": "dried ground oregano",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon dried ground oregano"
+        },
+        {
+          "name": "salt",
+          "quantity": "1",
+          "unit": "teaspoon",
+          "original": "1 teaspoon salt"
+        },
+        {
+          "name": "black pepper",
+          "quantity": "1/2",
+          "unit": "teaspoon",
+          "original": "½ teaspoon black pepper"
+        },
+        {
+          "name": "sugar",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons sugar"
+        },
+        {
+          "name": "red wine vinegar",
+          "quantity": "2",
+          "unit": "teaspoons",
+          "original": "2 teaspoons red wine vinegar"
+        }
+      ],
+      "steps": [
+        "Combine all the meatball ingredients except the mozzarella in a large bowl, and use your hands to mix thoroughly. Using damp hands, roll into meatballs about the size of a golf ball, keeping the size uniform. Press a cube of mozzarella into the meatball and make sure it is completely covered with the mince mixture. Place on a plate and refrigerate for at least 30 minutes before cooking.",
+        "To make the sauce, heat the oil in a large chef pan over medium-low heat. Add the garlic and onion and sauté gently until the onion becomes transparent. Be careful not to brown it. Stir in the passata, oregano, salt, pepper, sugar and vinegar. Simmer the sauce for 5 minutes or until it thickens slightly. Taste, and add more salt, sugar or vinegar as required.",
+        "Drop the chilled meatballs into the sauce and simmer for 1 hour."
+      ],
+      "nutrition": {},
+      "tags": [
+        "beef",
+        "pork"
+      ]
+    },
+    {
+      "id": 33,
+      "source": "juliegoodwin",
+      "title": "Big Mick",
+      "description": "Mick is my husband, and he is big – 6 foot 7 tall, or 2 metres if you are more the metric type. He has quite a fondness for this burger. That’s why I call it the Big Mick. That’s the only reason.",
+      "url": "https://juliegoodwin.com.au/recipe/big-mick/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Big-Mick-scaled.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Meat"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "for the patties:",
+          "quantity": null,
+          "unit": null,
+          "original": "For the patties:"
+        },
+        {
+          "name": "premium beef mince",
+          "quantity": "500",
+          "unit": "g",
+          "original": "500g premium beef mince"
+        },
+        {
+          "name": "salt and freshly ground black pepper",
+          "quantity": "1/2",
+          "unit": "tsp",
+          "original": "½ tsp salt and freshly ground black pepper"
+        },
+        {
+          "name": "for the burger:",
+          "quantity": null,
+          "unit": null,
+          "original": "For the burger:"
+        },
+        {
+          "name": "hamburger buns",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 hamburger buns"
+        },
+        {
+          "name": "small slices of jarlsberg or other mild cheese",
+          "quantity": "8",
+          "unit": null,
+          "original": "8 small slices of Jarlsberg or other mild cheese"
+        },
+        {
+          "name": "small iceberg lettuce, leaves finely shredded",
+          "quantity": "1/2",
+          "unit": null,
+          "original": "½ small iceberg lettuce, leaves finely shredded"
+        },
+        {
+          "name": "white salad onions, finely chopped",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 white salad onions, finely chopped"
+        },
+        {
+          "name": "burger sauce",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup burger sauce"
+        },
+        {
+          "name": "gherkins, sliced thinly",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 gherkins, sliced thinly"
+        }
+      ],
+      "steps": [
+        "Combine the mince, salt and pepper in a bowl. Work the mince with your hands until it is holding together. Using damp hands, divide the mince into 8 and form into thin patties, about the same size as or slightly bigger than the burger bun.",
+        "In a large chef’s pan over medium high heat, place 1 teaspoon of oil and cook 4 patties for 2 minutes each side or until browned on the outside and just cooked through. Set aside, covered with foil. Repeat with the other 4 patties.",
+        "To assemble the burgers, split the bun horizontally into 3. On the bottom piece, spread a generous amount of burger sauce. Top with shredded lettuce, chopped onion, a cooked patty and a slice of cheese. Top with a couple of gherkin slices. Place the middle part of the bun on top and repeat with the sauce, lettuce, meat and gherkins. Place the top of the bun on top and serve immediately."
+      ],
+      "nutrition": {},
+      "tags": [
+        "beef",
+        "pork"
+      ]
+    },
+    {
+      "id": 34,
+      "source": "juliegoodwin",
+      "title": "Lamb Kofta",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/lamb-kofta/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/Lamb-Kofta-scaled.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Meat"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "small onion, finely diced",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 small onion, finely diced"
+        },
+        {
+          "name": "garlic, crushed",
+          "quantity": "2",
+          "unit": "cloves",
+          "original": "2 cloves garlic, crushed"
+        },
+        {
+          "name": "tbs ground coriander seed",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 tbs ground coriander seed"
+        },
+        {
+          "name": "pine nuts, toasted and roughly chopped",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup pine nuts, toasted and roughly chopped"
+        },
+        {
+          "name": "ground chilli",
+          "quantity": "1/4",
+          "unit": "tsp",
+          "original": "¼ tsp ground chilli"
+        },
+        {
+          "name": "lamb mince",
+          "quantity": "750",
+          "unit": "g",
+          "original": "750 g lamb mince (not too lean)"
+        },
+        {
+          "name": "egg",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 egg"
+        },
+        {
+          "name": "salt and ground black pepper to taste",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt and ground black pepper to taste"
+        }
+      ],
+      "steps": [
+        "Cook onion and garlic over moderate heat until translucent but not brown. Place into a large bowl. Stir through spices and pine nuts.",
+        "Add lamb and egg. Spend a good few minutes working the ingredients into the lamb, kneading with your hands. It is important to massage the meat quite vigorously, until it is sticky. This is a bit messy but fun.",
+        "Form small handfuls of the lamb onto soaked bamboo or metal skewers, or make into patties. Cook on a hot BBQ until cooked through. (Time will depend on the size of your kofta.)",
+        "Serve the kofta with rice or flatbread, with lemon cheeks and fattoush salad."
+      ],
+      "nutrition": {},
+      "tags": [
+        "beef",
+        "lamb"
+      ]
+    },
+    {
+      "id": 35,
+      "source": "juliegoodwin",
+      "title": "Beef Salad with Crispy Noodles",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/beef-salad-with-crispy-noodles/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/beef-salad.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Meat"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "white sugar",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup white sugar"
+        },
+        {
+          "name": "white vinegar",
+          "quantity": "1/2",
+          "unit": "cup",
+          "original": "½ cup white vinegar"
+        },
+        {
+          "name": "garlic",
+          "quantity": "1",
+          "unit": "clove",
+          "original": "1 clove garlic"
+        },
+        {
+          "name": "small red chilli",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 small red chilli"
+        },
+        {
+          "name": "fish sauce",
+          "quantity": "1/3",
+          "unit": "cup",
+          "original": "⅓ cup fish sauce"
+        },
+        {
+          "name": "peanut or vegetable oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon peanut or vegetable oil"
+        },
+        {
+          "name": "rump steak",
+          "quantity": "500",
+          "unit": "g",
+          "original": "500 g rump steak"
+        },
+        {
+          "name": "salt",
+          "quantity": null,
+          "unit": null,
+          "original": "Salt"
+        },
+        {
+          "name": "wombok",
+          "quantity": "1/4",
+          "unit": null,
+          "original": "¼ wombok (Chinese cabbage)"
+        },
+        {
+          "name": "shallots",
+          "quantity": "4",
+          "unit": null,
+          "original": "4 shallots"
+        },
+        {
+          "name": "lebanese cucumber",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 Lebanese cucumber"
+        },
+        {
+          "name": "carrot",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 carrot"
+        },
+        {
+          "name": "mint",
+          "quantity": "1/3",
+          "unit": "bunch",
+          "original": "⅓ bunch mint"
+        },
+        {
+          "name": "coriander",
+          "quantity": "1/3",
+          "unit": "bunch",
+          "original": "⅓ bunch coriander"
+        },
+        {
+          "name": "packet of chang’s crunchy fried noodles",
+          "quantity": "100",
+          "unit": "g",
+          "original": "100 g packet of Chang’s crunchy fried noodles"
+        }
+      ],
+      "steps": [
+        "Put the chef pan over a high heat.",
+        "Combine the sugar and vinegar in a medium pot over a medium-high heat. Stir until the sugar dissolves. Bring to the boil and boil for 5 minutes or until slightly thickened. While it is cooking, place the garlic and chilli in the mini food processor and blitz until finely chopped. Remove the dressing from the heat and add the fish sauce. Cool for a few minutes then add the garlic and chilli. Set aside.",
+        "Put the oil in the pan. Season the steak with salt and cook for 2 minutes on each side (or longer, if the steak is thick or you like it more well done). Remove from the pan and set aside on a plate under foil to rest.",
+        "While the meat cooks, get on with the vegetables. Slice the wombok thinly with a knife. Peel and chop the shallots. Halve the cucumber lengthways and scoop out the seeds with a teaspoon. Use the mandolin to julienne the cucumber and carrot. Put them in the large bowl with the wombok and shallots. Pick the leaves from the mint and coriander and add to the bowl.",
+        "Slice the rump steak and add it to the salad bowl along with the noodles. Pour over the dressing, toss through, and serve straight away."
+      ],
+      "nutrition": {},
+      "tags": [
+        "beef"
+      ]
+    },
+    {
+      "id": 36,
+      "source": "juliegoodwin",
+      "title": "Pork Larb",
+      "description": "",
+      "url": "https://juliegoodwin.com.au/recipe/pork-larb/",
+      "image": "https://juliegoodwin.com.au/wp-content/uploads/2025/09/pork-lab.webp",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": null,
+      "category": [
+        "Meat"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "jasmine rice",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup jasmine rice"
+        },
+        {
+          "name": "peanut or vegetable oil",
+          "quantity": "1",
+          "unit": "tablespoon",
+          "original": "1 tablespoon peanut or vegetable oil"
+        },
+        {
+          "name": "pork mince",
+          "quantity": "500",
+          "unit": "g",
+          "original": "500 g pork mince"
+        },
+        {
+          "name": "coriander",
+          "quantity": "1/2",
+          "unit": "bunch",
+          "original": "½ bunch coriander"
+        },
+        {
+          "name": "garlic cloves",
+          "quantity": "3",
+          "unit": null,
+          "original": "3 garlic cloves"
+        },
+        {
+          "name": "red onion",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 red onion"
+        },
+        {
+          "name": "long green chilli",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 long green chilli"
+        },
+        {
+          "name": "fish sauce",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup fish sauce"
+        },
+        {
+          "name": "brown sugar",
+          "quantity": "1/4",
+          "unit": "cup",
+          "original": "¼ cup brown sugar"
+        },
+        {
+          "name": "limes",
+          "quantity": "2",
+          "unit": null,
+          "original": "2 limes"
+        },
+        {
+          "name": "mint leaves",
+          "quantity": "1/4",
+          "unit": "bunch",
+          "original": "¼ bunch mint leaves"
+        },
+        {
+          "name": "iceberg lettuce",
+          "quantity": "1",
+          "unit": null,
+          "original": "1 iceberg lettuce"
+        },
+        {
+          "name": "bean sprouts",
+          "quantity": "1",
+          "unit": "cup",
+          "original": "1 cup bean sprouts"
+        }
+      ],
+      "steps": [
+        "Put the chef pan over a medium heat. Put the rice in the pan and toast for 2–3 minutes or until golden brown. Place the toasted rice in the mini food processor and blitz to a fine, gritty powder. Remove to a small bowl and set aside.",
+        "Put the oil in the pan. Add the pork mince and stir, using a wooden spoon to squash any lumps. Cook through.",
+        "While the pork is cooking, cut the roots and stems off the coriander. (It is important to rinse the stems thoroughly under running water as they can be very gritty.) Set the leaves aside for later, then trim any stringy bits off the roots and place with the stems in the mini food processor. Peel the garlic and peel and quarter the onion and place in the mini food processor. Halve the chilli and scrape out the seeds with a teaspoon. Discard the seeds and stalk and place the chilli in the mini food processor. Blitz everything until finely chopped.",
+        "Add the coriander mixture to the pork in the pan and stir for 2–3 minutes until fragrant. Add the fish sauce and brown sugar. Zest the limes into the pan, then cut in half and squeeze in the juice. Remove the pan from the heat.",
+        "Pick the mint and coriander leaves onto a plate. Cut the lettuce in half. Remove the hard white core and separate the remaining leaves into cups.",
+        "Serve the larb mixture to the table with the bean sprouts, toasted rice, mint, coriander and lettuce and let everyone build their own."
+      ],
+      "nutrition": {},
+      "tags": [
+        "beef",
+        "pork"
+      ]
+    }
+  ]
+}
