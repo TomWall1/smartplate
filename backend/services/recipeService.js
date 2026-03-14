@@ -210,7 +210,7 @@ Respond with ONLY a JSON array of ${matchedWithSavings.length} objects. No markd
 
     try {
       const response = await this.anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 16000,
         messages: [{ role: 'user', content: prompt }],
       });
@@ -307,7 +307,7 @@ For each recipe, return a JSON object with these exact fields:
 You must respond with valid JSON only. Do not include any text, explanation or commentary before or after the JSON array. Respond with ONLY a JSON array of 50 recipe objects.`;
 
     const response = await this.anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 8000,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -399,7 +399,7 @@ Respond with ONLY the JSON array.`;
 
     try {
       const response = await this.anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 2000,
         messages: [{ role: 'user', content: prompt }],
       });
