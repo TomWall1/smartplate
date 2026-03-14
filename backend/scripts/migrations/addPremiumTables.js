@@ -5,7 +5,7 @@
  *
  * Requires DATABASE_URL (postgres connection string) in your .env
  */
-require('dotenv').config({ path: require('path').join(__dirname, '../../../.env') });
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 const { Pool } = require('pg');
 
@@ -18,7 +18,15 @@ if (!DATABASE_URL) {
 const pool = new Pool({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } });
 
 const migration = `
--- Add premium columns to users table
+-- Create users table if it doesn't exist (mirrors Supabase auth.users)
+CREATE TABLE IF NOT EXISTS users (
+  id             UUID        PRIMARY KEY,
+  email          TEXT        NOT NULL UNIQUE,
+  selected_store TEXT,
+  created_at     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Add premium columns (safe to run even if columns already exist)
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_premium    BOOLEAN   NOT NULL DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_since TIMESTAMP;
 
