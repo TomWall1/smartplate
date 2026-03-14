@@ -15,7 +15,7 @@ async function requirePremium(req, res, next) {
     if (!supabase) return res.status(503).json({ error: 'Auth service not configured' });
 
     const { data: profile } = await supabase
-      .from('user_profiles')
+      .from('users')
       .select('is_premium')
       .eq('id', req.user.id)
       .single();
