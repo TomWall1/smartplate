@@ -31,6 +31,7 @@ const Navigation = () => {
   const isFavoritesActive = location.pathname === '/favorites';
   const isPlannerActive   = location.pathname === '/meal-planner';
   const isListActive      = location.pathname === '/shopping-list';
+  const isAlertsActive    = location.pathname === '/price-alerts';
   const isPremiumActive   = location.pathname === '/premium';
   const isAdminActive     = location.pathname === '/admin';
 
@@ -134,6 +135,13 @@ const Navigation = () => {
                     style={activeLinkStyle(isListActive)}
                   >
                     Shopping
+                  </Link>
+                  <Link
+                    to="/price-alerts"
+                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    style={activeLinkStyle(isAlertsActive)}
+                  >
+                    Price Alerts
                   </Link>
                 </>
               )}
@@ -246,6 +254,14 @@ const Navigation = () => {
               >
                 <ShoppingCart className="w-5 h-5" />
                 <span>List</span>
+              </Link>
+              <Link
+                to="/price-alerts"
+                className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+                style={{ color: isAlertsActive ? 'var(--color-honey)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                <Bell className="w-5 h-5" />
+                <span>Alerts</span>
               </Link>
             </>
           )}
