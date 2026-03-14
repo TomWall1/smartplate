@@ -23,8 +23,8 @@ router.get('/users', requireAuth, requireAdmin, async (req, res) => {
   }
 
   const { data: users, error } = await adminSupabase
-    .from('users')
-    .select('id, email, is_premium, premium_since, selected_store, created_at')
+    .from('user_profiles')
+    .select('id, email, is_premium, premium_since, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -44,7 +44,7 @@ router.post('/users/:userId/toggle-premium', requireAuth, requireAdmin, async (r
   const { userId } = req.params;
 
   const { data: user, error: fetchError } = await adminSupabase
-    .from('users')
+    .from('user_profiles')
     .select('id, email, is_premium')
     .eq('id', userId)
     .single();
@@ -55,7 +55,7 @@ router.post('/users/:userId/toggle-premium', requireAuth, requireAdmin, async (r
 
   const newPremium = !user.is_premium;
   const { data: updated, error } = await adminSupabase
-    .from('users')
+    .from('user_profiles')
     .update({
       is_premium:    newPremium,
       premium_since: newPremium ? new Date().toISOString() : null,
@@ -82,7 +82,7 @@ router.get('/stats', requireAuth, requireAdmin, async (req, res) => {
   }
 
   const [usersResult, favResult, mealResult, listResult, alertResult] = await Promise.all([
-    adminSupabase.from('users').select('id, is_premium'),
+    adminSupabase.from('user_profiles').select('id, is_premium'),
     adminSupabase.from('favorite_recipes').select('id', { count: 'exact', head: true }),
     adminSupabase.from('meal_plans').select('id', { count: 'exact', head: true }),
     adminSupabase.from('shopping_lists').select('id', { count: 'exact', head: true }),

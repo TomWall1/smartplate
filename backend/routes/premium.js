@@ -14,7 +14,7 @@ router.get('/status', async (req, res) => {
   if (!supabase) return res.status(503).json({ error: 'Auth service not configured' });
 
   const { data: profile } = await supabase
-    .from('users')
+    .from('user_profiles')
     .select('is_premium, premium_since')
     .eq('id', req.user.id)
     .single();
