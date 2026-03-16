@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { UtensilsCrossed, Home, BookOpen, User, Wifi, WifiOff, LogIn, LogOut, Heart, Calendar, ShoppingCart, Crown, Bell, Shield, MapPin, ChefHat, Refrigerator } from 'lucide-react';
+import { UtensilsCrossed, Home, BookOpen, User, LogIn, LogOut, Heart, Calendar, ShoppingCart, Crown, Bell, Shield, MapPin, ChefHat, Refrigerator, ChevronDown } from 'lucide-react';
 import { useApp } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { usePremium } from '../context/PremiumContext';
@@ -11,12 +11,62 @@ const STORE_META = {
   iga:        { label: 'IGA',        color: '#003da5' },
 };
 
+function Dropdown({ open, onClose, children }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      ref={ref}
+      className="absolute top-full right-0 mt-1 rounded-2xl border shadow-lg z-50 min-w-[180px] overflow-hidden"
+      style={{ background: 'var(--color-parchment)', borderColor: 'var(--color-stone)', boxShadow: '0 4px 20px rgba(92,74,53,0.12)' }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DropdownLink({ to, onClick, icon: Icon, children, active }) {
+  const base = "flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-[#D6EDD4]";
+  const style = {
+    fontFamily: 'Nunito, sans-serif',
+    color: active ? 'var(--color-leaf)' : 'var(--color-bark)',
+  };
+  if (to) {
+    return (
+      <Link to={to} className={base} style={style} onClick={onClick}>
+        {Icon && <Icon className="w-4 h-4 flex-shrink-0" style={{ color: active ? 'var(--color-leaf)' : 'var(--color-text-muted)' }} />}
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <button onClick={onClick} className={`${base} w-full text-left`} style={style}>
+      {Icon && <Icon className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-muted)' }} />}
+      {children}
+    </button>
+  );
+}
+
 const Navigation = () => {
   const location = useLocation();
   const navigate  = useNavigate();
-  const { selectedStore, apiStatus, userState } = useApp();
+  const { selectedStore, userState } = useApp();
   const { user, signOut } = useAuth();
   const { isPremium } = usePremium();
+
+  const [premiumOpen, setPremiumOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
   const isAdmin    = user && adminEmail && user.email === adminEmail;
@@ -34,38 +84,14 @@ const Navigation = () => {
   const isAlertsActive    = location.pathname === '/price-alerts';
   const isPantryActive    = location.pathname === '/pantry';
   const isPremiumActive   = location.pathname === '/premium';
-  const isAdminActive         = location.pathname === '/admin';
-  const isAdminRecipesActive  = location.pathname === '/admin/recipes';
+  const isAdminActive     = location.pathname.startsWith('/admin');
+
+  const isPremiumDropActive = isFavoritesActive || isPlannerActive || isListActive || isAlertsActive || isPantryActive;
 
   const handleSignOut = async () => {
+    setAccountOpen(false);
     await signOut();
     navigate('/', { replace: true });
-  };
-
-  const StatusDot = () => {
-    if (apiStatus === 'connected') {
-      return (
-        <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-text-green)' }}>
-          <Wifi className="w-3.5 h-3.5" />
-          <span className="hidden lg:inline">Live</span>
-        </span>
-      );
-    }
-    if (apiStatus === 'disconnected') {
-      return (
-        <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-honey)' }}>
-          <WifiOff className="w-3.5 h-3.5" />
-          <span className="hidden lg:inline">Offline</span>
-        </span>
-      );
-    }
-    return (
-      <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-        <span className="w-3.5 h-3.5 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'var(--color-stone)', borderTopColor: 'var(--color-text-muted)' }}
-        />
-      </span>
-    );
   };
 
   const activeLinkStyle = (isActive, storeColor) => ({
@@ -115,85 +141,45 @@ const Navigation = () => {
               >
                 Recipes
               </Link>
-              {isPremium && (
-                <>
-                  <Link
-                    to="/favorites"
-                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
-                    style={activeLinkStyle(isFavoritesActive)}
+
+              {/* Premium dropdown (if subscribed) or Upgrade link */}
+              {isPremium ? (
+                <div className="relative">
+                  <button
+                    onClick={() => { setPremiumOpen(o => !o); setAccountOpen(false); }}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    style={{
+                      fontFamily: 'Nunito, sans-serif',
+                      color: isPremiumDropActive ? 'var(--color-leaf)' : 'var(--color-text-muted)',
+                      fontWeight: isPremiumDropActive ? 700 : 600,
+                    }}
                   >
-                    Favourites
-                  </Link>
-                  <Link
-                    to="/meal-planner"
-                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
-                    style={activeLinkStyle(isPlannerActive)}
-                  >
-                    Meal Plan
-                  </Link>
-                  <Link
-                    to="/shopping-list"
-                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
-                    style={activeLinkStyle(isListActive)}
-                  >
-                    Shopping
-                  </Link>
-                  <Link
-                    to="/price-alerts"
-                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
-                    style={activeLinkStyle(isAlertsActive)}
-                  >
-                    Price Alerts
-                  </Link>
-                  <Link
-                    to="/pantry"
-                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
-                    style={activeLinkStyle(isPantryActive)}
-                  >
-                    What I Have
-                  </Link>
-                </>
-              )}
-              {!isPremium && (
+                    <Crown className="w-3.5 h-3.5" style={{ color: 'var(--color-honey)' }} />
+                    Premium
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                  <Dropdown open={premiumOpen} onClose={() => setPremiumOpen(false)}>
+                    <DropdownLink to="/favorites" onClick={() => setPremiumOpen(false)} icon={Heart} active={isFavoritesActive}>Favourites</DropdownLink>
+                    <DropdownLink to="/meal-planner" onClick={() => setPremiumOpen(false)} icon={Calendar} active={isPlannerActive}>Meal Plan</DropdownLink>
+                    <DropdownLink to="/shopping-list" onClick={() => setPremiumOpen(false)} icon={ShoppingCart} active={isListActive}>Shopping List</DropdownLink>
+                    <DropdownLink to="/price-alerts" onClick={() => setPremiumOpen(false)} icon={Bell} active={isAlertsActive}>Price Alerts</DropdownLink>
+                    <DropdownLink to="/pantry" onClick={() => setPremiumOpen(false)} icon={Refrigerator} active={isPantryActive}>What I Have</DropdownLink>
+                  </Dropdown>
+                </div>
+              ) : (
                 <Link
                   to="/premium"
-                  className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#FBDFC3]"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#FBDFC3]"
                   style={activeLinkStyle(isPremiumActive)}
                 >
                   <Crown className="w-3.5 h-3.5" style={{ color: 'var(--color-honey)' }} />
                   Premium
                 </Link>
               )}
-              <Link
-                to="/profile"
-                className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
-                style={activeLinkStyle(isProfileActive)}
-              >
-                Profile
-              </Link>
-              {isAdmin && (
-                <>
-                  <Link
-                    to="/admin"
-                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
-                    style={activeLinkStyle(isAdminActive)}
-                  >
-                    Admin
-                  </Link>
-                  <Link
-                    to="/admin/recipes"
-                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
-                    style={activeLinkStyle(isAdminRecipesActive)}
-                  >
-                    Recipes
-                  </Link>
-                </>
-              )}
             </div>
 
-            {/* Right side: status + state + auth */}
+            {/* Right side: state pill + Account dropdown */}
             <div className="hidden md:flex items-center gap-3">
-              <StatusDot />
               {userState && (
                 <Link
                   to="/profile"
@@ -205,23 +191,30 @@ const Navigation = () => {
                   {userState.toUpperCase()}
                 </Link>
               )}
+
               {user ? (
-                <div className="flex items-center gap-2">
-                  <span
-                    className="text-xs max-w-[160px] truncate"
-                    style={{ color: 'var(--color-text-muted)' }}
-                    title={user.email}
-                  >
-                    {user.email}
-                  </span>
+                <div className="relative">
                   <button
-                    onClick={handleSignOut}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors hover:bg-[#D6EDD4]"
-                    style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                    onClick={() => { setAccountOpen(o => !o); setPremiumOpen(false); }}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    style={{
+                      fontFamily: 'Nunito, sans-serif',
+                      color: isProfileActive || isAdminActive ? 'var(--color-leaf)' : 'var(--color-text-muted)',
+                      fontWeight: isProfileActive || isAdminActive ? 700 : 600,
+                    }}
                   >
-                    <LogOut className="w-3.5 h-3.5" />
-                    Sign out
+                    <User className="w-4 h-4" />
+                    Account
+                    <ChevronDown className="w-3.5 h-3.5" />
                   </button>
+                  <Dropdown open={accountOpen} onClose={() => setAccountOpen(false)}>
+                    <DropdownLink to="/profile" onClick={() => setAccountOpen(false)} icon={User} active={isProfileActive}>Profile</DropdownLink>
+                    {isAdmin && (
+                      <DropdownLink to="/admin" onClick={() => setAccountOpen(false)} icon={Shield} active={isAdminActive}>Admin</DropdownLink>
+                    )}
+                    <div style={{ borderTop: '1px solid var(--color-stone)', margin: '4px 0' }} />
+                    <DropdownLink onClick={handleSignOut} icon={LogOut}>Sign out</DropdownLink>
+                  </Dropdown>
                 </div>
               ) : (
                 <Link
@@ -316,12 +309,12 @@ const Navigation = () => {
 
           {isAdmin && (
             <Link
-              to="/admin/recipes"
+              to="/admin"
               className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
-              style={{ color: isAdminRecipesActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: isAdminActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
             >
-              <ChefHat className="w-5 h-5" />
-              <span>Recipes</span>
+              <Shield className="w-5 h-5" />
+              <span>Admin</span>
             </Link>
           )}
 
