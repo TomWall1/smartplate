@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { validateMatch } = require('./matchingValidator');
 
 // ── Feature flag ──────────────────────────────────────────────────────────────
 // Set to false to revert to pure text-based matching (useful for A/B comparison).
@@ -690,6 +691,15 @@ class RecipeMatcher {
           // ── Tier 2: Text-based matching (fallback) ───────────────────────
           if (!matched && deal.keywords) {
             matched = this._termsMatch(ingredient.name, deal.keywords);
+            // Phase 1: validate using enriched ingredient tags when available
+            if (matched && ingredient.ingredientTags) {
+              const v = validateMatch(
+                ingredient.ingredientTags,
+                deal.keywords,
+                deal.productIntelligence?.category ?? null,
+              );
+              if (!v.valid) matched = false;
+            }
           }
 
           if (matched) {

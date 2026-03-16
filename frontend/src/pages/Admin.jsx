@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Crown, BarChart2, Loader, RefreshCw, Check, X, MapPin, BookOpen } from 'lucide-react';
+import { Shield, Users, Crown, BarChart2, Loader, RefreshCw, Check, X, MapPin, BookOpen, Ban } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../services/api';
@@ -130,6 +130,22 @@ export default function Admin() {
           >
             <BookOpen className="w-4 h-4" />
             Recipes
+          </button>
+          <button
+            onClick={() => navigate('/admin/blocklist')}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
+            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+          >
+            <Ban className="w-4 h-4" />
+            Blocklist
+          </button>
+          <button
+            onClick={() => navigate('/admin/feedback')}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
+            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+          >
+            <BarChart2 className="w-4 h-4" />
+            Feedback
           </button>
         </div>
 

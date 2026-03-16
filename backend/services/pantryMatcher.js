@@ -10,6 +10,7 @@
 
 const { Pool } = require('pg');
 const dealService = require('./dealService');
+const { validateMatch } = require('./matchingValidator');
 
 const usePG = process.env.USE_POSTGRESQL === 'true' || process.env.NODE_ENV === 'production';
 
@@ -114,7 +115,15 @@ function ingredientMatches(userRaw, recipeIng) {
   if (extraRecipeWords.some(w => DISQUALIFIERS.has(w))) return false;
 
   // All user words must be in recipe words
-  return userWords.every(w => recipeWords.includes(w));
+  if (!userWords.every(w => recipeWords.includes(w))) return false;
+
+  // Phase 1: validate category/form using enriched ingredient tags
+  if (recipeIng.ingredientTags) {
+    const v = validateMatch(recipeIng.ingredientTags, userRaw, null);
+    if (!v.valid) return false;
+  }
+
+  return true;
 }
 
 /**

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Users, ExternalLink, Flame } from 'lucide-react';
 import DealPopup from '../components/DealPopup';
 import SavingsBreakdown from '../components/SavingsBreakdown';
+import MatchFeedbackButton from '../components/MatchFeedbackButton';
 import { recipesApi } from '../services/api';
 import { useApp } from '../App';
 
@@ -44,7 +45,7 @@ function groupIngredients(raw) {
   return sections;
 }
 
-function IngredientRow({ item, globalIdx, matchedDeals, openPopupIndex, setOpenPopupIndex, badgeRefs, closePopup }) {
+function IngredientRow({ item, globalIdx, matchedDeals, openPopupIndex, setOpenPopupIndex, badgeRefs, closePopup, recipeId, recipeTitle }) {
   const deal    = findMatchedDeal(item.text, matchedDeals);
   const special = !!deal;
   const isOpen  = openPopupIndex === globalIdx;
@@ -66,6 +67,15 @@ function IngredientRow({ item, globalIdx, matchedDeals, openPopupIndex, setOpenP
             on special
           </span>
         </button>
+        <div className="flex justify-end mt-0.5 pr-1">
+          <MatchFeedbackButton
+            recipeId={recipeId}
+            recipeTitle={recipeTitle}
+            ingredientName={deal.ingredient}
+            productName={deal.dealName}
+            store={deal.store}
+          />
+        </div>
         {isOpen && (
           <DealPopup deal={deal} anchorRef={{ current: badgeRefs.current[globalIdx] }} onClose={closePopup} />
         )}
@@ -84,7 +94,7 @@ function IngredientRow({ item, globalIdx, matchedDeals, openPopupIndex, setOpenP
   );
 }
 
-function IngredientList({ ingredients, matchedDeals, openPopupIndex, setOpenPopupIndex, badgeRefs, closePopup }) {
+function IngredientList({ ingredients, matchedDeals, openPopupIndex, setOpenPopupIndex, badgeRefs, closePopup, recipeId, recipeTitle }) {
   const sections = groupIngredients(ingredients);
   return (
     <div>
@@ -110,6 +120,8 @@ function IngredientList({ ingredients, matchedDeals, openPopupIndex, setOpenPopu
                 setOpenPopupIndex={setOpenPopupIndex}
                 badgeRefs={badgeRefs}
                 closePopup={closePopup}
+                recipeId={recipeId}
+                recipeTitle={recipeTitle}
               />
             ))}
           </div>
@@ -478,6 +490,8 @@ export default function RecipeDetail() {
             setOpenPopupIndex={setOpenPopupIndex}
             badgeRefs={badgeRefs}
             closePopup={closePopup}
+            recipeId={recipe.id}
+            recipeTitle={recipe.title}
           />
         )}
 

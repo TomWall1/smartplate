@@ -254,6 +254,14 @@ export const pantryApi = {
   },
 };
 
+// Match feedback API
+export const feedbackApi = {
+  reportMatch: async (data) => {
+    const response = await api.post('/api/feedback/match', data);
+    return response.data;
+  },
+};
+
 // Admin API
 export const adminApi = {
   getUsers: async () => {
@@ -282,6 +290,26 @@ export const adminApi = {
   },
   deleteRecipe: async (id) => {
     const response = await api.delete(`/api/admin/recipes/${id}`);
+    return response.data;
+  },
+  getBlocklist: async () => {
+    const response = await api.get('/api/admin/blocklist');
+    return response.data;
+  },
+  addBlocklistRule: async (data) => {
+    const response = await api.post('/api/admin/blocklist', data);
+    return response.data;
+  },
+  deleteBlocklistRule: async (id) => {
+    const response = await api.delete(`/api/admin/blocklist/${id}`);
+    return response.data;
+  },
+  getFeedback: async () => {
+    const response = await api.get('/api/admin/feedback');
+    return response.data;
+  },
+  processFeedback: async () => {
+    const response = await api.post('/api/admin/feedback/process');
     return response.data;
   },
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ChefHat, Search, Filter, Edit2, Trash2, X, Check,
   Loader, ChevronLeft, ChevronRight, RefreshCw, AlertCircle,
-  GripVertical, Plus, AlertTriangle, Users, BookOpen,
+  GripVertical, Plus, AlertTriangle, Users, BookOpen, Ban, BarChart2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -610,6 +610,22 @@ export default function AdminRecipes() {
           >
             <BookOpen className="w-4 h-4" />
             Recipes
+          </button>
+          <button
+            onClick={() => navigate('/admin/blocklist')}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
+            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+          >
+            <Ban className="w-4 h-4" />
+            Blocklist
+          </button>
+          <button
+            onClick={() => navigate('/admin/feedback')}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
+            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+          >
+            <BarChart2 className="w-4 h-4" />
+            Feedback
           </button>
         </div>
 

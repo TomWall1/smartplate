@@ -15,6 +15,8 @@ import PantryMatcher from './pages/PantryMatcher';
 import Premium from './pages/Premium';
 import Admin from './pages/Admin';
 import AdminRecipes from './pages/AdminRecipes';
+import AdminBlocklist from './pages/AdminBlocklist';
+import AdminFeedbackDashboard from './pages/AdminFeedbackDashboard';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PremiumProvider } from './context/PremiumContext';
 import { dealsApi, recipesApi, healthApi, usersApi } from './services/api';
@@ -215,6 +217,8 @@ function AppInner() {
             <Route path="/premium" element={<Premium />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/recipes" element={<AdminRecipes />} />
+            <Route path="/admin/blocklist" element={<AdminBlocklist />} />
+            <Route path="/admin/feedback" element={<AdminFeedbackDashboard />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

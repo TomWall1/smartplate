@@ -277,4 +277,129 @@ router.delete('/recipes/:id', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+// ── GET /api/admin/blocklist ───────────────────────────────────────────────
+router.get('/blocklist', requireAuth, requireAdmin, async (req, res) => {
+  const pg = getPgPool();
+  if (!pg) return res.status(503).json({ error: 'Database not configured' });
+  try {
+    const { rows } = await pg.query('SELECT * FROM ingredient_blocklist ORDER BY created_at DESC');
+    res.json({ blocklist: rows });
+  } catch (err) {
+    console.error('[admin/blocklist GET]', err.message);
+    res.status(500).json({ error: 'Failed to fetch blocklist' });
+  }
+});
+
+// ── POST /api/admin/blocklist ──────────────────────────────────────────────
+router.post('/blocklist', requireAuth, requireAdmin, async (req, res) => {
+  const pg = getPgPool();
+  if (!pg) return res.status(503).json({ error: 'Database not configured' });
+
+  const { ingredient_pattern, blocked_product_patterns, reason } = req.body;
+  if (!ingredient_pattern) return res.status(400).json({ error: 'ingredient_pattern required' });
+
+  try {
+    const { rows } = await pg.query(
+      `INSERT INTO ingredient_blocklist (ingredient_pattern, blocked_product_patterns, reason, created_by)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [
+        ingredient_pattern.toLowerCase().trim(),
+        Array.isArray(blocked_product_patterns) ? blocked_product_patterns.map(p => p.toLowerCase().trim()) : [],
+        reason || null,
+        req.user.email,
+      ],
+    );
+    res.json({ rule: rows[0], message: 'Blocklist rule added' });
+  } catch (err) {
+    console.error('[admin/blocklist POST]', err.message);
+    res.status(500).json({ error: 'Failed to add blocklist rule' });
+  }
+});
+
+// ── DELETE /api/admin/blocklist/:id ────────────────────────────────────────
+router.delete('/blocklist/:id', requireAuth, requireAdmin, async (req, res) => {
+  const pg = getPgPool();
+  if (!pg) return res.status(503).json({ error: 'Database not configured' });
+
+  try {
+    const { rowCount } = await pg.query('DELETE FROM ingredient_blocklist WHERE id = $1', [req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Rule not found' });
+    res.json({ message: 'Deleted' });
+  } catch (err) {
+    console.error('[admin/blocklist DELETE]', err.message);
+    res.status(500).json({ error: 'Failed to delete blocklist rule' });
+  }
+});
+
+// ── GET /api/admin/feedback ─────────────────────────────────────────────────
+router.get('/feedback', requireAuth, requireAdmin, async (req, res) => {
+  const pg = getPgPool();
+  if (!pg) return res.status(503).json({ error: 'Database not configured' });
+
+  try {
+    const { rows } = await pg.query(`
+      SELECT * FROM match_feedback ORDER BY created_at DESC LIMIT 200
+    `);
+    // Summary: most-reported bad matches
+    const { rows: summary } = await pg.query(`
+      SELECT ingredient_name, product_name, COUNT(*) AS reports,
+             COUNT(*) FILTER (WHERE feedback_type = 'incorrect') AS incorrect,
+             COUNT(*) FILTER (WHERE feedback_type = 'correct')   AS correct
+      FROM match_feedback
+      GROUP BY ingredient_name, product_name
+      HAVING COUNT(*) >= 1
+      ORDER BY incorrect DESC, reports DESC
+      LIMIT 20
+    `);
+    res.json({ feedback: rows, summary });
+  } catch (err) {
+    console.error('[admin/feedback GET]', err.message);
+    res.status(500).json({ error: 'Failed to fetch feedback' });
+  }
+});
+
+// ── POST /api/admin/feedback/process ───────────────────────────────────────
+// Manually trigger auto-blocking of pairs with 3+ incorrect reports
+router.post('/feedback/process', requireAuth, requireAdmin, async (req, res) => {
+  const pg = getPgPool();
+  if (!pg) return res.status(503).json({ error: 'Database not configured' });
+
+  try {
+    const { rows: hotspots } = await pg.query(`
+      SELECT ingredient_name, product_name, COUNT(*) AS incorrect_count
+      FROM match_feedback
+      WHERE feedback_type = 'incorrect'
+      GROUP BY ingredient_name, product_name
+      HAVING COUNT(*) >= 3
+    `);
+
+    let added = 0;
+    for (const h of hotspots) {
+      // Check if already blocklisted
+      const { rows: existing } = await pg.query(
+        `SELECT id FROM ingredient_blocklist
+         WHERE ingredient_pattern = $1 AND $2 = ANY(blocked_product_patterns)`,
+        [h.ingredient_name, h.product_name],
+      );
+      if (existing.length === 0) {
+        await pg.query(
+          `INSERT INTO ingredient_blocklist (ingredient_pattern, blocked_product_patterns, reason, created_by)
+           VALUES ($1, $2, $3, $4)`,
+          [
+            h.ingredient_name,
+            [h.product_name],
+            `Auto-blocked after ${h.incorrect_count} user reports`,
+            'system',
+          ],
+        );
+        added++;
+      }
+    }
+    res.json({ message: `Processed ${hotspots.length} hotspots, added ${added} new blocklist rules` });
+  } catch (err) {
+    console.error('[admin/feedback/process]', err.message);
+    res.status(500).json({ error: 'Failed to process feedback' });
+  }
+});
+
 module.exports = router;
