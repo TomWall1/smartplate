@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ChefHat, Search, Filter, Edit2, Trash2, X, Check,
   Loader, ChevronLeft, ChevronRight, RefreshCw, AlertCircle,
-  GripVertical, Plus, AlertTriangle,
+  GripVertical, Plus, AlertTriangle, Users, BookOpen,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../services/api';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -483,6 +484,7 @@ function EditModal({ recipe, onClose, onSave }) {
 
 export default function AdminRecipes() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [recipes, setRecipes]   = useState([]);
   const [total, setTotal]       = useState(0);
@@ -589,6 +591,25 @@ export default function AdminRecipes() {
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4] disabled:opacity-50"
             style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
+          </button>
+        </div>
+
+        {/* Section tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => navigate('/admin')}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
+            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+          >
+            <Users className="w-4 h-4" />
+            Users
+          </button>
+          <button
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border"
+            style={{ fontFamily: 'Nunito, sans-serif', background: 'var(--color-bark)', color: '#fff', borderColor: 'var(--color-bark)' }}
+          >
+            <BookOpen className="w-4 h-4" />
+            Recipes
           </button>
         </div>
 

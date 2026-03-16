@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Crown, BarChart2, Loader, RefreshCw, Check, X, MapPin } from 'lucide-react';
+import { Shield, Users, Crown, BarChart2, Loader, RefreshCw, Check, X, MapPin, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../services/api';
 
 function StatCard({ label, value, sub, color }) {
@@ -20,6 +21,7 @@ function StatCard({ label, value, sub, color }) {
 
 export default function Admin() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers]     = useState([]);
   const [stats, setStats]     = useState(null);
   const [loading, setLoading] = useState(true);
@@ -109,6 +111,25 @@ export default function Admin() {
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
+          </button>
+        </div>
+
+        {/* Section tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border"
+            style={{ fontFamily: 'Nunito, sans-serif', background: 'var(--color-bark)', color: '#fff', borderColor: 'var(--color-bark)' }}
+          >
+            <Users className="w-4 h-4" />
+            Users
+          </button>
+          <button
+            onClick={() => navigate('/admin/recipes')}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
+            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+          >
+            <BookOpen className="w-4 h-4" />
+            Recipes
           </button>
         </div>
 
