@@ -19,15 +19,15 @@ router.get('/profile', requireAuth, async (req, res) => {
 
   if (!selError && existing) return res.json(existing);
 
-  // Row doesn't exist yet — create it
+  // Row doesn't exist yet — use UPSERT to avoid duplicate key errors
   const { data, error } = await supabase
     .from('users')
-    .insert({ id: req.user.id, email: req.user.email })
+    .upsert({ id: req.user.id, email: req.user.email }, { onConflict: 'id' })
     .select()
     .single();
 
   if (error) {
-    console.error('[users/profile] insert error:', error.message);
+    console.error('[users/profile] upsert error:', error.message);
     return res.status(500).json({ error: 'Failed to create profile' });
   }
 
