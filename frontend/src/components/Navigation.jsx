@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { UtensilsCrossed, Home, BookOpen, User, Wifi, WifiOff, LogIn, LogOut, Heart, Calendar, ShoppingCart, Crown, Bell, Shield } from 'lucide-react';
+import { UtensilsCrossed, Home, BookOpen, User, Wifi, WifiOff, LogIn, LogOut, Heart, Calendar, ShoppingCart, Crown, Bell, Shield, MapPin, ChefHat, Refrigerator } from 'lucide-react';
 import { useApp } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { usePremium } from '../context/PremiumContext';
@@ -14,7 +14,7 @@ const STORE_META = {
 const Navigation = () => {
   const location = useLocation();
   const navigate  = useNavigate();
-  const { selectedStore, apiStatus } = useApp();
+  const { selectedStore, apiStatus, userState } = useApp();
   const { user, signOut } = useAuth();
   const { isPremium } = usePremium();
 
@@ -32,8 +32,10 @@ const Navigation = () => {
   const isPlannerActive   = location.pathname === '/meal-planner';
   const isListActive      = location.pathname === '/shopping-list';
   const isAlertsActive    = location.pathname === '/price-alerts';
+  const isPantryActive    = location.pathname === '/pantry';
   const isPremiumActive   = location.pathname === '/premium';
-  const isAdminActive     = location.pathname === '/admin';
+  const isAdminActive         = location.pathname === '/admin';
+  const isAdminRecipesActive  = location.pathname === '/admin/recipes';
 
   const handleSignOut = async () => {
     await signOut();
@@ -143,6 +145,13 @@ const Navigation = () => {
                   >
                     Price Alerts
                   </Link>
+                  <Link
+                    to="/pantry"
+                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    style={activeLinkStyle(isPantryActive)}
+                  >
+                    What I Have
+                  </Link>
                 </>
               )}
               {!isPremium && (
@@ -163,19 +172,39 @@ const Navigation = () => {
                 Profile
               </Link>
               {isAdmin && (
-                <Link
-                  to="/admin"
-                  className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
-                  style={activeLinkStyle(isAdminActive)}
-                >
-                  Admin
-                </Link>
+                <>
+                  <Link
+                    to="/admin"
+                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    style={activeLinkStyle(isAdminActive)}
+                  >
+                    Admin
+                  </Link>
+                  <Link
+                    to="/admin/recipes"
+                    className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    style={activeLinkStyle(isAdminRecipesActive)}
+                  >
+                    Recipes
+                  </Link>
+                </>
               )}
             </div>
 
-            {/* Right side: status + auth */}
+            {/* Right side: status + state + auth */}
             <div className="hidden md:flex items-center gap-3">
               <StatusDot />
+              {userState && (
+                <Link
+                  to="/profile"
+                  title="Change your state"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-colors hover:bg-[#D6EDD4]"
+                  style={{ color: 'var(--color-text-green)', background: 'var(--color-mist)', fontFamily: 'Nunito, sans-serif' }}
+                >
+                  <MapPin className="w-3 h-3" />
+                  {userState.toUpperCase()}
+                </Link>
+              )}
               {user ? (
                 <div className="flex items-center gap-2">
                   <span
@@ -263,6 +292,14 @@ const Navigation = () => {
                 <Bell className="w-5 h-5" />
                 <span>Alerts</span>
               </Link>
+              <Link
+                to="/pantry"
+                className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+                style={{ color: isPantryActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                <Refrigerator className="w-5 h-5" />
+                <span>Pantry</span>
+              </Link>
             </>
           )}
 
@@ -277,12 +314,33 @@ const Navigation = () => {
             </Link>
           )}
 
+          {isAdmin && (
+            <Link
+              to="/admin/recipes"
+              className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+              style={{ color: isAdminRecipesActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <ChefHat className="w-5 h-5" />
+              <span>Recipes</span>
+            </Link>
+          )}
+
           <Link
             to="/profile"
             className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
             style={{ color: isProfileActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
           >
-            <User className="w-5 h-5" />
+            <div className="relative">
+              <User className="w-5 h-5" />
+              {userState && (
+                <span
+                  className="absolute -top-1.5 -right-2.5 text-[9px] font-extrabold leading-none px-1 py-0.5 rounded-full"
+                  style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)' }}
+                >
+                  {userState.toUpperCase()}
+                </span>
+              )}
+            </div>
             <span>Profile</span>
           </Link>
         </div>

@@ -9,10 +9,24 @@
  *   productlist/category/{saleId}         → product items (JSONP)
  *
  * Current catalogue IDs are discovered by scraping salefinder.com.au.
+ * State-specific catalogue IDs are stored in backend/data/state-catalogue-ids.json
+ * and refreshed weekly by running scripts/discoverStateCatalogues.js.
  */
 
-const axios = require('axios');
+const axios   = require('axios');
 const cheerio = require('cheerio');
+const fs      = require('fs');
+const path    = require('path');
+
+const STATE_IDS_PATH = path.join(__dirname, '..', 'data', 'state-catalogue-ids.json');
+
+function loadStateIds() {
+  try {
+    return JSON.parse(fs.readFileSync(STATE_IDS_PATH, 'utf8'));
+  } catch {
+    return {};
+  }
+}
 
 const BASE_URL = 'https://embed.salefinder.com.au/';
 
@@ -345,11 +359,201 @@ async function fetchSpecials({ slug, retailerId, locationId, nameSelector, store
   throw new Error(`No catalogue with food items found for ${slug}`);
 }
 
+/**
+ * Fetch food specials for a specific Australian state.
+ * Uses state-catalogue-ids.json when available, falls back to geo-located discovery.
+ *
+ * @param {Object} config  - Same as fetchSpecials, plus:
+ * @param {string} [config.state]  - Two-letter state code: nsw, vic, qld, wa, sa, tas, nt, act
+ */
+async function fetchSpecialsForState({ slug, retailerId, locationId, nameSelector, store, state, preferLargest }) {
+  // Try state-specific catalogue ID first
+  if (state) {
+    const stateIds = loadStateIds();
+    const stateLower = state.toLowerCase();
+    const catalogueId = stateIds[slug.toLowerCase()]?.[stateLower];
+
+    if (catalogueId) {
+      console.log(`[SaleFinder/${store}] Using state catalogue for ${stateLower.toUpperCase()}: ID ${catalogueId}`);
+      const catalogue = { id: catalogueId, name: `${store} ${stateLower.toUpperCase()}` };
+      const deals = await fetchCatalogueDeals(catalogue, { retailerId, locationId, nameSelector, store });
+      if (deals.length > 0) {
+        console.log(`[SaleFinder/${store}] ${deals.length} food deals for ${stateLower.toUpperCase()}`);
+        return deals;
+      }
+      console.warn(`[SaleFinder/${store}] State catalogue ${catalogueId} returned no deals, falling back to discovery`);
+    }
+  }
+
+  // Fall back to geo-located discovery
+  return fetchSpecials({ slug, retailerId, locationId, nameSelector, store, preferLargest });
+}
+
+// ── State catalogue discovery (runs before weekly deal refresh) ───────────────
+
+const PROBE_BEFORE    = 120;
+const PROBE_AFTER     = 30;
+const PROBE_BATCH     = 6;
+const PROBE_DELAY_MS  = 250;
+
+// State slug candidates tried in order when probing a catalogue ID
+const STATE_SLUGS = {
+  woolworths: ['weekly-catalogue', 'weekly-specials-catalogue'],
+  coles:      ['catalogue',        'weekly-catalogue'],
+  iga:        ['catalogue',        'weekly-specials'],
+};
+
+const RETAILER_PROBES = [
+  { slug: 'woolworths', slugVariants: STATE_SLUGS.woolworths },
+  { slug: 'coles',      slugVariants: STATE_SLUGS.coles      },
+  { slug: 'iga',        slugVariants: STATE_SLUGS.iga        },
+];
+
+const AU_STATES = ['nsw', 'vic', 'qld', 'wa', 'sa', 'tas', 'nt', 'act'];
+
+async function _probeId(id) {
+  try {
+    const res = await axios.get(`https://embed.salefinder.com.au/productlist/category/${id}`, {
+      params: { categoryId: '1', rows_per_page: 1, saleGroup: 0 },
+      timeout: 10000,
+    });
+    if (typeof res.data !== 'string' || res.data.length < 10) return false;
+    try {
+      const parsed = JSON.parse(res.data.substring(1, res.data.length - 1).replace(/[\r\n\t]/g, ''));
+      return !!(parsed?.content && parsed.content.length > 20);
+    } catch {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+}
+
+async function _findStateForId(retailerSlug, catalogueId, slugVariants) {
+  for (const state of AU_STATES) {
+    for (const variant of slugVariants) {
+      const url = `https://www.salefinder.com.au/${retailerSlug}-catalogue/${variant}-${state}/${catalogueId}/catalogue2`;
+      try {
+        const res = await axios.get(url, {
+          timeout: 8000,
+          maxRedirects: 3,
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SmartPlate/1.0)' },
+          validateStatus: s => s < 500,
+        });
+        if (res.status === 200 && typeof res.data === 'string' && res.data.length > 100) {
+          return state;
+        }
+      } catch {
+        // try next variant
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Discover current Salefinder catalogue IDs for all Australian states.
+ * Probes a window of IDs around the geo-located NSW baseline to find
+ * state-specific catalogues for Woolworths, Coles, and IGA.
+ *
+ * Saves results to backend/data/state-catalogue-ids.json.
+ * Called automatically by the weekly cron job before deal refresh.
+ *
+ * @returns {boolean} true if any IDs changed, false if unchanged or failed
+ */
+async function discoverAndSaveStateCatalogues() {
+  console.log('[CatalogueDiscovery] Starting weekly catalogue ID discovery...');
+  const existing = loadStateIds();
+  const output   = {
+    _comment:     existing._comment || 'Salefinder catalogue IDs by retailer and state. These IDs change weekly.',
+    _lastUpdated: new Date().toISOString().slice(0, 10),
+    _weekOf:      new Date(Date.now() - ((new Date().getDay() + 6) % 7) * 86400000).toISOString().slice(0, 10),
+  };
+  let anyChanged = false;
+
+  for (const { slug, slugVariants } of RETAILER_PROBES) {
+    output[slug] = {};
+
+    // Get baseline NSW catalogue from geo-located page
+    let baseId = null;
+    try {
+      const catalogues = await discoverCatalogueIds(slug);
+      if (catalogues.length > 0) {
+        baseId = Math.max(...catalogues.map(c => c.id));
+        console.log(`[CatalogueDiscovery] ${slug}: baseline NSW ID = ${baseId}`);
+      }
+    } catch (err) {
+      console.warn(`[CatalogueDiscovery] ${slug}: discovery page failed — ${err.message}`);
+    }
+
+    if (!baseId) {
+      console.warn(`[CatalogueDiscovery] ${slug}: no baseline ID found, keeping existing`);
+      output[slug] = existing[slug] || {};
+      continue;
+    }
+
+    // Probe IDs in window around baseline
+    const probeStart = baseId - PROBE_BEFORE;
+    const probeEnd   = baseId + PROBE_AFTER;
+    const ids        = Array.from({ length: probeEnd - probeStart + 1 }, (_, i) => probeStart + i);
+    const validIds   = [];
+
+    for (let i = 0; i < ids.length; i += PROBE_BATCH) {
+      const batch   = ids.slice(i, i + PROBE_BATCH);
+      const results = await Promise.all(batch.map(id => _probeId(id).then(v => v ? id : null)));
+      validIds.push(...results.filter(Boolean));
+      if (i + PROBE_BATCH < ids.length) await new Promise(r => setTimeout(r, PROBE_DELAY_MS));
+    }
+
+    console.log(`[CatalogueDiscovery] ${slug}: ${validIds.length} valid IDs found in range ${probeStart}–${probeEnd}`);
+
+    // Resolve state for each valid ID
+    const stateMap = {};
+    for (const id of validIds) {
+      const state = await _findStateForId(slug, id, slugVariants);
+      if (state) {
+        // Keep the highest ID per state (most recent catalogue)
+        if (!stateMap[state] || id > stateMap[state]) stateMap[state] = id;
+      }
+    }
+
+    // Populate output, fall back to existing for missing states
+    for (const state of AU_STATES) {
+      output[slug][state] = stateMap[state] ?? existing[slug]?.[state] ?? null;
+    }
+    // ACT uses NSW catalogue if not found separately
+    if (!output[slug].act) output[slug].act = output[slug].nsw ?? null;
+
+    // Log changes
+    for (const state of AU_STATES) {
+      const prev = existing[slug]?.[state];
+      const next = output[slug][state];
+      if (prev !== next && next) {
+        console.log(`[CatalogueDiscovery] ${slug}/${state}: ${prev ?? 'null'} → ${next}`);
+        anyChanged = true;
+      }
+    }
+  }
+
+  try {
+    fs.writeFileSync(STATE_IDS_PATH, JSON.stringify(output, null, 2), 'utf8');
+    console.log(`[CatalogueDiscovery] Saved to ${STATE_IDS_PATH} (changed: ${anyChanged})`);
+  } catch (err) {
+    console.error('[CatalogueDiscovery] Failed to save:', err.message);
+    return false;
+  }
+
+  return anyChanged;
+}
+
 module.exports = {
   fetchSpecials,
+  fetchSpecialsForState,
   discoverCatalogueIds,
+  discoverAndSaveStateCatalogues,
   getCategories,
   getItems,
+  loadStateIds,
   CATEGORY_MAP,
   EXCLUDED_CATEGORIES,
 };

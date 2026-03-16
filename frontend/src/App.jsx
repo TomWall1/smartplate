@@ -11,8 +11,10 @@ import Favorites from './pages/Favorites';
 import MealPlanner from './pages/MealPlanner';
 import ShoppingList from './pages/ShoppingList';
 import PriceAlerts from './pages/PriceAlerts';
+import PantryMatcher from './pages/PantryMatcher';
 import Premium from './pages/Premium';
 import Admin from './pages/Admin';
+import AdminRecipes from './pages/AdminRecipes';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PremiumProvider } from './context/PremiumContext';
 import { dealsApi, recipesApi, healthApi, usersApi } from './services/api';
@@ -71,6 +73,10 @@ function AppInner() {
     loadFromStorage('smartplate-preferences', DEFAULT_PREFERENCES)
   );
 
+  const [userState, setUserStateLocal] = useState(() =>
+    loadFromStorage('smartplate-state', 'nsw')
+  );
+
   // Wrapped setters that also persist to localStorage
   const setSelectedStore = (store) => {
     setSelectedStoreState(store);
@@ -86,6 +92,17 @@ function AppInner() {
     saveToStorage('smartplate-preferences', prefs);
   };
 
+  // setUserState: persist locally + save to backend when logged in
+  const setUserState = (state) => {
+    setUserStateLocal(state);
+    saveToStorage('smartplate-state', state);
+    if (user) {
+      usersApi.updateState(state).catch(() => {
+        // Silently ignore — local state is already updated
+      });
+    }
+  };
+
   // ── Sync user profile from Supabase when auth state changes ───────────────
   useEffect(() => {
     if (!user) return;
@@ -96,6 +113,11 @@ function AppInner() {
         if (profile.selected_store) {
           setSelectedStoreState(profile.selected_store);
           saveToStorage('smartplate-store', profile.selected_store);
+        }
+        // Apply saved state (Supabase wins over localStorage)
+        if (profile.state) {
+          setUserStateLocal(profile.state);
+          saveToStorage('smartplate-state', profile.state);
         }
         // Merge saved dietary/excluded preferences into existing prefs
         if (profile.dietary_restrictions?.length || profile.excluded_ingredients?.length) {
@@ -129,7 +151,8 @@ function AppInner() {
 
         try {
           const ingredients = dealList.map((d) => d.name);
-          const recipesData = await recipesApi.getRecipeSuggestions(ingredients, {}, []);
+          const currentState = loadFromStorage('smartplate-state', 'nsw');
+          const recipesData = await recipesApi.getRecipeSuggestions(ingredients, {}, [], currentState);
           const recipeList = Array.isArray(recipesData) ? recipesData : (recipesData?.recipes ?? []);
           setWeeklyRecipes(recipeList);
         } catch (recipeErr) {
@@ -155,6 +178,8 @@ function AppInner() {
     setSelectedStore,
     preferences,
     setPreferences,
+    userState,
+    setUserState,
     apiStatus,
     loading,
   };
@@ -186,8 +211,10 @@ function AppInner() {
             <Route path="/meal-planner" element={<MealPlanner />} />
             <Route path="/shopping-list" element={<ShoppingList />} />
             <Route path="/price-alerts" element={<PriceAlerts />} />
+            <Route path="/pantry" element={<PantryMatcher />} />
             <Route path="/premium" element={<Premium />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/recipes" element={<AdminRecipes />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

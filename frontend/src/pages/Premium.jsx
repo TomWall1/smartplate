@@ -1,13 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Crown, Heart, Calendar, ShoppingCart, Bell, Sparkles, Check, Star } from 'lucide-react';
+import { Crown, Heart, Calendar, ShoppingCart, Bell, Sparkles, Check, Star, ChefHat, Refrigerator } from 'lucide-react';
 import { usePremium } from '../context/PremiumContext';
 import { useAuth } from '../context/AuthContext';
 
 const FEATURES = [
   {
-    icon: Sparkles,
+    icon: ChefHat,
     color: '#7DB87A',
+    title: '150 AI-Matched Recipes Weekly',
+    desc: '3× more recipes than the free tier. Every recipe matched to this week\'s specials so you always cook with deals.',
+  },
+  {
+    icon: Refrigerator,
+    color: '#7DB87A',
+    title: 'What I Have at Home',
+    desc: 'Tell us what\'s in your fridge and we\'ll find recipes you can make right now — with deals on what\'s missing.',
+  },
+  {
+    icon: Sparkles,
+    color: '#D4667A',
     title: 'Personalised Recommendations',
     desc: 'AI-powered recipe suggestions tailored to your dietary preferences, cooking time, and household size.',
   },
@@ -19,7 +31,7 @@ const FEATURES = [
   },
   {
     icon: Calendar,
-    color: '#7DB87A',
+    color: '#F4A94E',
     title: 'Weekly Meal Planner',
     desc: 'Plan your breakfasts, lunches and dinners for the week. Never wonder "what\'s for dinner?" again.',
   },
@@ -38,20 +50,21 @@ const FEATURES = [
 ];
 
 const FREE_FEATURES = [
-  'Weekly recipe recommendations (50+ recipes)',
-  'Store-specific browsing',
-  'Deal filtering and search',
-  'Recipe details and instructions',
-  'Ingredient-to-deal matching',
+  { text: '50 recipes weekly', free: true },
+  { text: 'Store-specific browsing', free: true },
+  { text: 'Deal filtering and search', free: true },
+  { text: 'Recipe details and instructions', free: true },
+  { text: 'Ingredient-to-deal matching', free: true },
 ];
 
 const PREMIUM_FEATURES = [
-  ...FREE_FEATURES.map(f => ({ text: f, included: true })),
-  { text: 'Personalised AI recommendations', included: true, premium: true },
-  { text: 'Save favourite recipes', included: true, premium: true },
-  { text: 'Weekly meal planner', included: true, premium: true },
-  { text: 'Smart shopping lists', included: true, premium: true },
-  { text: 'Price alerts', included: true, premium: true },
+  { text: '150 AI-matched recipes weekly (3× more)', premium: true },
+  { text: 'What I Have at Home pantry matcher', premium: true },
+  { text: 'Personalised AI recommendations', premium: true },
+  { text: 'Save favourite recipes', premium: true },
+  { text: 'Weekly meal planner', premium: true },
+  { text: 'Smart shopping lists', premium: true },
+  { text: 'Price alerts', premium: true },
 ];
 
 export default function Premium() {
@@ -100,7 +113,7 @@ export default function Premium() {
               className="inline-flex items-center gap-1 px-5 py-2.5 rounded-xl text-white font-bold text-lg mb-2"
               style={{ background: '#F4A94E', fontFamily: '"Fredoka One", sans-serif' }}
             >
-              $7.99 / month
+              $9.99 / month
             </div>
             <p className="text-white/60 text-xs" style={{ fontFamily: 'Nunito, sans-serif' }}>
               Coming soon: Payment integration via Stripe
@@ -160,7 +173,7 @@ export default function Premium() {
             <div>Free</div>
             <div style={{ color: 'var(--color-honey)' }}>Premium</div>
           </div>
-          {PREMIUM_FEATURES.map((item, i) => (
+          {[...FREE_FEATURES, ...PREMIUM_FEATURES].map((item, i) => (
             <div
               key={i}
               className={`grid grid-cols-3 text-sm py-3 border-t text-center items-center ${item.premium ? 'font-semibold' : ''}`}
@@ -173,7 +186,7 @@ export default function Premium() {
             >
               <div className="px-4 text-left">{item.text}</div>
               <div>
-                {!item.premium ? (
+                {item.free ? (
                   <Check className="w-4 h-4 mx-auto" style={{ color: 'var(--color-leaf)' }} />
                 ) : (
                   <span style={{ color: 'var(--color-stone)' }}>—</span>

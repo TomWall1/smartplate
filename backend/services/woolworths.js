@@ -1,4 +1,4 @@
-const { fetchSpecials } = require('./salefinder');
+const { fetchSpecialsForState } = require('./salefinder');
 
 class WoolworthsService {
   constructor() {
@@ -11,9 +11,9 @@ class WoolworthsService {
     };
   }
 
-  async fetchDeals() {
-    console.log('Fetching Woolworths deals from SaleFinder...');
-    const rawDeals = await fetchSpecials(this.config);
+  async fetchDeals(state) {
+    console.log(`Fetching Woolworths deals from SaleFinder${state ? ` (${state.toUpperCase()})` : ''}...`);
+    const rawDeals = await fetchSpecialsForState({ ...this.config, state });
     console.log(`Woolworths: ${rawDeals.length} live food deals fetched`);
     return rawDeals;
   }

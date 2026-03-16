@@ -30,11 +30,14 @@ const CATEGORY_WEIGHTS = {
   other:             1,
 };
 
-const LIBRARY_PATH    = path.join(__dirname, '..', 'data', 'recipe-library.json');
-const JO_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'jamie-oliver-recipes.json');
-const DH_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'donna-hay-recipes.json');
-const WW_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'womensweekly-recipes.json');
-const JG_LIBRARY_PATH = path.join(__dirname, '..', 'data', 'juliegoodwin-recipes.json');
+// Each entry: prefer enriched file, fall back to original
+const LIBRARIES = [
+  { src: path.join(__dirname, '..', 'data', 'recipe-library.json'),        enriched: path.join(__dirname, '..', 'data', 'recipe-library-enriched.json'),        source: 'recipetineats' },
+  { src: path.join(__dirname, '..', 'data', 'jamie-oliver-recipes.json'),  enriched: path.join(__dirname, '..', 'data', 'jamie-oliver-recipes-enriched.json'),  source: 'jamieoliver'   },
+  { src: path.join(__dirname, '..', 'data', 'donna-hay-recipes.json'),     enriched: path.join(__dirname, '..', 'data', 'donna-hay-recipes-enriched.json'),     source: 'donnahay'      },
+  { src: path.join(__dirname, '..', 'data', 'womensweekly-recipes.json'),  enriched: path.join(__dirname, '..', 'data', 'womensweekly-recipes-enriched.json'),  source: 'womensweekly'  },
+  { src: path.join(__dirname, '..', 'data', 'juliegoodwin-recipes.json'),  enriched: path.join(__dirname, '..', 'data', 'juliegoodwin-recipes-enriched.json'),  source: 'juliegoodwin'  },
+];
 
 // Common brand/marketing terms to strip from deal names
 const STRIP_PREFIXES = [
@@ -265,58 +268,32 @@ class RecipeMatcher {
 
     const allRecipes = [];
 
-    // ── RecipeTinEats library ──────────────────────────────────────────────
-    try {
-      const data = JSON.parse(fs.readFileSync(LIBRARY_PATH, 'utf8'));
-      const rte  = (data.recipes || []).map(r => ({ ...r, source: r.source || 'recipetineats' }));
-      allRecipes.push(...rte);
-      console.log(`RecipeMatcher: Loaded ${rte.length} recipes from RecipeTinEats library`);
-    } catch (err) {
-      console.warn(`RecipeMatcher: Could not load RecipeTinEats library: ${err.message}`);
+    for (const lib of LIBRARIES) {
+      // Prefer enriched file if it exists; fall back to original
+      const filePath = fs.existsSync(lib.enriched) ? lib.enriched : lib.src;
+      const isEnriched = filePath === lib.enriched;
+      try {
+        const data    = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const recipes = (data.recipes || []).map(r => ({ ...r, source: lib.source }));
+        allRecipes.push(...recipes);
+        console.log(`RecipeMatcher: Loaded ${recipes.length} recipes from ${lib.source}${isEnriched ? ' (enriched)' : ''}`);
+      } catch (err) {
+        if (filePath === lib.src) {
+          // Main file missing — warn
+          console.warn(`RecipeMatcher: Could not load ${lib.source}: ${err.message}`);
+        }
+        // Enriched file missing — silently skip (expected before enrichment run)
+      }
     }
 
-    // ── Jamie Oliver library (optional — skip if file not generated yet) ────
-    try {
-      const data = JSON.parse(fs.readFileSync(JO_LIBRARY_PATH, 'utf8'));
-      const jo   = (data.recipes || []).map(r => ({ ...r, source: 'jamieoliver' }));
-      allRecipes.push(...jo);
-      console.log(`RecipeMatcher: Loaded ${jo.length} recipes from Jamie Oliver library`);
-    } catch {
-      // File doesn't exist yet — silently skip
-    }
-
-    // ── Donna Hay library (optional — skip if file not generated yet) ────────
-    try {
-      const data = JSON.parse(fs.readFileSync(DH_LIBRARY_PATH, 'utf8'));
-      const dh   = (data.recipes || []).map(r => ({ ...r, source: 'donnahay' }));
-      allRecipes.push(...dh);
-      console.log(`RecipeMatcher: Loaded ${dh.length} recipes from Donna Hay library`);
-    } catch {
-      // File doesn't exist yet — silently skip
-    }
-
-    // ── Women's Weekly Food library (optional — skip if file not generated yet) ──
-    try {
-      const data = JSON.parse(fs.readFileSync(WW_LIBRARY_PATH, 'utf8'));
-      const ww   = (data.recipes || []).map(r => ({ ...r, source: 'womensweekly' }));
-      allRecipes.push(...ww);
-      console.log(`RecipeMatcher: Loaded ${ww.length} recipes from Women's Weekly library`);
-    } catch {
-      // File doesn't exist yet — silently skip
-    }
-
-    // ── Julie Goodwin library (optional — skip if file not generated yet) ────
-    try {
-      const data = JSON.parse(fs.readFileSync(JG_LIBRARY_PATH, 'utf8'));
-      const jg   = (data.recipes || []).map(r => ({ ...r, source: 'juliegoodwin' }));
-      allRecipes.push(...jg);
-      console.log(`RecipeMatcher: Loaded ${jg.length} recipes from Julie Goodwin library`);
-    } catch {
-      // File doesn't exist yet — silently skip
+    // Exclude recipes marked inactive (is_active: false)
+    const active = allRecipes.filter(r => r.is_active !== false);
+    if (active.length < allRecipes.length) {
+      console.log(`RecipeMatcher: Filtered ${allRecipes.length - active.length} inactive recipes`);
     }
 
     // Reassign sequential IDs across the merged library
-    this.library = allRecipes.map((r, i) => ({ ...r, id: i + 1 }));
+    this.library = active.map((r, i) => ({ ...r, id: i + 1 }));
     console.log(`RecipeMatcher: Combined library: ${this.library.length} recipes`);
     return this.library;
   }
@@ -645,7 +622,7 @@ class RecipeMatcher {
 
   /**
    * Match deals against the recipe library.
-   * Returns top 50 recipes ranked by weighted score.
+   * Returns top N recipes ranked by weighted score.
    *
    * Deal matching uses two tiers:
    *   1. Product intelligence (satisfiesIngredients) — precise, avoids false positives
@@ -654,10 +631,11 @@ class RecipeMatcher {
    * Scoring weights protein deals (10×) over garnish deals (0.1×) so that
    * recipes featuring on-special main proteins rank first.
    *
-   * @param {Array} deals - Deal objects; enriched deals include a `productIntelligence` field
-   * @returns {Array} Top 50 matched recipes with matchedDeals, matchScore, totalSaving, weightedScore
+   * @param {Array}  deals - Deal objects; enriched deals include a `productIntelligence` field
+   * @param {number} limit - Max recipes to return (default 150; free tier slices to 50 at the route level)
+   * @returns {Array} Top N matched recipes with matchedDeals, matchScore, totalSaving, weightedScore
    */
-  matchDeals(deals) {
+  matchDeals(deals, limit = 150) {
     const recipes = this.loadLibrary();
     if (recipes.length === 0) return [];
 
@@ -683,6 +661,9 @@ class RecipeMatcher {
 
       for (const deal of normalisedDeals) {
         for (const ingredient of recipe.ingredients) {
+          // Skip section headers and admin-deactivated ingredients
+          if (ingredient.isSubheading || ingredient.isActive === false) continue;
+
           const cleanName = this._cleanIngredientName(ingredient.name);
           if (cleanName.length < 3) continue;
 
@@ -761,7 +742,7 @@ class RecipeMatcher {
     return scored
       .filter(r => r.matchScore > 0 && this._hasProteinMatch(r))
       .map(r => ({ ...r, weightedScore: +this._calculateRecipeScore(r).toFixed(2) }))
-      .slice(0, 50);
+      .slice(0, limit);
   }
 
   /**

@@ -15,10 +15,12 @@ router.get('/current', async (req, res) => {
 });
 
 // POST /api/deals/refresh — force live Salefinder fetch + update cache
+// Optional query param: ?state=vic  (nsw|vic|qld|wa|sa|tas|nt|act)
 router.post('/refresh', async (req, res) => {
   try {
-    console.log('Manual deal refresh requested...');
-    const { cache, deals } = await dealService.refreshDeals();
+    const state = (req.query.state || '').toLowerCase() || undefined;
+    console.log(`Manual deal refresh requested${state ? ` (state=${state})` : ''}...`);
+    const { cache, deals } = await dealService.refreshDeals(state);
     res.json({
       message: 'Deals cache refreshed successfully',
       lastUpdated: cache.lastUpdated,

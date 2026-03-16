@@ -1,4 +1,4 @@
-const { fetchSpecials } = require('./salefinder');
+const { fetchSpecialsForState } = require('./salefinder');
 
 class IGAService {
   constructor() {
@@ -12,9 +12,9 @@ class IGAService {
     };
   }
 
-  async fetchDeals() {
-    console.log('Fetching IGA deals from SaleFinder...');
-    const deals = await fetchSpecials(this.config);
+  async fetchDeals(state) {
+    console.log(`Fetching IGA deals from SaleFinder${state ? ` (${state.toUpperCase()})` : ''}...`);
+    const deals = await fetchSpecialsForState({ ...this.config, state });
     console.log(`IGA: ${deals.length} live food deals fetched`);
     return deals;
   }

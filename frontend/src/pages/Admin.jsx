@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Crown, BarChart2, Loader, RefreshCw, Check, X } from 'lucide-react';
+import { Shield, Users, Crown, BarChart2, Loader, RefreshCw, Check, X, MapPin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { adminApi } from '../services/api';
 
@@ -127,14 +127,56 @@ export default function Admin() {
           <>
             {/* Stats */}
             {stats && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-                <StatCard label="Total Users"    value={stats.totalUsers}        color="var(--color-bark)" />
-                <StatCard label="Premium"        value={stats.premiumUsers}       color="var(--color-honey)" />
-                <StatCard label="Free"           value={stats.freeUsers}          color="var(--color-text-muted)" />
-                <StatCard label="Favourites"     value={stats.totalFavorites}     color="var(--color-berry)" />
-                <StatCard label="Meal Plans"     value={stats.totalMealPlans}     color="var(--color-leaf)" />
-                <StatCard label="Shopping Lists" value={stats.totalShoppingLists} color="var(--color-leaf)" />
-              </div>
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                  <StatCard label="Total Users"    value={stats.totalUsers}        color="var(--color-bark)" />
+                  <StatCard label="Premium"        value={stats.premiumUsers}       color="var(--color-honey)" />
+                  <StatCard label="Free"           value={stats.freeUsers}          color="var(--color-text-muted)" />
+                  <StatCard label="Favourites"     value={stats.totalFavorites}     color="var(--color-berry)" />
+                  <StatCard label="Meal Plans"     value={stats.totalMealPlans}     color="var(--color-leaf)" />
+                  <StatCard label="Shopping Lists" value={stats.totalShoppingLists} color="var(--color-leaf)" />
+                </div>
+
+                {/* State Distribution */}
+                {stats.stateDistribution?.length > 0 && (
+                  <div
+                    className="rounded-[20px] border p-4 mb-6"
+                    style={{ background: '#ffffff', borderColor: 'var(--color-stone)' }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <MapPin className="w-4 h-4" style={{ color: 'var(--color-leaf)' }} />
+                      <h2 className="text-sm font-bold" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+                        Users by State
+                      </h2>
+                    </div>
+                    <div className="space-y-2">
+                      {stats.stateDistribution.map(({ state, count, pct }) => (
+                        <div key={state} className="flex items-center gap-3">
+                          <span
+                            className="w-10 text-xs font-extrabold text-right flex-shrink-0"
+                            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}
+                          >
+                            {state}
+                          </span>
+                          <div className="flex-1 h-5 rounded-full overflow-hidden" style={{ background: 'var(--color-mist)' }}>
+                            <div
+                              className="h-full rounded-full transition-all"
+                              style={{
+                                width: `${Math.max(pct, 2)}%`,
+                                background: 'var(--color-leaf)',
+                                opacity: 0.85,
+                              }}
+                            />
+                          </div>
+                          <span className="w-12 text-xs font-semibold flex-shrink-0" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+                            {count} <span className="text-[10px]">({pct}%)</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Filter tabs */}
@@ -167,7 +209,7 @@ export default function Admin() {
               <div
                 className="grid text-xs font-bold px-4 py-2.5"
                 style={{
-                  gridTemplateColumns: '1fr auto auto auto',
+                  gridTemplateColumns: '1fr auto auto auto auto',
                   gap: '12px',
                   background: 'var(--color-mist)',
                   fontFamily: 'Nunito, sans-serif',
@@ -175,6 +217,7 @@ export default function Admin() {
                 }}
               >
                 <span>Email</span>
+                <span>State</span>
                 <span>Store</span>
                 <span>Since</span>
                 <span>Premium</span>
@@ -189,7 +232,7 @@ export default function Admin() {
                   key={u.id}
                   className="grid items-center px-4 py-3 border-t"
                   style={{
-                    gridTemplateColumns: '1fr auto auto auto',
+                    gridTemplateColumns: '1fr auto auto auto auto',
                     gap: '12px',
                     borderColor: 'var(--color-stone)',
                     background: u.is_premium ? '#fffbf0' : '#ffffff',
@@ -206,6 +249,16 @@ export default function Admin() {
                       </p>
                     )}
                   </div>
+                  <span
+                    className="text-xs font-bold px-1.5 py-0.5 rounded"
+                    style={{
+                      fontFamily: 'Nunito, sans-serif',
+                      background: u.state ? 'var(--color-mist)' : 'transparent',
+                      color: u.state ? 'var(--color-text-green)' : 'var(--color-text-muted)',
+                    }}
+                  >
+                    {u.state ? u.state.toUpperCase() : '—'}
+                  </span>
                   <span className="text-xs capitalize" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
                     {u.selected_store ?? '—'}
                   </span>

@@ -73,12 +73,13 @@ export const dealsApi = {
 
 // Recipe API calls
 export const recipesApi = {
-  getRecipeSuggestions: async (dealIngredients, preferences = {}, pantryItems = []) => {
+  getRecipeSuggestions: async (dealIngredients, preferences = {}, pantryItems = [], state = null) => {
     try {
       const response = await api.post('/api/recipes/suggestions', {
         dealIngredients,
         preferences,
         pantryItems,
+        ...(state ? { state } : {}),
       }, { timeout: 60000 });
       return response.data;
     } catch (error) {
@@ -142,6 +143,11 @@ export const usersApi = {
 
   updatePreferences: async (prefs) => {
     const response = await api.put('/api/users/preferences', prefs);
+    return response.data;
+  },
+
+  updateState: async (state) => {
+    const response = await api.post('/api/users/state', { state });
     return response.data;
   },
 };
@@ -228,6 +234,26 @@ export const premiumApi = {
   },
 };
 
+// Pantry API — "What I Have at Home" premium feature
+export const pantryApi = {
+  getPantry: async () => {
+    const response = await api.get('/api/pantry');
+    return response.data;
+  },
+  savePantry: async (ingredients, hasPantryStaples) => {
+    const response = await api.post('/api/pantry', { ingredients, has_pantry_staples: hasPantryStaples });
+    return response.data;
+  },
+  deletePantry: async () => {
+    const response = await api.delete('/api/pantry');
+    return response.data;
+  },
+  matchPantry: async (ingredients, hasPantryStaples) => {
+    const response = await api.post('/api/pantry/match', { ingredients, has_pantry_staples: hasPantryStaples }, { timeout: 30000 });
+    return response.data;
+  },
+};
+
 // Admin API
 export const adminApi = {
   getUsers: async () => {
@@ -240,6 +266,22 @@ export const adminApi = {
   },
   getStats: async () => {
     const response = await api.get('/api/admin/stats');
+    return response.data;
+  },
+  getRecipes: async (params = {}) => {
+    const response = await api.get('/api/admin/recipes', { params });
+    return response.data;
+  },
+  getRecipe: async (id) => {
+    const response = await api.get(`/api/admin/recipes/${id}`);
+    return response.data;
+  },
+  updateRecipe: async (id, data) => {
+    const response = await api.put(`/api/admin/recipes/${id}`, data);
+    return response.data;
+  },
+  deleteRecipe: async (id) => {
+    const response = await api.delete(`/api/admin/recipes/${id}`);
     return response.data;
   },
 };

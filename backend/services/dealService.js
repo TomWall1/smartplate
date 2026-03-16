@@ -103,13 +103,14 @@ function cacheToFlatArray(cache) {
 
 // ── Raw fetch from Salefinder (no image enrichment) ───────────────────────────
 
-async function _fetchRaw() {
-  console.log('DealService: Fetching raw deals from Salefinder...');
+async function _fetchRaw(state) {
+  const stateLabel = state ? ` (${state.toUpperCase()})` : '';
+  console.log(`DealService: Fetching raw deals from Salefinder${stateLabel}...`);
 
   const tasks = [];
-  if (woolworthsService?.fetchDeals) tasks.push({ store: 'woolworths', fn: woolworthsService.fetchDeals() });
-  if (colesService?.fetchDeals)      tasks.push({ store: 'coles',      fn: colesService.fetchDeals()      });
-  if (igaService?.fetchDeals)        tasks.push({ store: 'iga',        fn: igaService.fetchDeals()        });
+  if (woolworthsService?.fetchDeals) tasks.push({ store: 'woolworths', fn: woolworthsService.fetchDeals(state) });
+  if (colesService?.fetchDeals)      tasks.push({ store: 'coles',      fn: colesService.fetchDeals(state)      });
+  if (igaService?.fetchDeals)        tasks.push({ store: 'iga',        fn: igaService.fetchDeals(state)        });
 
   if (tasks.length === 0) throw new Error('No deal services available');
 
@@ -357,9 +358,9 @@ const getCurrentDeals = async () => {
  *
  * Called by POST /api/deals/refresh, the weekly cron job, and server startup.
  */
-const refreshDeals = async () => {
+const refreshDeals = async (state) => {
   // Phase 1: raw fetch + immediate cache write
-  const byStore = await _fetchRaw();
+  const byStore = await _fetchRaw(state);
   const cache   = saveCache(byStore);
   console.log(
     `Basic deals cached — ${cache.woolworths.length} woolworths, ` +
@@ -404,6 +405,47 @@ const getDealsByCategory = async (category) => {
   return deals.filter(d => d.category && d.category.toLowerCase().includes(category.toLowerCase()));
 };
 
+// ── Per-state deal cache (fetched on-demand from Salefinder) ───────────────────
+
+const _stateDealCache = new Map(); // state → { deals, fetchedAt }
+const STATE_DEAL_TTL  = 6 * 60 * 60 * 1000; // 6 hours
+
+/**
+ * Get food deals for a specific Australian state.
+ * NSW uses the main cache; other states are fetched on-demand from Salefinder
+ * using the state-catalogue-ids.json lookup and cached in memory for 6 hours.
+ *
+ * Falls back to the main NSW cache if the state-specific fetch fails.
+ */
+const getDealsByState = async (state) => {
+  const s = (state || 'nsw').toLowerCase();
+  if (s === 'nsw') return getCurrentDeals();
+
+  const cached = _stateDealCache.get(s);
+  if (cached && Date.now() - cached.fetchedAt < STATE_DEAL_TTL) {
+    console.log(`DealService: Serving ${s.toUpperCase()} deals from memory cache (${cached.deals.length} deals)`);
+    return cached.deals;
+  }
+
+  console.log(`DealService: Fetching state-specific deals for ${s.toUpperCase()}...`);
+  try {
+    const byStore = await _fetchRaw(s);
+    const deals   = cacheToFlatArray(byStore);
+    _stateDealCache.set(s, { deals, fetchedAt: Date.now() });
+    console.log(`DealService: ${s.toUpperCase()} deal cache built — ${deals.length} deals`);
+    return deals;
+  } catch (err) {
+    console.warn(`DealService: ${s.toUpperCase()} fetch failed (${err.message}), falling back to NSW cache`);
+    return getCurrentDeals();
+  }
+};
+
+/** Invalidate all per-state caches (call after weekly deal refresh). */
+const clearStateDealCaches = () => {
+  _stateDealCache.clear();
+  console.log('DealService: Per-state deal caches cleared');
+};
+
 // Keep old name as alias so anything that still calls updateAllDeals() still works
 const updateAllDeals = async () => {
   const { deals } = await refreshDeals();
@@ -416,6 +458,8 @@ module.exports = {
   updateAllDeals,
   getDealsByStore,
   getDealsByCategory,
+  getDealsByState,
+  clearStateDealCaches,
   getCacheInfo,
   loadCache,
   setStartupFetch,

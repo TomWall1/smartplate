@@ -13,6 +13,112 @@ const SOURCE_META = {
   womensweekly:  { label: "Women's Weekly Food", logo: 'https://www.womensweeklyfood.com.au/favicon.ico' },
 };
 
+// ── Ingredient helpers ────────────────────────────────────────────────────────
+
+/**
+ * Build grouped sections from the ingredients array.
+ * Ingredients that are objects with isSubheading/isActive are from enriched recipes.
+ * String ingredients (legacy) are treated as plain active items.
+ */
+function groupIngredients(raw) {
+  const isObj = raw.length > 0 && typeof raw[0] === 'object';
+  if (!isObj) {
+    // Legacy string array — single ungrouped section
+    return [{ heading: null, items: raw.map((s, i) => ({ text: s, globalIdx: i, isActive: true })) }];
+  }
+
+  const sections = [];
+  let current = { heading: null, items: [] };
+
+  raw.forEach((ing, i) => {
+    if (ing.isActive === false) return; // hide admin-deactivated ingredients from users
+    if (ing.isSubheading) {
+      if (current.items.length > 0 || current.heading) sections.push(current);
+      current = { heading: ing.name, items: [] };
+    } else {
+      const text = [ing.quantity, ing.unit, ing.name].filter(Boolean).join(' ') || ing.raw || '';
+      current.items.push({ text, globalIdx: i, isActive: true });
+    }
+  });
+  if (current.items.length > 0 || current.heading) sections.push(current);
+  return sections;
+}
+
+function IngredientRow({ item, globalIdx, matchedDeals, openPopupIndex, setOpenPopupIndex, badgeRefs, closePopup }) {
+  const deal    = findMatchedDeal(item.text, matchedDeals);
+  const special = !!deal;
+  const isOpen  = openPopupIndex === globalIdx;
+
+  if (special) {
+    return (
+      <div className="relative">
+        <button
+          ref={(el) => { badgeRefs.current[globalIdx] = el; }}
+          onClick={() => setOpenPopupIndex(isOpen ? null : globalIdx)}
+          className="w-full text-left flex items-start gap-2 text-sm px-3 py-2 rounded-xl transition-colors cursor-pointer"
+          style={{ background: 'var(--color-mist)', border: '1.5px solid var(--color-sprout)', fontFamily: 'Nunito, sans-serif' }}
+          aria-expanded={isOpen}
+          aria-haspopup="dialog"
+        >
+          <span className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'var(--color-text-green)' }} />
+          <span className="font-semibold" style={{ color: 'var(--color-text-green)' }}>{item.text}</span>
+          <span className="ml-auto flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0 text-white" style={{ background: 'var(--color-berry)' }}>
+            on special
+          </span>
+        </button>
+        {isOpen && (
+          <DealPopup deal={deal} anchorRef={{ current: badgeRefs.current[globalIdx] }} onClose={closePopup} />
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="flex items-start gap-2 text-sm px-3 py-2 rounded-xl"
+      style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', fontFamily: 'Nunito, sans-serif' }}
+    >
+      <span className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'var(--color-stone)' }} />
+      <span style={{ color: 'var(--color-bark)' }}>{item.text}</span>
+    </div>
+  );
+}
+
+function IngredientList({ ingredients, matchedDeals, openPopupIndex, setOpenPopupIndex, badgeRefs, closePopup }) {
+  const sections = groupIngredients(ingredients);
+  return (
+    <div>
+      <h2 className="mb-3" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '20px' }}>
+        Ingredients
+      </h2>
+      {sections.map((section, si) => (
+        <div key={si} className={si > 0 ? 'mt-4' : ''}>
+          {section.heading && (
+            <p className="text-xs font-extrabold uppercase tracking-wide mb-2"
+              style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}>
+              {section.heading}
+            </p>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            {section.items.map((item) => (
+              <IngredientRow
+                key={item.globalIdx}
+                item={item}
+                globalIdx={item.globalIdx}
+                matchedDeals={matchedDeals}
+                openPopupIndex={openPopupIndex}
+                setOpenPopupIndex={setOpenPopupIndex}
+                badgeRefs={badgeRefs}
+                closePopup={closePopup}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function RecipeDetailSkeleton() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-parchment)' }}>
@@ -365,79 +471,14 @@ export default function RecipeDetail() {
 
         {/* Ingredients */}
         {displayIngredients.length > 0 && (
-          <div>
-            <h2
-              className="mb-3"
-              style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '20px' }}
-            >
-              Ingredients
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {displayIngredients.map((ing, i) => {
-                const deal = findMatchedDeal(ing, matchedDeals);
-                const special = !!deal;
-                const isOpen = openPopupIndex === i;
-
-                if (special) {
-                  return (
-                    <div key={i} className="relative">
-                      <button
-                        ref={(el) => { badgeRefs.current[i] = el; }}
-                        onClick={() => setOpenPopupIndex(isOpen ? null : i)}
-                        className="w-full text-left flex items-start gap-2 text-sm px-3 py-2 rounded-xl transition-colors cursor-pointer"
-                        style={{
-                          background: 'var(--color-mist)',
-                          border: '1.5px solid var(--color-sprout)',
-                          fontFamily: 'Nunito, sans-serif',
-                        }}
-                        aria-expanded={isOpen}
-                        aria-haspopup="dialog"
-                      >
-                        <span
-                          className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0"
-                          style={{ background: 'var(--color-text-green)' }}
-                        />
-                        <span className="font-semibold" style={{ color: 'var(--color-text-green)' }}>
-                          {ing}
-                        </span>
-                        <span
-                          className="ml-auto flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0 text-white"
-                          style={{ background: 'var(--color-berry)' }}
-                        >
-                          on special
-                        </span>
-                      </button>
-                      {isOpen && (
-                        <DealPopup
-                          deal={deal}
-                          anchorRef={{ current: badgeRefs.current[i] }}
-                          onClose={closePopup}
-                        />
-                      )}
-                    </div>
-                  );
-                }
-
-                return (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2 text-sm px-3 py-2 rounded-xl"
-                    style={{
-                      background: '#ffffff',
-                      border: '1.5px solid var(--color-stone)',
-                      fontFamily: 'Nunito, sans-serif',
-                    }}
-                  >
-                    <span
-                      className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ background: 'var(--color-stone)' }}
-                    />
-                    <span style={{ color: 'var(--color-bark)' }}>{ing}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <IngredientList
+            ingredients={displayIngredients}
+            matchedDeals={matchedDeals}
+            openPopupIndex={openPopupIndex}
+            setOpenPopupIndex={setOpenPopupIndex}
+            badgeRefs={badgeRefs}
+            closePopup={closePopup}
+          />
         )}
 
         {/* Steps */}

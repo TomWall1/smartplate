@@ -201,7 +201,7 @@ export default function Recipes() {
           >
             <span className="flex items-center gap-2" style={{ color: 'var(--color-bark)' }}>
               <Crown className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-honey)' }} />
-              Personalised recommendations are a <strong>Premium</strong> feature ($7.99/month).
+              Personalised recommendations are a <strong>Premium</strong> feature ($9.99/month).
             </span>
             <div className="flex items-center gap-2 flex-shrink-0">
               <Link
@@ -344,6 +344,30 @@ export default function Recipes() {
                     Showing all {filteredRecipes.length} recipes
                   </p>
                 ) : null}
+
+                {/* Upsell banner for free-tier users at end of results */}
+                {!isPremium && filteredRecipes.length > 0 && displayCount >= filteredRecipes.length && (
+                  <div
+                    className="rounded-[20px] border p-5 text-center"
+                    style={{ background: '#fffbf0', borderColor: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+                  >
+                    <Crown className="w-6 h-6 mx-auto mb-2" style={{ color: 'var(--color-honey)' }} />
+                    <p className="font-bold text-sm mb-1" style={{ color: 'var(--color-bark)' }}>
+                      You're seeing {filteredRecipes.length} recipes — upgrade to see 100 more
+                    </p>
+                    <p className="text-xs mb-3" style={{ color: 'var(--color-text-muted)' }}>
+                      Premium members get 150 AI-matched recipes weekly, plus the pantry matcher and meal planning.
+                    </p>
+                    <Link
+                      to="/premium"
+                      className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
+                      style={{ background: 'var(--color-honey)' }}
+                    >
+                      <Crown className="w-4 h-4" />
+                      Upgrade to Premium — $9.99/month
+                    </Link>
+                  </div>
+                )}
               </>
             ) : (
               <div

@@ -56,6 +56,14 @@ function applyExcludedIngredientFilter(recipes, excludeIngredients) {
   ];
 }
 
+// Common words to ignore when building deal keyword sets for state matching
+const STOP_WORDS = new Set([
+  'with', 'from', 'that', 'this', 'free', 'pack', 'each', 'fresh', 'whole', 'half',
+  'mini', 'large', 'small', 'extra', 'super', 'mega', 'plus', 'best', 'fine', 'good',
+  'original', 'classic', 'premium', 'select', 'value', 'range', 'brand', 'size',
+  'type', 'variety', 'assorted', 'mixed', 'style', 'flavour', 'natural', 'organic',
+]);
+
 class RecipeService {
   constructor() {
     this.anthropic = process.env.ANTHROPIC_API_KEY
@@ -100,8 +108,9 @@ class RecipeService {
       console.warn('RecipeService: Deal enrichment unavailable — using text matching:', enrichErr.message);
     }
 
-    // Step 1b: Find top 50 library recipes that match current deals (text + PI matching)
-    const matched = recipeMatcher.matchDeals(enrichedDeals);
+    // Step 1b: Find top 150 library recipes that match current deals (text + PI matching).
+    // Free tier sees 50; premium users see all 150. Limit applied at the route level.
+    const matched = recipeMatcher.matchDeals(enrichedDeals, 150);
     console.log(`RecipeService: Found ${matched.length} matching library recipes`);
 
     // If no matches (library empty or no overlap), fall back to pure generation
@@ -194,10 +203,18 @@ class RecipeService {
       };
     });
 
-    const prompt = `You are a helpful Australian meal-planning assistant. Below are ${matchedWithSavings.length} real recipes with their top on-special ingredients this week.
+    // Process enrichment in batches of 50 to stay within output token limits.
+    // 150 recipes at once produces ~40K+ chars of JSON which clips at 16K tokens.
+    const ENRICH_BATCH = 25;
+    const enriched = [];
+
+    try {
+      for (let batchStart = 0; batchStart < recipeSummary.length; batchStart += ENRICH_BATCH) {
+        const batch = recipeSummary.slice(batchStart, batchStart + ENRICH_BATCH);
+        const prompt = `You are a helpful Australian meal-planning assistant. Below are ${batch.length} real recipes with their top on-special ingredients this week.
 
 MATCHED RECIPES:
-${JSON.stringify(recipeSummary, null, 2)}
+${JSON.stringify(batch, null, 2)}
 
 For each recipe return a JSON object with:
 - "id": the recipe id
@@ -206,24 +223,29 @@ For each recipe return a JSON object with:
 - "dealIngredients": array of dealName strings from topDeals
 - "dealHighlights": array of strings formatted as "Ingredient $X.XX at Store (save $Y.YY)" — one per deal in topDeals
 
-Respond with ONLY a JSON array of ${matchedWithSavings.length} objects. No markdown, no explanation.`;
+Respond with ONLY a JSON array of ${batch.length} objects. No markdown, no explanation.`;
 
-    try {
-      const response = await this.anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 16000,
-        messages: [{ role: 'user', content: prompt }],
-      });
+        const response = await this.anthropic.messages.create({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 8192,
+          messages: [{ role: 'user', content: prompt }],
+        });
 
-      const text = response.content[0].text.trim();
-      let jsonText = text;
-      const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (fenceMatch) jsonText = fenceMatch[1].trim();
+        const text = response.content[0].text.trim();
+        let jsonText = text;
+        const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (fenceMatch) jsonText = fenceMatch[1].trim();
 
-      const enriched = JSON.parse(jsonText);
+        const batchResult = JSON.parse(jsonText);
+        if (!Array.isArray(batchResult) || batchResult.length === 0) {
+          throw new Error(`Claude returned invalid enrichment data for batch ${batchStart}`);
+        }
+        enriched.push(...batchResult);
+        console.log(`RecipeService: Enrichment batch ${Math.floor(batchStart / ENRICH_BATCH) + 1} complete (${enriched.length}/${recipeSummary.length})`);
+      }
 
-      if (!Array.isArray(enriched) || enriched.length === 0) {
-        throw new Error('Claude returned invalid enrichment data');
+      if (enriched.length === 0) {
+        throw new Error('Claude returned no enrichment data');
       }
 
       // Merge Claude enrichment with full library recipe data.
@@ -496,6 +518,9 @@ Respond with ONLY the JSON array.`;
   }
 
   async _saveWeeklyRecipes(recipes) {
+    // Invalidate per-state recipe caches so next request rebuilds with fresh data
+    this._stateRecipeCache.clear();
+
     let dealCount = 0;
     try {
       const dealService = require('./dealService');
@@ -646,6 +671,92 @@ Respond with ONLY the JSON array.`;
       })
       .filter(Boolean)
       .sort((a, b) => b.matchedDeals.length - a.matchedDeals.length);
+  }
+
+  // ── State-aware recipe delivery ──────────────────────────────────────────────
+
+  // In-memory per-state recipe re-score cache.
+  // Keyed by state abbreviation; invalidated on weekly recipe generation.
+  _stateRecipeCache = new Map(); // state → { recipes, builtAt }
+  static STATE_RECIPE_TTL = 6 * 60 * 60 * 1000; // 6 hours
+
+  /**
+   * Returns weekly recipes re-scored for relevance to the user's state.
+   *
+   * Strategy (fast, no AI calls):
+   *   1. Fetch state-specific deals from Salefinder (cached in dealService).
+   *   2. For each weekly recipe, count how many of its allIngredients appear
+   *      as keywords in the state deal names.
+   *   3. Sort by state-deal match count; discard recipes with zero matches
+   *      only if enough remain (>= 5).
+   *   4. First request for a state starts a background build and immediately
+   *      returns NSW weekly recipes as a fast fallback.
+   */
+  async getRecipesByState(state, store = null) {
+    const s = (state || 'nsw').toLowerCase();
+    if (s === 'nsw') return this.getWeeklyRecipes(store);
+
+    const cached = this._stateRecipeCache.get(s);
+    if (cached && Date.now() - cached.builtAt < RecipeService.STATE_RECIPE_TTL) {
+      const recipes = store ? this._filterRecipesByStore(cached.recipes, store) : cached.recipes;
+      return recipes;
+    }
+
+    // Start background build if not already running
+    if (!cached?.pending) {
+      this._stateRecipeCache.set(s, { pending: true });
+      this._buildStateRecipeCache(s).catch(err => {
+        console.warn(`RecipeService: State recipe cache build failed for ${s}:`, err.message);
+        this._stateRecipeCache.delete(s);
+      });
+    }
+
+    // Return NSW results while state cache is being built
+    return this.getWeeklyRecipes(store);
+  }
+
+  async _buildStateRecipeCache(state) {
+    const dealService = require('./dealService');
+    console.log(`RecipeService: Building recipe relevance cache for ${state.toUpperCase()}...`);
+
+    const stateDeals = await dealService.getDealsByState(state);
+    if (!stateDeals || stateDeals.length === 0) {
+      this._stateRecipeCache.delete(state);
+      return;
+    }
+
+    // Build a keyword set from deal names for fast matching
+    // e.g. "Woolworths Free Range Chicken Breast 500g" → ["free", "range", "chicken", "breast"]
+    const dealKeywords = stateDeals.flatMap(deal => {
+      return deal.name.toLowerCase()
+        .replace(/[^a-z\s]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length > 3 && !STOP_WORDS.has(w));
+    });
+    const dealKwSet = new Set(dealKeywords);
+
+    const weeklyRecipes = this.getWeeklyRecipes(null);
+
+    const rescored = weeklyRecipes
+      .map(recipe => {
+        // Combine all ingredient text for this recipe
+        const ingText = [
+          ...(recipe.allIngredients || []),
+          ...(recipe.dealIngredients || []),
+        ].join(' ').toLowerCase().replace(/[^a-z\s]/g, ' ');
+
+        const ingWords = ingText.split(/\s+/).filter(w => w.length > 3);
+        const matchCount = ingWords.filter(w => dealKwSet.has(w)).length;
+        return { ...recipe, _stateMatchCount: matchCount };
+      })
+      .sort((a, b) => b._stateMatchCount - a._stateMatchCount);
+
+    // Discard zero-match recipes only if we still have plenty
+    const withMatches = rescored.filter(r => r._stateMatchCount > 0);
+    const result = withMatches.length >= 5 ? withMatches : rescored;
+
+    this._stateRecipeCache.set(state, { recipes: result, builtAt: Date.now(), pending: false });
+    console.log(`RecipeService: ${state.toUpperCase()} recipe cache built — ${result.length} recipes (${withMatches.length} with state deal matches)`);
   }
 
   async getRecipeDetails(recipeId, store = null) {

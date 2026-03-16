@@ -39,7 +39,7 @@ export default function PremiumGate({ feature, children }) {
       </h3>
       <p className="text-sm mb-5 max-w-sm mx-auto" style={{ color: 'var(--color-text-muted)' }}>
         {feature ? `${feature} is` : 'This feature is'} available with SmartPlate Premium
-        for just <strong style={{ color: 'var(--color-bark)' }}>$7.99/month</strong>.
+        for just <strong style={{ color: 'var(--color-bark)' }}>$9.99/month</strong>.
       </p>
       {user ? (
         <Link

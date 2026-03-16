@@ -41,6 +41,7 @@ const recipesRoutes = require('./routes/recipes');
 const usersRoutes   = require('./routes/users');
 const premiumRoutes = require('./routes/premium');
 const adminRoutes   = require('./routes/admin');
+const pantryRoutes  = require('./routes/pantry');
 
 // Routes
 app.use('/api/deals',   dealsRoutes);
@@ -48,23 +49,37 @@ app.use('/api/recipes', recipesRoutes);
 app.use('/api/users',   usersRoutes);
 app.use('/api/premium', premiumRoutes);
 app.use('/api/admin',   adminRoutes);
+app.use('/api/pantry',  pantryRoutes);
 
 // External cron trigger — used by cron-job.org / GitHub Actions for weekly refresh
 // Returns 202 immediately; refresh runs in background to avoid proxy timeouts.
 app.post('/api/admin/refresh-deals', (req, res) => {
-  console.log('External cron: triggered deal refresh (background)');
+  const skipDiscovery = req.query.skipDiscovery === 'true';
+  console.log(`External cron: triggered deal refresh (discovery: ${!skipDiscovery})`);
   res.status(202).json({
     success: true,
-    message: 'Deal refresh started in background.',
+    message: 'Deal refresh pipeline started in background.',
     timestamp: new Date().toISOString(),
   });
-  const dealService = require('./services/dealService');
-  dealService.refreshDeals()
-    .then(({ cache }) => {
-      const total = (cache.woolworths?.length || 0) + (cache.coles?.length || 0) + (cache.iga?.length || 0);
-      console.log(`External cron: deal refresh complete — ${total} deals`);
-    })
-    .catch((err) => console.error('External cron: deal refresh error:', err.message));
+
+  (async () => {
+    // Step 1: Catalogue discovery (unless skipped)
+    if (!skipDiscovery) {
+      try {
+        const { discoverAndSaveStateCatalogues } = require('./services/salefinder');
+        const changed = await discoverAndSaveStateCatalogues();
+        console.log(`External cron: catalogue discovery complete (changed: ${changed})`);
+      } catch (err) {
+        console.warn(`External cron: catalogue discovery failed — continuing: ${err.message}`);
+      }
+    }
+    // Step 2: Deal refresh
+    const dealService = require('./services/dealService');
+    const { cache } = await dealService.refreshDeals();
+    const total = (cache.woolworths?.length || 0) + (cache.coles?.length || 0) + (cache.iga?.length || 0);
+    console.log(`External cron: deal refresh complete — ${total} deals`);
+    dealService.clearStateDealCaches();
+  })().catch((err) => console.error('External cron: pipeline error:', err.message));
 });
 
 // Health check
@@ -181,21 +196,35 @@ if (!process.env.VERCEL) {
   });
 
   // ── Weekly deals refresh — every Wednesday at 11:00 pm AEST ────────────────
+  // Pipeline: (1) discover catalogue IDs → (2) refresh deals → (3) clear state caches
   // Woolworths and Coles catalogues update Wednesday evening.
-  // node-cron uses the server's local time by default; we set timezone explicitly.
   const cron = require('node-cron');
   cron.schedule('0 23 * * 3', async () => {
-    console.log('Cron: Starting scheduled weekly deals refresh...');
+    console.log('Cron: Starting weekly pipeline (catalogue discovery → deal refresh)...');
+
+    // Step 1: Discover current catalogue IDs for all states
+    // Runs in ±120 ID window around geo-located NSW baseline.
+    // If discovery fails, deal refresh continues with last known IDs.
+    try {
+      const { discoverAndSaveStateCatalogues } = require('./services/salefinder');
+      const changed = await discoverAndSaveStateCatalogues();
+      console.log(`Cron: Catalogue discovery complete (IDs changed: ${changed})`);
+    } catch (err) {
+      console.warn(`Cron: Catalogue discovery failed — using previous IDs: ${err.message}`);
+    }
+
+    // Step 2: Refresh deals (uses updated catalogue IDs)
     try {
       const dealService = require('./services/dealService');
       const { cache } = await dealService.refreshDeals();
       console.log(`Cron: Deals refreshed — ${cache.woolworths.length} WW, ${cache.coles.length} Coles, ${cache.iga.length} IGA`);
+      dealService.clearStateDealCaches();
     } catch (err) {
       console.error('Cron: Deals refresh failed:', err.message);
     }
   }, { timezone: 'Australia/Sydney' });
 
-  console.log('Cron: Scheduled weekly deals refresh every Wednesday at 11 pm AEST');
+  console.log('Cron: Scheduled weekly pipeline every Wednesday at 11 pm AEST');
 }
 
 // Export for serverless adapters (Vercel etc.)

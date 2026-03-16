@@ -18,12 +18,40 @@ router.post('/generate-weekly', (req, res) => {
     .catch((err) => console.error('Recipe generation failed:', err.message));
 });
 
+// ── Helper: extract user's state from JWT or request ─────────────────
+async function extractUserState(req) {
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    try {
+      const token = authHeader.slice(7);
+      const userClient = clientForToken(token);
+      if (userClient) {
+        const { data: profile } = await userClient
+          .from('users')
+          .select('state')
+          .eq('id', (await authSupabase.auth.getUser(token)).data?.user?.id)
+          .single();
+        if (profile?.state) return profile.state.toLowerCase();
+      }
+    } catch {
+      // fall through to request param / default
+    }
+  }
+  // Unauthenticated — accept from query/body param (frontend passes userState)
+  const fromParam = req.body?.state || req.query?.state;
+  return fromParam ? fromParam.toLowerCase() : 'nsw';
+}
+
 // ── Get recipe suggestions ──────────────────────────────────────────
 // Default: returns stored weekly recipes (no API call)
 // With preferences: calls Claude for personalised ranking
 router.post('/suggestions', async (req, res) => {
   try {
-    const { dealIngredients, preferences, pantryItems, store } = req.body;
+    const { dealIngredients, preferences, pantryItems, store, state } = req.body;
+
+    // Determine state (from JWT profile first, then body param, then default NSW)
+    const userState = state ? state.toLowerCase()
+      : await extractUserState(req).catch(() => 'nsw');
 
     const hasPreferences =
       (preferences?.dietary && preferences.dietary.length > 0) ||
@@ -33,11 +61,37 @@ router.post('/suggestions', async (req, res) => {
       preferences?.cuisinePreferences?.length > 0 ||
       (preferences?.excludeIngredients && preferences.excludeIngredients.length > 0);
 
+    // Determine premium status from JWT (optional auth — free users have no token)
+    // Also used below for the hasPreferences gate, so computed once here.
+    let isPremiumUser = false;
+    let authedUser = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.slice(7);
+        const { data: { user: authUser } } = await authSupabase.auth.getUser(token);
+        if (authUser) {
+          authedUser = authUser;
+          const userClient = clientForToken(token);
+          const { data: profile } = await userClient
+            .from('users')
+            .select('is_premium')
+            .eq('id', authUser.id)
+            .single();
+          isPremiumUser = profile?.is_premium ?? false;
+        }
+      } catch {
+        // Non-fatal — default to free tier
+      }
+    }
+
+    // Recipe limit: premium users see 150 AI-matched recipes; free users see 50.
+    const recipeLimit = isPremiumUser ? 150 : 50;
+
     let recipes;
 
     if (hasPreferences) {
       // Premium gate — personalization requires a premium account
-      const authHeader = req.headers.authorization;
       if (!authHeader?.startsWith('Bearer ')) {
         return res.status(403).json({
           error: 'Premium required',
@@ -45,29 +99,19 @@ router.post('/suggestions', async (req, res) => {
           upgradeUrl: '/premium',
         });
       }
-      const token = authHeader.slice(7);
-      if (authSupabase) {
-        const { data: { user } } = await authSupabase.auth.getUser(token);
-        if (!user) {
-          return res.status(403).json({
-            error: 'Premium required',
-            message: 'Sign in to use personalised recommendations',
-            upgradeUrl: '/premium',
-          });
-        }
-        const userClient = clientForToken(token);
-        const { data: profile } = await userClient
-          .from('users')
-          .select('is_premium')
-          .eq('id', user.id)
-          .single();
-        if (!profile?.is_premium) {
-          return res.status(403).json({
-            error: 'Premium required',
-            message: 'Upgrade to SmartPlate Premium to get personalised recipe recommendations',
-            upgradeUrl: '/premium',
-          });
-        }
+      if (!authedUser) {
+        return res.status(403).json({
+          error: 'Premium required',
+          message: 'Sign in to use personalised recommendations',
+          upgradeUrl: '/premium',
+        });
+      }
+      if (!isPremiumUser) {
+        return res.status(403).json({
+          error: 'Premium required',
+          message: 'Upgrade to SmartPlate Premium to get personalised recipe recommendations',
+          upgradeUrl: '/premium',
+        });
       }
 
       // Personalised path — Claude API call with user prefs
@@ -78,10 +122,11 @@ router.post('/suggestions', async (req, res) => {
       console.log('Using personalised recipe path');
       recipes = await recipeService.getPersonalisedRecipes(fullPreferences);
     } else {
-      // Default path — read from stored weekly recipes (free)
+      // Default path — read from stored weekly recipes, state-filtered
       const storeLabel = store || null;
-      console.log(`Serving stored weekly recipes${storeLabel ? ` for store: ${storeLabel}` : ''}`);
-      recipes = recipeService.getWeeklyRecipes(storeLabel);
+      console.log(`Serving stored weekly recipes (limit: ${recipeLimit})${storeLabel ? ` for store: ${storeLabel}` : ''}${userState !== 'nsw' ? ` (state: ${userState.toUpperCase()})` : ''}`);
+      const allRecipes = await recipeService.getRecipesByState(userState, storeLabel);
+      recipes = Array.isArray(allRecipes) ? allRecipes.slice(0, recipeLimit) : allRecipes;
     }
 
     res.json(recipes);
@@ -123,9 +168,10 @@ router.get('/matched', async (req, res) => {
 // Query params: allergens (comma-separated), mealType, maxCookTime
 router.get('/matched-filtered', async (req, res) => {
   try {
-    const { allergens, mealType, maxCookTime, store } = req.query;
+    const { allergens, mealType, maxCookTime, store, state } = req.query;
 
-    let recipes = recipeService.getWeeklyRecipes(store || null);
+    const userState = state ? state.toLowerCase() : await extractUserState(req).catch(() => 'nsw');
+    let recipes = await recipeService.getRecipesByState(userState, store || null);
 
     if (allergens) {
       const allergenList = allergens.split(',').map(a => a.toLowerCase().trim());
