@@ -23,8 +23,10 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "scheme": "dealstodish",
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "extra": {
       "apiBaseUrl": "https://smartplate-backend.onrender.com"

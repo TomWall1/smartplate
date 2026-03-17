@@ -26,13 +26,24 @@ import ProfileScreen from '../screens/ProfileScreen';
 import PremiumGate from '../components/PremiumGate';
 import { PantryMatchResult } from '../types';
 
-// ─── Navigator param list types ───────────────────────────────────────────────
+// ─── Param list types ─────────────────────────────────────────────────────────
 
+// Auth-wall stack (first open, no user, no guest mode)
 export type AuthStackParamList = {
   Login: undefined;
   SignUp: undefined;
-  StateSelection: undefined;
   ForgotPassword: undefined;
+  StateSelection: undefined;
+};
+
+// Root stack used when user is logged in or in guest mode
+// Auth screens sit here as modals so any tab can navigate to them
+export type RootStackParamList = {
+  App: undefined;
+  Login: undefined;
+  SignUp: undefined;
+  ForgotPassword: undefined;
+  StateSelection: undefined;
 };
 
 export type RecipesStackParamList = {
@@ -65,14 +76,14 @@ export type MainTabParamList = {
 
 // ─── Stack navigators ─────────────────────────────────────────────────────────
 
-const AuthStack = createNativeStackNavigator<AuthStackParamList>();
+const AuthStack    = createNativeStackNavigator<AuthStackParamList>();
+const RootStack    = createNativeStackNavigator<RootStackParamList>();
 const RecipesStack = createNativeStackNavigator<RecipesStackParamList>();
-const PantryStack = createNativeStackNavigator<PantryStackParamList>();
-const FavouritesStack = createNativeStackNavigator<FavouritesStackParamList>();
+const PantryStack  = createNativeStackNavigator<PantryStackParamList>();
+const FavStack     = createNativeStackNavigator<FavouritesStackParamList>();
 const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
-const MainTab = createBottomTabNavigator<MainTabParamList>();
+const MainTab      = createBottomTabNavigator<MainTabParamList>();
 
-// Shared header options
 const headerOptions = {
   headerStyle: { backgroundColor: '#ffffff' },
   headerTintColor: '#5C4A35',
@@ -80,14 +91,12 @@ const headerOptions = {
   headerBackTitleVisible: false,
 };
 
+// ─── Tab navigators ───────────────────────────────────────────────────────────
+
 function RecipesNavigator() {
   return (
     <RecipesStack.Navigator screenOptions={headerOptions}>
-      <RecipesStack.Screen
-        name="RecipeList"
-        component={RecipeListScreen}
-        options={{ title: 'Recipes & Deals' }}
-      />
+      <RecipesStack.Screen name="RecipeList" component={RecipeListScreen} options={{ title: 'Recipes & Deals' }} />
       <RecipesStack.Screen
         name="RecipeDetail"
         component={RecipeDetailScreen}
@@ -101,23 +110,10 @@ function PantryNavigator() {
   const { isPremium } = usePremium();
   return (
     <PantryStack.Navigator screenOptions={headerOptions}>
-      <PantryStack.Screen
-        name="PantryInput"
-        options={{ title: 'My Pantry' }}
-      >
-        {(props) =>
-          isPremium ? (
-            <PantryInputScreen {...props} />
-          ) : (
-            <PremiumGate feature="Pantry matching" />
-          )
-        }
+      <PantryStack.Screen name="PantryInput" options={{ title: 'My Pantry' }}>
+        {(props) => isPremium ? <PantryInputScreen {...props} /> : <PremiumGate feature="Pantry matching" />}
       </PantryStack.Screen>
-      <PantryStack.Screen
-        name="PantryResults"
-        component={PantryResultsScreen}
-        options={{ title: 'Matching Recipes' }}
-      />
+      <PantryStack.Screen name="PantryResults" component={PantryResultsScreen} options={{ title: 'Matching Recipes' }} />
       <PantryStack.Screen
         name="PantryRecipeDetail"
         component={RecipeDetailScreen as any}
@@ -130,41 +126,24 @@ function PantryNavigator() {
 function FavouritesNavigator() {
   const { isPremium } = usePremium();
   return (
-    <FavouritesStack.Navigator screenOptions={headerOptions}>
-      <FavouritesStack.Screen
-        name="Favourites"
-        options={{ title: 'My Favourites' }}
-      >
-        {(props) =>
-          isPremium ? (
-            <FavouritesScreen {...props} />
-          ) : (
-            <PremiumGate feature="Saved favourites" />
-          )
-        }
-      </FavouritesStack.Screen>
-      <FavouritesStack.Screen
+    <FavStack.Navigator screenOptions={headerOptions}>
+      <FavStack.Screen name="Favourites" options={{ title: 'My Favourites' }}>
+        {(props) => isPremium ? <FavouritesScreen {...props} /> : <PremiumGate feature="Saved favourites" />}
+      </FavStack.Screen>
+      <FavStack.Screen
         name="FavouriteDetail"
         component={RecipeDetailScreen as any}
         options={({ route }) => ({ title: (route.params as { title: string }).title })}
       />
-    </FavouritesStack.Navigator>
+    </FavStack.Navigator>
   );
 }
 
 function ProfileNavigator() {
   return (
     <ProfileStack.Navigator screenOptions={headerOptions}>
-      <ProfileStack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ title: 'My Profile' }}
-      />
-      <ProfileStack.Screen
-        name="ProfileStateSelection"
-        component={StateSelectionScreen}
-        options={{ title: 'Change State' }}
-      />
+      <ProfileStack.Screen name="Profile" component={ProfileScreen} options={{ title: 'My Profile' }} />
+      <ProfileStack.Screen name="ProfileStateSelection" component={StateSelectionScreen} options={{ title: 'Change State' }} />
     </ProfileStack.Navigator>
   );
 }
@@ -177,28 +156,14 @@ function MainTabNavigator() {
         headerShown: false,
         tabBarActiveTintColor: '#7DB87A',
         tabBarInactiveTintColor: '#a09080',
-        tabBarStyle: {
-          backgroundColor: '#ffffff',
-          borderTopColor: '#e8e0d4',
-          borderTopWidth: 1,
-          paddingBottom: 4,
-          height: 60,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-        },
+        tabBarStyle: { backgroundColor: '#ffffff', borderTopColor: '#e8e0d4', borderTopWidth: 1, paddingBottom: 4, height: 60 },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
       <MainTab.Screen
         name="RecipesTab"
         component={RecipesNavigator}
-        options={{
-          tabBarLabel: 'Recipes',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="restaurant-outline" size={size} color={color} />
-          ),
-        }}
+        options={{ tabBarLabel: 'Recipes', tabBarIcon: ({ color, size }) => <Ionicons name="restaurant-outline" size={size} color={color} /> }}
       />
       <MainTab.Screen
         name="PantryTab"
@@ -208,11 +173,7 @@ function MainTabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <View>
               <Ionicons name="basket-outline" size={size} color={color} />
-              {!isPremium && (
-                <View style={styles.lockBadge}>
-                  <Ionicons name="lock-closed" size={9} color="#ffffff" />
-                </View>
-              )}
+              {!isPremium && <View style={styles.lockBadge}><Ionicons name="lock-closed" size={9} color="#ffffff" /></View>}
             </View>
           ),
         }}
@@ -225,11 +186,7 @@ function MainTabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <View>
               <Ionicons name="heart-outline" size={size} color={color} />
-              {!isPremium && (
-                <View style={styles.lockBadge}>
-                  <Ionicons name="lock-closed" size={9} color="#ffffff" />
-                </View>
-              )}
+              {!isPremium && <View style={styles.lockBadge}><Ionicons name="lock-closed" size={9} color="#ffffff" /></View>}
             </View>
           ),
         }}
@@ -237,42 +194,62 @@ function MainTabNavigator() {
       <MainTab.Screen
         name="ProfileTab"
         component={ProfileNavigator}
-        options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
-        }}
+        options={{ tabBarLabel: 'Profile', tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} /> }}
       />
     </MainTab.Navigator>
   );
 }
 
+// ─── Auth wall (shown on first open before any choice is made) ────────────────
+
 function AuthNavigator() {
   return (
     <AuthStack.Navigator screenOptions={{ ...headerOptions, headerShown: false }}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
-      <AuthStack.Screen
-        name="SignUp"
-        component={SignUpScreen}
-        options={{ headerShown: true, title: 'Create Account' }}
-      />
-      <AuthStack.Screen
-        name="ForgotPassword"
-        component={ForgotPasswordScreen}
-        options={{ headerShown: true, title: 'Reset Password' }}
-      />
-      <AuthStack.Screen
-        name="StateSelection"
-        component={StateSelectionScreen}
-        options={{ headerShown: true, title: 'Your Location' }}
-      />
+      <AuthStack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: true, title: 'Create Account' }} />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: true, title: 'Reset Password' }} />
+      <AuthStack.Screen name="StateSelection" component={StateSelectionScreen} options={{ headerShown: true, title: 'Your Location' }} />
     </AuthStack.Navigator>
   );
 }
 
+// ─── Root (user/guest mode): main app + modal auth screens ───────────────────
+
+function AppWithModalAuth() {
+  const { user } = useAuth();
+  return (
+    <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Screen name="App" component={MainTabNavigator} />
+      {/* Auth screens as modals — navigable from any tab via navigation.navigate('Login') etc. */}
+      <RootStack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ presentation: 'modal', headerShown: false }}
+      />
+      <RootStack.Screen
+        name="SignUp"
+        component={SignUpScreen}
+        options={{ presentation: 'modal', headerShown: true, title: 'Create Account', ...headerOptions }}
+      />
+      <RootStack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ presentation: 'modal', headerShown: true, title: 'Reset Password', ...headerOptions }}
+      />
+      {/* State selection shown as modal when user has no state set */}
+      <RootStack.Screen
+        name="StateSelection"
+        component={StateSelectionScreen}
+        options={{ presentation: 'modal', headerShown: true, title: 'Your Location', ...headerOptions }}
+      />
+    </RootStack.Navigator>
+  );
+}
+
+// ─── Root navigator ───────────────────────────────────────────────────────────
+
 export default function RootNavigator() {
-  const { user, loading } = useAuth();
+  const { user, loading, guestMode } = useAuth();
 
   if (loading) {
     return (
@@ -282,41 +259,18 @@ export default function RootNavigator() {
     );
   }
 
-  // User logged in but hasn't set a state yet — show StateSelection
-  const needsState = user && !user.state;
-
   return (
     <NavigationContainer>
-      {!user ? (
-        <AuthNavigator />
-      ) : needsState ? (
-        // Wrap StateSelection in a minimal stack so it has a navigator context
-        <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-          <AuthStack.Screen name="StateSelection" component={StateSelectionScreen} />
-        </AuthStack.Navigator>
-      ) : (
-        <MainTabNavigator />
-      )}
+      {user || guestMode ? <AppWithModalAuth /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  splash: {
-    flex: 1,
-    backgroundColor: '#FDFAF5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  splash: { flex: 1, backgroundColor: '#FDFAF5', justifyContent: 'center', alignItems: 'center' },
   lockBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -4,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#F4A94E',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: 'absolute', top: -2, right: -4,
+    width: 14, height: 14, borderRadius: 7,
+    backgroundColor: '#F4A94E', justifyContent: 'center', alignItems: 'center',
   },
 });

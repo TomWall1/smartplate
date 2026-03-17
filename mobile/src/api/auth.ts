@@ -14,3 +14,8 @@ export async function signup(email: string, password: string): Promise<AuthRespo
 export async function forgotPassword(email: string): Promise<void> {
   await client.post('/api/users/forgot-password', { email });
 }
+
+export async function getOAuthConfig(): Promise<{ supabaseUrl: string | null }> {
+  const response = await client.get<{ supabaseUrl: string | null }>('/api/users/oauth-config');
+  return response.data;
+}

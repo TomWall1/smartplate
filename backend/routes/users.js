@@ -4,6 +4,12 @@ const { clientForToken, supabase } = require('../services/authService');
 
 const router = express.Router();
 
+// ── GET /api/users/oauth-config ───────────────────────────────────────────────
+// Returns public config needed for mobile OAuth flows (no secrets)
+router.get('/oauth-config', (_req, res) => {
+  res.json({ supabaseUrl: process.env.SUPABASE_URL ?? null });
+});
+
 // ── POST /api/users/forgot-password ──────────────────────────────────────────
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;

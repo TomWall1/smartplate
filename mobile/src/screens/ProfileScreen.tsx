@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { usePremium } from '../context/PremiumContext';
 import { updateState } from '../api/users';
@@ -25,6 +26,7 @@ const AU_STATES = [
 ];
 
 export default function ProfileScreen() {
+  const navigation = useNavigation<any>();
   const { user, logout, refreshUser } = useAuth();
   const { isPremium } = usePremium();
   const [showStatePicker, setShowStatePicker] = useState(false);
@@ -63,6 +65,62 @@ export default function ProfileScreen() {
   }
 
   const currentStateLabel = AU_STATES.find((s) => s.code === user?.state)?.label ?? user?.state?.toUpperCase() ?? 'Not set';
+
+  // Guest: show sign-in prompt
+  if (!user) {
+    return (
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
+        <View style={styles.profileHeader}>
+          <View style={styles.avatar}>
+            <Ionicons name="person-outline" size={36} color="#a09080" />
+          </View>
+          <Text style={styles.email}>Guest</Text>
+          <Text style={{ fontSize: 13, color: '#a09080', marginTop: 2 }}>Browse free recipes below</Text>
+        </View>
+
+        <View style={styles.section}>
+          <View style={[styles.upgradeCard, { borderColor: '#D6EDD4', backgroundColor: '#f6fff5' }]}>
+            <View style={styles.upgradeIconRow}>
+              <Ionicons name="person-circle-outline" size={24} color="#7DB87A" />
+              <Text style={styles.upgradeTitle}>Sign in to unlock more</Text>
+            </View>
+            <Text style={styles.upgradeText}>
+              Create a free account to save your state, favourite recipes, and access premium features.
+            </Text>
+            <TouchableOpacity
+              style={[styles.upgradeButton, { backgroundColor: '#7DB87A' }]}
+              onPress={() => navigation.navigate('Login')}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.upgradeButtonText}>Sign in</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.upgradeButton, { backgroundColor: '#ffffff', borderWidth: 1.5, borderColor: '#7DB87A', marginTop: -4 }]}
+              onPress={() => navigation.navigate('SignUp')}
+              activeOpacity={0.85}
+            >
+              <Text style={[styles.upgradeButtonText, { color: '#7DB87A' }]}>Create account</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.upgradeCard}>
+            <View style={styles.upgradeIconRow}>
+              <Ionicons name="star" size={24} color="#F4A94E" />
+              <Text style={styles.upgradeTitle}>Unlock Premium</Text>
+            </View>
+            <Text style={styles.upgradeText}>
+              Get 150 recipes/week, pantry matching, favourites, and meal planning for $9.99/month.
+            </Text>
+            <TouchableOpacity style={styles.upgradeButton} activeOpacity={0.85}>
+              <Text style={styles.upgradeButtonText}>Upgrade to Premium</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
