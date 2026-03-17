@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const BASE_URL = 'https://smartplate-backend.onrender.com';
+const BASE_URL = 'https://deals-to-dish-api.onrender.com';
 export const TOKEN_KEY = 'deals_to_dish_token';
 
 let onUnauthorized: (() => void) | null = null;

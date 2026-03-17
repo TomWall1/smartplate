@@ -16,7 +16,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
-import { getOAuthConfig } from '../../api/auth';
+import { SUPABASE_URL } from '../../api/auth';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -50,14 +50,8 @@ export default function LoginScreen() {
   async function handleGoogleSignIn() {
     setGoogleLoading(true);
     try {
-      const { supabaseUrl } = await getOAuthConfig();
-      if (!supabaseUrl) {
-        Alert.alert('Unavailable', 'Google sign-in is not configured.');
-        return;
-      }
-
       const redirectUri = AuthSession.makeRedirectUri({ scheme: 'dealstodish', path: 'auth-callback' });
-      const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUri)}`;
+      const authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUri)}`;
 
       const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
