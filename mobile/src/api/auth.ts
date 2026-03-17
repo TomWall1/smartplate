@@ -10,3 +10,7 @@ export async function signup(email: string, password: string): Promise<AuthRespo
   const response = await client.post<AuthResponse>('/auth/signup', { email, password });
   return response.data;
 }
+
+export async function forgotPassword(email: string): Promise<void> {
+  await client.post('/api/users/forgot-password', { email });
+}

@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { UtensilsCrossed, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Auth() {
-  const [mode, setMode]         = useState('signin');
+  const [searchParams] = useSearchParams();
+  const [mode, setMode]         = useState('signin'); // signin | signup | forgot | reset
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError]       = useState('');
   const [message, setMessage]   = useState('');
   const [loading, setLoading]   = useState(false);
 
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signIn, signUp, signInWithGoogle, resetPassword, updatePassword, isRecoveryMode } = useAuth();
   const navigate = useNavigate();
+
+  // When Supabase redirects back with recovery token, switch to reset mode
+  useEffect(() => {
+    if (isRecoveryMode) setMode('reset');
+  }, [isRecoveryMode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +30,17 @@ export default function Auth() {
       if (mode === 'signup') {
         await signUp(email, password);
         setMessage('Account created! Check your email to confirm your address, then sign in.');
+        setMode('signin');
+      } else if (mode === 'forgot') {
+        await resetPassword(email);
+        setMessage('If that email exists, a reset link has been sent. Check your inbox.');
+      } else if (mode === 'reset') {
+        if (password !== confirmPassword) {
+          setError('Passwords do not match.');
+          return;
+        }
+        await updatePassword(password);
+        setMessage('Password updated! You can now sign in.');
         setMode('signin');
       } else {
         await signIn(email, password);
@@ -102,12 +120,13 @@ export default function Auth() {
           className="text-xl mb-1"
           style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
         >
-          {mode === 'signin' ? 'Welcome back' : 'Create an account'}
+          {mode === 'signin' ? 'Welcome back' : mode === 'signup' ? 'Create an account' : mode === 'forgot' ? 'Reset your password' : 'Set new password'}
         </h1>
         <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
-          {mode === 'signin'
-            ? 'Sign in to save your store and preferences.'
-            : 'Save your store and preferences across devices.'}
+          {mode === 'signin'  ? 'Sign in to save your store and preferences.'
+          : mode === 'signup' ? 'Save your store and preferences across devices.'
+          : mode === 'forgot' ? "Enter your email and we'll send you a reset link."
+          :                     'Enter and confirm your new password.'}
         </p>
 
         {/* Error */}
@@ -131,8 +150,8 @@ export default function Auth() {
           </div>
         )}
 
-        {/* Google OAuth */}
-        <button
+        {/* Google OAuth — only for signin/signup */}
+        {(mode === 'signin' || mode === 'signup') && <button
           onClick={handleGoogle}
           disabled={loading}
           className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors mb-4 disabled:opacity-60"
@@ -152,66 +171,97 @@ export default function Auth() {
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
           Continue with Google
-        </button>
+        </button>}
 
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex-1 h-px" style={{ background: 'var(--color-stone)' }} />
-          <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>or</span>
-          <div className="flex-1 h-px" style={{ background: 'var(--color-stone)' }} />
-        </div>
+        {(mode === 'signin' || mode === 'signup') && (
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px" style={{ background: 'var(--color-stone)' }} />
+            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>or</span>
+            <div className="flex-1 h-px" style={{ background: 'var(--color-stone)' }} />
+          </div>
+        )}
 
-        {/* Email / Password form */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label
-              className="block text-xs font-bold mb-1"
-              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              Email
-            </label>
-            <div className="relative">
-              <Mail
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                style={{ color: 'var(--color-text-muted)' }}
-              />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="you@example.com"
-                style={inputStyle}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-              />
+          {/* Email field — shown for signin, signup, forgot */}
+          {mode !== 'reset' && (
+            <div>
+              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@example.com"
+                  style={inputStyle}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
-          <div>
-            <label
-              className="block text-xs font-bold mb-1"
-              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              Password
-            </label>
-            <div className="relative">
-              <Lock
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                style={{ color: 'var(--color-text-muted)' }}
-              />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                placeholder="••••••••"
-                style={inputStyle}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-              />
+          {/* Password field — shown for signin, signup, reset */}
+          {mode !== 'forgot' && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-bold" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+                  {mode === 'reset' ? 'New password' : 'Password'}
+                </label>
+                {mode === 'signin' && (
+                  <button
+                    type="button"
+                    onClick={() => { setMode('forgot'); setError(''); setMessage(''); }}
+                    className="text-xs font-semibold hover:opacity-70 transition-opacity"
+                    style={{ color: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                  style={inputStyle}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                />
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Confirm password — only for reset mode */}
+          {mode === 'reset' && (
+            <div>
+              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+                Confirm new password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                  style={inputStyle}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                />
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"
@@ -220,22 +270,34 @@ export default function Auth() {
             style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {mode === 'signin' ? 'Sign in' : 'Create account'}
+            {mode === 'signin'  ? 'Sign in'
+            : mode === 'signup' ? 'Create account'
+            : mode === 'forgot' ? 'Send reset link'
+            :                     'Update password'}
           </button>
         </form>
 
-        <p
-          className="text-center text-sm mt-5"
-          style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
-        >
-          {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-          <button
-            onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); }}
-            className="font-bold underline transition-opacity hover:opacity-70"
-            style={{ color: 'var(--color-leaf)' }}
-          >
-            {mode === 'signin' ? 'Sign up' : 'Sign in'}
-          </button>
+        <p className="text-center text-sm mt-5" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+          {mode === 'forgot' || mode === 'reset' ? (
+            <button
+              onClick={() => { setMode('signin'); setError(''); setMessage(''); }}
+              className="font-bold underline transition-opacity hover:opacity-70"
+              style={{ color: 'var(--color-leaf)' }}
+            >
+              ← Back to sign in
+            </button>
+          ) : (
+            <>
+              {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+              <button
+                onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); }}
+                className="font-bold underline transition-opacity hover:opacity-70"
+                style={{ color: 'var(--color-leaf)' }}
+              >
+                {mode === 'signin' ? 'Sign up' : 'Sign in'}
+              </button>
+            </>
+          )}
         </p>
       </div>
 

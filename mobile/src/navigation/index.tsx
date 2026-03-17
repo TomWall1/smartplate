@@ -12,6 +12,7 @@ import { usePremium } from '../context/PremiumContext';
 import LoginScreen from '../screens/auth/LoginScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 import StateSelectionScreen from '../screens/auth/StateSelectionScreen';
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 
 // Main screens
 import RecipeListScreen from '../screens/recipes/RecipeListScreen';
@@ -31,6 +32,7 @@ export type AuthStackParamList = {
   Login: undefined;
   SignUp: undefined;
   StateSelection: undefined;
+  ForgotPassword: undefined;
 };
 
 export type RecipesStackParamList = {
@@ -254,6 +256,11 @@ function AuthNavigator() {
         name="SignUp"
         component={SignUpScreen}
         options={{ headerShown: true, title: 'Create Account' }}
+      />
+      <AuthStack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ headerShown: true, title: 'Reset Password' }}
       />
       <AuthStack.Screen
         name="StateSelection"

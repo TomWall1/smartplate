@@ -1,8 +1,23 @@
 const express     = require('express');
 const requireAuth = require('../middleware/requireAuth');
-const { clientForToken } = require('../services/authService');
+const { clientForToken, supabase } = require('../services/authService');
 
 const router = express.Router();
+
+// ── POST /api/users/forgot-password ──────────────────────────────────────────
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+  if (!supabase) return res.status(503).json({ error: 'Auth service not configured' });
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://www.dealtodish.com/auth?reset=true',
+  });
+
+  // Always return 200 — don't leak whether email exists
+  if (error) console.error('[forgot-password]', error.message);
+  res.json({ message: 'If that email exists, a reset link has been sent.' });
+});
 
 // ── GET /api/users/profile ────────────────────────────────────────────────────
 // Returns the current user's profile. Creates the row on first access.
