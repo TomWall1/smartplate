@@ -173,6 +173,10 @@ export default function RecipeDetail() {
   const closePopup = useCallback(() => setOpenPopupIndex(null), []);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
+  useEffect(() => {
     if (!id) return;
     setLoading(true);
     setError(null);
