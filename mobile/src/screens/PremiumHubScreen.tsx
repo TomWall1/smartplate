@@ -66,7 +66,7 @@ export default function PremiumHubScreen() {
           <View style={styles.crownCircle}>
             <Ionicons name="star" size={36} color="#F4A94E" />
           </View>
-          <Text style={styles.upgradeTitle}>Deals to Dish Premium</Text>
+          <Text style={styles.upgradeTitle}>Deal to Dish Premium</Text>
           <Text style={styles.upgradeSubtitle}>
             Unlock powerful tools to save more money and cook smarter.
           </Text>

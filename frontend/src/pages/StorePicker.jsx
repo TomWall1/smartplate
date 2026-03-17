@@ -106,7 +106,7 @@ export default function StorePicker() {
           className="text-4xl mb-2"
           style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
         >
-          Deals to Dish
+          Deal to Dish
         </h1>
         <p
           className="text-lg max-w-sm mx-auto"

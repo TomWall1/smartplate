@@ -66,7 +66,7 @@ export default function SignUpScreen({ navigation }: Props) {
           <View style={styles.logoCircle}>
             <Ionicons name="leaf" size={36} color="#7DB87A" />
           </View>
-          <Text style={styles.logoText}>Deals to Dish</Text>
+          <Text style={styles.logoText}>Deal to Dish</Text>
           <Text style={styles.tagline}>Cook smart. Save more.</Text>
         </View>
 

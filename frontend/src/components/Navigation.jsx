@@ -121,7 +121,7 @@ const Navigation = () => {
                 className="text-xl"
                 style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
               >
-                Deals to Dish
+                Deal to Dish
               </span>
             </Link>
 

@@ -103,7 +103,7 @@ export default function Auth() {
           className="text-2xl"
           style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
         >
-          Deals to Dish
+          Deal to Dish
         </span>
       </Link>
 
