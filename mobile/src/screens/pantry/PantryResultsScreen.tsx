@@ -5,8 +5,8 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  Image,
 } from 'react-native';
-import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PantryStackParamList } from '../../navigation';
@@ -14,8 +14,6 @@ import { PantryMatchResult } from '../../types';
 import DealBadge from '../../components/DealBadge';
 
 type Props = NativeStackScreenProps<PantryStackParamList, 'PantryResults'>;
-
-const BLURHASH = 'L6PZfSi_.AyE_3t7t7R**0o#DgR4';
 
 function CoverageBar({ percent }: { percent: number }) {
   const clamped = Math.min(100, Math.max(0, percent));
@@ -35,9 +33,7 @@ function ResultCard({ result, onPress }: { result: PantryMatchResult; onPress: (
       <Image
         source={{ uri: recipe.image_url }}
         style={styles.cardImage}
-        placeholder={BLURHASH}
-        contentFit="cover"
-        transition={300}
+        resizeMode="cover"
       />
       <View style={styles.cardBody}>
         <View style={styles.cardHeader}>

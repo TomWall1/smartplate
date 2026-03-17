@@ -7,8 +7,8 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
+  Image,
 } from 'react-native';
-import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
@@ -22,7 +22,6 @@ type Props = NativeStackScreenProps<RecipesStackParamList, 'RecipeDetail'>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_HEIGHT = 260;
-const BLURHASH = 'L6PZfSi_.AyE_3t7t7R**0o#DgR4';
 
 export default function RecipeDetailScreen({ route, navigation }: Props) {
   const { id } = route.params;
@@ -88,9 +87,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
       <Image
         source={{ uri: recipe.image_url }}
         style={styles.heroImage}
-        placeholder={BLURHASH}
-        contentFit="cover"
-        transition={300}
+        resizeMode="cover"
       />
 
       <View style={styles.body}>

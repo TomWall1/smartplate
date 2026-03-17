@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Image } from 'expo-image';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Recipe } from '../types';
 
@@ -9,8 +8,6 @@ interface Props {
   onPress: () => void;
 }
 
-const BLURHASH = 'L6PZfSi_.AyE_3t7t7R**0o#DgR4';
-
 export default function RecipeCard({ recipe, onPress }: Props) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.88}>
@@ -18,9 +15,7 @@ export default function RecipeCard({ recipe, onPress }: Props) {
         <Image
           source={{ uri: recipe.image_url }}
           style={styles.image}
-          placeholder={BLURHASH}
-          contentFit="cover"
-          transition={300}
+          resizeMode="cover"
         />
         {recipe.deal_count > 0 && (
           <View style={styles.dealBadge}>
