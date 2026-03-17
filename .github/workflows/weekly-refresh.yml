@@ -9,15 +9,15 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger weekly deal refresh
+      - name: Trigger weekly deal refresh + recipe generation
         run: |
-          echo "Triggering SmartPlate deal refresh at $(date)"
+          echo "Triggering Deal to Dish weekly pipeline at $(date)"
           response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "Content-Type: application/json" \
             https://deals-to-dish-api.onrender.com/api/admin/refresh-deals)
           echo "Response status: $response"
           if [ "$response" != "202" ]; then
-            echo "❌ Refresh failed with status $response"
+            echo "❌ Pipeline trigger failed with status $response"
             exit 1
           fi
-          echo "✅ Refresh triggered successfully"
+          echo "✅ Pipeline triggered — deals refresh + recipe generation running in background"

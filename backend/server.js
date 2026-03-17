@@ -83,6 +83,16 @@ app.post('/api/admin/refresh-deals', (req, res) => {
     const total = (cache.woolworths?.length || 0) + (cache.coles?.length || 0) + (cache.iga?.length || 0);
     console.log(`External cron: deal refresh complete — ${total} deals`);
     dealService.clearStateDealCaches();
+
+    // Step 3: Regenerate weekly recipes against the new deals
+    try {
+      const recipeService = require('./services/recipeService');
+      console.log('External cron: regenerating weekly recipes against new deals...');
+      const recipes = await recipeService.generateWeeklyRecipes();
+      console.log(`External cron: recipe generation complete — ${recipes.length} recipes`);
+    } catch (err) {
+      console.error('External cron: recipe generation failed:', err.message);
+    }
   })().catch((err) => console.error('External cron: pipeline error:', err.message));
 });
 
@@ -199,16 +209,14 @@ if (!process.env.VERCEL) {
     })();
   });
 
-  // ── Weekly deals refresh — every Wednesday at 11:00 pm AEST ────────────────
-  // Pipeline: (1) discover catalogue IDs → (2) refresh deals → (3) clear state caches
-  // Woolworths and Coles catalogues update Wednesday evening.
+  // ── Weekly pipeline — every Wednesday at 4:00 am AEDT ──────────────────────
+  // Pipeline: (1) discover catalogue IDs → (2) refresh deals → (3) regenerate recipes
+  // Woolworths and Coles catalogues go live at the start of Wednesday.
   const cron = require('node-cron');
-  cron.schedule('0 23 * * 3', async () => {
-    console.log('Cron: Starting weekly pipeline (catalogue discovery → deal refresh)...');
+  cron.schedule('0 17 * * 2', async () => {
+    console.log('Cron: Starting weekly pipeline (catalogue discovery → deal refresh → recipe generation)...');
 
     // Step 1: Discover current catalogue IDs for all states
-    // Runs in ±120 ID window around geo-located NSW baseline.
-    // If discovery fails, deal refresh continues with last known IDs.
     try {
       const { discoverAndSaveStateCatalogues } = require('./services/salefinder');
       const changed = await discoverAndSaveStateCatalogues();
@@ -225,6 +233,16 @@ if (!process.env.VERCEL) {
       dealService.clearStateDealCaches();
     } catch (err) {
       console.error('Cron: Deals refresh failed:', err.message);
+    }
+
+    // Step 3: Regenerate weekly recipes against the new deals
+    try {
+      const recipeService = require('./services/recipeService');
+      console.log('Cron: Regenerating weekly recipes against new deals...');
+      const recipes = await recipeService.generateWeeklyRecipes();
+      console.log(`Cron: Recipe generation complete — ${recipes.length} recipes`);
+    } catch (err) {
+      console.error('Cron: Recipe generation failed:', err.message);
     }
   }, { timezone: 'Australia/Sydney' });
 
