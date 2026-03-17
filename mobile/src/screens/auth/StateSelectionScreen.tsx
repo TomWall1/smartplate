@@ -8,8 +8,10 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { updateState } from '../../api/users';
 import { useAuth } from '../../context/AuthContext';
+import { useStore } from '../../context/StoreContext';
 
 const AU_STATES = [
   { code: 'nsw', label: 'NSW', name: 'New South Wales' },
@@ -23,7 +25,9 @@ const AU_STATES = [
 ];
 
 export default function StateSelectionScreen() {
-  const { refreshUser } = useAuth();
+  const navigation = useNavigation<any>();
+  const { user, refreshUser } = useAuth();
+  const { setSelectedState } = useStore();
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -34,10 +38,20 @@ export default function StateSelectionScreen() {
     }
     setLoading(true);
     try {
-      await updateState(selected);
-      await refreshUser();
-      // Navigation happens automatically — AuthContext refreshUser updates user.state,
-      // which the navigator uses to decide which screen to show.
+      // Always persist locally (used for guest mode + as local cache)
+      await setSelectedState(selected);
+
+      // Also save to backend for logged-in users
+      if (user) {
+        await updateState(selected);
+        await refreshUser();
+      }
+
+      // If this screen was presented as a modal, dismiss it
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      }
+      // Otherwise the RootNavigator reacts to effectiveState changing automatically
     } catch (err: any) {
       Alert.alert('Error', 'Could not save your state. Please try again.');
     } finally {

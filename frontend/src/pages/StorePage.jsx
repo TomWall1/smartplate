@@ -1,10 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChefHat } from 'lucide-react';
+import { ArrowLeft, ChefHat, SlidersHorizontal, Crown } from 'lucide-react';
 import { useApp } from '../App';
 import { dealsApi, recipesApi } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import CategorizedDeals from '../components/CategorizedDeals';
+import PreferencesPanel from '../components/PreferencesPanel';
+import { usePremium } from '../context/PremiumContext';
+
+const TAG_FILTERS = [
+  { id: 'all',        label: 'All' },
+  { id: 'quick',      label: 'Quick' },
+  { id: 'vegetarian', label: 'Vegetarian' },
+  { id: 'vegan',      label: 'Vegan' },
+  { id: 'meal prep',  label: 'Meal prep' },
+  { id: 'breakfast',  label: 'Breakfast' },
+  { id: 'lunch',      label: 'Lunch' },
+  { id: 'dinner',     label: 'Dinner' },
+];
 
 const STORE_COLORS = {
   woolworths: { bg: '#007833', light: '#e8f5e9', text: '#ffffff' },
@@ -56,6 +69,7 @@ export default function StorePage() {
   const { store } = useParams();
   const navigate = useNavigate();
   const { setSelectedStore } = useApp();
+  const { isPremium } = usePremium();
 
   const [storeDeals, setStoreDeals] = useState([]);
   const [dealsLoading, setDealsLoading] = useState(true);
@@ -65,6 +79,10 @@ export default function StorePage() {
   const [recipesLoading, setRecipesLoading] = useState(true);
   const [displayCount, setDisplayCount] = useState(6);
   const RECIPES_PER_PAGE = 6;
+
+  const [activeTag, setActiveTag] = useState('all');
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [showPremiumNudge, setShowPremiumNudge] = useState(false);
 
   const colors = STORE_COLORS[store] || { bg: '#78716c', light: 'var(--color-blush)', text: '#ffffff' };
   const storeName = capitalize(store);
@@ -106,6 +124,13 @@ export default function StorePage() {
     setSelectedStore(null);
     navigate('/');
   };
+
+  const filteredRecipes = useMemo(() => {
+    if (activeTag === 'all') return storeRecipes;
+    return storeRecipes.filter((r) =>
+      (r.tags ?? []).some((t) => t.toLowerCase().includes(activeTag.toLowerCase()))
+    );
+  }, [storeRecipes, activeTag]);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-parchment)' }}>
@@ -157,7 +182,7 @@ export default function StorePage() {
 
         {/* ── Section 1: Recipes ────────────────────────────────────────────── */}
         <section>
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <h2
               className="text-xl flex items-center gap-2"
               style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
@@ -165,14 +190,54 @@ export default function StorePage() {
               <ChefHat className="w-5 h-5" style={{ color: colors.bg }} />
               Recipes Using These Deals
             </h2>
-            <Link
-              to="/recipes"
-              className="text-sm font-bold underline underline-offset-2 transition-colors hover:opacity-70"
-              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              View all recipes →
-            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (!isPremium) { setShowPremiumNudge(true); return; }
+                  setPanelOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-xs font-bold transition-all hover:opacity-90"
+                style={{ background: isPremium ? 'var(--color-leaf)' : 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                {isPremium ? <SlidersHorizontal className="w-3.5 h-3.5" /> : <Crown className="w-3.5 h-3.5" />}
+                Filter
+              </button>
+              <Link
+                to="/recipes"
+                className="text-sm font-bold underline underline-offset-2 transition-colors hover:opacity-70"
+                style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                View all →
+              </Link>
+            </div>
           </div>
+
+          {/* Tag filter chips */}
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 sm:mx-0 px-4 sm:px-0 mb-3">
+            {TAG_FILTERS.map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => { setActiveTag(id); setDisplayCount(RECIPES_PER_PAGE); }}
+                className={`tag-chip flex-shrink-0 ${activeTag === id ? 'active' : 'inactive'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Premium nudge */}
+          {showPremiumNudge && !isPremium && (
+            <div
+              className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm border mb-3"
+              style={{ background: '#fffbf0', borderColor: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <span style={{ color: 'var(--color-bark)' }}>
+                <Crown className="w-3.5 h-3.5 inline mr-1.5" style={{ color: 'var(--color-honey)' }} />
+                Personalised filters are a <strong>Premium</strong> feature.
+              </span>
+              <button onClick={() => setShowPremiumNudge(false)} style={{ color: 'var(--color-text-muted)' }}>✕</button>
+            </div>
+          )}
 
           {recipesLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -180,37 +245,38 @@ export default function StorePage() {
                 <RecipeSkeleton key={i} />
               ))}
             </div>
-          ) : storeRecipes.length === 0 ? (
+          ) : filteredRecipes.length === 0 ? (
             <div
               className="rounded-[20px] p-6 text-center text-sm border border-dashed"
               style={{ background: colors.light, borderColor: 'var(--color-stone)', color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
             >
-              <p>No recipes matched to {storeName} deals yet.</p>
-              <p className="mt-1 text-xs">Check back after recipes are generated for the week.</p>
+              {storeRecipes.length === 0
+                ? <><p>No recipes matched to {storeName} deals yet.</p><p className="mt-1 text-xs">Check back after recipes are generated for the week.</p></>
+                : <p>No recipes match this filter. Try a different tag.</p>}
             </div>
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {storeRecipes.slice(0, displayCount).map((recipe) => (
+                {filteredRecipes.slice(0, displayCount).map((recipe) => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
               </div>
-              {displayCount < storeRecipes.length ? (
+              {displayCount < filteredRecipes.length ? (
                 <div className="flex justify-center mt-6">
                   <button
-                    onClick={() => setDisplayCount((n) => Math.min(n + RECIPES_PER_PAGE, storeRecipes.length))}
+                    onClick={() => setDisplayCount((n) => Math.min(n + RECIPES_PER_PAGE, filteredRecipes.length))}
                     className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
                     style={{ background: 'var(--color-leaf)', color: '#ffffff', fontFamily: 'Nunito, sans-serif' }}
                   >
-                    Show more recipes ({storeRecipes.length - displayCount} remaining)
+                    Show more recipes ({filteredRecipes.length - displayCount} remaining)
                   </button>
                 </div>
-              ) : storeRecipes.length > RECIPES_PER_PAGE ? (
+              ) : filteredRecipes.length > RECIPES_PER_PAGE ? (
                 <p
                   className="text-center text-sm mt-4"
                   style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
                 >
-                  Showing all {storeRecipes.length} recipes
+                  Showing all {filteredRecipes.length} recipes
                 </p>
               ) : null}
             </>
@@ -256,6 +322,15 @@ export default function StorePage() {
           )}
         </section>
       </div>
+
+      {/* Preferences panel — premium only */}
+      {isPremium && (
+        <PreferencesPanel
+          isOpen={panelOpen}
+          onClose={() => setPanelOpen(false)}
+          onApply={() => setPanelOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
 import { getRecipeSuggestions } from '../../api/recipes';
 import { useAuth } from '../../context/AuthContext';
+import { useStore } from '../../context/StoreContext';
 import { Recipe, FilterType } from '../../types';
 import RecipeCard from '../../components/RecipeCard';
 import LoadingState from '../../components/LoadingState';
@@ -50,6 +51,8 @@ function applyFilter(recipes: Recipe[], filter: FilterType): Recipe[] {
 
 export default function RecipeListScreen({ navigation }: Props) {
   const { user } = useAuth();
+  const { selectedState } = useStore();
+  const effectiveState = user?.state || selectedState;
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -57,15 +60,15 @@ export default function RecipeListScreen({ navigation }: Props) {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
   const fetchRecipes = useCallback(async () => {
-    if (!user?.state) return;
+    if (!effectiveState) return;
     setError(null);
     try {
-      const data = await getRecipeSuggestions(user.state);
+      const data = await getRecipeSuggestions(effectiveState);
       setRecipes(data);
     } catch (err: any) {
       setError('Could not load recipes. Please check your connection.');
     }
-  }, [user?.state]);
+  }, [effectiveState]);
 
   useEffect(() => {
     setLoading(true);
