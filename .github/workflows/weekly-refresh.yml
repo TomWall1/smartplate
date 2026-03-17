@@ -2,7 +2,7 @@ name: Weekly Deal Refresh
 
 on:
   schedule:
-    - cron: '0 13 * * 3'  # Wednesday 1pm UTC = Wednesday 11pm AEST
+    - cron: '0 17 * * 2'  # Tuesday 5pm UTC = Wednesday 4am AEDT
   workflow_dispatch:       # Allow manual trigger from GitHub Actions UI
 
 jobs:
