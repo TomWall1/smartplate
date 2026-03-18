@@ -19,6 +19,34 @@ const TAG_FILTERS = [
   { id: 'dinner',     label: 'Dinner' },
 ];
 
+const PROTEIN_FILTERS = [
+  { id: 'chicken', label: 'Chicken', keywords: ['chicken'] },
+  { id: 'beef',    label: 'Beef',    keywords: ['beef', 'steak', 'brisket', 'sirloin', 'rump', 'scotch fillet', 'eye fillet', 'porterhouse', 'rib'] },
+  { id: 'lamb',    label: 'Lamb',    keywords: ['lamb'] },
+  { id: 'pork',    label: 'Pork',    keywords: ['pork'] },
+  { id: 'mince',   label: 'Mince',   keywords: ['mince', 'minced'] },
+  { id: 'salmon',  label: 'Salmon',  keywords: ['salmon'] },
+  { id: 'fish',    label: 'Fish',    keywords: ['fish', 'barramundi', 'snapper', 'bream', 'whiting', 'flathead', 'cod', 'tuna', 'tilapia', 'trout'] },
+  { id: 'seafood', label: 'Seafood', keywords: ['prawn', 'shrimp', 'scallop', 'calamari', 'squid', 'mussel', 'crab', 'lobster', 'octopus'] },
+  { id: 'turkey',  label: 'Turkey',  keywords: ['turkey'] },
+  { id: 'duck',    label: 'Duck',    keywords: ['duck'] },
+  { id: 'veal',    label: 'Veal',    keywords: ['veal'] },
+];
+
+// Indicators that the deal is canned/processed, not fresh or frozen
+const PROCESSED_INDICATORS = ['canned', 'tinned', 'stock', 'broth', 'soup', 'paste'];
+
+function hasProteinDeal(recipe, proteinId) {
+  if (!proteinId) return true;
+  const protein = PROTEIN_FILTERS.find((p) => p.id === proteinId);
+  if (!protein) return true;
+  return (recipe.matchedDeals ?? []).some((deal) => {
+    const name = ((deal.dealName || '') + ' ' + (deal.ingredient || '')).toLowerCase();
+    if (PROCESSED_INDICATORS.some((ind) => name.includes(ind))) return false;
+    return protein.keywords.some((kw) => name.includes(kw));
+  });
+}
+
 function RecipeSkeleton() {
   return (
     <div className="rounded-[20px] overflow-hidden border" style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}>
@@ -42,6 +70,7 @@ export default function Recipes() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTag, setActiveTag] = useState('all');
+  const [activeProtein, setActiveProtein] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [showPremiumNudge, setShowPremiumNudge] = useState(false);
 
@@ -116,8 +145,13 @@ export default function Recipes() {
       ];
     }
 
+    // 3. Protein filter — premium only, must have a fresh/frozen matched deal for the protein
+    if (activeProtein && isPremium) {
+      list = list.filter((r) => hasProteinDeal(r, activeProtein));
+    }
+
     return list;
-  }, [baseRecipes, activeTag, searchQuery, preferences.mealTypes, preferences.excludeIngredients, isPersonalised]);
+  }, [baseRecipes, activeTag, activeProtein, searchQuery, preferences.mealTypes, preferences.excludeIngredients, isPersonalised, isPremium]);
 
   const handleApplyPreferences = async (prefs) => {
     setPersonalisedLoading(true);
@@ -272,6 +306,44 @@ export default function Recipes() {
             </button>
           ))}
         </div>
+
+        {/* ── Protein filter row (premium only) ────────────────────────────── */}
+        {isPremium && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-700" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif', fontWeight: 700 }}>
+                🥩 Filter by protein on special
+              </span>
+              {activeProtein && (
+                <button
+                  onClick={() => setActiveProtein(null)}
+                  className="text-xs font-bold underline underline-offset-2"
+                  style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 sm:mx-0 px-4 sm:px-0">
+              {PROTEIN_FILTERS.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveProtein(activeProtein === id ? null : id)}
+                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border-1.5 transition-all"
+                  style={{
+                    borderWidth: '1.5px',
+                    borderColor: activeProtein === id ? 'var(--color-honey)' : 'var(--color-stone)',
+                    background: activeProtein === id ? 'var(--color-honey)' : '#ffffff',
+                    color: activeProtein === id ? '#ffffff' : 'var(--color-text-muted)',
+                    fontFamily: 'Nunito, sans-serif',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── Personalised banner ───────────────────────────────────────────── */}
         {isPersonalised && personalisedRecipes !== null && !personalisedLoading && (
