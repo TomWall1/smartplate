@@ -1,26 +1,15 @@
 /**
  * pantryMatcher.js
  *
- * Matches a user's pantry ingredients against the recipe database.
+ * Matches a user's pantry ingredients against the weekly deal-matched recipes.
  * Uses enriched ingredient tags where available, falls back to text matching.
- * Attaches current deal info to missing ingredients.
+ * Shows deal info from the weekly matches on missing ingredients.
  *
- * All matching is DB-driven — no AI calls.
+ * All matching is local — no AI or DB calls for recipes.
  */
 
-const { Pool } = require('pg');
 const dealService = require('./dealService');
 const { validateMatch } = require('./matchingValidator');
-
-const usePG = process.env.USE_POSTGRESQL === 'true' || process.env.NODE_ENV === 'production';
-
-let pool;
-function getPool() {
-  if (!pool && usePG && process.env.DATABASE_URL) {
-    pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-  }
-  return pool;
-}
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -209,61 +198,34 @@ function findDealForIngredient(ingName, allDeals) {
 // ── Main export ───────────────────────────────────────────────────────────────
 
 /**
- * Match user pantry against all recipes in the database (PostgreSQL) or
- * fallback to JSON files (local dev).
+ * Match user pantry against the weekly deal-matched recipes.
+ * These recipes already have matchedDeals attached, so clicking through
+ * always leads to a valid recipe detail page with deal info.
  *
  * @param {string[]} userIngredients - Array of ingredient name strings
  * @param {boolean}  hasPantryStaples - Whether user has common pantry staples
  * @returns {Promise<Array>} Ranked list of matched recipes
  */
 async function matchPantry(userIngredients, hasPantryStaples = true) {
-  // Load all active recipes
-  let recipes = [];
+  // Load weekly deal-matched recipes (same set shown on Recipes tab)
+  const recipeService = require('./recipeService');
+  const weeklyRecipes = recipeService.getWeeklyRecipes();
 
-  const pg = getPool();
-  if (pg) {
-    const { rows } = await pg.query(
-      `SELECT id, source, title, description, url, image, prep_time, cook_time, total_time, servings, category, cuisine, ingredients, metadata
-       FROM recipes
-       WHERE is_active IS NOT FALSE
-       ORDER BY id`
-    );
-    recipes = rows.map(r => ({
-      id:          r.id,
-      source:      r.source,
-      title:       r.title,
-      description: r.description,
-      url:         r.url,
-      image:       r.image,
-      prepTime:    r.prep_time,
-      cookTime:    r.cook_time,
-      totalTime:   r.total_time,
-      servings:    r.servings,
-      category:    r.category,
-      cuisine:     r.cuisine,
-      ingredients: r.ingredients,
-      metadata:    r.metadata,
-    }));
-  } else {
-    // Local dev: load from JSON files
-    const fs   = require('fs');
-    const path = require('path');
-    const DATA_DIR = path.join(__dirname, '..', 'data');
-    const sources = ['recipe-library-enriched.json', 'jamie-oliver-recipes-enriched.json'];
-    for (const src of sources) {
-      const fp = path.join(DATA_DIR, src);
-      if (fs.existsSync(fp)) {
-        const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
-        if (Array.isArray(data.recipes)) recipes.push(...data.recipes);
-      }
-    }
-  }
-
-  if (recipes.length === 0) {
+  if (!weeklyRecipes || weeklyRecipes.length === 0) {
     return [];
   }
 
-  // Load current deals for missing-ingredient enrichment
+  // Normalise weekly recipes to the shape matchRecipe expects.
+  // Weekly recipes store ingredients as string arrays (allIngredients),
+  // but matchRecipe expects objects with { name, ingredientTags }.
+  const recipes = weeklyRecipes.map(r => ({
+    ...r,
+    ingredients: (r.ingredients || r.allIngredients || []).map(ing =>
+      typeof ing === 'string' ? { name: ing, raw: ing } : ing
+    ),
+  }));
+
+  // Use deals already attached to each recipe's matchedDeals for enrichment
   let allDeals = [];
   try {
     const cache = await dealService.getCurrentDeals();
