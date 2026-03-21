@@ -110,7 +110,7 @@ class RecipeService {
 
     // Step 1b: Find top 150 library recipes that match current deals (text + PI matching).
     // Free tier sees 50; premium users see all 150. Limit applied at the route level.
-    const matched = recipeMatcher.matchDeals(enrichedDeals, 150);
+    const matched = await recipeMatcher.matchDeals(enrichedDeals, 150);
     console.log(`RecipeService: Found ${matched.length} matching library recipes`);
 
     // If no matches (library empty or no overlap), fall back to pure generation
@@ -155,6 +155,31 @@ class RecipeService {
 
         // Drop recipes where AI matched but found no deals (genuine no-match)
         aiRefined = aiResults.filter(r => r.matchedDeals.length > 0);
+
+        // ── Verification pass: review text-matched recipes with a second AI call ──
+        // Only runs on recipes that fell back to text matching (aiMatched !== true).
+        // Gated by ENABLE_MATCH_VERIFICATION env var (default: true).
+        if (process.env.ENABLE_MATCH_VERIFICATION !== 'false') {
+          const textOnly = aiRefined.filter(r => !r.aiMatched);
+          if (textOnly.length > 0) {
+            console.log(`RecipeService: Verifying ${textOnly.length} text-matched recipes...`);
+            let verifiedCount = 0;
+            for (let vi = 0; vi < textOnly.length; vi++) {
+              if (vi > 0) await new Promise(resolve => setTimeout(resolve, 300));
+              try {
+                const originalCount = textOnly[vi].matchedDeals.length;
+                const verified = await aiMatcher.verifyMatches(textOnly[vi], textOnly[vi].matchedDeals);
+                textOnly[vi].matchedDeals = verified;
+                if (verified.length < originalCount) verifiedCount++;
+              } catch (verifyErr) {
+                console.warn(`RecipeService: Verification failed for "${textOnly[vi].title}": ${verifyErr.message}`);
+              }
+            }
+            // Re-filter: remove recipes that lost all deals after verification
+            aiRefined = aiRefined.filter(r => r.matchedDeals.length > 0);
+            console.log(`RecipeService: Verification complete — ${verifiedCount} recipes had matches removed`);
+          }
+        }
 
         const stats = aiMatcher.getMatchStats();
         console.log(

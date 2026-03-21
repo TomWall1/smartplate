@@ -5,6 +5,58 @@
 
 require('dotenv').config();
 const Anthropic = require('@anthropic-ai/sdk');
+const fs   = require('fs');
+const path = require('path');
+
+// ── Synonym expansion ────────────────────────────────────────────────────────
+// Loaded once; used to expand satisfiesIngredients with AU/UK/US variants.
+let _synonymMap = null;
+let _reverseSynonymMap = null;
+
+function getSynonymMap() {
+  if (_synonymMap) return _synonymMap;
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, '..', 'data', 'ingredient-synonyms.json'), 'utf8');
+    _synonymMap = JSON.parse(raw);
+    // Build reverse map: synonym → canonical + all siblings
+    _reverseSynonymMap = {};
+    for (const [canonical, synonyms] of Object.entries(_synonymMap)) {
+      if (canonical.startsWith('_')) continue;
+      const allNames = [canonical, ...synonyms];
+      for (const name of allNames) {
+        const lower = name.toLowerCase();
+        if (!_reverseSynonymMap[lower]) _reverseSynonymMap[lower] = new Set();
+        for (const n of allNames) _reverseSynonymMap[lower].add(n.toLowerCase());
+      }
+    }
+  } catch {
+    _synonymMap = {};
+    _reverseSynonymMap = {};
+  }
+  return _synonymMap;
+}
+
+/**
+ * Expand a satisfiesIngredients array with known synonyms.
+ * E.g. ["capsicum"] → ["capsicum", "bell pepper", "pepper", ...]
+ * Respects the max-8 limit from the categorizer prompt.
+ */
+function expandWithSynonyms(satisfies) {
+  if (!satisfies || satisfies.length === 0) return satisfies;
+  getSynonymMap(); // ensure loaded
+  if (!_reverseSynonymMap) return satisfies;
+
+  const expanded = new Set(satisfies.map(s => s.toLowerCase()));
+  for (const entry of satisfies) {
+    const lower = entry.toLowerCase();
+    const related = _reverseSynonymMap[lower];
+    if (related) {
+      for (const r of related) expanded.add(r);
+    }
+  }
+  // Cap at 12 to keep storage reasonable while allowing synonym expansion
+  return [...expanded].slice(0, 12);
+}
 
 let _client = null;
 
@@ -102,6 +154,11 @@ async function claudeCategorize(productName, category = '', price = null) {
     const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
     const parsed  = JSON.parse(cleaned);
 
+    // Expand satisfiesIngredients with AU/UK/US synonyms
+    if (parsed.satisfiesIngredients) {
+      parsed.satisfiesIngredients = expandWithSynonyms(parsed.satisfiesIngredients);
+    }
+
     console.log(`[Categorizer] "${productName}" → ${parsed.baseIngredient} (${parsed.category})`);
     return parsed;
   } catch (err) {
@@ -167,6 +224,13 @@ CRITICAL RULES for satisfiesIngredients — these override all other logic:
 
     if (!Array.isArray(parsed) || parsed.length !== products.length) {
       throw new Error(`Expected array of ${products.length}, got ${parsed?.length}`);
+    }
+
+    // Expand synonyms for all batch results
+    for (const p of parsed) {
+      if (p.satisfiesIngredients) {
+        p.satisfiesIngredients = expandWithSynonyms(p.satisfiesIngredients);
+      }
     }
 
     return parsed;
@@ -235,4 +299,5 @@ module.exports = {
   claudeCategorizeBatch,
   categorizationPrompt,
   basicFallback,
+  expandWithSynonyms,
 };

@@ -1,6 +1,61 @@
 const fs = require('fs');
 const path = require('path');
-const { validateMatch } = require('./matchingValidator');
+const { validateMatch, isAboveThreshold } = require('./matchingValidator');
+const { quantityRelevanceScore } = require('./quantityParser');
+
+// ── Ingredient blocklist (DB-backed negative match cache) ────────────────────
+// Loaded once per process; refreshed on matchDeals() if stale.
+let _blocklist = null;
+let _blocklistLoadedAt = 0;
+const BLOCKLIST_TTL = 30 * 60 * 1000; // 30 minutes
+
+async function loadBlocklist() {
+  if (_blocklist && Date.now() - _blocklistLoadedAt < BLOCKLIST_TTL) return _blocklist;
+  try {
+    const db = require('../database/db');
+    const pool = db.getDb();
+    // Support both pg (pool.query) and sqlite (prepare)
+    if (typeof pool.query === 'function') {
+      const { rows } = await pool.query('SELECT ingredient_pattern, blocked_product_patterns FROM ingredient_blocklist');
+      _blocklist = rows;
+    } else {
+      // SQLite — table may not exist locally
+      try {
+        _blocklist = pool.prepare('SELECT ingredient_pattern, blocked_product_patterns FROM ingredient_blocklist').all();
+        _blocklist = _blocklist.map(r => ({
+          ...r,
+          blocked_product_patterns: typeof r.blocked_product_patterns === 'string'
+            ? JSON.parse(r.blocked_product_patterns) : r.blocked_product_patterns,
+        }));
+      } catch {
+        _blocklist = [];
+      }
+    }
+    _blocklistLoadedAt = Date.now();
+  } catch {
+    _blocklist = [];
+  }
+  return _blocklist;
+}
+
+/**
+ * Check if an ingredient + deal name is blocklisted.
+ * @param {string} ingredientName - Cleaned ingredient name
+ * @param {string} dealName       - Raw deal name
+ */
+function isBlocklisted(ingredientName, dealName) {
+  if (!_blocklist || _blocklist.length === 0) return false;
+  const ingLower  = ingredientName.toLowerCase();
+  const dealLower = dealName.toLowerCase();
+  for (const rule of _blocklist) {
+    if (ingLower.includes(rule.ingredient_pattern)) {
+      const patterns = rule.blocked_product_patterns || [];
+      if (patterns.length === 0) return true; // blanket block on this ingredient
+      if (patterns.some(p => dealLower.includes(p))) return true;
+    }
+  }
+  return false;
+}
 
 // ── Feature flag ──────────────────────────────────────────────────────────────
 // Set to false to revert to pure text-based matching (useful for A/B comparison).
@@ -42,11 +97,25 @@ const LIBRARIES = [
 
 // Common brand/marketing terms to strip from deal names
 const STRIP_PREFIXES = [
+  // Store brands
   'woolworths', 'coles', 'iga', 'aldi',
-  'rspca approved', 'rspca', 'organic', 'free range', 'free-range',
-  'grass fed', 'grass-fed', 'hormone free', 'australian',
+  // Store sub-brands
+  'macro wholefoods', 'macro', 'community co', 'coles finest',
+  "nature's finest", 'woolworths gold', 'coles simply', 'simply',
+  'love life', 'farmland', 'be natural', 'coles bakery',
+  'woolworths essentials', 'coles essentials',
+  // Certifications / marketing
+  'rspca approved', 'rspca', 'organic', 'certified organic',
+  'free range', 'free-range', 'cage free', 'cage-free',
+  'grass fed', 'grass-fed', 'grain fed', 'grain-free',
+  'hormone free', 'antibiotic free', 'no added hormones',
+  'australian', 'product of australia', 'australian grown',
+  // Quality tiers
   'fresh', 'premium', 'quality', 'value', 'homebrand', 'essentials',
-  'selected varieties', 'selected', 'varieties',
+  'gold', 'finest', 'select', 'choice',
+  // Deal descriptors
+  'selected varieties', 'selected', 'varieties', 'any variety',
+  'special', 'half price', 'save', 'bonus',
 ];
 
 // Weight/quantity patterns to strip
@@ -146,9 +215,15 @@ const BLOCKED_CATEGORIES = new Set([
 // that disqualify the match.
 // e.g. "cream" in a recipe means cooking cream; it should not match "ice cream" products.
 const COMPOUND_BLOCKLIST = {
-  cream: ['ice cream', 'ice-cream'],
-  butter: ['peanut butter', 'nut butter', 'almond butter'],
-  milk: ['oat milk', 'almond milk', 'soy milk', 'coconut milk', 'skim milk', 'rice milk'],
+  cream: ['ice cream', 'ice-cream', 'moisturising cream', 'body cream', 'hand cream', 'face cream', 'sour cream and onion'],
+  butter: ['peanut butter', 'nut butter', 'almond butter', 'cashew butter', 'body butter'],
+  milk: ['oat milk', 'almond milk', 'soy milk', 'coconut milk', 'skim milk', 'rice milk', 'body milk'],
+  coconut: ['coconut water'],
+  corn: ['corn chip', 'corn chips', 'popcorn'],
+  honey: ['honey soy', 'honey mustard'],
+  lemon: ['lemon pepper', 'lemon myrtle'],
+  garlic: ['garlic bread', 'garlic knot'],
+  onion: ['onion ring', 'onion rings', 'french onion dip'],
 };
 
 // Protein cut/form words — if a recipe ingredient contains one of these, the deal
@@ -217,6 +292,35 @@ const FORM_DISQUALIFIERS = {
   mince: [
     'sausage', 'burger', 'patty', 'meatball', 'pre-seasoned', 'marinated',
     'frozen meal', 'ready to cook',
+  ],
+  // Cheese: prevent block/fresh cheese ingredients matching processed cheese snack products
+  cheese: [
+    'spread', 'dip', 'snack', 'cracker', 'string', 'twists',
+    'chip', 'crisp', 'flavoured', 'flavored', 'sauce',
+  ],
+  // Potato: prevent fresh potato matching processed potato products
+  potato: [
+    'chip', 'crisp', 'wedge', 'gem', 'frozen meal', 'hash brown',
+    'mash', 'instant', 'flake', 'snack',
+  ],
+  // Tomato: prevent fresh tomato matching processed tomato products (except paste/sauce which have their own compound logic)
+  tomato: [
+    'chip', 'crisp', 'snack', 'juice', 'drink',
+  ],
+  // Fruit entries: prevent fresh fruit matching processed fruit products
+  apple: [
+    'juice', 'cider', 'chip', 'crisp', 'snack', 'sauce',
+    'dried', 'leather', 'bar', 'jam',
+  ],
+  banana: [
+    'chip', 'dried', 'bread', 'snack', 'bar', 'smoothie',
+  ],
+  strawberry: [
+    'jam', 'juice', 'dried', 'snack', 'bar', 'ice cream',
+    'flavoured', 'flavored', 'yoghurt', 'yogurt',
+  ],
+  orange: [
+    'juice', 'drink', 'cordial', 'marmalade', 'flavoured', 'flavored',
   ],
 };
 
@@ -542,16 +646,18 @@ class RecipeMatcher {
   }
 
   /**
-   * Weighted recipe score: sum of (ingredient_weight × saving_amount) for each matched deal.
+   * Weighted recipe score: sum of (ingredient_weight × saving_amount × quantity_fit) for each matched deal.
    * A protein deal on special is worth 10× more than a garnish deal on special.
+   * Quantity relevance adjusts the score based on how well the deal size fits the recipe.
    */
   _calculateRecipeScore(recipe) {
     let score = 0;
     for (const deal of recipe.matchedDeals) {
-      const weight  = this._getIngredientWeight(deal);
-      const saving  = deal.saving || 0;
+      const weight   = this._getIngredientWeight(deal);
+      const saving   = deal.saving || 0;
+      const qtyScore = quantityRelevanceScore(deal.dealName || '', deal.ingredient || '');
       // Add weight even if saving is $0 so recipes with protein deals rank above those without
-      score += weight * (1 + saving);
+      score += weight * (1 + saving) * qtyScore;
     }
     return score;
   }
@@ -636,9 +742,12 @@ class RecipeMatcher {
    * @param {number} limit - Max recipes to return (default 150; free tier slices to 50 at the route level)
    * @returns {Array} Top N matched recipes with matchedDeals, matchScore, totalSaving, weightedScore
    */
-  matchDeals(deals, limit = 150) {
+  async matchDeals(deals, limit = 150) {
     const recipes = this.loadLibrary();
     if (recipes.length === 0) return [];
+
+    // Load ingredient blocklist from DB (cached, refreshes every 30 min)
+    await loadBlocklist();
 
     // Normalise all deal names upfront and filter to food deals only.
     // The spread preserves productIntelligence if present on the original deal.
@@ -667,6 +776,9 @@ class RecipeMatcher {
 
           const cleanName = this._cleanIngredientName(ingredient.name);
           if (cleanName.length < 3) continue;
+
+          // Check blocklist — skip pairs that have been confirmed as bad matches
+          if (isBlocklisted(cleanName, deal.name)) continue;
 
           // Unique key distinguishes PI and text paths for the same deal
           const pathKey = deal.productIntelligence ? 'pi' : 'txt';
@@ -698,7 +810,7 @@ class RecipeMatcher {
                 deal.keywords,
                 deal.productIntelligence?.category ?? null,
               );
-              if (!v.valid) matched = false;
+              if (!v.valid || !isAboveThreshold(v.confidence)) matched = false;
             }
           }
 

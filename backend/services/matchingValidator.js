@@ -175,4 +175,16 @@ function scoreMatch(ingredient, deal, textMatched = true) {
   return { valid: v.valid, confidence, label, reason: v.reason };
 }
 
-module.exports = { validateMatch, scoreMatch, categoriseProduct };
+// ── Confidence threshold ─────────────────────────────────────────────────────
+// Matches scoring below this are filtered out as unreliable.
+const MIN_CONFIDENCE = 50;
+
+/**
+ * Check whether a confidence score meets the minimum threshold.
+ * @param {number} confidence - Score from validateMatch (0-100)
+ */
+function isAboveThreshold(confidence) {
+  return confidence >= MIN_CONFIDENCE;
+}
+
+module.exports = { validateMatch, scoreMatch, categoriseProduct, MIN_CONFIDENCE, isAboveThreshold };

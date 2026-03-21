@@ -14,8 +14,8 @@ const db = require('../database/db');
 
 // ── Name normalization ────────────────────────────────────────────────────────
 
-const STORE_NAMES       = /\b(woolworths|coles|iga|macro|select|homebrand|woolies)\b/gi;
-const CERTIFICATIONS    = /\b(rspca\s*approved?|free\s*range|organic|certified\s*organic|grass\s*fed|grain\s*fed|cage\s*free|hormone\s*free|antibiotic\s*free|no\s*added\s*hormones?)\b/gi;
+const STORE_NAMES       = /\b(woolworths|coles|iga|aldi|macro\s*wholefoods|macro|community\s*co|coles\s*finest|nature'?s\s*finest|woolworths\s*gold|coles\s*simply|simply|love\s*life|farmland|be\s*natural|coles\s*bakery|woolworths\s*essentials|coles\s*essentials|select|homebrand|woolies|gold|finest|choice)\b/gi;
+const CERTIFICATIONS    = /\b(rspca\s*approved?|free[\s-]*range|organic|certified\s*organic|grass[\s-]*fed|grain[\s-]*fed|cage[\s-]*free|hormone\s*free|antibiotic\s*free|no\s*added\s*hormones?|australian\s*grown|product\s*of\s*australia|australian)\b/gi;
 const SIZES             = /\b\d+(\.\d+)?\s*(g|gm|kg|ml|l|litre|liter|oz|lb|fl\.?\s*oz)\b/gi;
 const PACK_COUNTS       = /\b\d+\s*(pack|pk|x\s*\d+|piece|pc|pcs|serves|portions?)\b/gi;
 const EXTRA_WHITESPACE  = /\s{2,}/g;
