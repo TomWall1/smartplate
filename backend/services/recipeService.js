@@ -396,88 +396,11 @@ You must respond with valid JSON only. Do not include any text, explanation or c
     return normalised;
   }
 
-  // ── Personalised ranking (per-user Claude call) ───────────────────
+  // ── Personalised filtering (local, no API call) ────────────────────
 
   async getPersonalisedRecipes(userPreferences) {
     const weeklyRecipes = this.getWeeklyRecipes();
-
-    if (!this.anthropic) {
-      console.log('RecipeService: No API key, filtering locally');
-      return this._filterLocally(weeklyRecipes, userPreferences);
-    }
-
-    const recipeSummary = weeklyRecipes.map(r => ({
-      id: r.id,
-      title: r.title,
-      description: r.description,
-      tags: r.tags,
-      dealIngredients: r.dealIngredients,
-      allIngredients: r.allIngredients,
-      prepTime: r.prepTime,
-      totalEstimatedCost: r.totalEstimatedCost,
-    }));
-
-    const excluded = (userPreferences.excludeIngredients || []).map(e => e.toLowerCase());
-
-    const prompt = `You are a meal-planning assistant. Here are this week's pre-generated recipes:
-
-${JSON.stringify(recipeSummary, null, 2)}
-
-The user has these preferences:
-${JSON.stringify(userPreferences, null, 2)}
-
-Preference fields explained:
-- dietary: dietary requirements like ["vegetarian", "gluten-free", "dairy-free", "vegan"]
-- mealTypes: preferred meal styles like ["quick", "family-friendly", "healthy", "comfort", "batch-cook", "one-pot"] — match against recipe tags
-- maxPrepTime: maximum prep time in minutes — exclude recipes where prepTime exceeds this
-- excludeIngredients: ingredients the user dislikes and must not appear in results
-- cuisinePreferences: preferred cuisine styles
-
-Apply these rules strictly in order:
-1. HARD EXCLUDE — Remove any recipe whose allIngredients contains any word from excludeIngredients. Do not include these at all.
-2. DIETARY — Remove any recipe incompatible with the dietary array (e.g. vegetarian recipes must have no meat).
-3. PREP TIME — Remove any recipe where prepTime exceeds maxPrepTime (if set).
-4. RANK — From the remaining recipes, rank best-to-worst. Recipes whose tags include items from mealTypes should rank higher. Mention matching meal types in the reason.
-
-Return a JSON array ranked best to worst, at most 10 entries. Format:
-[{"id": 1, "reason": "Quick weeknight meal under 20 min — matches your family-friendly preference"}, ...]
-
-Respond with ONLY the JSON array.`;
-
-    try {
-      const response = await this.anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2000,
-        messages: [{ role: 'user', content: prompt }],
-      });
-
-      const text = response.content[0].text.trim();
-      let jsonText = text;
-      const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (fenceMatch) jsonText = fenceMatch[1].trim();
-
-      const ranked = JSON.parse(jsonText);
-
-      if (!Array.isArray(ranked)) throw new Error('Invalid ranking response');
-
-      // Map ranked IDs back to full recipe objects
-      const rawResult = [];
-      for (const entry of ranked) {
-        const recipe = weeklyRecipes.find(r => r.id === entry.id);
-        if (recipe) {
-          rawResult.push({ ...recipe, matchReason: entry.reason });
-        }
-      }
-
-      // Server-side enforcement: soft sort + warning tagging for excluded ingredients.
-      // Claude may still return recipes containing excluded ingredients — we correct that here.
-      const result = applyExcludedIngredientFilter(rawResult, userPreferences.excludeIngredients);
-
-      return result;
-    } catch (error) {
-      console.error('RecipeService: Personalisation failed:', error.message);
-      return this._filterLocally(weeklyRecipes, userPreferences);
-    }
+    return this._filterLocally(weeklyRecipes, userPreferences);
   }
 
   // ── Read stored weekly recipes ────────────────────────────────────
