@@ -5,19 +5,45 @@ on:
     - cron: '0 17 * * 2'  # Tuesday 5pm UTC = Wednesday 4am AEDT
   workflow_dispatch:       # Allow manual trigger from GitHub Actions UI
 
+env:
+  API_URL: https://deals-to-dish-api.onrender.com
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      - name: Wake up Render server (free tier spins down after inactivity)
+        run: |
+          echo "Waking up server at $(date)..."
+          for attempt in 1 2 3 4 5; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$API_URL/health")
+            echo "Wake attempt $attempt: status $status"
+            if [ "$status" = "200" ]; then
+              echo "Server is awake"
+              break
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              echo "Server failed to wake after 5 attempts"
+              exit 1
+            fi
+            echo "Waiting 15s for cold start..."
+            sleep 15
+          done
+
       - name: Trigger weekly deal refresh + recipe generation
         run: |
-          echo "Triggering Deal to Dish weekly pipeline at $(date)"
-          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-            -H "Content-Type: application/json" \
-            https://deals-to-dish-api.onrender.com/api/admin/refresh-deals)
-          echo "Response status: $response"
-          if [ "$response" != "202" ]; then
-            echo "❌ Pipeline trigger failed with status $response"
-            exit 1
-          fi
-          echo "✅ Pipeline triggered — deals refresh + recipe generation running in background"
+          echo "Triggering SmartPlate weekly pipeline at $(date)"
+          for attempt in 1 2 3; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 -X POST \
+              -H "Content-Type: application/json" \
+              "$API_URL/api/admin/refresh-deals")
+            echo "Attempt $attempt: status $response"
+            if [ "$response" = "202" ]; then
+              echo "Pipeline triggered — deals refresh + recipe generation running in background"
+              exit 0
+            fi
+            echo "Retrying in 10s..."
+            sleep 10
+          done
+          echo "Pipeline trigger failed after 3 attempts"
+          exit 1

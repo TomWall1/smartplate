@@ -5,9 +5,9 @@
 | Layer      | Service                           | URL                                    |
 |------------|-----------------------------------|----------------------------------------|
 | Frontend   | Vercel (Hobby — free)             | https://dealtodish.com                 |
-| Backend    | Render (Free tier)                | https://smartplate-api.onrender.com    |
+| Backend    | Render (Free tier)                | https://deals-to-dish-api.onrender.com    |
 | Database   | Supabase (Free tier, PostgreSQL)  | supabase.com dashboard                 |
-| Cron       | GitHub Actions / cron-job.org     | Wednesday 11pm AEST                    |
+| Cron       | GitHub Actions / cron-job.org     | Tuesday 5pm UTC (Wednesday 4am AEDT)   |
 | Keep-alive | UptimeRobot (free)                | Pings /health every 5 min              |
 
 **Total cost: $0/month**
@@ -45,17 +45,17 @@ This migrates all products and aliases from local SQLite to Supabase PostgreSQL.
    - `ANTHROPIC_API_KEY` — your Anthropic API key
    - `SUPABASE_URL` — Supabase project URL
    - `SUPABASE_ANON_KEY` — Supabase anon key
-5. Deploy — backend available at `https://smartplate-api.onrender.com`
+5. Deploy — backend available at `https://deals-to-dish-api.onrender.com`
 
 **Verify:**
 ```bash
-curl https://smartplate-api.onrender.com/health
+curl https://deals-to-dish-api.onrender.com/health
 ```
 
 ### 4. Deploy Frontend to Vercel
 
 1. Go to https://vercel.com → Import your GitHub repo
-2. Set environment variable: `VITE_API_URL=https://smartplate-api.onrender.com`
+2. Set environment variable: `VITE_API_URL=https://deals-to-dish-api.onrender.com`
 3. Deploy — frontend available at your Vercel URL or custom domain
 
 **Or** if already deployed: add the env var in Vercel dashboard → Project Settings → Environment Variables, then redeploy.
@@ -64,13 +64,13 @@ curl https://smartplate-api.onrender.com/health
 
 **Option A: GitHub Actions (recommended — already configured)**
 - File: `.github/workflows/weekly-refresh.yml`
-- Runs automatically every Wednesday 1pm UTC (11pm AEST)
+- Runs automatically every Tuesday 5pm UTC (Wednesday 4am AEDT)
 - Can be triggered manually via GitHub Actions UI → "Run workflow"
 
 **Option B: cron-job.org**
 1. Go to https://cron-job.org → Create account
 2. New cron job:
-   - URL: `https://smartplate-api.onrender.com/api/admin/refresh-deals`
+   - URL: `https://deals-to-dish-api.onrender.com/api/admin/refresh-deals`
    - Method: POST
    - Schedule: `0 23 * * 3` (Wednesday 11pm)
    - Timezone: Australia/Sydney
@@ -81,7 +81,7 @@ curl https://smartplate-api.onrender.com/health
 2. New monitor:
    - Type: HTTP(s)
    - Name: SmartPlate API
-   - URL: `https://smartplate-api.onrender.com/health`
+   - URL: `https://deals-to-dish-api.onrender.com/health`
    - Interval: 5 minutes
 3. Enable email alerts for downtime
 
@@ -103,7 +103,7 @@ curl https://smartplate-api.onrender.com/health
 ### Vercel (Frontend)
 | Variable       | Value                                       |
 |----------------|---------------------------------------------|
-| `VITE_API_URL` | `https://smartplate-api.onrender.com`       |
+| `VITE_API_URL` | `https://deals-to-dish-api.onrender.com`       |
 
 ---
 

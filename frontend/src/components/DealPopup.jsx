@@ -44,7 +44,7 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
   const storeName = deal.store
     ? deal.store.charAt(0).toUpperCase() + deal.store.slice(1)
     : 'Store';
-  const searchUrl = getStoreSearchUrl(deal.ingredient, deal.store);
+  const searchUrl = getStoreSearchUrl(deal.name || deal.ingredient, deal.store);
 
   const hasWasNow = deal.originalPrice && deal.price && deal.originalPrice !== deal.price;
   const discountLabel = deal.discountPercentage

@@ -2,11 +2,13 @@
 
 ## Weekly Deal Refresh
 
-**Automatic:** GitHub Actions triggers every Wednesday 1pm UTC (11pm AEST)
+**Automatic:** GitHub Actions triggers every Tuesday 5pm UTC (Wednesday 4am AEDT).
+The workflow wakes the Render server first (free tier spins down after inactivity),
+then triggers the refresh pipeline with retry logic.
 
 **Manual trigger (curl):**
 ```bash
-curl -X POST https://smartplate-api.onrender.com/api/admin/refresh-deals
+curl -X POST https://deals-to-dish-api.onrender.com/api/admin/refresh-deals
 ```
 
 **Manual trigger (GitHub Actions):**
@@ -19,13 +21,13 @@ curl -X POST https://smartplate-api.onrender.com/api/admin/refresh-deals
 
 ```bash
 # API health
-curl https://smartplate-api.onrender.com/health
+curl https://deals-to-dish-api.onrender.com/health
 
 # Get deals (verify data is loaded)
-curl https://smartplate-api.onrender.com/api/deals/current | head -c 500
+curl https://deals-to-dish-api.onrender.com/api/deals/current | head -c 500
 
 # Get recipes
-curl https://smartplate-api.onrender.com/api/recipes/suggestions | head -c 500
+curl https://deals-to-dish-api.onrender.com/api/recipes/suggestions | head -c 500
 ```
 
 ---
@@ -98,7 +100,7 @@ node backend/scripts/seedDatabase/seedColes.js
 Run locally to check production status:
 ```bash
 # Quick status check
-curl https://smartplate-api.onrender.com/health
+curl https://deals-to-dish-api.onrender.com/health
 curl https://dealtodish.com | head -c 100
 ```
 

@@ -246,7 +246,7 @@ if (!process.env.VERCEL) {
     }
   }, { timezone: 'Australia/Sydney' });
 
-  console.log('Cron: Scheduled weekly pipeline every Wednesday at 11 pm AEST');
+  console.log('Cron: Scheduled weekly pipeline every Tuesday 5pm UTC (Wednesday 4am AEDT)');
 }
 
 // Export for serverless adapters (Vercel etc.)
