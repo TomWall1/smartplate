@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { UtensilsCrossed, Home, BookOpen, User, LogIn, LogOut, Heart, Calendar, ShoppingCart, Crown, Bell, Shield, MapPin, ChefHat, Refrigerator, ChevronDown } from 'lucide-react';
+import { UtensilsCrossed, Home, BookOpen, User, LogIn, LogOut, Heart, Calendar, ShoppingCart, Crown, Bell, Shield, MapPin, ChefHat, Refrigerator, ChevronDown, HelpCircle } from 'lucide-react';
 import { useApp } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { usePremium } from '../context/PremiumContext';
@@ -61,7 +61,7 @@ function DropdownLink({ to, onClick, icon: Icon, children, active }) {
 const Navigation = () => {
   const location = useLocation();
   const navigate  = useNavigate();
-  const { selectedStore, userState } = useApp();
+  const { selectedStore, userState, startOnboarding } = useApp();
   const { user, signOut } = useAuth();
   const { isPremium } = usePremium();
 
@@ -178,8 +178,16 @@ const Navigation = () => {
               )}
             </div>
 
-            {/* Right side: state pill + Account dropdown */}
+            {/* Right side: how-it-works + state pill + Account dropdown */}
             <div className="hidden md:flex items-center gap-3">
+              <button
+                onClick={startOnboarding}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-colors hover:bg-[#D6EDD4]"
+                style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                <HelpCircle className="w-4 h-4" />
+                How it works
+              </button>
               {userState && (
                 <Link
                   to="/profile"
@@ -240,10 +248,10 @@ const Navigation = () => {
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        <div className="flex items-stretch min-w-max w-full">
+        <div className="flex items-stretch w-full">
           <Link
             to={dealsPath}
-            className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
             style={{ color: isDealsActive ? (storeMeta?.color || 'var(--color-leaf)') : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
           >
             <Home className="w-5 h-5" />
@@ -252,7 +260,7 @@ const Navigation = () => {
 
           <Link
             to="/recipes"
-            className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
             style={{ color: isRecipesActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
           >
             <BookOpen className="w-5 h-5" />
@@ -263,7 +271,7 @@ const Navigation = () => {
             <>
               <Link
                 to="/favorites"
-                className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
                 style={{ color: isFavoritesActive ? 'var(--color-berry)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
               >
                 <Heart className="w-5 h-5" />
@@ -271,7 +279,7 @@ const Navigation = () => {
               </Link>
               <Link
                 to="/shopping-list"
-                className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
                 style={{ color: isListActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
               >
                 <ShoppingCart className="w-5 h-5" />
@@ -279,7 +287,7 @@ const Navigation = () => {
               </Link>
               <Link
                 to="/price-alerts"
-                className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
                 style={{ color: isAlertsActive ? 'var(--color-honey)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
               >
                 <Bell className="w-5 h-5" />
@@ -287,7 +295,7 @@ const Navigation = () => {
               </Link>
               <Link
                 to="/pantry"
-                className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
                 style={{ color: isPantryActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
               >
                 <Refrigerator className="w-5 h-5" />
@@ -299,7 +307,7 @@ const Navigation = () => {
           {!isPremium && (
             <Link
               to="/premium"
-              className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
               style={{ color: isPremiumActive ? 'var(--color-honey)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
             >
               <Crown className="w-5 h-5" />
@@ -310,7 +318,7 @@ const Navigation = () => {
           {isAdmin && (
             <Link
               to="/admin"
-              className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
               style={{ color: isAdminActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
             >
               <Shield className="w-5 h-5" />
@@ -320,14 +328,14 @@ const Navigation = () => {
 
           <Link
             to="/profile"
-            className="flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 py-2 text-xs font-semibold transition-colors"
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
             style={{ color: isProfileActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
           >
             <div className="relative">
               <User className="w-5 h-5" />
               {userState && (
                 <span
-                  className="absolute -top-1.5 -right-2.5 text-[9px] font-extrabold leading-none px-1 py-0.5 rounded-full"
+                  className="absolute -top-1.5 -right-2.5 text-[10px] font-extrabold leading-none px-1 py-0.5 rounded-full"
                   style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)' }}
                 >
                   {userState.toUpperCase()}

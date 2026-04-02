@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { UtensilsCrossed, RefreshCw } from 'lucide-react';
+import { UtensilsCrossed, RefreshCw, HelpCircle } from 'lucide-react';
 import { useApp } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { usersApi } from '../services/api';
@@ -39,7 +39,7 @@ const STORES = [
 ];
 
 export default function StorePicker() {
-  const { deals, loading, selectedStore, setSelectedStore } = useApp();
+  const { deals, loading, selectedStore, setSelectedStore, startOnboarding } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -86,7 +86,7 @@ export default function StorePicker() {
           </span>
           <button
             onClick={handleContinue}
-            className="text-sm font-bold px-4 py-1.5 rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-px"
+            className="text-sm font-bold px-5 py-2.5 rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-px"
             style={{ background: selectedMeta.headerBg, fontFamily: 'Nunito, sans-serif' }}
           >
             Continue →
@@ -221,6 +221,16 @@ export default function StorePicker() {
           </button>
         </p>
       )}
+
+      {/* ── How it works (re-trigger onboarding) ──────────────────────── */}
+      <button
+        onClick={startOnboarding}
+        className="mt-8 inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors hover:opacity-70"
+        style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+      >
+        <HelpCircle className="w-4 h-4" />
+        How it works
+      </button>
     </div>
   );
 }

@@ -33,6 +33,7 @@ const CACHE_PATH = path.join(__dirname, '..', 'data', 'cached-deals.json');
 
 let _startupLoading  = false;
 let _startupDone     = null; // Promise that resolves when the startup fetch finishes
+let _dealsReady      = false; // true once we have ANY servable deals (stale or fresh)
 
 /**
  * Register the promise returned by the startup refreshDeals() call.
@@ -45,7 +46,18 @@ function setStartupFetch(fetchPromise) {
     fetchPromise.then(resolve, resolve); // resolve on both fulfil and reject
   }).then(() => {
     _startupLoading = false;
+    _dealsReady = true;
   });
+}
+
+/** Mark deals as ready (e.g. stale cache loaded on startup). */
+function setDealsReady() {
+  _dealsReady = true;
+}
+
+/** Returns true once we have any servable deals (stale or fresh). */
+function isReady() {
+  return _dealsReady;
 }
 
 /** Returns true while the startup fetch is in progress. */
@@ -463,6 +475,8 @@ module.exports = {
   getCacheInfo,
   loadCache,
   setStartupFetch,
+  setDealsReady,
+  isReady,
   isLoading,
   waitForDeals,
   enrichDealWithProduct,

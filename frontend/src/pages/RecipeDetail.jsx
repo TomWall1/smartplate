@@ -443,7 +443,7 @@ export default function RecipeDetail() {
                           {deal.store && (
                             <span
                               className="inline-block mr-1.5 px-1.5 py-0.5 rounded-full text-white text-xs font-bold"
-                              style={{ background: deal.store === 'woolworths' ? '#00843D' : deal.store === 'coles' ? '#E32726' : '#003087', fontSize: '10px' }}
+                              style={{ background: deal.store === 'woolworths' ? '#00843D' : deal.store === 'coles' ? '#E32726' : '#003087', fontSize: '12px' }}
                             >
                               {deal.store.charAt(0).toUpperCase() + deal.store.slice(1)}
                             </span>

@@ -22,6 +22,7 @@ import { PremiumProvider } from './context/PremiumContext';
 import { dealsApi, recipesApi, healthApi, usersApi } from './services/api';
 import { filterFoodDeals } from './utils/dealFilters';
 import { WifiOff } from 'lucide-react';
+import Onboarding, { useOnboarding } from './components/Onboarding';
 
 // ── App Context ───────────────────────────────────────────────────────────────
 export const AppContext = createContext(null);
@@ -65,7 +66,12 @@ function AppInner() {
   const [deals, setDeals] = useState([]);
   const [weeklyRecipes, setWeeklyRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dealsLoading, setDealsLoading] = useState(false);
+  const [apiError, setApiError] = useState(null); // 'network' | 'server' | null
+  const [warmingUp, setWarmingUp] = useState(false);
+  const [retryCountdown, setRetryCountdown] = useState(0);
   const [apiStatus, setApiStatus] = useState('unknown');
+  const { showOnboarding, startOnboarding, dismissOnboarding } = useOnboarding();
 
   const [selectedStore, setSelectedStoreState] = useState(() =>
     loadFromStorage('smartplate-store', null)
@@ -139,36 +145,71 @@ function AppInner() {
       });
   }, [user]);
 
-  // ── On mount: health check + deals + weekly recipes ───────────────────────
+  // ── Countdown timer for warming-up retry ──────────────────────────────────
   useEffect(() => {
-    const init = async () => {
-      healthApi.checkHealth()
-        .then(() => setApiStatus('connected'))
-        .catch(() => setApiStatus('disconnected'));
+    if (retryCountdown <= 0) return;
+    const timer = setTimeout(() => setRetryCountdown((n) => n - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [retryCountdown]);
+
+  // ── Fetch function (stable ref so retry button can call it) ──────────────
+  const fetchRef = React.useRef(null);
+
+  const fetchDealsAndRecipes = React.useCallback(async (retryCount = 0) => {
+    setApiError(null);
+    if (retryCount === 0) setDealsLoading(true);
+
+    try {
+      const dealsData = await dealsApi.getCurrentDeals();
+      const dealList = Array.isArray(dealsData) ? dealsData : (dealsData?.deals ?? []);
+      setDeals(filterFoodDeals(dealList));
+      setDealsLoading(false);
+      setWarmingUp(false);
+      setRetryCountdown(0);
 
       try {
-        const dealsData = await dealsApi.getCurrentDeals();
-        const dealList = Array.isArray(dealsData) ? dealsData : (dealsData?.deals ?? []);
-        setDeals(filterFoodDeals(dealList));
-
-        try {
-          const ingredients = dealList.map((d) => d.name);
-          const currentState = loadFromStorage('smartplate-state', 'nsw');
-          const recipesData = await recipesApi.getRecipeSuggestions(ingredients, {}, [], currentState);
-          const recipeList = Array.isArray(recipesData) ? recipesData : (recipesData?.recipes ?? []);
-          setWeeklyRecipes(recipeList);
-        } catch (recipeErr) {
-          console.warn('Could not load weekly recipes:', recipeErr.message);
-        }
-      } catch (dealErr) {
-        console.warn('Could not load deals:', dealErr.message);
-      } finally {
-        setLoading(false);
+        const ingredients = dealList.map((d) => d.name);
+        const currentState = loadFromStorage('smartplate-state', 'nsw');
+        const recipesData = await recipesApi.getRecipeSuggestions(ingredients, {}, [], currentState);
+        const recipeList = Array.isArray(recipesData) ? recipesData : (recipesData?.recipes ?? []);
+        setWeeklyRecipes(recipeList);
+      } catch (recipeErr) {
+        console.warn('Could not load weekly recipes:', recipeErr.message);
       }
-    };
-
-    init();
+    } catch (err) {
+      // 503 = server is still loading deals — retry automatically
+      if (err.response?.status === 503 && retryCount < 4) {
+        setWarmingUp(true);
+        setRetryCountdown(15);
+        console.log(`Deals not ready yet, retrying in 15s (attempt ${retryCount + 1}/4)...`);
+        setTimeout(() => fetchDealsAndRecipes(retryCount + 1), 15000);
+        return;
+      }
+      // Actual error — stop retrying
+      setDealsLoading(false);
+      setWarmingUp(false);
+      setRetryCountdown(0);
+      if (err.response?.status >= 500) {
+        setApiError('server');
+      } else {
+        setApiError('network');
+      }
+      console.warn('Could not load deals:', err.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  fetchRef.current = fetchDealsAndRecipes;
+
+  // ── On mount: health check + deals + weekly recipes ───────────────────────
+  useEffect(() => {
+    healthApi.checkHealth()
+      .then(() => setApiStatus('connected'))
+      .catch(() => setApiStatus('disconnected'));
+
+    fetchDealsAndRecipes();
+  }, [fetchDealsAndRecipes]);
 
   // ── Context value ─────────────────────────────────────────────────────────
   const contextValue = {
@@ -184,6 +225,12 @@ function AppInner() {
     setUserState,
     apiStatus,
     loading,
+    dealsLoading,
+    apiError,
+    warmingUp,
+    retryCountdown,
+    retryFetch: () => fetchRef.current?.(0),
+    startOnboarding,
   };
 
   return (
@@ -199,9 +246,24 @@ function AppInner() {
           </div>
         )}
 
+        {warmingUp && (
+          <div
+            className="flex items-center justify-center gap-2 border-b py-2 px-4 text-xs"
+            style={{ background: 'var(--color-mist)', borderColor: 'var(--color-leaf)', color: 'var(--color-bark)' }}
+          >
+            <span className="inline-block w-3 h-3 border-2 rounded-full animate-spin flex-shrink-0" style={{ borderColor: 'var(--color-leaf)', borderTopColor: 'transparent' }} />
+            <span style={{ fontFamily: 'Nunito, sans-serif' }}>
+              Getting this week's specials ready — usually takes about 30 seconds on first load
+              {retryCountdown > 0 && (
+                <span style={{ color: 'var(--color-text-muted)' }}> · trying again in {retryCountdown}s</span>
+              )}
+            </span>
+          </div>
+        )}
+
         <Navigation />
 
-        <main style={{ paddingBottom: '80px' }}>
+        <main style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
           <Routes>
             <Route path="/" element={<StorePicker />} />
             <Route path="/store/:store" element={<StorePage />} />
@@ -222,6 +284,8 @@ function AppInner() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+
+        {showOnboarding && <Onboarding onDismiss={dismissOnboarding} />}
       </Router>
     </AppContext.Provider>
   );

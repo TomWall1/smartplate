@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChefHat, SlidersHorizontal, Crown } from 'lucide-react';
+import { ArrowLeft, ChefHat, SlidersHorizontal, Crown, RefreshCw, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { useApp } from '../App';
 import { dealsApi, recipesApi } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
@@ -79,7 +79,7 @@ function DealSkeleton() {
 function RecipeSkeleton() {
   return (
     <div
-      className="rounded-[20px] overflow-hidden flex-shrink-0 w-64 sm:w-auto border"
+      className="rounded-[20px] overflow-hidden border"
       style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}
     >
       <div className="skeleton aspect-video w-full" />
@@ -100,10 +100,12 @@ export default function StorePage() {
 
   const [storeDeals, setStoreDeals] = useState([]);
   const [dealsLoading, setDealsLoading] = useState(true);
-  const [dealsError, setDealsError] = useState(null);
+  const [dealsError, setDealsError] = useState(null); // null | 'warming' | 'network' | string
+  const [dealsRetryCountdown, setDealsRetryCountdown] = useState(0);
 
   const [storeRecipes, setStoreRecipes] = useState([]);
   const [recipesLoading, setRecipesLoading] = useState(true);
+  const [recipesError, setRecipesError] = useState(null);
   const [displayCount, setDisplayCount] = useState(6);
   const RECIPES_PER_PAGE = 6;
 
@@ -115,26 +117,45 @@ export default function StorePage() {
   const colors = STORE_COLORS[store] || { bg: '#78716c', light: 'var(--color-blush)', text: '#ffffff' };
   const storeName = capitalize(store);
 
+  // Countdown timer for deal retry
   useEffect(() => {
+    if (dealsRetryCountdown <= 0) return;
+    const t = setTimeout(() => setDealsRetryCountdown((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+  }, [dealsRetryCountdown]);
+
+  const fetchStoreDeals = React.useCallback((retryCount = 0) => {
     if (!store) return;
-    setDealsLoading(true);
-    setDealsError(null);
+    if (retryCount === 0) { setDealsLoading(true); setDealsError(null); }
 
     dealsApi.getDealsByStore(store)
       .then((data) => {
         const list = Array.isArray(data) ? data : (data?.deals ?? []);
         setStoreDeals(list);
+        setDealsError(null);
+        setDealsLoading(false);
+        setDealsRetryCountdown(0);
       })
       .catch((err) => {
         console.error('Failed to load store deals:', err);
-        setDealsError('Could not load deals. Please try again.');
-      })
-      .finally(() => setDealsLoading(false));
+        if (err.response?.status === 503 && retryCount < 4) {
+          setDealsError('warming');
+          setDealsRetryCountdown(15);
+          setTimeout(() => fetchStoreDeals(retryCount + 1), 15000);
+        } else {
+          setDealsError(err.response?.status >= 500 ? 'network' : 'Could not load deals. Please try again.');
+          setDealsLoading(false);
+          setDealsRetryCountdown(0);
+        }
+      });
   }, [store]);
+
+  useEffect(() => { fetchStoreDeals(0); }, [fetchStoreDeals]);
 
   useEffect(() => {
     if (!store) return;
     setRecipesLoading(true);
+    setRecipesError(null);
 
     recipesApi.getRecipesForStore(store)
       .then((data) => {
@@ -144,6 +165,11 @@ export default function StorePage() {
       .catch((err) => {
         console.error('Failed to load store recipes:', err);
         setStoreRecipes([]);
+        if (err.response?.status === 503) {
+          setRecipesError('warming');
+        } else {
+          setRecipesError('error');
+        }
       })
       .finally(() => setRecipesLoading(false));
   }, [store]);
@@ -230,15 +256,15 @@ export default function StorePage() {
                   if (!isPremium) { setShowPremiumNudge(true); return; }
                   setPanelOpen(true);
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-xs font-bold transition-all hover:opacity-90"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90"
                 style={{ background: isPremium ? 'var(--color-leaf)' : 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
               >
-                {isPremium ? <SlidersHorizontal className="w-3.5 h-3.5" /> : <Crown className="w-3.5 h-3.5" />}
+                {isPremium ? <SlidersHorizontal className="w-4 h-4" /> : <Crown className="w-4 h-4" />}
                 Filter
               </button>
               <Link
                 to="/recipes"
-                className="text-sm font-bold underline underline-offset-2 transition-colors hover:opacity-70"
+                className="text-sm font-bold underline underline-offset-2 transition-colors hover:opacity-70 py-2.5"
                 style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
               >
                 View all →
@@ -281,7 +307,7 @@ export default function StorePage() {
                   <button
                     key={id}
                     onClick={() => { setActiveProtein(activeProtein === id ? null : id); setDisplayCount(RECIPES_PER_PAGE); }}
-                    className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                    className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all"
                     style={{
                       borderWidth: '1.5px',
                       borderStyle: 'solid',
@@ -314,18 +340,42 @@ export default function StorePage() {
 
           {recipesLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
+              {Array.from({ length: 3 }).map((_, i) => (
                 <RecipeSkeleton key={i} />
               ))}
+            </div>
+          ) : recipesError === 'warming' ? (
+            <div
+              className="rounded-[20px] border p-6 text-center"
+              style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <ChefHat className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--color-honey)' }} />
+              <p className="text-sm mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+                Recipes are on the way
+              </p>
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                The server is loading this week's deals — recipes will appear shortly.
+              </p>
+            </div>
+          ) : filteredRecipes.length === 0 && storeRecipes.length === 0 ? (
+            <div
+              className="rounded-[20px] border p-6 text-center"
+              style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <p className="text-2xl mb-2">🍽️</p>
+              <p className="text-sm font-bold mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+                No strong matches this week
+              </p>
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                Try a different store, or check back Wednesday when deals refresh.
+              </p>
             </div>
           ) : filteredRecipes.length === 0 ? (
             <div
               className="rounded-[20px] p-6 text-center text-sm border border-dashed"
               style={{ background: colors.light, borderColor: 'var(--color-stone)', color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
             >
-              {storeRecipes.length === 0
-                ? <><p>No recipes matched to {storeName} deals yet.</p><p className="mt-1 text-xs">Check back after recipes are generated for the week.</p></>
-                : <p>No recipes match this filter. Try a different tag.</p>}
+              <p>No recipes match this filter. Try a different tag.</p>
             </div>
           ) : (
             <>
@@ -367,16 +417,53 @@ export default function StorePage() {
             </h2>
           </div>
 
-          {dealsError && (
+          {dealsError === 'warming' ? (
+            <div
+              className="rounded-[20px] border p-6 text-center"
+              style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <ShoppingCart className="w-8 h-8 mx-auto mb-2 animate-spin" style={{ color: 'var(--color-honey)', animationDuration: '3s' }} />
+              <p className="text-sm font-bold mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+                Getting this week's specials ready
+              </p>
+              <p className="text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>
+                Usually takes about 30 seconds on first load
+              </p>
+              {dealsRetryCountdown > 0 && (
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  Trying again in {dealsRetryCountdown}s...
+                </p>
+              )}
+            </div>
+          ) : dealsError === 'network' ? (
+            <div
+              className="rounded-[20px] border p-6 text-center"
+              style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <AlertTriangle className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--color-honey)' }} />
+              <p className="text-sm font-bold mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+                Something went wrong on our end
+              </p>
+              <p className="text-xs mb-3" style={{ color: 'var(--color-text-muted)' }}>
+                The deals are still there — try refreshing!
+              </p>
+              <button
+                onClick={() => fetchStoreDeals(0)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
+                style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Try again
+              </button>
+            </div>
+          ) : dealsError ? (
             <div
               className="rounded-[20px] p-4 text-sm mb-4 border"
               style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
             >
               {dealsError}
             </div>
-          )}
-
-          {dealsLoading ? (
+          ) : dealsLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {Array.from({ length: 9 }).map((_, i) => (
                 <DealSkeleton key={i} />

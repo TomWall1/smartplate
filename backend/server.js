@@ -163,6 +163,8 @@ if (!process.env.VERCEL) {
           const { cache } = await fetchPromise;
           console.log(`Startup fetch complete — woolworths:${cache.woolworths.length} coles:${cache.coles.length} iga:${cache.iga.length}`);
         } else {
+          // Stale cache exists — mark deals as ready immediately so endpoints can serve
+          dealService.setDealsReady();
           console.log(`Startup: deals cache OK (${info.counts.total} deals, last updated ${info.lastUpdated})`);
         }
       } catch (err) {

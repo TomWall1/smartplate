@@ -78,7 +78,7 @@ const DealCard = ({ deal }) => {
         <div className="flex items-center gap-2">
           <h3
             className="font-bold leading-snug"
-            style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif', fontSize: '14px' }}
+            style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif', fontSize: '14px', lineHeight: '1.4' }}
           >
             {deal.name}
           </h3>

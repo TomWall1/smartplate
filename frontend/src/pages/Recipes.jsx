@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, Sparkles, X, Crown } from 'lucide-react';
+import { Search, SlidersHorizontal, Sparkles, X, Crown, RefreshCw, ShoppingCart, UtensilsCrossed, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../App';
 import { recipesApi } from '../services/api';
@@ -64,7 +64,7 @@ function RecipeSkeleton() {
 }
 
 export default function Recipes() {
-  const { weeklyRecipes, deals, preferences } = useApp();
+  const { weeklyRecipes, deals, preferences, loading, dealsLoading, warmingUp, retryCountdown, apiError, retryFetch } = useApp();
   const { isPremium } = usePremium();
   const { user } = useAuth();
 
@@ -266,12 +266,13 @@ export default function Recipes() {
             placeholder="Search recipes, ingredients or tags..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 py-3 rounded-xl text-sm shadow-sm outline-none"
+            className="w-full pl-10 pr-10 py-3 rounded-xl shadow-sm outline-none"
             style={{
               background: '#ffffff',
               border: '1.5px solid var(--color-stone)',
               color: 'var(--color-bark)',
               fontFamily: 'Nunito, sans-serif',
+              fontSize: '16px',
             }}
             onFocus={(e) => {
               e.target.style.borderColor = 'var(--color-leaf)';
@@ -285,11 +286,11 @@ export default function Recipes() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-opacity hover:opacity-70"
               style={{ color: 'var(--color-text-muted)' }}
               aria-label="Clear search"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -329,7 +330,7 @@ export default function Recipes() {
                 <button
                   key={id}
                   onClick={() => setActiveProtein(activeProtein === id ? null : id)}
-                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border-1.5 transition-all"
+                  className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all"
                   style={{
                     borderWidth: '1.5px',
                     borderColor: activeProtein === id ? 'var(--color-honey)' : 'var(--color-stone)',
@@ -376,13 +377,91 @@ export default function Recipes() {
           </div>
         )}
 
-        {/* ── Loading skeleton ─────────────────────────────────────────────── */}
-        {(personalisedLoading || weeklyRecipes.length === 0) && !personalisedError ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <RecipeSkeleton key={i} />
-            ))}
+        {/* ── Loading: skeleton cards ─────────────────────────────────────── */}
+        {personalisedLoading || (loading && weeklyRecipes.length === 0) ? (
+          <div>
+            <div className="text-center mb-6">
+              <UtensilsCrossed
+                className="w-8 h-8 mx-auto mb-2 animate-spin"
+                style={{ color: 'var(--color-leaf)', animationDuration: '3s' }}
+              />
+              <p className="text-sm font-bold" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+                Finding this week's best deals...
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <RecipeSkeleton key={i} />
+              ))}
+            </div>
           </div>
+
+        ) : warmingUp && weeklyRecipes.length === 0 ? (
+          /* ── Backend warming up: friendly message + countdown ────────── */
+          <div
+            className="rounded-[20px] border p-8 text-center"
+            style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+          >
+            <ShoppingCart className="w-10 h-10 mx-auto mb-3 animate-spin" style={{ color: 'var(--color-honey)', animationDuration: '3s' }} />
+            <h3 className="text-lg mb-2" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              Getting this week's specials ready
+            </h3>
+            <p className="text-sm mb-4 max-w-sm mx-auto" style={{ color: 'var(--color-text-muted)' }}>
+              Usually takes about 30 seconds on first load — hang tight!
+            </p>
+            {retryCountdown > 0 && (
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                Trying again in {retryCountdown} second{retryCountdown !== 1 ? 's' : ''}...
+              </p>
+            )}
+          </div>
+
+        ) : apiError && weeklyRecipes.length === 0 ? (
+          /* ── API error: retry button ────────────────────────────────── */
+          <div
+            className="rounded-[20px] border p-8 text-center"
+            style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+          >
+            <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--color-honey)' }} />
+            <h3 className="text-lg mb-2" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              Something went wrong on our end
+            </h3>
+            <p className="text-sm mb-5 max-w-sm mx-auto" style={{ color: 'var(--color-text-muted)' }}>
+              The deals are still there — try refreshing!
+            </p>
+            <button
+              onClick={retryFetch}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 hover:-translate-y-px"
+              style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <RefreshCw className="w-4 h-4" />
+              Try again
+            </button>
+          </div>
+
+        ) : !loading && weeklyRecipes.length === 0 && !personalisedError ? (
+          /* ── No recipes matched ─────────────────────────────────────── */
+          <div
+            className="rounded-[20px] border p-8 text-center"
+            style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+          >
+            <p className="text-3xl mb-3">🍽️</p>
+            <h3 className="text-lg mb-2" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              No strong matches this week
+            </h3>
+            <p className="text-sm mb-5 max-w-md mx-auto" style={{ color: 'var(--color-text-muted)' }}>
+              Try selecting a different store, or check back Wednesday when deals refresh.
+            </p>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 hover:-translate-y-px"
+              style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Pick a store
+            </Link>
+          </div>
+
         ) : (
           <>
             {filteredRecipes.length > 0 ? (
@@ -442,6 +521,7 @@ export default function Recipes() {
                 )}
               </>
             ) : (
+              /* ── Filtered to zero (search/tag produced no results) ───── */
               <div
                 className="text-center py-16"
                 style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}

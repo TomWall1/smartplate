@@ -144,20 +144,20 @@ export default function RecipeCard({ recipe, showMatchReason = false, isFavorite
 
         {/* Stats row */}
         <div
-          className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2 mb-3 text-xs"
+          className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2 mb-3 text-sm"
           style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif', fontWeight: 600 }}
         >
           <span className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-4 h-4" />
             {prepTime} min
           </span>
           <span className="flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" />
+            <Users className="w-4 h-4" />
             {servings}
           </span>
           {cost > 0 && (
             <span className="flex items-center gap-1">
-              <DollarSign className="w-3.5 h-3.5" />
+              <DollarSign className="w-4 h-4" />
               ${cost.toFixed(2)}
             </span>
           )}
@@ -170,7 +170,7 @@ export default function RecipeCard({ recipe, showMatchReason = false, isFavorite
                 color: 'var(--color-text-green)',
                 border: breakdownOpen ? '1px solid var(--color-sprout)' : '1px solid transparent',
                 fontFamily: 'Nunito, sans-serif',
-                fontSize: '12px',
+                fontSize: '13px',
               }}
               aria-label="Show savings breakdown"
             >
@@ -190,7 +190,7 @@ export default function RecipeCard({ recipe, showMatchReason = false, isFavorite
             {visibleDeals.map((ing, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-0.5 text-xs font-bold px-3 py-0.5 rounded-full"
+                className="inline-flex items-center gap-0.5 text-sm font-bold px-3 py-0.5 rounded-full"
                 style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
               >
                 • {ing}
@@ -198,7 +198,7 @@ export default function RecipeCard({ recipe, showMatchReason = false, isFavorite
             ))}
             {extraDeals > 0 && (
               <span
-                className="text-xs font-bold px-3 py-0.5 rounded-full"
+                className="text-sm font-bold px-3 py-0.5 rounded-full"
                 style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
               >
                 +{extraDeals} more
@@ -226,7 +226,7 @@ export default function RecipeCard({ recipe, showMatchReason = false, isFavorite
             {visibleTags.map((tag, i) => (
               <span
                 key={i}
-                className="text-xs font-bold px-3 py-0.5 rounded-full"
+                className="text-sm font-bold px-3 py-0.5 rounded-full"
                 style={{ background: 'var(--color-blush)', color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
               >
                 {tag}
@@ -248,7 +248,7 @@ export default function RecipeCard({ recipe, showMatchReason = false, isFavorite
               onError={(e) => { e.target.style.display = 'none'; }}
             />
             <span
-              className="text-xs"
+              className="text-sm"
               style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
             >
               {SOURCE_META[recipe.source].label}

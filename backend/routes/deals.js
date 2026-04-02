@@ -6,6 +6,13 @@ const imageCache  = require('../services/imageCache');
 // GET /api/deals/current — serve from cache (instant)
 router.get('/current', async (req, res) => {
   try {
+    // If startup fetch is still running and no stale cache exists, return 503
+    if (!dealService.isReady()) {
+      return res.status(503).json({
+        status: 'loading',
+        message: "We're getting this week's deals ready — check back in 30 seconds.",
+      });
+    }
     const deals = await dealService.getCurrentDeals();
     res.json(deals);
   } catch (error) {

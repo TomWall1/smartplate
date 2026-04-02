@@ -6,16 +6,31 @@ const { supabase: authSupabase, clientForToken } = require('../services/authServ
 // ── Manually trigger weekly recipe generation ───────────────────────
 // Returns 202 immediately; generation runs in background.
 router.post('/generate-weekly', (req, res) => {
-  console.log('Manual weekly recipe generation triggered (background)');
-  res.status(202).json({
-    success: true,
-    message: 'Recipe generation started in background. Check /api/recipes/suggestions in ~2 minutes.',
-    startedAt: new Date().toISOString(),
-  });
-  // Fire-and-forget
-  recipeService.generateWeeklyRecipes()
-    .then((recipes) => console.log(`Recipe generation complete: ${recipes.length} recipes`))
-    .catch((err) => console.error('Recipe generation failed:', err.message));
+  try {
+    const dealService = require('../services/dealService');
+
+    // Guard: deals must be loaded before we can generate recipes
+    if (!dealService.isReady()) {
+      return res.status(503).json({
+        status: 'loading',
+        message: "We're getting this week's deals ready — check back in 30 seconds.",
+      });
+    }
+
+    console.log('Manual weekly recipe generation triggered (background)');
+    res.status(202).json({
+      success: true,
+      message: 'Recipe generation started in background. Check /api/recipes/suggestions in ~2 minutes.',
+      startedAt: new Date().toISOString(),
+    });
+    // Fire-and-forget
+    recipeService.generateWeeklyRecipes()
+      .then((recipes) => console.log(`Recipe generation complete: ${recipes.length} recipes`))
+      .catch((err) => console.error('Recipe generation failed:', err.message));
+  } catch (err) {
+    console.error('Error in /generate-weekly:', err.message);
+    res.status(500).json({ error: 'Failed to start recipe generation', message: err.message });
+  }
 });
 
 // ── Helper: extract user's state from JWT or request ─────────────────

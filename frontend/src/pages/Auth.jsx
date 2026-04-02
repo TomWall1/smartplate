@@ -68,9 +68,9 @@ export default function Auth() {
     background: '#ffffff',
     border: '1.5px solid var(--color-stone)',
     borderRadius: '12px',
-    padding: '10px 12px 10px 36px',
+    padding: '12px 12px 12px 40px',
     fontFamily: 'Nunito, sans-serif',
-    fontSize: '14px',
+    fontSize: '16px',
     color: 'var(--color-bark)',
     outline: 'none',
     width: '100%',
@@ -154,7 +154,7 @@ export default function Auth() {
         {(mode === 'signin' || mode === 'signup') && <button
           onClick={handleGoogle}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors mb-4 disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold transition-colors mb-4 disabled:opacity-60"
           style={{
             border: '1.5px solid var(--color-stone)',
             color: 'var(--color-bark)',
@@ -266,7 +266,7 @@ export default function Auth() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-sm font-bold transition-all disabled:opacity-60 mt-1 hover:opacity-90 hover:-translate-y-px"
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-white text-sm font-bold transition-all disabled:opacity-60 mt-1 hover:opacity-90 hover:-translate-y-px"
             style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
