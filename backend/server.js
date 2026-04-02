@@ -277,10 +277,28 @@ if (!process.env.VERCEL) {
           } else {
             console.log('Cache empty on startup — fetching live deals...');
           }
+
+          // Run catalogue discovery first so we have working embed IDs
+          try {
+            const { discoverAndSaveStateCatalogues } = require('./services/salefinder');
+            console.log('Startup: running catalogue discovery before deal refresh...');
+            const changed = await discoverAndSaveStateCatalogues();
+            console.log(`Startup: catalogue discovery complete (changed: ${changed})`);
+          } catch (err) {
+            console.warn(`Startup: catalogue discovery failed — continuing: ${err.message}`);
+          }
+
           const fetchPromise = dealService.refreshDeals();
           dealService.setStartupFetch(fetchPromise);
           const { cache } = await fetchPromise;
           console.log(`Startup fetch complete — woolworths:${cache.woolworths.length} coles:${cache.coles.length} iga:${cache.iga.length}`);
+
+          // If any store got 0 deals, log a warning
+          for (const store of ['woolworths', 'coles', 'iga']) {
+            if ((cache[store]?.length || 0) === 0) {
+              console.error(`Startup WARNING: ${store} returned 0 deals — scraper may need attention`);
+            }
+          }
 
           // Stale deals were refreshed — regenerate recipes too
           if (isStale) {

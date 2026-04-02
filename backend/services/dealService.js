@@ -116,13 +116,17 @@ function cacheToFlatArray(cache) {
 // ── Raw fetch from Salefinder (no image enrichment) ───────────────────────────
 
 async function _fetchRaw(state) {
-  const stateLabel = state ? ` (${state.toUpperCase()})` : '';
+  // If no state specified, default to 'nsw' so fetchSpecialsForState uses
+  // the state-catalogue-ids.json (which have verified embed IDs) instead of
+  // falling back to main-site scrape (which can return non-embed IDs).
+  const effectiveState = state || 'nsw';
+  const stateLabel = ` (${effectiveState.toUpperCase()})`;
   console.log(`DealService: Fetching raw deals from Salefinder${stateLabel}...`);
 
   const tasks = [];
-  if (woolworthsService?.fetchDeals) tasks.push({ store: 'woolworths', fn: woolworthsService.fetchDeals(state) });
-  if (colesService?.fetchDeals)      tasks.push({ store: 'coles',      fn: colesService.fetchDeals(state)      });
-  if (igaService?.fetchDeals)        tasks.push({ store: 'iga',        fn: igaService.fetchDeals(state)        });
+  if (woolworthsService?.fetchDeals) tasks.push({ store: 'woolworths', fn: woolworthsService.fetchDeals(effectiveState) });
+  if (colesService?.fetchDeals)      tasks.push({ store: 'coles',      fn: colesService.fetchDeals(effectiveState)      });
+  if (igaService?.fetchDeals)        tasks.push({ store: 'iga',        fn: igaService.fetchDeals(effectiveState)        });
 
   if (tasks.length === 0) throw new Error('No deal services available');
 
