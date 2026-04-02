@@ -45,6 +45,7 @@ function parseJSONP(data) {
 
 async function discoverCatalogueIds(retailerSlug) {
   const url = `https://www.salefinder.com.au/${retailerSlug}-catalogue`;
+  console.log(`[SaleFinder] Discovering catalogues from ${url}`);
   const res = await axios.get(url, {
     timeout: 15000,
     headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
@@ -65,6 +66,15 @@ async function discoverCatalogueIds(retailerSlug) {
       }
     }
   });
+
+  if (catalogues.length === 0) {
+    // Log a sample of the HTML to help debug if the page structure changed
+    const allLinks = [];
+    $('a[href*="catalogue"]').each((_, el) => allLinks.push($(el).attr('href')));
+    console.warn(`[SaleFinder] No catalogues found for ${retailerSlug}. Sample links on page: ${allLinks.slice(0, 10).join(', ') || '(none)'}`);
+  } else {
+    console.log(`[SaleFinder] Found ${catalogues.length} catalogue(s) for ${retailerSlug}: ${catalogues.map(c => `${c.name}(${c.id})`).join(', ')}`);
+  }
 
   return catalogues;
 }
@@ -104,7 +114,9 @@ async function getCategories(catalogueId, retailerId, locationId) {
       const cats = parseCategoriesFromHTML(cheerio.load(parsed.content));
       if (cats.length > 0) return cats;
     }
-  } catch {}
+  } catch (err) {
+    console.warn(`[SaleFinder] getNavbar failed for catalogue ${catalogueId}: ${err.message}`);
+  }
 
   // Method 2: productlist navbar (works for Woolworths)
   try {
@@ -117,8 +129,11 @@ async function getCategories(catalogueId, retailerId, locationId) {
       const cats = parseCategoriesFromHTML(cheerio.load(parsed.content));
       if (cats.length > 0) return cats;
     }
-  } catch {}
+  } catch (err) {
+    console.warn(`[SaleFinder] productlist failed for catalogue ${catalogueId}: ${err.message}`);
+  }
 
+  console.warn(`[SaleFinder] No categories found for catalogue ${catalogueId} (both methods returned empty)`);
   return [];
 }
 

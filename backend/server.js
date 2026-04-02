@@ -55,6 +55,30 @@ app.use('/api/pantry',   pantryRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/auth',     authRoutes);
 
+// Quick diagnostic: test if SaleFinder scraper can discover catalogues
+app.get('/api/admin/test-salefinder', async (req, res) => {
+  try {
+    const { discoverCatalogueIds, getCategories } = require('./services/salefinder');
+    const results = {};
+    for (const retailer of ['woolworths', 'coles', 'iga']) {
+      try {
+        const catalogues = await discoverCatalogueIds(retailer);
+        results[retailer] = { catalogues: catalogues.length, ids: catalogues.map(c => ({ id: c.id, name: c.name })) };
+        // Test if we can get categories from the first catalogue
+        if (catalogues.length > 0) {
+          const cats = await getCategories(catalogues[0].id, 126, 4778);
+          results[retailer].categoriesFromFirst = cats.length;
+        }
+      } catch (err) {
+        results[retailer] = { error: err.message };
+      }
+    }
+    res.json({ timestamp: new Date().toISOString(), results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // External cron trigger — used by cron-job.org / GitHub Actions for weekly refresh
 // Returns 202 immediately; refresh runs in background to avoid proxy timeouts.
 app.post('/api/admin/refresh-deals', (req, res) => {
@@ -98,12 +122,23 @@ app.post('/api/admin/refresh-deals', (req, res) => {
 
 // Health check
 app.get('/health', (req, res) => {
+  const dealService = require('./services/dealService');
+  const info = dealService.getCacheInfo();
+  const staleMs = info?.lastUpdated ? Date.now() - new Date(info.lastUpdated).getTime() : null;
+  const staleDays = staleMs ? (staleMs / (24 * 60 * 60 * 1000)).toFixed(1) : null;
+
   res.json({
     status: 'OK',
     timestamp: new Date().toISOString(),
     message: 'SmartPlate API is running',
     version: '1.0.0',
     database: process.env.USE_POSTGRESQL === 'true' || process.env.NODE_ENV === 'production' ? 'PostgreSQL' : 'SQLite',
+    deals: info ? {
+      lastUpdated: info.lastUpdated,
+      staleDays,
+      isStale: staleDays > 8,
+      counts: info.counts,
+    } : { error: 'no cache' },
   });
 });
 
