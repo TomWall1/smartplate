@@ -623,7 +623,9 @@ async function fetchFromMainSite(retailerSlug, store) {
       const $ = cheerio.load(res.data);
       const items = [];
 
-      // Each product is an <a class="item-image"> with data attributes
+      // Each product is in a div.item-landscape containing:
+      //   <a class="item-image" data-itemname="..."> (name + link)
+      //   <span class="item-details-container"> (price info)
       $('a.item-image').each((_, el) => {
         const $el = $(el);
         const name = ($el.attr('data-itemname') || '').trim();
@@ -631,17 +633,25 @@ async function fetchFromMainSite(retailerSlug, store) {
         if (!name || seen.has(name)) return;
         seen.add(name);
 
-        // Extract category from URL path: /64998/category/subcategory/product/id/
+        // Extract category from URL path: /64998/food-and-beverage/groceries/bakery/product/id/
         const pathParts = href.split('/').filter(Boolean);
-        const rawCategory = pathParts.length >= 2 ? pathParts[1].replace(/-/g, ' ') : '';
+        // Find the most specific category (skip generic "food-and-beverage" and "groceries")
+        let rawCategory = '';
+        for (const part of pathParts.slice(1)) {
+          const lower = part.replace(/-/g, ' ');
+          if (lower !== 'food and beverage' && lower !== 'groceries' && !part.match(/^\d+$/)) {
+            rawCategory = lower;
+            break;
+          }
+        }
 
-        // Find the price container — it's a sibling in the same product wrapper
-        const $wrapper = $el.closest('.item') || $el.parent();
+        // Parent div.item-landscape contains all product info
+        const $wrapper = $el.parent();
         const priceText = $wrapper.find('.price').first().text().trim();
         const priceOptionsText = $wrapper.find('.price-options').text().trim();
 
-        // Parse sale price
-        const priceMatch = priceText.match(/\$?([\d.]+)/);
+        // Parse sale price — must follow a $ sign to avoid matching "Any 2 for $6"
+        const priceMatch = priceText.match(/\$([\d.]+)/);
         const salePrice = priceMatch ? parseFloat(priceMatch[1]) : 0;
 
         // Parse savings amount
