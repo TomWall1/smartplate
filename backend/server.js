@@ -58,16 +58,41 @@ app.use('/api/auth',     authRoutes);
 // Quick diagnostic: test if SaleFinder scraper can discover catalogues
 app.get('/api/admin/test-salefinder', async (req, res) => {
   try {
-    const { discoverCatalogueIds, getCategories } = require('./services/salefinder');
+    const axios = require('axios');
+    const { discoverCatalogueIds, getCategories, getItems } = require('./services/salefinder');
     const results = {};
     for (const retailer of ['woolworths', 'coles', 'iga']) {
       try {
         const catalogues = await discoverCatalogueIds(retailer);
         results[retailer] = { catalogues: catalogues.length, ids: catalogues.map(c => ({ id: c.id, name: c.name })) };
-        // Test if we can get categories from the first catalogue
         if (catalogues.length > 0) {
-          const cats = await getCategories(catalogues[0].id, 126, 4778);
+          const catId = catalogues[0].id;
+          const cats = await getCategories(catId, 126, 4778);
           results[retailer].categoriesFromFirst = cats.length;
+          results[retailer].categoryNames = cats.slice(0, 5).map(c => c.name);
+
+          // If categories work, test fetching items from the first one
+          if (cats.length > 0) {
+            const items = await getItems(catId, cats[0].ids, 4778, '.shelfProductTile-descriptionLink');
+            results[retailer].itemsFromFirstCat = items.length;
+            results[retailer].sampleItem = items[0]?.name || null;
+          }
+
+          // Raw API probe — show what the embed API actually returns
+          try {
+            const raw1 = await axios.get(`https://embed.salefinder.com.au/catalogue/getNavbar/${catId}`, { params: { retailerId: 126 }, timeout: 10000 });
+            results[retailer].navbarRawLength = raw1.data?.length || 0;
+            results[retailer].navbarRawSample = typeof raw1.data === 'string' ? raw1.data.substring(0, 300) : JSON.stringify(raw1.data).substring(0, 300);
+          } catch (err) {
+            results[retailer].navbarError = err.message;
+          }
+          try {
+            const raw2 = await axios.get(`https://embed.salefinder.com.au/productlist/category/${catId}`, { params: { locationId: 4778, categoryId: '1', rows_per_page: 1, saleGroup: 0 }, timeout: 10000 });
+            results[retailer].productlistRawLength = raw2.data?.length || 0;
+            results[retailer].productlistRawSample = typeof raw2.data === 'string' ? raw2.data.substring(0, 500) : JSON.stringify(raw2.data).substring(0, 500);
+          } catch (err) {
+            results[retailer].productlistError = err.message;
+          }
         }
       } catch (err) {
         results[retailer] = { error: err.message };
