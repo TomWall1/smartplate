@@ -223,6 +223,23 @@ const CATEGORY_MAP = {
   'pantry':                    'Pantry',
   'frozen':                    'Frozen',
   'half price specials':       'Specials',
+  // Main-site URL slug variants (hyphens replaced with spaces)
+  'biscuits and snacks':       'Pantry',
+  'breakfast foods':           'Pantry',
+  'canned and packet food':    'Pantry',
+  'cooking seasoning and gravy':'Pantry',
+  'fruit and vegetables':      'Fruit & Vegetables',
+  'deli and chilled':          'Deli',
+  'health foods':              'Pantry',
+  'international foods':       'Pantry',
+  'jams and spreads':          'Pantry',
+  'frozen food':               'Frozen',
+  'beer wine and spirit':      'Drinks',
+  'bread and bakery':          'Bakery',
+  'meat seafood and deli':     'Meat',
+  'dairy eggs and meals':      'Dairy',
+  'half price special':        'Specials',
+  'low price everyday':        'Specials',
 };
 
 // Categories to exclude (non-food)
@@ -382,7 +399,7 @@ async function fetchSpecials({ slug, retailerId, locationId, nameSelector, store
  * @param {string} [config.state]  - Two-letter state code: nsw, vic, qld, wa, sa, tas, nt, act
  */
 async function fetchSpecialsForState({ slug, retailerId, locationId, nameSelector, store, state, preferLargest }) {
-  // Try state-specific catalogue ID first
+  // Try state-specific catalogue ID first (embed API)
   if (state) {
     const stateIds = loadStateIds();
     const stateLower = state.toLowerCase();
@@ -396,12 +413,24 @@ async function fetchSpecialsForState({ slug, retailerId, locationId, nameSelecto
         console.log(`[SaleFinder/${store}] ${deals.length} food deals for ${stateLower.toUpperCase()}`);
         return deals;
       }
-      console.warn(`[SaleFinder/${store}] State catalogue ${catalogueId} returned no deals, falling back to discovery`);
+      console.warn(`[SaleFinder/${store}] State catalogue ${catalogueId} returned no deals via embed API`);
     }
   }
 
-  // Fall back to geo-located discovery
-  return fetchSpecials({ slug, retailerId, locationId, nameSelector, store, preferLargest });
+  // Try geo-located embed API discovery
+  try {
+    const deals = await fetchSpecials({ slug, retailerId, locationId, nameSelector, store, preferLargest });
+    if (deals.length > 0) return deals;
+  } catch (err) {
+    console.warn(`[SaleFinder/${store}] Embed API discovery failed: ${err.message}`);
+  }
+
+  // Final fallback: scrape the main salefinder.com.au catalogue page directly
+  console.log(`[SaleFinder/${store}] Embed API returned no deals — trying main-site scrape`);
+  const mainSiteDeals = await fetchFromMainSite(slug, store);
+  if (mainSiteDeals.length > 0) return mainSiteDeals;
+
+  throw new Error(`No deals found for ${store} via any method (embed API + main-site scrape)`);
 }
 
 // ── State catalogue discovery (runs before weekly deal refresh) ───────────────
@@ -561,9 +590,116 @@ async function discoverAndSaveStateCatalogues() {
   return anyChanged;
 }
 
+// ── Main-site scraper (fallback when embed API fails) ───────────────────────
+
+/**
+ * Scrape deals directly from the salefinder.com.au catalogue listing page.
+ * This bypasses the embed API entirely and parses server-rendered HTML.
+ *
+ * The page shows 12 items per page with pagination via ?qs={page},,0,0,0
+ *
+ * @param {string} retailerSlug - e.g. 'woolworths', 'coles', 'IGA'
+ * @param {string} store        - store name for deal objects (e.g. 'woolworths')
+ * @returns {Promise<Array>} Array of deal objects
+ */
+async function fetchFromMainSite(retailerSlug, store) {
+  const baseUrl = `https://www.salefinder.com.au/${retailerSlug}-catalogue`;
+  console.log(`[SaleFinder/${store}] Trying main-site scrape from ${baseUrl}`);
+
+  const allDeals = [];
+  const validUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const seen = new Set();
+  let page = 1;
+  const MAX_PAGES = 40;
+
+  while (page <= MAX_PAGES) {
+    const url = page === 1 ? baseUrl : `${baseUrl}?qs=${page},,0,0,0`;
+    try {
+      const res = await axios.get(url, {
+        timeout: 15000,
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      });
+
+      const $ = cheerio.load(res.data);
+      const items = [];
+
+      // Each product is an <a class="item-image"> with data attributes
+      $('a.item-image').each((_, el) => {
+        const $el = $(el);
+        const name = ($el.attr('data-itemname') || '').trim();
+        const href = $el.attr('href') || '';
+        if (!name || seen.has(name)) return;
+        seen.add(name);
+
+        // Extract category from URL path: /64998/category/subcategory/product/id/
+        const pathParts = href.split('/').filter(Boolean);
+        const rawCategory = pathParts.length >= 2 ? pathParts[1].replace(/-/g, ' ') : '';
+
+        // Find the price container — it's a sibling in the same product wrapper
+        const $wrapper = $el.closest('.item') || $el.parent();
+        const priceText = $wrapper.find('.price').first().text().trim();
+        const priceOptionsText = $wrapper.find('.price-options').text().trim();
+
+        // Parse sale price
+        const priceMatch = priceText.match(/\$?([\d.]+)/);
+        const salePrice = priceMatch ? parseFloat(priceMatch[1]) : 0;
+
+        // Parse savings amount
+        const saveMatch = priceOptionsText.match(/save\s*\$?([\d.]+)/i);
+        const saveAmount = saveMatch ? parseFloat(saveMatch[1]) : 0;
+        const originalPrice = salePrice + saveAmount;
+
+        // Parse unit
+        const unitMatch = priceText.match(/\d\s*(each|per\s+\w+|kg|g|ml|litre|L|pack|bundle)\b/i);
+        const unit = unitMatch ? unitMatch[1].trim() : 'each';
+
+        if (salePrice > 0) {
+          items.push({ name, salePrice, originalPrice, saveAmount, rawCategory, unit });
+        }
+      });
+
+      if (items.length === 0) break; // No more items — stop pagination
+
+      for (const item of items) {
+        const discountPercent = item.originalPrice > item.salePrice
+          ? ((item.originalPrice - item.salePrice) / item.originalPrice) * 100
+          : 0;
+
+        // Map category from URL slug to app category
+        const appCategory = mapCategory(item.rawCategory) || 'Specials';
+
+        if (isLikelyFood(item.name) && (discountPercent > 0 || item.saveAmount > 0)) {
+          allDeals.push({
+            name: item.name,
+            category: appCategory,
+            price: parseFloat(item.salePrice.toFixed(2)),
+            originalPrice: parseFloat(item.originalPrice.toFixed(2)),
+            store,
+            description: item.name,
+            unit: item.unit,
+            validUntil,
+            discountPercentage: Math.round(discountPercent),
+          });
+        }
+      }
+
+      page++;
+      // Small delay to be respectful
+      if (page <= MAX_PAGES) await new Promise(r => setTimeout(r, 300));
+    } catch (err) {
+      console.warn(`[SaleFinder/${store}] Main-site page ${page} failed: ${err.message}`);
+      break;
+    }
+  }
+
+  console.log(`[SaleFinder/${store}] Main-site scrape complete: ${allDeals.length} food deals from ${page - 1} pages`);
+  return allDeals;
+}
+
 module.exports = {
   fetchSpecials,
   fetchSpecialsForState,
+  fetchFromMainSite,
   discoverCatalogueIds,
   discoverAndSaveStateCatalogues,
   getCategories,
