@@ -59,41 +59,91 @@ app.use('/api/auth',     authRoutes);
 app.get('/api/admin/test-salefinder', async (req, res) => {
   try {
     const axios = require('axios');
-    const { discoverCatalogueIds, getCategories, getItems } = require('./services/salefinder');
+    const { discoverCatalogueIds, getCategories, getItems, loadStateIds } = require('./services/salefinder');
+
+    const RETAILER_CONFIG = {
+      woolworths: { retailerId: 126, locationId: 4778, nameSelector: '.shelfProductTile-descriptionLink' },
+      coles:      { retailerId: 148, locationId: 8245, nameSelector: '.sf-item-heading' },
+      iga:        { retailerId: 183, locationId: 0,    nameSelector: '.sf-item-heading' },
+    };
+
+    const stateIds = loadStateIds();
     const results = {};
+
     for (const retailer of ['woolworths', 'coles', 'iga']) {
+      const cfg = RETAILER_CONFIG[retailer];
       try {
-        const catalogues = await discoverCatalogueIds(retailer);
-        results[retailer] = { catalogues: catalogues.length, ids: catalogues.map(c => ({ id: c.id, name: c.name })) };
+        // 1. Discover from main site
+        const catalogues = await discoverCatalogueIds(retailer === 'iga' ? 'IGA' : retailer);
+        results[retailer] = {
+          discoveredCatalogues: catalogues.map(c => ({ id: c.id, name: c.name })),
+          stateIdNsw: stateIds[retailer]?.nsw || null,
+        };
+
+        // 2. Test discovered ID with correct retailer config
         if (catalogues.length > 0) {
           const catId = catalogues[0].id;
-          const cats = await getCategories(catId, 126, 4778);
-          results[retailer].categoriesFromFirst = cats.length;
-          results[retailer].categoryNames = cats.slice(0, 5).map(c => c.name);
+          const cats = await getCategories(catId, cfg.retailerId, cfg.locationId);
+          results[retailer].discovered_categories = cats.length;
 
-          // If categories work, test fetching items from the first one
-          if (cats.length > 0) {
-            const items = await getItems(catId, cats[0].ids, 4778, '.shelfProductTile-descriptionLink');
-            results[retailer].itemsFromFirstCat = items.length;
-            results[retailer].sampleItem = items[0]?.name || null;
-          }
-
-          // Raw API probe — show what the embed API actually returns
+          // Raw probe on discovered ID
           try {
-            const raw1 = await axios.get(`https://embed.salefinder.com.au/catalogue/getNavbar/${catId}`, { params: { retailerId: 126 }, timeout: 10000 });
-            results[retailer].navbarRawLength = raw1.data?.length || 0;
-            results[retailer].navbarRawSample = typeof raw1.data === 'string' ? raw1.data.substring(0, 300) : JSON.stringify(raw1.data).substring(0, 300);
+            const raw = await axios.get(`https://embed.salefinder.com.au/productlist/category/${catId}`, {
+              params: { locationId: cfg.locationId, categoryId: '1', rows_per_page: 5, saleGroup: 0 },
+              timeout: 10000,
+            });
+            results[retailer].discovered_rawLength = raw.data?.length || 0;
+            results[retailer].discovered_rawSample = (typeof raw.data === 'string' ? raw.data : '').substring(0, 400);
           } catch (err) {
-            results[retailer].navbarError = err.message;
-          }
-          try {
-            const raw2 = await axios.get(`https://embed.salefinder.com.au/productlist/category/${catId}`, { params: { locationId: 4778, categoryId: '1', rows_per_page: 1, saleGroup: 0 }, timeout: 10000 });
-            results[retailer].productlistRawLength = raw2.data?.length || 0;
-            results[retailer].productlistRawSample = typeof raw2.data === 'string' ? raw2.data.substring(0, 500) : JSON.stringify(raw2.data).substring(0, 500);
-          } catch (err) {
-            results[retailer].productlistError = err.message;
+            results[retailer].discovered_rawError = err.message;
           }
         }
+
+        // 3. Test state catalogue ID (from state-catalogue-ids.json)
+        const stateId = stateIds[retailer]?.nsw;
+        if (stateId) {
+          const cats = await getCategories(stateId, cfg.retailerId, cfg.locationId);
+          results[retailer].stateId_categories = cats.length;
+
+          try {
+            const raw = await axios.get(`https://embed.salefinder.com.au/productlist/category/${stateId}`, {
+              params: { locationId: cfg.locationId, categoryId: '1', rows_per_page: 5, saleGroup: 0 },
+              timeout: 10000,
+            });
+            results[retailer].stateId_rawLength = raw.data?.length || 0;
+            results[retailer].stateId_rawSample = (typeof raw.data === 'string' ? raw.data : '').substring(0, 400);
+          } catch (err) {
+            results[retailer].stateId_rawError = err.message;
+          }
+        }
+
+        // 4. Try fetching from main salefinder page directly (scrape specials page)
+        try {
+          const pageUrl = `https://www.salefinder.com.au/${retailer === 'iga' ? 'IGA' : retailer}-specials`;
+          const pageRes = await axios.get(pageUrl, { timeout: 15000, headers: { 'User-Agent': 'Mozilla/5.0' } });
+          const cheerio = require('cheerio');
+          const $ = cheerio.load(pageRes.data);
+          // Look for embedded catalogue/sale IDs in the page
+          const embedIds = [];
+          $('iframe[src*="salefinder"], [data-sale-id], [data-catalogue-id]').each((_, el) => {
+            const src = $(el).attr('src') || '';
+            const saleId = $(el).attr('data-sale-id') || $(el).attr('data-catalogue-id') || '';
+            const match = src.match(/\/(\d+)/);
+            if (match) embedIds.push(match[1]);
+            if (saleId) embedIds.push(saleId);
+          });
+          // Also check for sale IDs in script tags
+          const scriptText = $('script').text();
+          const saleMatches = scriptText.match(/saleId['":\s]+(\d+)/g) || [];
+          results[retailer].specialsPage = {
+            status: pageRes.status,
+            embedIds: [...new Set(embedIds)],
+            saleIdsInScripts: saleMatches.slice(0, 5),
+          };
+        } catch (err) {
+          results[retailer].specialsPageError = err.message;
+        }
+
       } catch (err) {
         results[retailer] = { error: err.message };
       }
