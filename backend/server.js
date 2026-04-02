@@ -45,16 +45,6 @@ const pantryRoutes    = require('./routes/pantry');
 const feedbackRoutes  = require('./routes/feedback');
 const authRoutes      = require('./routes/auth');
 
-// Routes
-app.use('/api/deals',    dealsRoutes);
-app.use('/api/recipes',  recipesRoutes);
-app.use('/api/users',    usersRoutes);
-app.use('/api/premium',  premiumRoutes);
-app.use('/api/admin',    adminRoutes);
-app.use('/api/pantry',   pantryRoutes);
-app.use('/api/feedback', feedbackRoutes);
-app.use('/api/auth',     authRoutes);
-
 // Quick test: main-site scraper for Woolworths
 app.get('/api/admin/test-mainsite', async (req, res) => {
   try {
@@ -232,6 +222,16 @@ app.get('/api/admin/test-salefinder', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Routes
+app.use('/api/deals',    dealsRoutes);
+app.use('/api/recipes',  recipesRoutes);
+app.use('/api/users',    usersRoutes);
+app.use('/api/premium',  premiumRoutes);
+app.use('/api/admin',    adminRoutes);
+app.use('/api/pantry',   pantryRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/auth',     authRoutes);
 
 // External cron trigger — used by cron-job.org / GitHub Actions for weekly refresh
 // Returns 202 immediately; refresh runs in background to avoid proxy timeouts.
