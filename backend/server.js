@@ -55,6 +55,49 @@ app.use('/api/pantry',   pantryRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/auth',     authRoutes);
 
+// Quick test: main-site scraper for Woolworths
+app.get('/api/admin/test-mainsite', async (req, res) => {
+  try {
+    const axios = require('axios');
+    const cheerio = require('cheerio');
+    const { fetchFromMainSite } = require('./services/salefinder');
+
+    // 1. Test the scraper function
+    const deals = await fetchFromMainSite('woolworths', 'woolworths');
+
+    // 2. Also dump raw HTML to debug selectors
+    const rawPage = await axios.get('https://www.salefinder.com.au/woolworths-catalogue', {
+      timeout: 15000,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    });
+    const $ = cheerio.load(rawPage.data);
+    const selectors = {
+      'a.item-image': $('a.item-image').length,
+      'a.item-name': $('a.item-name').length,
+      '.price': $('.price').length,
+      '.price-options': $('.price-options').length,
+      '.item': $('.item').length,
+      '[data-itemname]': $('[data-itemname]').length,
+    };
+    // Get first product area HTML
+    const firstItemImage = $('a.item-image').first();
+    const firstParent = firstItemImage.parent().html()?.substring(0, 600) || 'NOT FOUND';
+    // Also try broader container
+    const firstGrandparent = firstItemImage.parent().parent().html()?.substring(0, 800) || 'NOT FOUND';
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      scraperResult: { deals: deals.length, sample: deals.slice(0, 3) },
+      pageLength: rawPage.data.length,
+      selectors,
+      firstParentHTML: firstParent,
+      firstGrandparentHTML: firstGrandparent,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, stack: err.stack?.split('\n').slice(0, 5) });
+  }
+});
+
 // Quick diagnostic: test if SaleFinder scraper can discover catalogues
 app.get('/api/admin/test-salefinder', async (req, res) => {
   try {
