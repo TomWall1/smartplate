@@ -59,7 +59,7 @@ app.use('/api/auth',     authRoutes);
 app.get('/api/admin/test-salefinder', async (req, res) => {
   try {
     const axios = require('axios');
-    const { discoverCatalogueIds, getCategories, getItems, loadStateIds } = require('./services/salefinder');
+    const { discoverCatalogueIds, getCategories, getItems, loadStateIds, fetchFromMainSite } = require('./services/salefinder');
 
     const RETAILER_CONFIG = {
       woolworths: { retailerId: 126, locationId: 4778, nameSelector: '.shelfProductTile-descriptionLink' },
@@ -148,6 +148,42 @@ app.get('/api/admin/test-salefinder', async (req, res) => {
         results[retailer] = { error: err.message };
       }
     }
+
+    // Test main-site scraper for Woolworths specifically
+    try {
+      const mainSiteDeals = await fetchFromMainSite('woolworths', 'woolworths');
+      results.woolworths_mainsite = {
+        deals: mainSiteDeals.length,
+        sample: mainSiteDeals.slice(0, 3).map(d => ({ name: d.name, price: d.price, originalPrice: d.originalPrice, category: d.category })),
+      };
+    } catch (err) {
+      results.woolworths_mainsite = { error: err.message };
+    }
+
+    // Also dump raw HTML from page 1 so we can check selectors
+    try {
+      const rawPage = await axios.get('https://www.salefinder.com.au/woolworths-catalogue', {
+        timeout: 15000,
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      });
+      const cheerio = require('cheerio');
+      const $ = cheerio.load(rawPage.data);
+      const itemImages = $('a.item-image').length;
+      const itemNames = $('a.item-name').length;
+      const prices = $('.price').length;
+      const priceOptions = $('.price-options').length;
+      const sfItems = $('.sf-item').length;
+      // Get sample of the first product container
+      const firstProduct = $('a.item-image').first().parent().html()?.substring(0, 500) || 'no a.item-image found';
+      results.woolworths_rawHTML = {
+        pageLength: rawPage.data.length,
+        selectors: { 'a.item-image': itemImages, 'a.item-name': itemNames, '.price': prices, '.price-options': priceOptions, '.sf-item': sfItems },
+        firstProductHTML: firstProduct,
+      };
+    } catch (err) {
+      results.woolworths_rawHTML = { error: err.message };
+    }
+
     res.json({ timestamp: new Date().toISOString(), results });
   } catch (err) {
     res.status(500).json({ error: err.message });
