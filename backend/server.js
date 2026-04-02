@@ -156,14 +156,32 @@ if (!process.env.VERCEL) {
         const dealService = require('./services/dealService');
         const info = dealService.getCacheInfo();
         const isEmpty = !info || info.counts.total === 0;
-        if (isEmpty) {
-          console.log('Cache empty on startup — fetching live deals...');
+        const STALE_MS = 8 * 24 * 60 * 60 * 1000; // 8 days
+        const isStale = info?.lastUpdated && (Date.now() - new Date(info.lastUpdated).getTime() > STALE_MS);
+
+        if (isEmpty || isStale) {
+          if (isStale) {
+            // Serve stale deals immediately while refresh runs in background
+            dealService.setDealsReady();
+            console.log(`Startup: deals cache is stale (last updated ${info.lastUpdated}) — serving stale data while refreshing...`);
+          } else {
+            console.log('Cache empty on startup — fetching live deals...');
+          }
           const fetchPromise = dealService.refreshDeals();
           dealService.setStartupFetch(fetchPromise);
           const { cache } = await fetchPromise;
           console.log(`Startup fetch complete — woolworths:${cache.woolworths.length} coles:${cache.coles.length} iga:${cache.iga.length}`);
+
+          // Stale deals were refreshed — regenerate recipes too
+          if (isStale) {
+            console.log('Startup: deals were stale — regenerating weekly recipes...');
+            const recipeService = require('./services/recipeService');
+            recipeService.generateWeeklyRecipes()
+              .then(recipes => console.log(`Startup: regenerated ${recipes.length} weekly recipes after stale refresh`))
+              .catch(err => console.error('Startup: recipe regeneration failed:', err.message));
+          }
         } else {
-          // Stale cache exists — mark deals as ready immediately so endpoints can serve
+          // Fresh cache exists — mark deals as ready immediately so endpoints can serve
           dealService.setDealsReady();
           console.log(`Startup: deals cache OK (${info.counts.total} deals, last updated ${info.lastUpdated})`);
         }
