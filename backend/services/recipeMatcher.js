@@ -86,6 +86,23 @@ const CATEGORY_WEIGHTS = {
   other:             1,
 };
 
+// ── Diversity tuning ──────────────────────────────────────────────────────────
+// Decay factor for repeated anchor ingredients: score × 1/(1 + DECAY × count).
+// At count=1 → 0.71×, count=2 → 0.56×, count=5 → 0.33×.
+const DIVERSITY_DECAY = 0.4;
+
+// Minimum recipes per protein bucket guaranteed in results (if matches exist).
+const MIN_PER_BUCKET = 3;
+
+// Maps primaryProtein values (from enriched recipe data) → broad buckets.
+const PROTEIN_BUCKETS = {
+  chicken: 'poultry', turkey: 'poultry', duck: 'poultry', poultry: 'poultry',
+  beef: 'red-meat', lamb: 'red-meat', pork: 'red-meat', veal: 'red-meat',
+  fish: 'seafood', prawns: 'seafood', salmon: 'seafood', tuna: 'seafood',
+  shrimp: 'seafood', crab: 'seafood', squid: 'seafood', mussels: 'seafood',
+  seafood: 'seafood',
+};
+
 // Each entry: prefer enriched file, fall back to original
 const LIBRARIES = [
   { src: path.join(__dirname, '..', 'data', 'recipe-library.json'),        enriched: path.join(__dirname, '..', 'data', 'recipe-library-enriched.json'),        source: 'recipetineats' },
@@ -663,6 +680,106 @@ class RecipeMatcher {
   }
 
   /**
+   * Identify the "anchor ingredient" — the matched deal ingredient with the
+   * highest category weight (i.e. the main reason this recipe was surfaced).
+   */
+  _getAnchorIngredient(recipe) {
+    let best = null;
+    let bestWeight = -1;
+    for (const deal of recipe.matchedDeals) {
+      const w = this._getIngredientWeight(deal);
+      if (w > bestWeight) {
+        bestWeight = w;
+        best = deal.ingredient;
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Get the broad protein bucket for a recipe using its enrichment data.
+   * Returns 'poultry', 'red-meat', 'seafood', or 'other'.
+   */
+  _getProteinBucket(recipe) {
+    const primary = (recipe.metadata?.primaryProtein || recipe.enrichment?.primaryProtein || '').toLowerCase();
+    if (!primary) return 'other';
+    return PROTEIN_BUCKETS[primary] || 'other';
+  }
+
+  /**
+   * Post-scoring diversity pass. Applies two layers:
+   *  1. Anchor ingredient decay — repeated use of the same anchor ingredient
+   *     gets a diminishing score multiplier.
+   *  2. Protein bucket guarantee — ensures at least MIN_PER_BUCKET recipes
+   *     per protein category (poultry, red-meat, seafood) appear in results.
+   */
+  _diversifyResults(scoredRecipes, limit) {
+    // Step 1: Filter to valid recipes and compute base scores
+    const candidates = scoredRecipes
+      .filter(r => r.matchScore > 0 && this._hasProteinMatch(r))
+      .map(r => ({
+        ...r,
+        weightedScore:    +this._calculateRecipeScore(r).toFixed(2),
+        anchorIngredient: this._getAnchorIngredient(r),
+        proteinBucket:    this._getProteinBucket(r),
+      }));
+
+    // Step 2: Sort by raw weighted score (same as before)
+    candidates.sort((a, b) =>
+      b.weightedScore - a.weightedScore
+      || b.matchScore - a.matchScore
+      || b.totalSaving - a.totalSaving
+    );
+
+    // Step 3: Apply anchor ingredient decay
+    const anchorCounts = new Map();
+    for (const recipe of candidates) {
+      const anchor = recipe.anchorIngredient || '';
+      const count = anchorCounts.get(anchor) || 0;
+      recipe.decayedScore = +(recipe.weightedScore / (1 + DIVERSITY_DECAY * count)).toFixed(2);
+      anchorCounts.set(anchor, count + 1);
+    }
+
+    // Step 4: Re-sort by decayed score
+    candidates.sort((a, b) =>
+      b.decayedScore - a.decayedScore
+      || b.matchScore - a.matchScore
+      || b.totalSaving - a.totalSaving
+    );
+
+    // Step 5: Protein bucket guarantee — pull top recipes per bucket to the front
+    const bucketQueues = new Map();
+    for (const recipe of candidates) {
+      const bucket = recipe.proteinBucket;
+      if (!bucketQueues.has(bucket)) bucketQueues.set(bucket, []);
+      bucketQueues.get(bucket).push(recipe);
+    }
+
+    const result = [];
+    const placed = new Set();
+
+    // Place MIN_PER_BUCKET from each non-'other' bucket that has matches
+    for (const bucket of ['poultry', 'red-meat', 'seafood']) {
+      const queue = bucketQueues.get(bucket) || [];
+      for (let i = 0; i < Math.min(MIN_PER_BUCKET, queue.length); i++) {
+        result.push(queue[i]);
+        placed.add(queue[i]);
+      }
+    }
+
+    // Fill remaining slots from the decay-sorted list
+    for (const recipe of candidates) {
+      if (result.length >= limit) break;
+      if (!placed.has(recipe)) {
+        result.push(recipe);
+        placed.add(recipe);
+      }
+    }
+
+    return result.slice(0, limit);
+  }
+
+  /**
    * Check if an ingredient matches a deal keyword (strict matching)
    */
   _termsMatch(ingredientName, dealKeyword) {
@@ -853,18 +970,7 @@ class RecipeMatcher {
       };
     });
 
-    // Primary sort: weighted score (protein deals > garnish deals)
-    // Secondary: match count, then raw saving
-    scored.sort((a, b) => {
-      const sa = this._calculateRecipeScore(a);
-      const sb = this._calculateRecipeScore(b);
-      return sb - sa || b.matchScore - a.matchScore || b.totalSaving - a.totalSaving;
-    });
-
-    return scored
-      .filter(r => r.matchScore > 0 && this._hasProteinMatch(r))
-      .map(r => ({ ...r, weightedScore: +this._calculateRecipeScore(r).toFixed(2) }))
-      .slice(0, limit);
+    return this._diversifyResults(scored, limit);
   }
 
   /**
