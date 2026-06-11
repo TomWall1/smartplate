@@ -57,6 +57,35 @@ const _autoMigrate = (async () => {
       CREATE UNIQUE INDEX IF NOT EXISTS idx_deals_cache_last_updated
       ON deals_cache(last_updated)
     `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS match_edges (
+        ingredient_norm TEXT NOT NULL,
+        deal_norm       TEXT NOT NULL,
+        verdict         BOOLEAN NOT NULL,
+        reason          TEXT,
+        model           TEXT,
+        decided_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (ingredient_norm, deal_norm)
+      )
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS recipe_meta (
+        recipe_key           TEXT PRIMARY KEY,
+        total_estimated_cost REAL,
+        model                TEXT,
+        estimated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    // insertProduct upserts ON CONFLICT (barcode); the prod table predates
+    // schema.pg.sql's UNIQUE and was created without it, so every new-product
+    // insert failed ("no unique or exclusion constraint") and the knowledge
+    // base silently stopped growing. NULL barcodes (all deal-derived
+    // products) never conflict — duplicate prevention for those is the
+    // lookup-before-insert flow, same as SQLite.
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_products_barcode_unique
+      ON products(barcode)
+    `);
   } catch (err) {
     // Non-fatal — log and continue. Server still works; caches fall back to filesystem.
     console.warn('[PG] cache-table auto-migrate warning:', err.message);
@@ -360,6 +389,84 @@ async function getDealsCache() {
   };
 }
 
+// ── Match Edges (persisted ingredient↔deal verdicts) ──────────────────────────
+
+/**
+ * Bulk-fetch edges for a set of {ingredientNorm, dealNorm} pairs.
+ * Returns a Map keyed by `${ingredientNorm} ${dealNorm}` → {verdict, reason}.
+ */
+async function getMatchEdges(pairs) {
+  await _autoMigrate;
+  if (!pairs.length) return new Map();
+  const ingredients = [...new Set(pairs.map(p => p.ingredientNorm))];
+  const result = await pool.query(
+    'SELECT ingredient_norm, deal_norm, verdict, reason FROM match_edges WHERE ingredient_norm = ANY($1)',
+    [ingredients]
+  );
+  const wanted = new Set(pairs.map(p => `${p.ingredientNorm} ${p.dealNorm}`));
+  const map = new Map();
+  for (const row of result.rows) {
+    const key = `${row.ingredient_norm} ${row.deal_norm}`;
+    if (wanted.has(key)) map.set(key, { verdict: row.verdict, reason: row.reason });
+  }
+  return map;
+}
+
+/** Bulk-insert verdicts: [{ingredientNorm, dealNorm, verdict, reason, model}]. */
+async function saveMatchEdges(edges) {
+  await _autoMigrate;
+  if (!edges.length) return 0;
+  const values = [];
+  const params = [];
+  edges.forEach((e, i) => {
+    const base = i * 5;
+    values.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`);
+    params.push(e.ingredientNorm, e.dealNorm, e.verdict, e.reason ?? null, e.model ?? null);
+  });
+  await pool.query(`
+    INSERT INTO match_edges (ingredient_norm, deal_norm, verdict, reason, model)
+    VALUES ${values.join(', ')}
+    ON CONFLICT (ingredient_norm, deal_norm) DO UPDATE
+      SET verdict = EXCLUDED.verdict, reason = EXCLUDED.reason,
+          model = EXCLUDED.model, decided_at = CURRENT_TIMESTAMP
+  `, params);
+  return edges.length;
+}
+
+// ── Recipe Meta (one-time cost estimates) ─────────────────────────────────────
+
+/** Bulk-fetch cost estimates. Returns Map recipe_key → total_estimated_cost. */
+async function getRecipeCosts(keys) {
+  await _autoMigrate;
+  if (!keys.length) return new Map();
+  const result = await pool.query(
+    'SELECT recipe_key, total_estimated_cost FROM recipe_meta WHERE recipe_key = ANY($1)',
+    [keys]
+  );
+  return new Map(result.rows.map(r => [r.recipe_key, r.total_estimated_cost]));
+}
+
+/** Bulk-upsert cost estimates: [{recipeKey, cost, model}]. */
+async function saveRecipeCosts(rows) {
+  await _autoMigrate;
+  if (!rows.length) return 0;
+  const values = [];
+  const params = [];
+  rows.forEach((r, i) => {
+    const base = i * 3;
+    values.push(`($${base + 1}, $${base + 2}, $${base + 3})`);
+    params.push(r.recipeKey, r.cost, r.model ?? null);
+  });
+  await pool.query(`
+    INSERT INTO recipe_meta (recipe_key, total_estimated_cost, model)
+    VALUES ${values.join(', ')}
+    ON CONFLICT (recipe_key) DO UPDATE
+      SET total_estimated_cost = EXCLUDED.total_estimated_cost,
+          model = EXCLUDED.model, estimated_at = CURRENT_TIMESTAMP
+  `, params);
+  return rows.length;
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 async function getStats() {
@@ -375,6 +482,10 @@ module.exports = {
   getWeeklyRecipes,
   saveDealsCache,
   getDealsCache,
+  getMatchEdges,
+  saveMatchEdges,
+  getRecipeCosts,
+  saveRecipeCosts,
   insertProduct,
   insertProductBatch,
   getProductById,

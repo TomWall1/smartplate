@@ -167,3 +167,24 @@ CREATE TABLE IF NOT EXISTS deals_cache (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_deals_cache_last_updated ON deals_cache(last_updated);
+
+-- ── Match Edges (persisted ingredient↔deal verdicts, judged once by Claude) ──
+
+CREATE TABLE IF NOT EXISTS match_edges (
+  ingredient_norm TEXT      NOT NULL,
+  deal_norm       TEXT      NOT NULL,
+  verdict         BOOLEAN   NOT NULL,
+  reason          TEXT,
+  model           TEXT,
+  decided_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (ingredient_norm, deal_norm)
+);
+
+-- ── Recipe Meta (one-time per-recipe cost estimates) ─────────────────────────
+
+CREATE TABLE IF NOT EXISTS recipe_meta (
+  recipe_key           TEXT PRIMARY KEY,
+  total_estimated_cost REAL,
+  model                TEXT,
+  estimated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

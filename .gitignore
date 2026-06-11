@@ -29,6 +29,7 @@ logs
 
 # Generated files (re-created at runtime)
 backend/data/enrich-progress-*.json
+backend/scripts/eval/candidate-pairs.json
 backend/scripts/consolidate/exports/
 backend/data/weekly-recipes.json
 backend/data/matched-test.json

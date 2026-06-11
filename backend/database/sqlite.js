@@ -304,6 +304,71 @@ function getDealsCache() {
   };
 }
 
+// ── Match Edges (persisted ingredient↔deal verdicts) ──────────────────────────
+
+function getMatchEdges(pairs) {
+  const db = getDb();
+  if (!pairs.length) return new Map();
+  const ingredients = [...new Set(pairs.map(p => p.ingredientNorm))];
+  const placeholders = ingredients.map(() => '?').join(', ');
+  const rows = db.prepare(
+    `SELECT ingredient_norm, deal_norm, verdict, reason FROM match_edges WHERE ingredient_norm IN (${placeholders})`
+  ).all(...ingredients);
+  const wanted = new Set(pairs.map(p => `${p.ingredientNorm} ${p.dealNorm}`));
+  const map = new Map();
+  for (const row of rows) {
+    const key = `${row.ingredient_norm} ${row.deal_norm}`;
+    if (wanted.has(key)) map.set(key, { verdict: !!row.verdict, reason: row.reason });
+  }
+  return map;
+}
+
+function saveMatchEdges(edges) {
+  const db = getDb();
+  if (!edges.length) return 0;
+  const stmt = db.prepare(`
+    INSERT INTO match_edges (ingredient_norm, deal_norm, verdict, reason, model)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(ingredient_norm, deal_norm) DO UPDATE
+      SET verdict = excluded.verdict, reason = excluded.reason,
+          model = excluded.model, decided_at = datetime('now')
+  `);
+  const insertAll = db.transaction((rows) => {
+    for (const e of rows) stmt.run(e.ingredientNorm, e.dealNorm, e.verdict ? 1 : 0, e.reason ?? null, e.model ?? null);
+  });
+  insertAll(edges);
+  return edges.length;
+}
+
+// ── Recipe Meta (one-time cost estimates) ─────────────────────────────────────
+
+function getRecipeCosts(keys) {
+  const db = getDb();
+  if (!keys.length) return new Map();
+  const placeholders = keys.map(() => '?').join(', ');
+  const rows = db.prepare(
+    `SELECT recipe_key, total_estimated_cost FROM recipe_meta WHERE recipe_key IN (${placeholders})`
+  ).all(...keys);
+  return new Map(rows.map(r => [r.recipe_key, r.total_estimated_cost]));
+}
+
+function saveRecipeCosts(rows) {
+  const db = getDb();
+  if (!rows.length) return 0;
+  const stmt = db.prepare(`
+    INSERT INTO recipe_meta (recipe_key, total_estimated_cost, model)
+    VALUES (?, ?, ?)
+    ON CONFLICT(recipe_key) DO UPDATE
+      SET total_estimated_cost = excluded.total_estimated_cost,
+          model = excluded.model, estimated_at = datetime('now')
+  `);
+  const insertAll = db.transaction((items) => {
+    for (const r of items) stmt.run(r.recipeKey, r.cost, r.model ?? null);
+  });
+  insertAll(rows);
+  return rows.length;
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 function deserializeProduct(row) {
@@ -329,6 +394,10 @@ module.exports = {
   getWeeklyRecipes,
   saveDealsCache,
   getDealsCache,
+  getMatchEdges,
+  saveMatchEdges,
+  getRecipeCosts,
+  saveRecipeCosts,
   insertProduct,
   insertProductBatch,
   getProductById,

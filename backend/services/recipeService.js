@@ -2,12 +2,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs');
 const path = require('path');
 const { enrichMatchedDealsWithSavings } = require('./savingsCalculator');
-const { mapWithConcurrency, withRetry } = require('../lib/concurrency');
-
-// Bounded parallelism + retry policy for per-recipe Claude calls.
-// Replaces the old fixed 500ms sleep between sequential calls.
-const AI_CONCURRENCY = 3;
-const AI_RETRY = { retries: 2, shouldRetry: (err) => err?.status === 429 || err?.status >= 500 };
+const recipeCostService = require('./recipeCostService');
 
 // Primary path (works locally, read-only on Vercel but included in deploy)
 const WEEKLY_RECIPES_PATH = path.join(__dirname, '..', 'data', 'weekly-recipes.json');
@@ -133,201 +128,98 @@ class RecipeService {
       );
     }
 
-    // Step 1b-AI: Refine deal matching with Claude AI for each candidate recipe.
-    // Runs once per weekly generation; results are cached with the recipes.
-    // Bounded concurrency with backoff on 429s to stay within rate limits.
-    let aiRefined = matched;
-    if (this.anthropic) {
-      try {
-        const aiMatcher = require('./aiMatcher');
-        aiMatcher.resetMatchStats();
-
-        // Pre-filter to food deals only — same filtering as recipeMatcher uses internally
-        const foodDeals = enrichedDeals.filter(d => {
-          const kw = recipeMatcher.normalizeDealName(d.name || '');
-          return kw && recipeMatcher._isFoodDeal(kw, d.category);
-        });
-        console.log(`RecipeService: AI matching ${matched.length} recipes against ${foodDeals.length} food deals`);
-
-        const aiResults = (await mapWithConcurrency(matched, AI_CONCURRENCY, async (recipe) => {
-          const aiDeals = await withRetry(
-            () => aiMatcher.matchRecipeToDeals(recipe, foodDeals),
-            AI_RETRY
-          );
-          // Use AI deals if it found any; otherwise keep text-matched deals as fallback
-          return {
-            ...recipe,
-            matchedDeals: aiDeals.length > 0 ? aiDeals : recipe.matchedDeals,
-            aiMatched: aiDeals.length > 0,
-          };
-        }, {
-          onError: (recipeErr, recipe) =>
-            console.warn(`RecipeService: AI match failed for "${recipe.title}": ${recipeErr.message}`),
-        })).map((result, i) => result ?? matched[i]); // failed recipes keep their text-matched result
-
-        // Drop recipes where AI matched but found no deals (genuine no-match)
-        aiRefined = aiResults.filter(r => r.matchedDeals.length > 0);
-
-        // ── Verification pass: review text-matched recipes with a second AI call ──
-        // Only runs on recipes that fell back to text matching (aiMatched !== true).
-        // Gated by ENABLE_MATCH_VERIFICATION env var (default: true).
-        if (process.env.ENABLE_MATCH_VERIFICATION !== 'false') {
-          const textOnly = aiRefined.filter(r => !r.aiMatched);
-          if (textOnly.length > 0) {
-            console.log(`RecipeService: Verifying ${textOnly.length} text-matched recipes...`);
-            let verifiedCount = 0;
-            await mapWithConcurrency(textOnly, AI_CONCURRENCY, async (recipe) => {
-              const originalCount = recipe.matchedDeals.length;
-              const verified = await withRetry(
-                () => aiMatcher.verifyMatches(recipe, recipe.matchedDeals),
-                AI_RETRY
-              );
-              recipe.matchedDeals = verified;
-              if (verified.length < originalCount) verifiedCount++;
-            }, {
-              onError: (verifyErr, recipe) =>
-                console.warn(`RecipeService: Verification failed for "${recipe.title}": ${verifyErr.message}`),
-            });
-            // Re-filter: remove recipes that lost all deals after verification
-            aiRefined = aiRefined.filter(r => r.matchedDeals.length > 0);
-            console.log(`RecipeService: Verification complete — ${verifiedCount} recipes had matches removed`);
-          }
-        }
-
-        const stats = aiMatcher.getMatchStats();
-        console.log(
-          `RecipeService: AI matching complete — ` +
-          `${stats.totalCalls} API calls, ${stats.totalIngredients} ingredients checked, ` +
-          `est. cost $${stats.estimatedCost.toFixed(2)}`
-        );
-      } catch (aiErr) {
-        console.warn('RecipeService: AI matching unavailable — using text matching:', aiErr.message);
-        aiRefined = matched;
-      }
+    // Step 1b-AI: validate every ingredient↔deal pairing against the
+    // persisted edge store (match_edges). Verdicts already stored are free;
+    // only never-seen pairs go to Claude, once, and are persisted forever.
+    // This replaces the old per-recipe AI matching + verification passes,
+    // which re-purchased the same judgments every week.
+    try {
+      const matchEdgeService = require('./matchEdgeService');
+      await matchEdgeService.filterRecipesByEdges(matched);
+    } catch (edgeErr) {
+      console.warn('RecipeService: edge filtering unavailable — keeping text-matched deals:', edgeErr.message);
     }
+    const aiRefined = matched.filter(r => (r.matchedDeals || []).length > 0);
+    console.log(`RecipeService: ${aiRefined.length}/${matched.length} recipes have verified deal matches`);
 
     // Step 1c: Attach per-serving savings to each matched recipe's deals.
     const matchedWithSavings = aiRefined.map(r =>
       enrichMatchedDealsWithSavings(r, r.matchedDeals)
     );
 
-    // Step 2: Send matched recipes to Claude for enrichment.
-    // Slim payload — drop the full deal list and cap matchedDeals to top 5 per recipe
-    // so the prompt stays manageable.
-    const recipeSummary = matchedWithSavings.map((r, i) => {
+    // Step 2: Deal-aware fields computed in code. The old Sonnet "enrichment"
+    // call did sums (estimatedSaving), field copies (dealIngredients), and
+    // string templates (dealHighlights) — code does those correctly and for
+    // free. totalEstimatedCost is the one genuine judgment: it comes from the
+    // durable one-time estimates in recipe_meta (recipeCostService).
+    let costMap = new Map();
+    try {
+      costMap = await recipeCostService.getCosts(matchedWithSavings);
+    } catch (costErr) {
+      console.warn('RecipeService: cost estimates unavailable — price chips hidden this week:', costErr.message);
+    }
+
+    const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+    const normalised = matchedWithSavings.map((libRecipe, i) => {
       // Best deal per unique ingredient (deduped), then top 5 by saving.
-      // Without dedup, "rice" can match 4+ rice products and Claude sums them all,
-      // making estimatedSaving exceed totalEstimatedCost.
+      // Without dedup, "rice" can match 4+ rice products and the savings
+      // double-count, making estimatedSaving exceed the meal's cost.
       const seenIngredients = new Set();
-      const topDeals = [...r.matchedDeals]
+      const topDeals = [...(libRecipe.matchedDeals || [])]
         .sort((a, b) => (b.saving || 0) - (a.saving || 0))
         .filter(md => {
-          if (seenIngredients.has(md.ingredient)) return false;
+          if (!md.ingredient || seenIngredients.has(md.ingredient)) return false;
           seenIngredients.add(md.ingredient);
           return true;
         })
-        .slice(0, 5)
-        .map(md => ({
-          ingredient: md.ingredient,
-          dealName: md.dealName,
-          price: md.price,
-          saving: md.saving,
-          store: md.store,
-        }));
+        .slice(0, 5);
+
+      const estimatedSaving = +topDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2);
+      const dealIngredients = topDeals.map(d => d.dealName);
+      // Format matches the old Claude output ("Ingredient $X.XX at Store (save $Y.YY)");
+      // _filterRecipesByStore relies on the store name appearing in the string.
+      const dealHighlights = topDeals.map(d => {
+        const price = d.price != null ? ` $${d.price.toFixed(2)}` : '';
+        const store = d.store ? ` at ${cap(d.store)}` : '';
+        const save  = d.saving ? ` (save $${d.saving.toFixed(2)})` : '';
+        return `${cap(d.ingredient)}${price}${store}${save}`;
+      });
+
+      const libIngredients = libRecipe.ingredients || [];
+      const allIngredients = libIngredients.map(ing => ing.raw || ing.name).filter(Boolean);
       return {
         id: i + 1,
-        title: r.title,
-        topDeals,
+        title: decodeHtml(libRecipe.title) || `Recipe ${i + 1}`,
+        description: decodeHtml(libRecipe.description) || '',
+        dealIngredients,
+        allIngredients,
+        estimatedSaving,
+        totalEstimatedCost: costMap.get(recipeCostService.recipeKey(libRecipe)) ?? 0,
+        prepTime: libRecipe.totalTime || libRecipe.prepTime || 30,
+        servings: libRecipe.servings || 4,
+        steps: libRecipe.steps || [],
+        tags: libRecipe.tags || [],
+        dealHighlights,
+        matchedDeals:          libRecipe.matchedDeals         || [],
+        weightedScore:         libRecipe.weightedScore         ?? null,
+        totalMealSaving:       libRecipe.totalMealSaving       ?? null,
+        totalPerServingSaving: libRecipe.totalPerServingSaving ?? null,
+        // Backwards compat fields for existing frontend
+        image: libRecipe.image || `https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400`,
+        cookTime: libRecipe.cookTime || libRecipe.totalTime || 30,
+        rating: 4.5,
+        ingredients: allIngredients,
+        instructions: Array.isArray(libRecipe.steps) ? libRecipe.steps.join(' ') : '',
+        source: libRecipe.source || 'recipetineats',
+        sourceUrl: libRecipe.url || '#',
+        nutrition: libRecipe.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 },
       };
     });
 
-    // Process enrichment in batches of 50 to stay within output token limits.
-    // 150 recipes at once produces ~40K+ chars of JSON which clips at 16K tokens.
-    const ENRICH_BATCH = 25;
-    const enriched = [];
-
-    try {
-      for (let batchStart = 0; batchStart < recipeSummary.length; batchStart += ENRICH_BATCH) {
-        const batch = recipeSummary.slice(batchStart, batchStart + ENRICH_BATCH);
-        const prompt = `You are a helpful Australian meal-planning assistant. Below are ${batch.length} real recipes with their top on-special ingredients this week.
-
-MATCHED RECIPES:
-${JSON.stringify(batch, null, 2)}
-
-For each recipe return a JSON object with:
-- "id": the recipe id
-- "estimatedSaving": sum of saving fields in topDeals (number, 2 decimal places)
-- "totalEstimatedCost": realistic total ingredient cost in AUD for a home cook (number)
-- "dealIngredients": array of dealName strings from topDeals
-- "dealHighlights": array of strings formatted as "Ingredient $X.XX at Store (save $Y.YY)" — one per deal in topDeals
-
-Respond with ONLY a JSON array of ${batch.length} objects. No markdown, no explanation.`;
-
-        const response = await this.anthropic.messages.create({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 8192,
-          messages: [{ role: 'user', content: prompt }],
-        });
-
-        const text = response.content[0].text.trim();
-        let jsonText = text;
-        const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (fenceMatch) jsonText = fenceMatch[1].trim();
-
-        const batchResult = JSON.parse(jsonText);
-        if (!Array.isArray(batchResult) || batchResult.length === 0) {
-          throw new Error(`Claude returned invalid enrichment data for batch ${batchStart}`);
-        }
-        enriched.push(...batchResult);
-        console.log(`RecipeService: Enrichment batch ${Math.floor(batchStart / ENRICH_BATCH) + 1} complete (${enriched.length}/${recipeSummary.length})`);
-      }
-
-      if (enriched.length === 0) {
-        throw new Error('Claude returned no enrichment data');
-      }
-
-      // Merge Claude enrichment with full library recipe data.
-      // Claude only returns the deal-aware fields; everything else comes from the library.
-      const normalised = enriched.map((e, i) => {
-        const libRecipe = matchedWithSavings[i] || {};
-        const libIngredients = libRecipe.ingredients || [];
-        const allIngredients = libIngredients.map(ing => ing.raw || ing.name).filter(Boolean);
-        return {
-          id: e.id || i + 1,
-          title: decodeHtml(libRecipe.title) || `Recipe ${i + 1}`,
-          description: decodeHtml(libRecipe.description) || '',
-          dealIngredients: Array.isArray(e.dealIngredients) ? e.dealIngredients : [],
-          allIngredients,
-          estimatedSaving: typeof e.estimatedSaving === 'number' ? e.estimatedSaving : libRecipe.totalSaving || 0,
-          totalEstimatedCost: typeof e.totalEstimatedCost === 'number' ? e.totalEstimatedCost : 0,
-          prepTime: libRecipe.totalTime || libRecipe.prepTime || 30,
-          servings: libRecipe.servings || 4,
-          steps: libRecipe.steps || [],
-          tags: libRecipe.tags || [],
-          dealHighlights: Array.isArray(e.dealHighlights) ? e.dealHighlights : [],
-          matchedDeals:          libRecipe.matchedDeals         || [],
-          weightedScore:         libRecipe.weightedScore         ?? null,
-          totalMealSaving:       libRecipe.totalMealSaving       ?? null,
-          totalPerServingSaving: libRecipe.totalPerServingSaving ?? null,
-          // Backwards compat fields for existing frontend
-          image: libRecipe.image || `https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400`,
-          cookTime: libRecipe.cookTime || libRecipe.totalTime || 30,
-          rating: 4.5,
-          ingredients: allIngredients,
-          instructions: Array.isArray(libRecipe.steps) ? libRecipe.steps.join(' ') : '',
-          source: libRecipe.source || 'recipetineats',
-          sourceUrl: libRecipe.url || '#',
-          nutrition: libRecipe.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 },
-        };
-      });
-
-      await this._saveWeeklyRecipes(normalised);
-      console.log(`RecipeService: Enriched and stored ${normalised.length} weekly recipes from library`);
-      return normalised;
-    } catch (error) {
-      console.error('RecipeService: Claude enrichment failed:', error.message);
-      throw error;
-    }
+    await this._saveWeeklyRecipes(normalised);
+    console.log(`RecipeService: stored ${normalised.length} weekly recipes (deal fields computed in code — no weekly enrichment call)`);
+    return normalised;
   }
 
   // ── Personalised filtering (local, no API call) ────────────────────
