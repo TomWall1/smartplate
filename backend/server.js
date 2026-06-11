@@ -120,6 +120,23 @@ app.post('/api/admin/refresh-deals', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 
+  // Keep-alive: Render's free tier spins the instance down after ~15 min
+  // without INBOUND traffic — background work doesn't count, so this
+  // ~25-minute pipeline dies mid-flight on a quiet site (observed: phase 1
+  // saved, then the instance slept and recipes/state artifacts never built).
+  // Pinging our own public URL counts as inbound via Render's proxy.
+  const selfUrl = process.env.RENDER_EXTERNAL_URL;
+  let keepAlive = null;
+  if (selfUrl) {
+    const axios = require('axios');
+    keepAlive = setInterval(() => {
+      axios.get(`${selfUrl}/health`, { timeout: 20000 }).catch(() => {});
+    }, 4 * 60 * 1000);
+    console.log(`External cron: keep-alive self-ping active (${selfUrl})`);
+  } else {
+    console.warn('External cron: RENDER_EXTERNAL_URL not set — no keep-alive; long pipeline may die if the instance idles');
+  }
+
   (async () => {
     // Step 1: Catalogue discovery (unless skipped)
     if (!skipDiscovery) {
@@ -169,7 +186,10 @@ app.post('/api/admin/refresh-deals', (req, res) => {
     }
   })()
     .catch((err) => console.error('External cron: pipeline error:', err.message))
-    .finally(() => { _pipelineRunning = false; });
+    .finally(() => {
+      _pipelineRunning = false;
+      if (keepAlive) clearInterval(keepAlive);
+    });
 });
 
 // Health check
