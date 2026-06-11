@@ -7,56 +7,9 @@ import RecipeCard from '../components/RecipeCard';
 import CategorizedDeals from '../components/CategorizedDeals';
 import PreferencesPanel from '../components/PreferencesPanel';
 import { usePremium } from '../context/PremiumContext';
-
-const TAG_FILTERS = [
-  { id: 'all',        label: 'All' },
-  { id: 'quick',      label: 'Quick' },
-  { id: 'vegetarian', label: 'Vegetarian' },
-  { id: 'vegan',      label: 'Vegan' },
-  { id: 'meal prep',  label: 'Meal prep' },
-  { id: 'breakfast',  label: 'Breakfast' },
-  { id: 'lunch',      label: 'Lunch' },
-  { id: 'dinner',     label: 'Dinner' },
-];
-
-const PROTEIN_FILTERS = [
-  { id: 'chicken', label: 'Chicken', keywords: ['chicken'] },
-  { id: 'beef',    label: 'Beef',    keywords: ['beef', 'steak', 'brisket', 'sirloin', 'rump', 'scotch fillet', 'eye fillet', 'porterhouse', 'rib'] },
-  { id: 'lamb',    label: 'Lamb',    keywords: ['lamb'] },
-  { id: 'pork',    label: 'Pork',    keywords: ['pork'] },
-  { id: 'mince',   label: 'Mince',   keywords: ['mince', 'minced'] },
-  { id: 'salmon',  label: 'Salmon',  keywords: ['salmon'] },
-  { id: 'fish',    label: 'Fish',    keywords: ['fish', 'barramundi', 'snapper', 'bream', 'whiting', 'flathead', 'cod', 'tuna', 'tilapia', 'trout'] },
-  { id: 'seafood', label: 'Seafood', keywords: ['prawn', 'shrimp', 'scallop', 'calamari', 'squid', 'mussel', 'crab', 'lobster', 'octopus'] },
-  { id: 'turkey',  label: 'Turkey',  keywords: ['turkey'] },
-  { id: 'duck',    label: 'Duck',    keywords: ['duck'] },
-  { id: 'veal',    label: 'Veal',    keywords: ['veal'] },
-];
-
-const PROCESSED_INDICATORS = ['canned', 'tinned', 'stock', 'broth', 'soup', 'paste'];
-
-function hasProteinDeal(recipe, proteinId) {
-  if (!proteinId) return true;
-  const protein = PROTEIN_FILTERS.find((p) => p.id === proteinId);
-  if (!protein) return true;
-  return (recipe.matchedDeals ?? []).some((deal) => {
-    const name = ((deal.dealName || '') + ' ' + (deal.ingredient || '')).toLowerCase();
-    if (PROCESSED_INDICATORS.some((ind) => name.includes(ind))) return false;
-    return protein.keywords.some((kw) => name.includes(kw));
-  });
-}
-
-const STORE_COLORS = {
-  woolworths: { bg: '#007833', light: '#e8f5e9', text: '#ffffff' },
-  coles:      { bg: '#e31837', light: '#ffeaed', text: '#ffffff' },
-  iga:        { bg: '#003da5', light: '#e8eeff', text: '#ffffff' },
-};
-
-const STORE_LOGOS = {
-  woolworths: 'https://www.woolworths.com.au/favicon.ico',
-  coles:      'https://www.coles.com.au/favicon.ico',
-  iga:        'https://www.iga.com.au/favicon.ico',
-};
+import { TAG_FILTERS, PROTEIN_FILTERS, hasProteinDeal } from '../constants/filters';
+import { STORE_COLORS, STORE_LOGOS } from '../constants/colors';
+import { useWarmupFetch } from '../hooks/useWarmupFetch';
 
 function capitalize(str) {
   if (!str) return '';
@@ -99,10 +52,6 @@ export default function StorePage() {
   const { isPremium } = usePremium();
 
   const [storeDeals, setStoreDeals] = useState([]);
-  const [dealsLoading, setDealsLoading] = useState(true);
-  const [dealsError, setDealsError] = useState(null); // null | 'warming' | 'network' | string
-  const [dealsRetryCountdown, setDealsRetryCountdown] = useState(0);
-
   const [storeRecipes, setStoreRecipes] = useState([]);
   const [recipesLoading, setRecipesLoading] = useState(true);
   const [recipesError, setRecipesError] = useState(null);
@@ -117,40 +66,20 @@ export default function StorePage() {
   const colors = STORE_COLORS[store] || { bg: '#78716c', light: 'var(--color-blush)', text: '#ffffff' };
   const storeName = capitalize(store);
 
-  // Countdown timer for deal retry
-  useEffect(() => {
-    if (dealsRetryCountdown <= 0) return;
-    const t = setTimeout(() => setDealsRetryCountdown((n) => n - 1), 1000);
-    return () => clearTimeout(t);
-  }, [dealsRetryCountdown]);
-
-  const fetchStoreDeals = React.useCallback((retryCount = 0) => {
-    if (!store) return;
-    if (retryCount === 0) { setDealsLoading(true); setDealsError(null); }
-
-    dealsApi.getDealsByStore(store)
-      .then((data) => {
-        const list = Array.isArray(data) ? data : (data?.deals ?? []);
-        setStoreDeals(list);
-        setDealsError(null);
-        setDealsLoading(false);
-        setDealsRetryCountdown(0);
-      })
-      .catch((err) => {
-        console.error('Failed to load store deals:', err);
-        if (err.response?.status === 503 && retryCount < 4) {
-          setDealsError('warming');
-          setDealsRetryCountdown(15);
-          setTimeout(() => fetchStoreDeals(retryCount + 1), 15000);
-        } else {
-          setDealsError(err.response?.status >= 500 ? 'network' : 'Could not load deals. Please try again.');
-          setDealsLoading(false);
-          setDealsRetryCountdown(0);
-        }
-      });
+  const fetchDeals = React.useCallback(async () => {
+    const data = await dealsApi.getDealsByStore(store);
+    const list = Array.isArray(data) ? data : (data?.deals ?? []);
+    setStoreDeals(list);
   }, [store]);
 
-  useEffect(() => { fetchStoreDeals(0); }, [fetchStoreDeals]);
+  const {
+    run: fetchStoreDeals,
+    loading: dealsLoading,
+    error: dealsError,
+    countdown: dealsRetryCountdown,
+  } = useWarmupFetch(fetchDeals, { initialLoading: true });
+
+  useEffect(() => { if (store) fetchStoreDeals(0); }, [store, fetchStoreDeals]);
 
   useEffect(() => {
     if (!store) return;
@@ -417,7 +346,7 @@ export default function StorePage() {
             </h2>
           </div>
 
-          {dealsError === 'warming' ? (
+          {dealsError?.type === 'warming' ? (
             <div
               className="rounded-[20px] border p-6 text-center"
               style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
@@ -435,7 +364,7 @@ export default function StorePage() {
                 </p>
               )}
             </div>
-          ) : dealsError === 'network' ? (
+          ) : dealsError?.type === 'server' ? (
             <div
               className="rounded-[20px] border p-6 text-center"
               style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
@@ -461,7 +390,7 @@ export default function StorePage() {
               className="rounded-[20px] p-4 text-sm mb-4 border"
               style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
             >
-              {dealsError}
+              Could not load deals. Please try again.
             </div>
           ) : dealsLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

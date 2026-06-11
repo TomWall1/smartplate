@@ -154,4 +154,6 @@ const DealCard = ({ deal }) => {
   );
 };
 
-export default DealCard;
+// Pure presentational card rendered in long lists — memo avoids re-rendering
+// every card when a parent grid re-renders.
+export default React.memo(DealCard);

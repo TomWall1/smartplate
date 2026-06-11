@@ -13,7 +13,7 @@ const SOURCE_META = {
   womensweekly:  { label: "Women's Weekly Food", logo: 'https://www.womensweeklyfood.com.au/favicon.ico' },
 };
 
-export default function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFavoriteChange }) {
+function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFavoriteChange }) {
   const navigate = useNavigate();
   const { isPremium } = usePremium();
   const { user } = useAuth();
@@ -287,3 +287,7 @@ export default function RecipeCard({ recipe, showMatchReason = false, isFavorite
     </div>
   );
 }
+
+// Pure presentational card rendered in long lists — memo avoids re-rendering
+// every card when a parent grid re-renders.
+export default React.memo(RecipeCard);

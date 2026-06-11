@@ -2,6 +2,12 @@ const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs');
 const path = require('path');
 const { enrichMatchedDealsWithSavings } = require('./savingsCalculator');
+const { mapWithConcurrency, withRetry } = require('../lib/concurrency');
+
+// Bounded parallelism + retry policy for per-recipe Claude calls.
+// Replaces the old fixed 500ms sleep between sequential calls.
+const AI_CONCURRENCY = 3;
+const AI_RETRY = { retries: 2, shouldRetry: (err) => err?.status === 429 || err?.status >= 500 };
 
 // Primary path (works locally, read-only on Vercel but included in deploy)
 const WEEKLY_RECIPES_PATH = path.join(__dirname, '..', 'data', 'weekly-recipes.json');
@@ -121,7 +127,7 @@ class RecipeService {
 
     // Step 1b-AI: Refine deal matching with Claude AI for each candidate recipe.
     // Runs once per weekly generation; results are cached with the recipes.
-    // 500ms delay between recipes to stay within rate limits.
+    // Bounded concurrency with backoff on 429s to stay within rate limits.
     let aiRefined = matched;
     if (this.anthropic) {
       try {
@@ -135,23 +141,21 @@ class RecipeService {
         });
         console.log(`RecipeService: AI matching ${matched.length} recipes against ${foodDeals.length} food deals`);
 
-        const aiResults = [];
-        for (let i = 0; i < matched.length; i++) {
-          if (i > 0) await new Promise(resolve => setTimeout(resolve, 500));
-          const recipe = matched[i];
-          try {
-            const aiDeals = await aiMatcher.matchRecipeToDeals(recipe, foodDeals);
-            // Use AI deals if it found any; otherwise keep text-matched deals as fallback
-            aiResults.push({
-              ...recipe,
-              matchedDeals: aiDeals.length > 0 ? aiDeals : recipe.matchedDeals,
-              aiMatched: aiDeals.length > 0,
-            });
-          } catch (recipeErr) {
-            console.warn(`RecipeService: AI match failed for "${recipe.title}": ${recipeErr.message}`);
-            aiResults.push(recipe); // keep text-matched result
-          }
-        }
+        const aiResults = (await mapWithConcurrency(matched, AI_CONCURRENCY, async (recipe) => {
+          const aiDeals = await withRetry(
+            () => aiMatcher.matchRecipeToDeals(recipe, foodDeals),
+            AI_RETRY
+          );
+          // Use AI deals if it found any; otherwise keep text-matched deals as fallback
+          return {
+            ...recipe,
+            matchedDeals: aiDeals.length > 0 ? aiDeals : recipe.matchedDeals,
+            aiMatched: aiDeals.length > 0,
+          };
+        }, {
+          onError: (recipeErr, recipe) =>
+            console.warn(`RecipeService: AI match failed for "${recipe.title}": ${recipeErr.message}`),
+        })).map((result, i) => result ?? matched[i]); // failed recipes keep their text-matched result
 
         // Drop recipes where AI matched but found no deals (genuine no-match)
         aiRefined = aiResults.filter(r => r.matchedDeals.length > 0);
@@ -164,17 +168,18 @@ class RecipeService {
           if (textOnly.length > 0) {
             console.log(`RecipeService: Verifying ${textOnly.length} text-matched recipes...`);
             let verifiedCount = 0;
-            for (let vi = 0; vi < textOnly.length; vi++) {
-              if (vi > 0) await new Promise(resolve => setTimeout(resolve, 300));
-              try {
-                const originalCount = textOnly[vi].matchedDeals.length;
-                const verified = await aiMatcher.verifyMatches(textOnly[vi], textOnly[vi].matchedDeals);
-                textOnly[vi].matchedDeals = verified;
-                if (verified.length < originalCount) verifiedCount++;
-              } catch (verifyErr) {
-                console.warn(`RecipeService: Verification failed for "${textOnly[vi].title}": ${verifyErr.message}`);
-              }
-            }
+            await mapWithConcurrency(textOnly, AI_CONCURRENCY, async (recipe) => {
+              const originalCount = recipe.matchedDeals.length;
+              const verified = await withRetry(
+                () => aiMatcher.verifyMatches(recipe, recipe.matchedDeals),
+                AI_RETRY
+              );
+              recipe.matchedDeals = verified;
+              if (verified.length < originalCount) verifiedCount++;
+            }, {
+              onError: (verifyErr, recipe) =>
+                console.warn(`RecipeService: Verification failed for "${recipe.title}": ${verifyErr.message}`),
+            });
             // Re-filter: remove recipes that lost all deals after verification
             aiRefined = aiRefined.filter(r => r.matchedDeals.length > 0);
             console.log(`RecipeService: Verification complete — ${verifiedCount} recipes had matches removed`);
@@ -558,7 +563,9 @@ You must respond with valid JSON only. Do not include any text, explanation or c
       filtered = [...matches, ...rest];
     }
 
-    return filtered.slice(0, 10);
+    // Personalisation is premium-only — return up to the premium recipe limit
+    // (150, matching routes/recipes.js) rather than truncating to a top-10.
+    return filtered.slice(0, 150);
   }
 
   _hasNonVegIngredient(recipe) {

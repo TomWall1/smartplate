@@ -13,25 +13,9 @@
 const db = require('../database/db');
 
 // ── Name normalization ────────────────────────────────────────────────────────
-
-const STORE_NAMES       = /\b(woolworths|coles|iga|aldi|macro\s*wholefoods|macro|community\s*co|coles\s*finest|nature'?s\s*finest|woolworths\s*gold|coles\s*simply|simply|love\s*life|farmland|be\s*natural|coles\s*bakery|woolworths\s*essentials|coles\s*essentials|select|homebrand|woolies|gold|finest|choice)\b/gi;
-const CERTIFICATIONS    = /\b(rspca\s*approved?|free[\s-]*range|organic|certified\s*organic|grass[\s-]*fed|grain[\s-]*fed|cage[\s-]*free|hormone\s*free|antibiotic\s*free|no\s*added\s*hormones?|australian\s*grown|product\s*of\s*australia|australian)\b/gi;
-const SIZES             = /\b\d+(\.\d+)?\s*(g|gm|kg|ml|l|litre|liter|oz|lb|fl\.?\s*oz)\b/gi;
-const PACK_COUNTS       = /\b\d+\s*(pack|pk|x\s*\d+|piece|pc|pcs|serves|portions?)\b/gi;
-const EXTRA_WHITESPACE  = /\s{2,}/g;
-
-function normalizeName(dealName) {
-  if (!dealName) return '';
-  return dealName
-    .toLowerCase()
-    .replace(STORE_NAMES,    '')
-    .replace(CERTIFICATIONS, '')
-    .replace(SIZES,          '')
-    .replace(PACK_COUNTS,    '')
-    .replace(/[^a-z0-9\s]/g, ' ')   // strip punctuation
-    .replace(EXTRA_WHITESPACE,  ' ')
-    .trim();
-}
+// Shared with recipeMatcher — see lib/normalize.js. DB keys
+// (products.normalized_name, product_aliases.normalized) are derived from it.
+const { normalizeName } = require('../lib/normalize');
 
 // ── Levenshtein distance ──────────────────────────────────────────────────────
 
@@ -143,6 +127,41 @@ async function findProduct(dealName) {
   return null;
 }
 
+// ── Batch lookup (tiers 1-2 only) ─────────────────────────────────────────────
+
+/**
+ * Resolve the cheap tiers (exact + alias) for many deal names in two bulk
+ * queries instead of two queries per deal. Returns a Map keyed by normalized
+ * name → { product, matchType }. Names that miss both tiers are absent from
+ * the Map — callers fall through to findProduct() for the expensive tiers (3-5).
+ */
+async function findProductsBatch(dealNames) {
+  const resolved = new Map();
+  const normalized = [...new Set(dealNames.map(normalizeName).filter(Boolean))];
+  if (normalized.length === 0) return resolved;
+
+  // Tier 1: exact name matches
+  const exact = await db.getProductsByNormalizedNames(normalized);
+  for (const product of exact) {
+    if (!resolved.has(product.normalized_name)) {
+      resolved.set(product.normalized_name, { product, matchType: 'exact' });
+    }
+  }
+
+  // Tier 2: alias lookups for the rest
+  const missing = normalized.filter((n) => !resolved.has(n));
+  if (missing.length > 0) {
+    const aliasRows = await db.getAliasesByNormalizedNames(missing);
+    for (const row of aliasRows) {
+      if (!resolved.has(row.alias_normalized)) {
+        resolved.set(row.alias_normalized, { product: row, matchType: 'alias' });
+      }
+    }
+  }
+
+  return resolved;
+}
+
 // ── Record match + auto-alias ─────────────────────────────────────────────────
 
 /**
@@ -182,6 +201,7 @@ module.exports = {
   similarity,
   extractBarcode,
   findProduct,
+  findProductsBatch,
   recordMatch,
   lookupAndRecord,
 };

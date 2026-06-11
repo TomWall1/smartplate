@@ -129,7 +129,8 @@ router.post('/suggestions', async (req, res) => {
         });
       }
 
-      // Personalised path — Claude API call with user prefs
+      // Personalised path — local filtering of the cached weekly recipes
+      // against user prefs (no Claude call; see recipeService._filterLocally)
       const fullPreferences = {
         ...preferences,
         pantryItems: pantryItems || [],

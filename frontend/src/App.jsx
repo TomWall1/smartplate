@@ -23,6 +23,7 @@ import { dealsApi, recipesApi, healthApi, usersApi } from './services/api';
 import { filterFoodDeals } from './utils/dealFilters';
 import { WifiOff } from 'lucide-react';
 import Onboarding, { useOnboarding } from './components/Onboarding';
+import { useWarmupFetch } from './hooks/useWarmupFetch';
 
 // ── App Context ───────────────────────────────────────────────────────────────
 export const AppContext = createContext(null);
@@ -66,10 +67,6 @@ function AppInner() {
   const [deals, setDeals] = useState([]);
   const [weeklyRecipes, setWeeklyRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dealsLoading, setDealsLoading] = useState(false);
-  const [apiError, setApiError] = useState(null); // 'network' | 'server' | null
-  const [warmingUp, setWarmingUp] = useState(false);
-  const [retryCountdown, setRetryCountdown] = useState(0);
   const [apiStatus, setApiStatus] = useState('unknown');
   const { showOnboarding, startOnboarding, dismissOnboarding } = useOnboarding();
 
@@ -145,62 +142,38 @@ function AppInner() {
       });
   }, [user]);
 
-  // ── Countdown timer for warming-up retry ──────────────────────────────────
-  useEffect(() => {
-    if (retryCountdown <= 0) return;
-    const timer = setTimeout(() => setRetryCountdown((n) => n - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [retryCountdown]);
-
-  // ── Fetch function (stable ref so retry button can call it) ──────────────
-  const fetchRef = React.useRef(null);
-
-  const fetchDealsAndRecipes = React.useCallback(async (retryCount = 0) => {
-    setApiError(null);
-    if (retryCount === 0) setDealsLoading(true);
+  // ── Deals + weekly recipes fetch ──────────────────────────────────────────
+  // 503-warmup retry/countdown mechanics live in useWarmupFetch (shared with
+  // StorePage). This callback owns only the data handling.
+  const fetchDealsAndRecipes = React.useCallback(async () => {
+    const dealsData = await dealsApi.getCurrentDeals();
+    const dealList = Array.isArray(dealsData) ? dealsData : (dealsData?.deals ?? []);
+    setDeals(filterFoodDeals(dealList));
 
     try {
-      const dealsData = await dealsApi.getCurrentDeals();
-      const dealList = Array.isArray(dealsData) ? dealsData : (dealsData?.deals ?? []);
-      setDeals(filterFoodDeals(dealList));
-      setDealsLoading(false);
-      setWarmingUp(false);
-      setRetryCountdown(0);
-
-      try {
-        const ingredients = dealList.map((d) => d.name);
-        const currentState = loadFromStorage('smartplate-state', 'nsw');
-        const recipesData = await recipesApi.getRecipeSuggestions(ingredients, {}, [], currentState);
-        const recipeList = Array.isArray(recipesData) ? recipesData : (recipesData?.recipes ?? []);
-        setWeeklyRecipes(recipeList);
-      } catch (recipeErr) {
-        console.warn('Could not load weekly recipes:', recipeErr.message);
-      }
-    } catch (err) {
-      // 503 = server is still loading deals — retry automatically
-      if (err.response?.status === 503 && retryCount < 4) {
-        setWarmingUp(true);
-        setRetryCountdown(15);
-        console.log(`Deals not ready yet, retrying in 15s (attempt ${retryCount + 1}/4)...`);
-        setTimeout(() => fetchDealsAndRecipes(retryCount + 1), 15000);
-        return;
-      }
-      // Actual error — stop retrying
-      setDealsLoading(false);
-      setWarmingUp(false);
-      setRetryCountdown(0);
-      if (err.response?.status >= 500) {
-        setApiError('server');
-      } else {
-        setApiError('network');
-      }
-      console.warn('Could not load deals:', err.message);
-    } finally {
-      setLoading(false);
+      const ingredients = dealList.map((d) => d.name);
+      const currentState = loadFromStorage('smartplate-state', 'nsw');
+      const recipesData = await recipesApi.getRecipeSuggestions(ingredients, {}, [], currentState);
+      const recipeList = Array.isArray(recipesData) ? recipesData : (recipesData?.recipes ?? []);
+      setWeeklyRecipes(recipeList);
+    } catch (recipeErr) {
+      console.warn('Could not load weekly recipes:', recipeErr.message);
     }
   }, []);
 
-  fetchRef.current = fetchDealsAndRecipes;
+  const {
+    run: runDealsFetch,
+    loading: dealsLoading,
+    error: fetchError,
+    countdown: retryCountdown,
+  } = useWarmupFetch(fetchDealsAndRecipes);
+
+  // Preserve the context's historical error vocabulary
+  const warmingUp = fetchError?.type === 'warming';
+  const apiError =
+    fetchError?.type === 'server' ? 'server'
+    : fetchError?.type === 'request' ? 'network'
+    : null;
 
   // ── On mount: health check + deals + weekly recipes ───────────────────────
   useEffect(() => {
@@ -208,8 +181,8 @@ function AppInner() {
       .then(() => setApiStatus('connected'))
       .catch(() => setApiStatus('disconnected'));
 
-    fetchDealsAndRecipes();
-  }, [fetchDealsAndRecipes]);
+    runDealsFetch(0).finally(() => setLoading(false));
+  }, [runDealsFetch]);
 
   // ── Context value ─────────────────────────────────────────────────────────
   const contextValue = {
@@ -229,7 +202,7 @@ function AppInner() {
     apiError,
     warmingUp,
     retryCountdown,
-    retryFetch: () => fetchRef.current?.(0),
+    retryFetch: () => runDealsFetch(0),
     startOnboarding,
   };
 

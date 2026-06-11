@@ -1,0 +1,35 @@
+{
+  "_comment": "Salefinder catalogue IDs by retailer and state. These IDs change weekly. Run scripts/discoverStateCatalogues.js to refresh them.",
+  "_lastUpdated": "2026-06-11",
+  "_weekOf": "2026-06-08",
+  "woolworths": {
+    "nsw": 66087,
+    "vic": 64700,
+    "qld": 64630,
+    "wa": 64701,
+    "sa": 64702,
+    "tas": 64711,
+    "nt": 64712,
+    "act": 64710
+  },
+  "coles": {
+    "nsw": 66018,
+    "vic": 64687,
+    "qld": 64685,
+    "wa": 64686,
+    "sa": 64688,
+    "tas": 64690,
+    "nt": 64691,
+    "act": 64650
+  },
+  "iga": {
+    "nsw": 66087,
+    "vic": 64709,
+    "qld": 64699,
+    "wa": 64534,
+    "sa": 64539,
+    "tas": null,
+    "nt": 64670,
+    "act": 66087
+  }
+}

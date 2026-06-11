@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { groupDealsByCategory } from '../utils/categoryMapper';
 import DealCard from './DealCard';
@@ -83,7 +83,7 @@ function CategorySection({ categoryName, deals, isExpanded, onToggle }) {
 }
 
 export default function CategorizedDeals({ deals }) {
-  const groupedDeals  = groupDealsByCategory(deals);
+  const groupedDeals  = useMemo(() => groupDealsByCategory(deals), [deals]);
   const categoryNames = Object.keys(groupedDeals);
 
   // Proteins expanded by default; everything else collapsed

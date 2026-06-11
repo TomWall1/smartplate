@@ -1,6 +1,7 @@
-const fs         = require('fs');
 const path       = require('path');
 const imageCache = require('./imageCache');
+const { mapWithConcurrency } = require('../lib/concurrency');
+const { JsonStore } = require('../lib/jsonStore');
 
 // ── Product intelligence (lazy-loaded so DB is optional) ──────────────────────
 let productLookup, productCategorizer, db;
@@ -26,6 +27,12 @@ try { colesService      = require('./coles');      } catch (e) { console.warn('C
 try { igaService        = require('./iga');        } catch (e) { console.warn('IGA service unavailable:', e.message); }
 
 const CACHE_PATH = path.join(__dirname, '..', 'data', 'cached-deals.json');
+
+// In-memory mirror of cached-deals.json with queued atomic writes.
+// One synchronous read at startup; after that, reads never touch disk and
+// concurrent enrichment phases can't clobber each other's cache updates.
+const _dealStore = new JsonStore(CACHE_PATH);
+_dealStore.loadSync();
 
 // ── Startup fetch tracking ─────────────────────────────────────────────────────
 // Lets other services wait for the initial background fetch to complete
@@ -80,13 +87,13 @@ async function waitForDeals(timeoutMs = 180000) {
 
 // ── Cache helpers ──────────────────────────────────────────────────────────────
 
+/**
+ * Returns the cache object (or null if no cache exists yet).
+ * Served from the in-memory mirror — external edits to cached-deals.json
+ * while the server is running are not picked up until restart.
+ */
 function loadCache() {
-  try {
-    const raw = fs.readFileSync(CACHE_PATH, 'utf8');
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  return _dealStore.get();
 }
 
 function saveCache(byStore) {
@@ -100,8 +107,8 @@ function saveCache(byStore) {
       totalCacheEntries: imageCache.size(),
     },
   };
-  fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true });
-  fs.writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2), 'utf8');
+  // Mirror updates synchronously; the disk write is queued + atomic.
+  _dealStore.set(cache);
   return cache;
 }
 
@@ -154,6 +161,20 @@ async function _fetchRaw(state) {
 
 let _enrichStats = { hits: 0, misses: 0, errors: 0 };
 
+/** Attach a knowledge-base product's categorization to a deal (mutates the deal). */
+function _attachIntelligence(deal, product, matchType) {
+  deal.productIntelligence = {
+    productId:            product.id,
+    productType:          product.product_type,
+    baseIngredient:       product.base_ingredient,
+    category:             product.category,
+    processingLevel:      product.processing_level,
+    isHeroIngredient:     product.is_hero_ingredient,
+    satisfiesIngredients: product.satisfies_ingredients,
+    matchType,
+  };
+}
+
 /**
  * Enrich a single deal with product categorization data.
  * Mutates the deal object in-place and returns it.
@@ -172,17 +193,7 @@ async function enrichDealWithProduct(deal) {
     if (result) {
       // Cache hit — attach categorization
       _enrichStats.hits++;
-      const p = result.product;
-      deal.productIntelligence = {
-        productId:            p.id,
-        productType:          p.product_type,
-        baseIngredient:       p.base_ingredient,
-        category:             p.category,
-        processingLevel:      p.processing_level,
-        isHeroIngredient:     p.is_hero_ingredient,
-        satisfiesIngredients: p.satisfies_ingredients,
-        matchType:            result.matchType,
-      };
+      _attachIntelligence(deal, result.product, result.matchType);
     } else {
       // Cache miss — categorize via Claude and save
       _enrichStats.misses++;
@@ -230,9 +241,15 @@ async function enrichDealWithProduct(deal) {
   return deal;
 }
 
+// Bounded parallelism for the miss path: it can call Claude for categorization,
+// so keep it gentle on rate limits. Cache hits are resolved in bulk beforehand.
+const ENRICH_CONCURRENCY = 4;
+
 /**
  * Enrich all deals in a flat array with product intelligence.
- * Runs sequentially to avoid hammering Claude API.
+ * Tiers 1-2 (exact + alias) are resolved for the whole batch in two bulk
+ * queries; only genuine misses go through the per-deal path (fuzzy lookup,
+ * Claude categorization) with bounded concurrency.
  */
 async function enrichDealsWithProducts(deals) {
   if (!productLookup) return deals;
@@ -240,12 +257,33 @@ async function enrichDealsWithProducts(deals) {
   console.log(`[DealService] Enriching ${deals.length} deals with product intelligence...`);
   _enrichStats = { hits: 0, misses: 0, errors: 0 };
 
-  for (let i = 0; i < deals.length; i++) {
-    await enrichDealWithProduct(deals[i]);
-    if ((i + 1) % 25 === 0) {
-      console.log(`[DealService] Enrichment progress: ${i + 1}/${deals.length} (hits: ${_enrichStats.hits}, misses: ${_enrichStats.misses})`);
+  let resolved = new Map();
+  try {
+    resolved = await productLookup.findProductsBatch(deals.map(d => d.name));
+  } catch (err) {
+    console.warn('[DealService] Bulk lookup failed — falling back to per-deal lookups:', err.message);
+  }
+
+  const unresolved = [];
+  for (const deal of deals) {
+    const hit = resolved.get(productLookup.normalizeName(deal.name));
+    if (hit) {
+      _enrichStats.hits++;
+      _attachIntelligence(deal, hit.product, hit.matchType);
+      productLookup.recordMatch(deal.name, hit.product.id, hit.matchType, deal.store);
+    } else {
+      unresolved.push(deal);
     }
   }
+
+  let processed = 0;
+  await mapWithConcurrency(unresolved, ENRICH_CONCURRENCY, async (deal) => {
+    await enrichDealWithProduct(deal);
+    processed++;
+    if (processed % 25 === 0) {
+      console.log(`[DealService] Enrichment progress: ${processed}/${unresolved.length} uncached (hits: ${_enrichStats.hits}, misses: ${_enrichStats.misses})`);
+    }
+  });
 
   const total   = _enrichStats.hits + _enrichStats.misses;
   const hitRate = total > 0 ? ((_enrichStats.hits / total) * 100).toFixed(1) : '0';
@@ -257,20 +295,16 @@ async function enrichDealsWithProducts(deals) {
 // ── Phase 2 & 3: background enrichment helpers ────────────────────────────────
 
 /**
- * Write one store's deals back into the on-disk cache.
- * Always re-reads the cache file first so concurrent writes (images + PI)
- * don't overwrite each other's data.
+ * Write one store's deals back into the cache.
+ * Mutations go through the JsonStore write queue, so concurrent writers
+ * (images + PI enrichment) can't overwrite each other's data.
  */
 function _updateCacheStore(storeName, enrichedDeals, label = '') {
-  try {
-    const cache = loadCache();
-    if (!cache) return;
+  if (!_dealStore.get()) return;
+  _dealStore.update((cache) => {
     cache[storeName] = enrichedDeals;
-    fs.writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2), 'utf8');
-    console.log(`DealService: ${storeName} cache updated${label ? ` (${label})` : ''} — ${enrichedDeals.length} deals`);
-  } catch (err) {
-    console.error(`DealService: Failed to update ${storeName} cache:`, err.message);
-  }
+  });
+  console.log(`DealService: ${storeName} cache updated${label ? ` (${label})` : ''} — ${enrichedDeals.length} deals`);
 }
 
 /**

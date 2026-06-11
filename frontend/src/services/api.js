@@ -8,15 +8,37 @@ const api = axios.create({
   timeout: 120000,
 });
 
+// Session cache — kept fresh by onAuthStateChange (sign-in, sign-out, token
+// refresh) so we don't hit supabase.auth.getSession() on every request.
+// Requests that fire before the initial session restore await it once.
+let currentSession = null;
+let sessionReady = !supabase;
+let initialSession = Promise.resolve(null);
+if (supabase) {
+  initialSession = supabase.auth
+    .getSession()
+    .then(({ data }) => {
+      currentSession = data.session;
+      sessionReady = true;
+      return data.session;
+    })
+    .catch(() => {
+      sessionReady = true;
+      return null;
+    });
+  supabase.auth.onAuthStateChange((_event, session) => {
+    currentSession = session;
+    sessionReady = true;
+  });
+}
+
 // Request interceptor — attach Supabase JWT when logged in
 api.interceptors.request.use(
   async (config) => {
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
-    if (supabase) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) {
-        config.headers.Authorization = `Bearer ${session.access_token}`;
-      }
+    if (!sessionReady) await initialSession;
+    if (currentSession?.access_token) {
+      config.headers.Authorization = `Bearer ${currentSession.access_token}`;
     }
     return config;
   },

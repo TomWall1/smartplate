@@ -28,6 +28,8 @@ logs
 *.log
 
 # Generated files (re-created at runtime)
+backend/data/enrich-progress-*.json
+backend/scripts/consolidate/exports/
 backend/data/weekly-recipes.json
 backend/data/matched-test.json
 backend/data/off_products.csv.gz

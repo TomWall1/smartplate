@@ -138,6 +138,19 @@ function getProductsByNormalizedNameLike(normalized) {
   return rows.map(deserializeProduct);
 }
 
+function getProductsByNormalizedNames(names) {
+  if (!names || names.length === 0) return [];
+  const db = getDb();
+  const rows = [];
+  // Chunked to stay under SQLite's bound-variable limit
+  for (let i = 0; i < names.length; i += 500) {
+    const chunk = names.slice(i, i + 500);
+    const placeholders = chunk.map(() => '?').join(',');
+    rows.push(...db.prepare(`SELECT * FROM products WHERE normalized_name IN (${placeholders})`).all(...chunk));
+  }
+  return rows.map(deserializeProduct);
+}
+
 function incrementTimesMatched(productId) {
   getDb().prepare('UPDATE products SET times_matched = times_matched + 1, updated_at = datetime(\'now\') WHERE id = ?').run(productId);
 }
@@ -168,6 +181,23 @@ function getAlias(normalized) {
     WHERE pa.normalized = ?
   `).get(normalized);
   return row ? deserializeProduct(row) : null;
+}
+
+function getAliasesByNormalizedNames(normalizedList) {
+  if (!normalizedList || normalizedList.length === 0) return [];
+  const db = getDb();
+  const rows = [];
+  for (let i = 0; i < normalizedList.length; i += 500) {
+    const chunk = normalizedList.slice(i, i + 500);
+    const placeholders = chunk.map(() => '?').join(',');
+    rows.push(...db.prepare(`
+      SELECT pa.normalized AS alias_normalized, p.*
+      FROM product_aliases pa
+      JOIN products p ON p.id = pa.product_id
+      WHERE pa.normalized IN (${placeholders})
+    `).all(...chunk));
+  }
+  return rows.map(deserializeProduct);
 }
 
 function countAliases() {
@@ -263,10 +293,12 @@ module.exports = {
   getProductByBarcode,
   getProductByNormalizedName,
   getProductsByNormalizedNameLike,
+  getProductsByNormalizedNames,
   incrementTimesMatched,
   countProducts,
   insertAlias,
   getAlias,
+  getAliasesByNormalizedNames,
   countAliases,
   recordMatch,
   getMatchStats,

@@ -177,6 +177,15 @@ async function getProductsByNormalizedNameLike(normalized) {
   return result.rows.map(deserializeProduct);
 }
 
+async function getProductsByNormalizedNames(names) {
+  if (!names || names.length === 0) return [];
+  const result = await pool.query(
+    'SELECT * FROM products WHERE normalized_name = ANY($1)',
+    [names]
+  );
+  return result.rows.map(deserializeProduct);
+}
+
 async function incrementTimesMatched(productId) {
   await pool.query(
     'UPDATE products SET times_matched = times_matched + 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1',
@@ -211,6 +220,17 @@ async function getAlias(normalized) {
     WHERE pa.normalized = $1
   `, [normalized]);
   return deserializeProduct(result.rows[0] ?? null);
+}
+
+async function getAliasesByNormalizedNames(normalizedList) {
+  if (!normalizedList || normalizedList.length === 0) return [];
+  const result = await pool.query(`
+    SELECT pa.normalized AS alias_normalized, p.*
+    FROM product_aliases pa
+    JOIN products p ON p.id = pa.product_id
+    WHERE pa.normalized = ANY($1)
+  `, [normalizedList]);
+  return result.rows.map(deserializeProduct);
 }
 
 async function countAliases() {
@@ -297,10 +317,12 @@ module.exports = {
   getProductByBarcode,
   getProductByNormalizedName,
   getProductsByNormalizedNameLike,
+  getProductsByNormalizedNames,
   incrementTimesMatched,
   countProducts,
   insertAlias,
   getAlias,
+  getAliasesByNormalizedNames,
   countAliases,
   recordMatch,
   getMatchStats,

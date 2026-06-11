@@ -2,7 +2,10 @@ name: Weekly Deal Refresh
 
 on:
   schedule:
-    - cron: '0 17 * * 2'  # Tuesday 5pm UTC = Wednesday 4am AEDT
+    # GitHub Actions cron is UTC-only. Target: early Wednesday SYDNEY time,
+    # when the new Woolworths/Coles catalogues go live.
+    # Tue 17:00 UTC = Wed 4:00am AEDT (summer) / Wed 3:00am AEST (winter).
+    - cron: '0 17 * * 2'
   workflow_dispatch:       # Allow manual trigger from GitHub Actions UI
 
 env:

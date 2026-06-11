@@ -4,6 +4,7 @@ import PremiumGate from '../components/PremiumGate';
 import { usePremium } from '../context/PremiumContext';
 import { useAuth } from '../context/AuthContext';
 import { premiumApi } from '../services/api';
+import { STORE_COLORS } from '../constants/colors';
 
 const STORE_OPTIONS = [
   { value: '',           label: 'Any store' },
@@ -11,12 +12,6 @@ const STORE_OPTIONS = [
   { value: 'coles',      label: 'Coles' },
   { value: 'iga',        label: 'IGA' },
 ];
-
-const STORE_COLORS = {
-  woolworths: '#007833',
-  coles:      '#e31837',
-  iga:        '#003da5',
-};
 
 function AlertCard({ alert, onDelete }) {
   const [deleting, setDeleting] = useState(false);
@@ -38,7 +33,7 @@ function AlertCard({ alert, onDelete }) {
     >
       <div
         className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: alert.store ? STORE_COLORS[alert.store] : 'var(--color-leaf)' }}
+        style={{ background: alert.store ? STORE_COLORS[alert.store]?.bg : 'var(--color-leaf)' }}
       >
         <Bell className="w-5 h-5 text-white" />
       </div>
