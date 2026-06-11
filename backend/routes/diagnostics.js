@@ -8,6 +8,37 @@ const express = require('express');
 
 const router = express.Router();
 
+// Quick test: is the Anthropic API key on this instance alive?
+// Makes one minimal Haiku call and reports the outcome (or the API error).
+router.get('/test-claude', async (req, res) => {
+  try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.json({ ok: false, error: 'ANTHROPIC_API_KEY not set' });
+    }
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const started = Date.now();
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 16,
+      messages: [{ role: 'user', content: 'Reply with the single word: ok' }],
+    });
+    res.json({
+      ok: true,
+      model: response.model,
+      reply: response.content[0]?.text ?? null,
+      latencyMs: Date.now() - started,
+    });
+  } catch (err) {
+    res.json({
+      ok: false,
+      errorType: err.constructor?.name ?? 'Error',
+      status: err.status ?? null,
+      error: err.message,
+    });
+  }
+});
+
 // Quick test: main-site scraper for Woolworths
 router.get('/test-mainsite', async (req, res) => {
   try {

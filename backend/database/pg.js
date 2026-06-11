@@ -46,6 +46,17 @@ const _autoMigrate = (async () => {
         saved_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    // One row per refresh: enrichment phases re-persist the same snapshot
+    // (same last_updated) and must UPDATE it, not stack duplicates.
+    // Dedupe first so the unique index can build on pre-existing tables.
+    await pool.query(`
+      DELETE FROM deals_cache a USING deals_cache b
+      WHERE a.last_updated = b.last_updated AND a.id < b.id
+    `);
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_deals_cache_last_updated
+      ON deals_cache(last_updated)
+    `);
   } catch (err) {
     // Non-fatal — log and continue. Server still works; caches fall back to filesystem.
     console.warn('[PG] cache-table auto-migrate warning:', err.message);
@@ -311,9 +322,13 @@ async function getWeeklyRecipes() {
 
 async function saveDealsCache(cache) {
   await _autoMigrate;
+  // Upsert keyed on last_updated: phase-1 inserts the snapshot, the
+  // enrichment phases (same lastUpdated) update it in place.
   const result = await pool.query(`
     INSERT INTO deals_cache (data, last_updated)
     VALUES ($1, $2)
+    ON CONFLICT (last_updated) DO UPDATE
+      SET data = EXCLUDED.data, saved_at = CURRENT_TIMESTAMP
     RETURNING id, saved_at
   `, [JSON.stringify(cache), cache.lastUpdated ?? new Date().toISOString()]);
 

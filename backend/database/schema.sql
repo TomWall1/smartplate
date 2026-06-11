@@ -172,3 +172,5 @@ CREATE TABLE IF NOT EXISTS deals_cache (
   last_updated TEXT NOT NULL,
   saved_at     TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_deals_cache_last_updated ON deals_cache(last_updated);

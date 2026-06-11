@@ -165,3 +165,5 @@ CREATE TABLE IF NOT EXISTS deals_cache (
   last_updated TIMESTAMP NOT NULL,
   saved_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_deals_cache_last_updated ON deals_cache(last_updated);

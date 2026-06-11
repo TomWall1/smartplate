@@ -268,9 +268,13 @@ function getWeeklyRecipes() {
 
 function saveDealsCache(cache) {
   const db = getDb();
+  // Upsert keyed on last_updated: phase-1 inserts the snapshot, the
+  // enrichment phases (same lastUpdated) update it in place.
   const result = db.prepare(`
     INSERT INTO deals_cache (data, last_updated)
     VALUES (?, ?)
+    ON CONFLICT(last_updated) DO UPDATE
+      SET data = excluded.data, saved_at = datetime('now')
   `).run(JSON.stringify(cache), cache.lastUpdated ?? new Date().toISOString());
 
   // Keep only the 2 most recent snapshots (current + previous week)
