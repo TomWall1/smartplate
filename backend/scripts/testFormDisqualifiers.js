@@ -310,31 +310,33 @@ matcherModule.library = null;                      // reset cache
 const cache     = JSON.parse(fs.readFileSync(CACHE_PATH, 'utf8'));
 const allDeals  = [...cache.woolworths, ...cache.coles, ...cache.iga];
 
-const beforeRecipes = matcherModule.matchDeals(allDeals);
-const beforeCount   = beforeRecipes.length;
+(async () => {
+  const beforeRecipes = await matcherModule.matchDeals(allDeals);
+  const beforeCount   = beforeRecipes.length;
 
-// Show sample of deals that would have passed (by checking _termsMatch with old logic)
-console.log(`BEFORE (no form disqualifier): ${beforeCount} qualifying recipes`);
+  // Show sample of deals that would have passed (by checking _termsMatch with old logic)
+  console.log(`BEFORE (no form disqualifier): ${beforeCount} qualifying recipes`);
 
-// Restore and re-run
-matcherModule._hasFormDisqualifier = realHFD;
-matcherModule.library = null;
+  // Restore and re-run
+  matcherModule._hasFormDisqualifier = realHFD;
+  matcherModule.library = null;
 
-const afterRecipes = matcherModule.matchDeals(allDeals);
-const afterCount   = afterRecipes.length;
+  const afterRecipes = await matcherModule.matchDeals(allDeals);
+  const afterCount   = afterRecipes.length;
 
-console.log(`AFTER  (with form disqualifier): ${afterCount} qualifying recipes`);
-console.log(`Difference: ${beforeCount - afterCount} recipes removed (had only pre-prepared protein matches)\n`);
+  console.log(`AFTER  (with form disqualifier): ${afterCount} qualifying recipes`);
+  console.log(`Difference: ${beforeCount - afterCount} recipes removed (had only pre-prepared protein matches)\n`);
 
-// Show top 5 after recipes to confirm fresh protein deals still qualify
-console.log('Top 5 qualifying recipes (with matched protein deal):');
-afterRecipes.slice(0, 5).forEach((r, i) => {
-  const protein = r.matchedDeals.find(d =>
-    ['chicken','beef','lamb','pork','salmon','fish','prawn','tuna','mince',
-     'steak','fillet','thigh','breast','drumstick'].some(p => d.ingredient.includes(p))
-  );
-  const proteinLabel = protein ? `${protein.ingredient} → "${protein.dealName}"` : '(no protein deal shown)';
-  console.log(`  ${i + 1}. ${r.title} [score:${r.matchScore}] — ${proteinLabel}`);
-});
+  // Show top 5 after recipes to confirm fresh protein deals still qualify
+  console.log('Top 5 qualifying recipes (with matched protein deal):');
+  afterRecipes.slice(0, 5).forEach((r, i) => {
+    const protein = r.matchedDeals.find(d =>
+      ['chicken','beef','lamb','pork','salmon','fish','prawn','tuna','mince',
+       'steak','fillet','thigh','breast','drumstick'].some(p => d.ingredient.includes(p))
+    );
+    const proteinLabel = protein ? `${protein.ingredient} → "${protein.dealName}"` : '(no protein deal shown)';
+    console.log(`  ${i + 1}. ${r.title} [score:${r.matchScore}] — ${proteinLabel}`);
+  });
 
-console.log('');
+  console.log('');
+})();

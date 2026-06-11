@@ -15,14 +15,14 @@ async function main() {
   // ── Run without protein filter to see the full match landscape ──────────────
   const origFilter = recipeMatcher._hasProteinMatch.bind(recipeMatcher);
   recipeMatcher._hasProteinMatch = () => true;
-  const allMatched = recipeMatcher.matchDeals(deals);   // top 20 by matchScore, no protein gate
+  const allMatched = await recipeMatcher.matchDeals(deals);   // top 20 by matchScore, no protein gate
   recipeMatcher._hasProteinMatch = origFilter;
 
   // ── Also run with the real filter to get the final set ──────────────────────
   console.log('\n' + '='.repeat(80));
   console.log('RUNNING FULL MATCH WITH PROTEIN FILTER (live code)');
   console.log('='.repeat(80) + '\n');
-  const withFilter = recipeMatcher.matchDeals(deals);
+  const withFilter = await recipeMatcher.matchDeals(deals);
 
   console.log('\n' + '='.repeat(80));
   console.log('RESULTS');

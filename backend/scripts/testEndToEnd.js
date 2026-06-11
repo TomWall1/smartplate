@@ -84,7 +84,7 @@ async function main() {
   // ── Step 3: Match recipes ─────────────────────────────────────────────────
   console.log('\n[E2E] Step 3: Matching recipes...');
   const matchStart = Date.now();
-  const matched    = recipeMatcher.matchDeals(enriched);
+  const matched    = await recipeMatcher.matchDeals(enriched);
   const matchTime  = Date.now() - matchStart;
 
   console.log(`[E2E] ✓ ${matched.length} recipes matched in ${matchTime}ms`);

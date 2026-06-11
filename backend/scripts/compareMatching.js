@@ -144,7 +144,7 @@ function loadCachedDeals() {
 
 // ── Run matching with feature flag ────────────────────────────────────────────
 
-function runMatching(deals, usePi) {
+async function runMatching(deals, usePi) {
   // Temporarily swap the flag by direct property access on the module instance
   // (the flag is module-level; we patch via a side-channel run option instead)
   // Since USE_PRODUCT_INTELLIGENCE is a module-level const we can't change it at runtime.
@@ -155,7 +155,7 @@ function runMatching(deals, usePi) {
   });
 
   const start   = Date.now();
-  const results = recipeMatcher.matchDeals(testDeals);
+  const results = await recipeMatcher.matchDeals(testDeals);
   const elapsed = Date.now() - start;
 
   return { results, elapsed };
@@ -193,13 +193,13 @@ async function main() {
 
   // ── Run 1: text-based matching (old) ──────────────────────────────────────
   console.log('── Run 1: Text-based matching (no product intelligence) ─────────');
-  const run1 = runMatching(enrichedDeals, false);
+  const run1 = await runMatching(enrichedDeals, false);
   console.log(`   ${run1.results.length} recipes matched in ${run1.elapsed}ms`);
   printTopRecipes(run1.results, 'Text matching');
 
   // ── Run 2: product intelligence matching (new) ────────────────────────────
   console.log('\n── Run 2: Product intelligence matching ─────────────────────────');
-  const run2 = runMatching(enrichedDeals, true);
+  const run2 = await runMatching(enrichedDeals, true);
   console.log(`   ${run2.results.length} recipes matched in ${run2.elapsed}ms`);
   printTopRecipes(run2.results, 'PI matching');
 

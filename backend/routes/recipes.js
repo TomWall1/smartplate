@@ -162,7 +162,7 @@ router.get('/matched', async (req, res) => {
     const dealService = require('../services/dealService');
 
     const deals = await dealService.getCurrentDeals();
-    const matched = recipeMatcher.matchDeals(deals);
+    const matched = await recipeMatcher.matchDeals(deals);
 
     res.json({
       matchedAt: new Date().toISOString(),
