@@ -468,12 +468,21 @@ const refreshDeals = async (state) => {
   // Phase 2 + 3: image enrichment → PI enrichment, both in background.
   // _enrichInBackground hands off to _enrichPIAndPersist once images are done,
   // so both sets of data persist to cache without race conditions.
-  _enrichInBackground(byStore).catch(err => {
+  // The promise is tracked so the weekly pipeline can await completion
+  // before building per-state artifacts (which copy enrichment from here).
+  _enrichmentPromise = _enrichInBackground(byStore).catch(err => {
     console.error('DealService: Background enrichment error:', err.message);
   });
 
   return { cache, deals: cacheToFlatArray(byStore) };
 };
+
+let _enrichmentPromise = Promise.resolve();
+
+/** Wait for the current refresh's background enrichment to finish. */
+async function waitForEnrichment() {
+  await _enrichmentPromise;
+}
 
 /**
  * Return the raw cache object (for health checks etc.)
@@ -503,42 +512,153 @@ const getDealsByCategory = async (category) => {
   return deals.filter(d => d.category && d.category.toLowerCase().includes(category.toLowerCase()));
 };
 
-// ── Per-state deal cache (fetched on-demand from Salefinder) ───────────────────
+// ── Per-state deal artifacts (built by the weekly pipeline, served from DB) ───
 
-const _stateDealCache = new Map(); // state → { deals, fetchedAt }
-const STATE_DEAL_TTL  = 6 * 60 * 60 * 1000; // 6 hours
+const STORES = ['woolworths', 'coles', 'iga'];
+// NSW is the main cache; ACT shares NSW's catalogues.
+const ARTIFACT_STATES = ['vic', 'qld', 'wa', 'sa', 'tas', 'nt'];
+
+const _stateDealCache = new Map(); // state → { deals, loadedAt } (process-local read cache)
+const STATE_DEAL_TTL  = 6 * 60 * 60 * 1000; // re-read DB row after 6h
 
 /**
- * Get food deals for a specific Australian state.
- * NSW uses the main cache; other states are fetched on-demand from Salefinder
- * using the state-catalogue-ids.json lookup and cached in memory for 6 hours.
- *
- * Falls back to the main NSW cache if the state-specific fetch fails.
+ * Fetch one state's raw deals strictly by verified catalogue ID — no
+ * geo-discovery or main-site fallback (those silently return NSW-ish data,
+ * which is the exact bug per-state artifacts exist to fix). Retailers with
+ * no catalogue for the state this week are reported in `missing`.
+ */
+async function _fetchStateRaw(state, stateIds) {
+  const { fetchCatalogueDeals } = require('./salefinder');
+  const services = { woolworths: woolworthsService, coles: colesService, iga: igaService };
+  const byStore  = { woolworths: [], coles: [], iga: [] };
+  const missing  = [];
+
+  for (const store of STORES) {
+    const id = stateIds[store]?.[state];
+    if (!id) { missing.push(store); continue; }
+    try {
+      const cfg = services[store].config;
+      // locationId 0: region-mismatched locations blank the catalogue
+      byStore[store] = await fetchCatalogueDeals(
+        { id, name: `${store} ${state}` },
+        { retailerId: cfg.retailerId, locationId: 0, nameSelector: cfg.nameSelector, store: cfg.store }
+      );
+      if (byStore[store].length === 0) missing.push(store);
+    } catch (err) {
+      console.warn(`[StateDeals] ${state}/${store} fetch failed: ${err.message}`);
+      missing.push(store);
+    }
+  }
+  return { byStore, missing };
+}
+
+/**
+ * Build and persist per-state deal artifacts for all non-NSW states.
+ * Run by the weekly pipeline AFTER the main (NSW) cache is fully enriched:
+ * shared deals copy images + product intelligence from the main cache
+ * (keeping the STATE's own prices); state-unique deals get PI enrichment
+ * (DB-cached, so only genuinely new products cost tokens).
+ */
+async function refreshStateDeals() {
+  if (!db?.saveStateDeals) {
+    console.warn('[StateDeals] DB unavailable — skipping state artifacts');
+    return;
+  }
+  const { loadStateIds } = require('./salefinder');
+  const stateIds = loadStateIds();
+
+  // Enrichment map from the fully-enriched main cache, keyed by store+name
+  const main = loadCache();
+  const enrichMap = new Map();
+  for (const store of STORES) {
+    for (const d of main?.[store] ?? []) enrichMap.set(`${store}||${d.name}`, d);
+  }
+
+  for (const state of ARTIFACT_STATES) {
+    try {
+      const { byStore, missing } = await _fetchStateRaw(state, stateIds);
+      const flat = [];
+      const stateUnique = [];
+
+      for (const store of STORES) {
+        for (const deal of byStore[store]) {
+          const base = enrichMap.get(`${store}||${deal.name}`);
+          if (base) {
+            // Shared deal: reuse enrichment, keep this state's own pricing
+            flat.push({
+              ...base,
+              price:              deal.price,
+              originalPrice:      deal.originalPrice,
+              discountPercentage: deal.discountPercentage,
+              unit:               deal.unit,
+              validUntil:         deal.validUntil,
+            });
+          } else {
+            flat.push(deal);
+            stateUnique.push(deal);
+          }
+        }
+      }
+
+      if (flat.length === 0) {
+        console.warn(`[StateDeals] ${state}: nothing fetched — keeping previous artifact`);
+        continue;
+      }
+
+      if (stateUnique.length && productLookup) {
+        try {
+          await enrichDealsWithProducts(stateUnique); // mutates in place; objects shared with flat
+        } catch (err) {
+          console.warn(`[StateDeals] ${state}: PI enrichment of state-unique deals failed: ${err.message}`);
+        }
+      }
+
+      await db.saveStateDeals(state, {
+        state,
+        deals: flat,
+        missingRetailers: missing,
+        fetchedAt: new Date().toISOString(),
+      });
+      console.log(
+        `[StateDeals] ${state}: ${flat.length} deals persisted ` +
+        `(${stateUnique.length} state-unique, missing retailers: ${missing.join(',') || 'none'})`
+      );
+    } catch (err) {
+      console.error(`[StateDeals] ${state} failed: ${err.message}`);
+    }
+  }
+
+  _stateDealCache.clear();
+}
+
+/**
+ * Get food deals for a specific Australian state, served from the durable
+ * per-state artifact (built weekly). NSW/ACT use the main cache. Falls back
+ * to the national cache — loudly — only when no artifact exists yet.
  */
 const getDealsByState = async (state) => {
   const s = (state || 'nsw').toLowerCase();
-  if (s === 'nsw') return getCurrentDeals();
+  if (s === 'nsw' || s === 'act' || !ARTIFACT_STATES.includes(s)) return getCurrentDeals();
 
   const cached = _stateDealCache.get(s);
-  if (cached && Date.now() - cached.fetchedAt < STATE_DEAL_TTL) {
-    console.log(`DealService: Serving ${s.toUpperCase()} deals from memory cache (${cached.deals.length} deals)`);
-    return cached.deals;
+  if (cached && Date.now() - cached.loadedAt < STATE_DEAL_TTL) return cached.deals;
+
+  try {
+    const row = await db?.getStateDeals?.(s);
+    if (row?.data?.deals?.length) {
+      _stateDealCache.set(s, { deals: row.data.deals, loadedAt: Date.now() });
+      console.log(`DealService: ${s.toUpperCase()} serving ${row.data.deals.length} deals from state artifact (fetched ${row.data.fetchedAt})`);
+      return row.data.deals;
+    }
+  } catch (err) {
+    console.warn(`DealService: ${s.toUpperCase()} artifact read failed: ${err.message}`);
   }
 
-  console.log(`DealService: Fetching state-specific deals for ${s.toUpperCase()}...`);
-  try {
-    const byStore = await _fetchRaw(s);
-    const deals   = cacheToFlatArray(byStore);
-    _stateDealCache.set(s, { deals, fetchedAt: Date.now() });
-    console.log(`DealService: ${s.toUpperCase()} deal cache built — ${deals.length} deals`);
-    return deals;
-  } catch (err) {
-    console.warn(`DealService: ${s.toUpperCase()} fetch failed (${err.message}), falling back to NSW cache`);
-    return getCurrentDeals();
-  }
+  console.warn(`DealService: no ${s.toUpperCase()} deal artifact yet — serving national deals (run the weekly pipeline)`);
+  return getCurrentDeals();
 };
 
-/** Invalidate all per-state caches (call after weekly deal refresh). */
+/** Invalidate the process-local state caches (call after weekly deal refresh). */
 const clearStateDealCaches = () => {
   _stateDealCache.clear();
   console.log('DealService: Per-state deal caches cleared');
@@ -557,6 +677,8 @@ module.exports = {
   getDealsByStore,
   getDealsByCategory,
   getDealsByState,
+  refreshStateDeals,
+  waitForEnrichment,
   clearStateDealCaches,
   getCacheInfo,
   loadCache,

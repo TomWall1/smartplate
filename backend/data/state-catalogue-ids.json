@@ -1,35 +1,35 @@
 {
-  "_comment": "Salefinder catalogue IDs by retailer and state. These IDs change weekly. Run scripts/discoverStateCatalogues.js to refresh them.",
+  "_comment": "Salefinder catalogue IDs by retailer and state, classified by catalogue title. These IDs change weekly; run discovery to refresh.",
   "_lastUpdated": "2026-06-11",
   "_weekOf": "2026-06-08",
   "woolworths": {
-    "nsw": 66087,
-    "vic": 64700,
-    "qld": 64630,
-    "wa": 64701,
-    "sa": 64702,
-    "tas": 64711,
-    "nt": 64712,
-    "act": 64710
+    "nsw": 66048,
+    "vic": 66045,
+    "qld": 65968,
+    "wa": 66046,
+    "sa": 66047,
+    "tas": 66049,
+    "nt": 66050,
+    "act": 66048
   },
   "coles": {
-    "nsw": 66018,
-    "vic": 64687,
-    "qld": 64685,
-    "wa": 64686,
-    "sa": 64688,
-    "tas": 64690,
-    "nt": 64691,
-    "act": 64650
+    "nsw": 65988,
+    "vic": 66020,
+    "qld": 66018,
+    "wa": 66019,
+    "sa": 66021,
+    "tas": 66022,
+    "nt": 66023,
+    "act": 65988
   },
   "iga": {
-    "nsw": 66087,
-    "vic": 64709,
-    "qld": 64699,
-    "wa": 64534,
-    "sa": 64539,
+    "nsw": 66083,
+    "vic": 66086,
+    "qld": 66078,
+    "wa": 66053,
+    "sa": 65912,
     "tas": null,
-    "nt": 64670,
-    "act": 66087
+    "nt": 66025,
+    "act": 66083
   }
 }

@@ -4,6 +4,7 @@ const dealService = require('../services/dealService');
 const imageCache  = require('../services/imageCache');
 
 // GET /api/deals/current — serve from cache (instant)
+// Optional ?state=vic serves that state's deal artifact (nsw|vic|qld|wa|sa|tas|nt|act)
 router.get('/current', async (req, res) => {
   try {
     // If startup fetch is still running and no stale cache exists, return 503
@@ -13,7 +14,10 @@ router.get('/current', async (req, res) => {
         message: "We're getting this week's deals ready — check back in 30 seconds.",
       });
     }
-    const deals = await dealService.getCurrentDeals();
+    const state = (req.query.state || '').toLowerCase();
+    const deals = state
+      ? await dealService.getDealsByState(state)
+      : await dealService.getCurrentDeals();
     res.json(deals);
   } catch (error) {
     console.error('Error fetching deals:', error.message);

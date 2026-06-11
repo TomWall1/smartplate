@@ -146,13 +146,13 @@ function AppInner() {
   // 503-warmup retry/countdown mechanics live in useWarmupFetch (shared with
   // StorePage). This callback owns only the data handling.
   const fetchDealsAndRecipes = React.useCallback(async () => {
-    const dealsData = await dealsApi.getCurrentDeals();
+    const currentState = loadFromStorage('smartplate-state', 'nsw');
+    const dealsData = await dealsApi.getCurrentDeals(currentState);
     const dealList = Array.isArray(dealsData) ? dealsData : (dealsData?.deals ?? []);
     setDeals(filterFoodDeals(dealList));
 
     try {
       const ingredients = dealList.map((d) => d.name);
-      const currentState = loadFromStorage('smartplate-state', 'nsw');
       const recipesData = await recipesApi.getRecipeSuggestions(ingredients, {}, [], currentState);
       const recipeList = Array.isArray(recipesData) ? recipesData : (recipesData?.recipes ?? []);
       setWeeklyRecipes(recipeList);
@@ -183,6 +183,17 @@ function AppInner() {
 
     runDealsFetch(0).finally(() => setLoading(false));
   }, [runDealsFetch]);
+
+  // Refetch deals + recipes when the user switches state (skip initial mount —
+  // the mount effect above already fetched with the stored state)
+  const skipFirstStateFetch = React.useRef(true);
+  useEffect(() => {
+    if (skipFirstStateFetch.current) {
+      skipFirstStateFetch.current = false;
+      return;
+    }
+    runDealsFetch(0);
+  }, [userState, runDealsFetch]);
 
   // ── Context value ─────────────────────────────────────────────────────────
   const contextValue = {

@@ -408,7 +408,10 @@ async function fetchSpecialsForState({ slug, retailerId, locationId, nameSelecto
     if (catalogueId) {
       console.log(`[SaleFinder/${store}] Using state catalogue for ${stateLower.toUpperCase()}: ID ${catalogueId}`);
       const catalogue = { id: catalogueId, name: `${store} ${stateLower.toUpperCase()}` };
-      const deals = await fetchCatalogueDeals(catalogue, { retailerId, locationId, nameSelector, store });
+      // locationId 0, not the config's Sydney location: the embed API
+      // returns EMPTY content when the location doesn't belong to the
+      // catalogue's region, which blanked out every non-Sydney state.
+      const deals = await fetchCatalogueDeals(catalogue, { retailerId, locationId: 0, nameSelector, store });
       if (deals.length > 0) {
         console.log(`[SaleFinder/${store}] ${deals.length} food deals for ${stateLower.toUpperCase()}`);
         return deals;
@@ -434,146 +437,184 @@ async function fetchSpecialsForState({ slug, retailerId, locationId, nameSelecto
 }
 
 // ── State catalogue discovery (runs before weekly deal refresh) ───────────────
+//
+// Classification is by catalogue TITLE from the embed API. The old approach
+// probed main-site URLs per state and treated any HTTP 200 as a match;
+// SaleFinder started returning 200 for every state path, so every ID
+// classified as NSW (probed first) and the saved IDs went stale — at one
+// point "Woolworths NSW" pointed at an IGA Victoria catalogue. The embed
+// productlist response carries saleName ("Coles Catalogue QLD METRO",
+// "IGA VIC Medium", "Weekly Catalogue NSW" = Woolworths), areaName, and the
+// validity window, which classify retailer + state + freshness directly.
 
-const PROBE_BEFORE    = 120;
-const PROBE_AFTER     = 30;
-const PROBE_BATCH     = 6;
-const PROBE_DELAY_MS  = 250;
-
-// State slug candidates tried in order when probing a catalogue ID
-const STATE_SLUGS = {
-  woolworths: ['weekly-catalogue', 'weekly-specials-catalogue'],
-  coles:      ['catalogue',        'weekly-catalogue'],
-  iga:        ['catalogue',        'weekly-specials'],
-};
-
-const RETAILER_PROBES = [
-  { slug: 'woolworths', slugVariants: STATE_SLUGS.woolworths },
-  { slug: 'coles',      slugVariants: STATE_SLUGS.coles      },
-  { slug: 'iga',        slugVariants: STATE_SLUGS.iga        },
-];
+const PROBE_WINDOW_BEFORE = 180;
+const PROBE_WINDOW_AFTER  = 40;
+const PROBE_BATCH         = 8;
+const PROBE_DELAY_MS      = 200;
 
 const AU_STATES = ['nsw', 'vic', 'qld', 'wa', 'sa', 'tas', 'nt', 'act'];
+const STATE_TOKEN = /\b(NSW|VIC|QLD|WA|SA|TAS|NT|ACT)\b/;
 
-async function _probeId(id) {
+/**
+ * Fetch a catalogue's metadata (saleName, areaName, validity window) from
+ * the embed API. Returns null for invalid/empty catalogue IDs.
+ */
+async function getCatalogueInfo(id) {
   try {
-    const res = await axios.get(`https://embed.salefinder.com.au/productlist/category/${id}`, {
+    const res = await axios.get(`${BASE_URL}productlist/category/${id}`, {
       params: { categoryId: '1', rows_per_page: 1, saleGroup: 0 },
       timeout: 10000,
     });
-    if (typeof res.data !== 'string' || res.data.length < 10) return false;
-    try {
-      const parsed = JSON.parse(res.data.substring(1, res.data.length - 1).replace(/[\r\n\t]/g, ''));
-      return !!(parsed?.content && parsed.content.length > 20);
-    } catch {
-      return false;
-    }
+    const parsed = parseJSONP(res.data);
+    if (!parsed?.saleName) return null;
+    return {
+      id,
+      saleName:  parsed.saleName,
+      areaName:  parsed.areaName || '',
+      startDate: (parsed.startDate || '').slice(0, 10),
+      endDate:   (parsed.endDate || '').slice(0, 10),
+    };
   } catch {
-    return false;
+    return null;
   }
 }
 
-async function _findStateForId(retailerSlug, catalogueId, slugVariants) {
-  for (const state of AU_STATES) {
-    for (const variant of slugVariants) {
-      const url = `https://www.salefinder.com.au/${retailerSlug}-catalogue/${variant}-${state}/${catalogueId}/catalogue2`;
-      try {
-        const res = await axios.get(url, {
-          timeout: 8000,
-          maxRedirects: 3,
-          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SmartPlate/1.0)' },
-          validateStatus: s => s < 500,
-        });
-        if (res.status === 200 && typeof res.data === 'string' && res.data.length > 100) {
-          return state;
-        }
-      } catch {
-        // try next variant
-      }
-    }
-  }
+/** Classify retailer from the saleName. Returns null for non-supermarket sales. */
+function _classifyRetailer(info) {
+  const sale = info.saleName;
+  if (/^coles\b/i.test(sale)) return 'coles';
+  if (/^iga\b/i.test(sale))   return 'iga';
+  // Woolworths' weekly catalogues are titled "Weekly Catalogue {STATE}".
+  if (/^weekly catalogue\b/i.test(sale)) return 'woolworths';
   return null;
+}
+
+/** Classify state from saleName/areaName tokens. Returns lowercase state or null. */
+function _classifyState(info) {
+  const haystack = `${info.saleName} ${info.areaName}`.toUpperCase();
+  const m = haystack.match(STATE_TOKEN);
+  return m ? m[0].toLowerCase() : null;
+}
+
+/**
+ * Score a candidate catalogue for selection within a (retailer, state).
+ * Higher wins. Prefers the canonical metro/weekly edition over regional,
+ * "Specialty", short-window ("3 Day") and small-format variants.
+ */
+function _scoreCandidate(retailer, state, info) {
+  const sale = info.saleName.toLowerCase();
+  const area = info.areaName.toLowerCase();
+  if (/3 day/i.test(sale)) return -1; // transient mid-week sale, never use
+
+  let score = 0;
+  if (retailer === 'woolworths') {
+    // Canonical: areaName is exactly the state token (not "QLD Specialty",
+    // not regional "NSW-NORTH").
+    if (area === state) score += 10;
+    else if (area.includes('specialty')) score += 4;
+    else score += 1;
+  } else if (retailer === 'coles') {
+    if (area === `c-${state}-met`) score += 10; // metro edition
+    else score += 2;
+  } else if (retailer === 'iga') {
+    if (sale.includes('large')) score += 6;
+    else if (sale.includes('medium')) score += 4;
+    else score += 1; // local grocer / country
+    const v = sale.match(/v(\d)/);
+    if (v) score += parseInt(v[1], 10) * 0.1;
+  }
+  return score;
 }
 
 /**
  * Discover current Salefinder catalogue IDs for all Australian states.
- * Probes a window of IDs around the geo-located NSW baseline to find
- * state-specific catalogues for Woolworths, Coles, and IGA.
+ *
+ * 1. Anchor a probe window on the geo-located discovery pages (max ID seen).
+ * 2. Fetch metadata for every ID in the window via the embed API.
+ * 3. Classify each valid catalogue by retailer + state from its title,
+ *    keep only catalogues valid TODAY, and pick the best edition per
+ *    (retailer, state).
  *
  * Saves results to backend/data/state-catalogue-ids.json.
- * Called automatically by the weekly cron job before deal refresh.
  *
  * @returns {boolean} true if any IDs changed, false if unchanged or failed
  */
 async function discoverAndSaveStateCatalogues() {
-  console.log('[CatalogueDiscovery] Starting weekly catalogue ID discovery...');
+  console.log('[CatalogueDiscovery] Starting title-based catalogue discovery...');
   const existing = loadStateIds();
-  const output   = {
-    _comment:     existing._comment || 'Salefinder catalogue IDs by retailer and state. These IDs change weekly.',
+
+  // Anchor the window: max ID across all retailers' discovery pages,
+  // falling back to the max previously-known ID.
+  let anchor = null;
+  for (const slug of ['woolworths', 'coles', 'iga']) {
+    try {
+      const catalogues = await discoverCatalogueIds(slug);
+      for (const c of catalogues) anchor = Math.max(anchor ?? 0, c.id);
+    } catch (err) {
+      console.warn(`[CatalogueDiscovery] ${slug} discovery page failed: ${err.message}`);
+    }
+  }
+  if (!anchor) {
+    const knownIds = ['woolworths', 'coles', 'iga']
+      .flatMap(slug => Object.values(existing[slug] || {}))
+      .filter(v => typeof v === 'number');
+    anchor = knownIds.length ? Math.max(...knownIds) : null;
+  }
+  if (!anchor) {
+    console.error('[CatalogueDiscovery] No anchor ID available — keeping existing file');
+    return false;
+  }
+
+  // Probe the window for catalogue metadata
+  const start = anchor - PROBE_WINDOW_BEFORE;
+  const end   = anchor + PROBE_WINDOW_AFTER;
+  const ids   = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  const infos = [];
+  for (let i = 0; i < ids.length; i += PROBE_BATCH) {
+    const batch = await Promise.all(ids.slice(i, i + PROBE_BATCH).map(getCatalogueInfo));
+    infos.push(...batch.filter(Boolean));
+    if (i + PROBE_BATCH < ids.length) await new Promise(r => setTimeout(r, PROBE_DELAY_MS));
+  }
+  console.log(`[CatalogueDiscovery] ${infos.length} catalogues found in window ${start}–${end} (anchor ${anchor})`);
+
+  // Classify and select: best current catalogue per (retailer, state)
+  const today = new Date().toISOString().slice(0, 10);
+  const best  = { woolworths: {}, coles: {}, iga: {} }; // retailer → state → {id, score, saleName}
+  for (const info of infos) {
+    const retailer = _classifyRetailer(info);
+    const state    = _classifyState(info);
+    if (!retailer || !state) continue;
+    if (info.endDate && info.endDate < today) continue;       // expired
+    if (info.startDate && info.startDate > today) continue;   // not yet active
+    const score = _scoreCandidate(retailer, state, info);
+    if (score < 0) continue;
+    const cur = best[retailer][state];
+    if (!cur || score > cur.score || (score === cur.score && info.id > cur.id)) {
+      best[retailer][state] = { id: info.id, score, saleName: info.saleName };
+    }
+  }
+
+  const output = {
+    _comment:     'Salefinder catalogue IDs by retailer and state, classified by catalogue title. These IDs change weekly; run discovery to refresh.',
     _lastUpdated: new Date().toISOString().slice(0, 10),
     _weekOf:      new Date(Date.now() - ((new Date().getDay() + 6) % 7) * 86400000).toISOString().slice(0, 10),
   };
   let anyChanged = false;
 
-  for (const { slug, slugVariants } of RETAILER_PROBES) {
-    output[slug] = {};
-
-    // Get baseline NSW catalogue from geo-located page
-    let baseId = null;
-    try {
-      const catalogues = await discoverCatalogueIds(slug);
-      if (catalogues.length > 0) {
-        baseId = Math.max(...catalogues.map(c => c.id));
-        console.log(`[CatalogueDiscovery] ${slug}: baseline NSW ID = ${baseId}`);
-      }
-    } catch (err) {
-      console.warn(`[CatalogueDiscovery] ${slug}: discovery page failed — ${err.message}`);
-    }
-
-    if (!baseId) {
-      console.warn(`[CatalogueDiscovery] ${slug}: no baseline ID found, keeping existing`);
-      output[slug] = existing[slug] || {};
-      continue;
-    }
-
-    // Probe IDs in window around baseline
-    const probeStart = baseId - PROBE_BEFORE;
-    const probeEnd   = baseId + PROBE_AFTER;
-    const ids        = Array.from({ length: probeEnd - probeStart + 1 }, (_, i) => probeStart + i);
-    const validIds   = [];
-
-    for (let i = 0; i < ids.length; i += PROBE_BATCH) {
-      const batch   = ids.slice(i, i + PROBE_BATCH);
-      const results = await Promise.all(batch.map(id => _probeId(id).then(v => v ? id : null)));
-      validIds.push(...results.filter(Boolean));
-      if (i + PROBE_BATCH < ids.length) await new Promise(r => setTimeout(r, PROBE_DELAY_MS));
-    }
-
-    console.log(`[CatalogueDiscovery] ${slug}: ${validIds.length} valid IDs found in range ${probeStart}–${probeEnd}`);
-
-    // Resolve state for each valid ID
-    const stateMap = {};
-    for (const id of validIds) {
-      const state = await _findStateForId(slug, id, slugVariants);
-      if (state) {
-        // Keep the highest ID per state (most recent catalogue)
-        if (!stateMap[state] || id > stateMap[state]) stateMap[state] = id;
-      }
-    }
-
-    // Populate output, fall back to existing for missing states
+  for (const retailer of ['woolworths', 'coles', 'iga']) {
+    output[retailer] = {};
     for (const state of AU_STATES) {
-      output[slug][state] = stateMap[state] ?? existing[slug]?.[state] ?? null;
+      output[retailer][state] = best[retailer][state]?.id ?? null;
     }
-    // ACT uses NSW catalogue if not found separately
-    if (!output[slug].act) output[slug].act = output[slug].nsw ?? null;
+    // ACT has no dedicated catalogues — use NSW
+    if (!output[retailer].act) output[retailer].act = output[retailer].nsw ?? null;
 
-    // Log changes
     for (const state of AU_STATES) {
-      const prev = existing[slug]?.[state];
-      const next = output[slug][state];
-      if (prev !== next && next) {
-        console.log(`[CatalogueDiscovery] ${slug}/${state}: ${prev ?? 'null'} → ${next}`);
+      const prev = existing[retailer]?.[state];
+      const next = output[retailer][state];
+      if (prev !== next) {
+        const label = best[retailer][state]?.saleName ?? '(none)';
+        console.log(`[CatalogueDiscovery] ${retailer}/${state}: ${prev ?? 'null'} → ${next ?? 'null'} "${label}"`);
         anyChanged = true;
       }
     }
@@ -709,9 +750,11 @@ async function fetchFromMainSite(retailerSlug, store) {
 module.exports = {
   fetchSpecials,
   fetchSpecialsForState,
+  fetchCatalogueDeals,
   fetchFromMainSite,
   discoverCatalogueIds,
   discoverAndSaveStateCatalogues,
+  getCatalogueInfo,
   getCategories,
   getItems,
   loadStateIds,

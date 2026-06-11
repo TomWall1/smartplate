@@ -57,14 +57,6 @@ function applyExcludedIngredientFilter(recipes, excludeIngredients) {
   ];
 }
 
-// Common words to ignore when building deal keyword sets for state matching
-const STOP_WORDS = new Set([
-  'with', 'from', 'that', 'this', 'free', 'pack', 'each', 'fresh', 'whole', 'half',
-  'mini', 'large', 'small', 'extra', 'super', 'mega', 'plus', 'best', 'fine', 'good',
-  'original', 'classic', 'premium', 'select', 'value', 'range', 'brand', 'size',
-  'type', 'variety', 'assorted', 'mixed', 'style', 'flavour', 'natural', 'organic',
-]);
-
 class RecipeService {
   constructor() {
     this.anthropic = process.env.ANTHROPIC_API_KEY
@@ -159,67 +151,125 @@ class RecipeService {
       console.warn('RecipeService: cost estimates unavailable — price chips hidden this week:', costErr.message);
     }
 
-    const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-
-    const normalised = matchedWithSavings.map((libRecipe, i) => {
-      // Best deal per unique ingredient (deduped), then top 5 by saving.
-      // Without dedup, "rice" can match 4+ rice products and the savings
-      // double-count, making estimatedSaving exceed the meal's cost.
-      const seenIngredients = new Set();
-      const topDeals = [...(libRecipe.matchedDeals || [])]
-        .sort((a, b) => (b.saving || 0) - (a.saving || 0))
-        .filter(md => {
-          if (!md.ingredient || seenIngredients.has(md.ingredient)) return false;
-          seenIngredients.add(md.ingredient);
-          return true;
-        })
-        .slice(0, 5);
-
-      const estimatedSaving = +topDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2);
-      const dealIngredients = topDeals.map(d => d.dealName);
-      // Format matches the old Claude output ("Ingredient $X.XX at Store (save $Y.YY)");
-      // _filterRecipesByStore relies on the store name appearing in the string.
-      const dealHighlights = topDeals.map(d => {
-        const price = d.price != null ? ` $${d.price.toFixed(2)}` : '';
-        const store = d.store ? ` at ${cap(d.store)}` : '';
-        const save  = d.saving ? ` (save $${d.saving.toFixed(2)})` : '';
-        return `${cap(d.ingredient)}${price}${store}${save}`;
-      });
-
-      const libIngredients = libRecipe.ingredients || [];
-      const allIngredients = libIngredients.map(ing => ing.raw || ing.name).filter(Boolean);
-      return {
-        id: i + 1,
-        title: decodeHtml(libRecipe.title) || `Recipe ${i + 1}`,
-        description: decodeHtml(libRecipe.description) || '',
-        dealIngredients,
-        allIngredients,
-        estimatedSaving,
-        totalEstimatedCost: costMap.get(recipeCostService.recipeKey(libRecipe)) ?? 0,
-        prepTime: libRecipe.totalTime || libRecipe.prepTime || 30,
-        servings: libRecipe.servings || 4,
-        steps: libRecipe.steps || [],
-        tags: libRecipe.tags || [],
-        dealHighlights,
-        matchedDeals:          libRecipe.matchedDeals         || [],
-        weightedScore:         libRecipe.weightedScore         ?? null,
-        totalMealSaving:       libRecipe.totalMealSaving       ?? null,
-        totalPerServingSaving: libRecipe.totalPerServingSaving ?? null,
-        // Backwards compat fields for existing frontend
-        image: libRecipe.image || `https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400`,
-        cookTime: libRecipe.cookTime || libRecipe.totalTime || 30,
-        rating: 4.5,
-        ingredients: allIngredients,
-        instructions: Array.isArray(libRecipe.steps) ? libRecipe.steps.join(' ') : '',
-        source: libRecipe.source || 'recipetineats',
-        sourceUrl: libRecipe.url || '#',
-        nutrition: libRecipe.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 },
-      };
-    });
+    const normalised = matchedWithSavings.map((libRecipe, i) =>
+      this._composeWeeklyRecipe(libRecipe, i, costMap)
+    );
 
     await this._saveWeeklyRecipes(normalised);
     console.log(`RecipeService: stored ${normalised.length} weekly recipes (deal fields computed in code — no weekly enrichment call)`);
     return normalised;
+  }
+
+  /**
+   * Compose the serving shape for one matched library recipe: deal-aware
+   * fields computed in code from its matchedDeals, everything else from the
+   * library. Shared by the national and per-state generation paths.
+   */
+  _composeWeeklyRecipe(libRecipe, i, costMap) {
+    const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+    // Best deal per unique ingredient (deduped), then top 5 by saving.
+    // Without dedup, "rice" can match 4+ rice products and the savings
+    // double-count, making estimatedSaving exceed the meal's cost.
+    const seenIngredients = new Set();
+    const topDeals = [...(libRecipe.matchedDeals || [])]
+      .sort((a, b) => (b.saving || 0) - (a.saving || 0))
+      .filter(md => {
+        if (!md.ingredient || seenIngredients.has(md.ingredient)) return false;
+        seenIngredients.add(md.ingredient);
+        return true;
+      })
+      .slice(0, 5);
+
+    const estimatedSaving = +topDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2);
+    const dealIngredients = topDeals.map(d => d.dealName);
+    // Format matches the old Claude output ("Ingredient $X.XX at Store (save $Y.YY)");
+    // _filterRecipesByStore relies on the store name appearing in the string.
+    const dealHighlights = topDeals.map(d => {
+      const price = d.price != null ? ` $${d.price.toFixed(2)}` : '';
+      const store = d.store ? ` at ${cap(d.store)}` : '';
+      const save  = d.saving ? ` (save $${d.saving.toFixed(2)})` : '';
+      return `${cap(d.ingredient)}${price}${store}${save}`;
+    });
+
+    const libIngredients = libRecipe.ingredients || [];
+    const allIngredients = libIngredients.map(ing => ing.raw || ing.name).filter(Boolean);
+    return {
+      id: i + 1,
+      title: decodeHtml(libRecipe.title) || `Recipe ${i + 1}`,
+      description: decodeHtml(libRecipe.description) || '',
+      dealIngredients,
+      allIngredients,
+      estimatedSaving,
+      totalEstimatedCost: costMap.get(recipeCostService.recipeKey(libRecipe)) ?? 0,
+      prepTime: libRecipe.totalTime || libRecipe.prepTime || 30,
+      servings: libRecipe.servings || 4,
+      steps: libRecipe.steps || [],
+      tags: libRecipe.tags || [],
+      dealHighlights,
+      matchedDeals:          libRecipe.matchedDeals         || [],
+      weightedScore:         libRecipe.weightedScore         ?? null,
+      totalMealSaving:       libRecipe.totalMealSaving       ?? null,
+      totalPerServingSaving: libRecipe.totalPerServingSaving ?? null,
+      // Backwards compat fields for existing frontend
+      image: libRecipe.image || `https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400`,
+      cookTime: libRecipe.cookTime || libRecipe.totalTime || 30,
+      rating: 4.5,
+      ingredients: allIngredients,
+      instructions: Array.isArray(libRecipe.steps) ? libRecipe.steps.join(' ') : '',
+      source: libRecipe.source || 'recipetineats',
+      sourceUrl: libRecipe.url || '#',
+      nutrition: libRecipe.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    };
+  }
+
+  /**
+   * Generate and persist per-state weekly recipe artifacts from the
+   * per-state deal artifacts. Runs after the national generation; the edge
+   * store makes the matching essentially free (verdicts are shared across
+   * states — only state-unique IGA pairings are ever judged fresh).
+   */
+  async generateAllStateRecipes() {
+    const recipeMatcher    = require('./recipeMatcher');
+    const matchEdgeService = require('./matchEdgeService');
+    const db = require('../database/db');
+    const STATES = ['vic', 'qld', 'wa', 'sa', 'tas', 'nt'];
+
+    for (const state of STATES) {
+      try {
+        const row = await db.getStateDeals(state);
+        const deals = row?.data?.deals;
+        if (!deals?.length) {
+          console.warn(`RecipeService: no ${state.toUpperCase()} deal artifact — skipping state recipes`);
+          continue;
+        }
+
+        const matched = await recipeMatcher.matchDeals(deals, 150);
+        if (!matched.length) {
+          console.warn(`RecipeService: ${state.toUpperCase()} matched 0 recipes — skipping`);
+          continue;
+        }
+
+        await matchEdgeService.filterRecipesByEdges(matched);
+        const withDeals = matched.filter(r => (r.matchedDeals || []).length > 0);
+        const withSavings = withDeals.map(r => enrichMatchedDealsWithSavings(r, r.matchedDeals));
+
+        let costMap = new Map();
+        try {
+          costMap = await recipeCostService.getCosts(withSavings);
+        } catch (costErr) {
+          console.warn(`RecipeService: ${state.toUpperCase()} cost estimates unavailable: ${costErr.message}`);
+        }
+
+        const recipes = withSavings.map((r, i) => this._composeWeeklyRecipe(r, i, costMap));
+        await db.saveStateRecipes(state, recipes, deals.length);
+        console.log(`RecipeService: ${state.toUpperCase()} recipe artifact stored — ${recipes.length} recipes against ${deals.length} deals`);
+      } catch (err) {
+        console.error(`RecipeService: ${state.toUpperCase()} recipe generation failed: ${err.message}`);
+      }
+    }
+
+    this._stateRecipeCache.clear();
   }
 
   // ── Personalised filtering (local, no API call) ────────────────────
@@ -451,88 +501,43 @@ class RecipeService {
 
   // ── State-aware recipe delivery ──────────────────────────────────────────────
 
-  // In-memory per-state recipe re-score cache.
-  // Keyed by state abbreviation; invalidated on weekly recipe generation.
+  // Process-local read cache over the per-state recipe artifacts in the DB.
+  // Invalidated on weekly generation.
   _stateRecipeCache = new Map(); // state → { recipes, builtAt }
-  static STATE_RECIPE_TTL = 6 * 60 * 60 * 1000; // 6 hours
+  static STATE_RECIPE_TTL = 6 * 60 * 60 * 1000; // re-read DB row after 6h
 
   /**
-   * Returns weekly recipes re-scored for relevance to the user's state.
+   * Returns the weekly recipes generated against the user's state's own
+   * deals (per-state artifact built by the weekly pipeline). NSW/ACT use
+   * the national set. Falls back to the national set — loudly — only when
+   * no artifact exists yet.
    *
-   * Strategy (fast, no AI calls):
-   *   1. Fetch state-specific deals from Salefinder (cached in dealService).
-   *   2. For each weekly recipe, count how many of its allIngredients appear
-   *      as keywords in the state deal names.
-   *   3. Sort by state-deal match count; discard recipes with zero matches
-   *      only if enough remain (>= 5).
-   *   4. First request for a state starts a background build and immediately
-   *      returns NSW weekly recipes as a fast fallback.
+   * This replaced the old keyword re-scoring approach, which shuffled the
+   * ORDER of NSW recipes but still showed NSW deals and prices to every
+   * state.
    */
   async getRecipesByState(state, store = null) {
     const s = (state || 'nsw').toLowerCase();
-    if (s === 'nsw') return this.getWeeklyRecipes(store);
+    if (s === 'nsw' || s === 'act') return this.getWeeklyRecipes(store);
 
     const cached = this._stateRecipeCache.get(s);
     if (cached && Date.now() - cached.builtAt < RecipeService.STATE_RECIPE_TTL) {
-      const recipes = store ? this._filterRecipesByStore(cached.recipes, store) : cached.recipes;
-      return recipes;
+      return store ? this._filterRecipesByStore(cached.recipes, store) : cached.recipes;
     }
 
-    // Start background build if not already running
-    if (!cached?.pending) {
-      this._stateRecipeCache.set(s, { pending: true });
-      this._buildStateRecipeCache(s).catch(err => {
-        console.warn(`RecipeService: State recipe cache build failed for ${s}:`, err.message);
-        this._stateRecipeCache.delete(s);
-      });
+    try {
+      const db = require('../database/db');
+      const row = await db.getStateRecipes(s);
+      if (row?.recipes?.length) {
+        this._stateRecipeCache.set(s, { recipes: row.recipes, builtAt: Date.now() });
+        return store ? this._filterRecipesByStore(row.recipes, store) : row.recipes;
+      }
+    } catch (err) {
+      console.warn(`RecipeService: ${s.toUpperCase()} recipe artifact read failed: ${err.message}`);
     }
 
-    // Return NSW results while state cache is being built
+    console.warn(`RecipeService: no ${s.toUpperCase()} recipe artifact yet — serving national set (run the weekly pipeline)`);
     return this.getWeeklyRecipes(store);
-  }
-
-  async _buildStateRecipeCache(state) {
-    const dealService = require('./dealService');
-    console.log(`RecipeService: Building recipe relevance cache for ${state.toUpperCase()}...`);
-
-    const stateDeals = await dealService.getDealsByState(state);
-    if (!stateDeals || stateDeals.length === 0) {
-      this._stateRecipeCache.delete(state);
-      return;
-    }
-
-    // Build a keyword set from deal names for fast matching
-    // e.g. "Woolworths Free Range Chicken Breast 500g" → ["free", "range", "chicken", "breast"]
-    const dealKeywords = stateDeals.flatMap(deal => {
-      return deal.name.toLowerCase()
-        .replace(/[^a-z\s]/g, ' ')
-        .split(/\s+/)
-        .filter(w => w.length > 3 && !STOP_WORDS.has(w));
-    });
-    const dealKwSet = new Set(dealKeywords);
-
-    const weeklyRecipes = this.getWeeklyRecipes(null);
-
-    const rescored = weeklyRecipes
-      .map(recipe => {
-        // Combine all ingredient text for this recipe
-        const ingText = [
-          ...(recipe.allIngredients || []),
-          ...(recipe.dealIngredients || []),
-        ].join(' ').toLowerCase().replace(/[^a-z\s]/g, ' ');
-
-        const ingWords = ingText.split(/\s+/).filter(w => w.length > 3);
-        const matchCount = ingWords.filter(w => dealKwSet.has(w)).length;
-        return { ...recipe, _stateMatchCount: matchCount };
-      })
-      .sort((a, b) => b._stateMatchCount - a._stateMatchCount);
-
-    // Discard zero-match recipes only if we still have plenty
-    const withMatches = rescored.filter(r => r._stateMatchCount > 0);
-    const result = withMatches.length >= 5 ? withMatches : rescored;
-
-    this._stateRecipeCache.set(state, { recipes: result, builtAt: Date.now(), pending: false });
-    console.log(`RecipeService: ${state.toUpperCase()} recipe cache built — ${result.length} recipes (${withMatches.length} with state deal matches)`);
   }
 
   async getRecipeDetails(recipeId, store = null) {

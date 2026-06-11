@@ -369,6 +369,47 @@ function saveRecipeCosts(rows) {
   return rows.length;
 }
 
+// ── Per-State Artifacts ───────────────────────────────────────────────────────
+
+function saveStateDeals(state, data) {
+  getDb().prepare(`
+    INSERT INTO state_deals_cache (state, data)
+    VALUES (?, ?)
+    ON CONFLICT(state) DO UPDATE
+      SET data = excluded.data, fetched_at = datetime('now')
+  `).run(state, JSON.stringify(data));
+}
+
+function getStateDeals(state) {
+  const row = getDb().prepare(
+    'SELECT data, fetched_at FROM state_deals_cache WHERE state = ?'
+  ).get(state);
+  if (!row) return null;
+  return { data: JSON.parse(row.data), fetchedAt: row.fetched_at };
+}
+
+function saveStateRecipes(state, recipes, dealCount = 0) {
+  getDb().prepare(`
+    INSERT INTO state_recipes_cache (state, recipes, deal_count)
+    VALUES (?, ?, ?)
+    ON CONFLICT(state) DO UPDATE
+      SET recipes = excluded.recipes, deal_count = excluded.deal_count,
+          generated_at = datetime('now')
+  `).run(state, JSON.stringify(recipes), dealCount);
+}
+
+function getStateRecipes(state) {
+  const row = getDb().prepare(
+    'SELECT recipes, deal_count, generated_at FROM state_recipes_cache WHERE state = ?'
+  ).get(state);
+  if (!row) return null;
+  return {
+    recipes:     JSON.parse(row.recipes || '[]'),
+    dealCount:   row.deal_count,
+    generatedAt: row.generated_at,
+  };
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 function deserializeProduct(row) {
@@ -398,6 +439,10 @@ module.exports = {
   saveMatchEdges,
   getRecipeCosts,
   saveRecipeCosts,
+  saveStateDeals,
+  getStateDeals,
+  saveStateRecipes,
+  getStateRecipes,
   insertProduct,
   insertProductBatch,
   getProductById,

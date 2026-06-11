@@ -76,6 +76,21 @@ const _autoMigrate = (async () => {
         estimated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS state_deals_cache (
+        state      TEXT PRIMARY KEY,
+        data       JSONB     NOT NULL,
+        fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS state_recipes_cache (
+        state        TEXT PRIMARY KEY,
+        recipes      JSONB     NOT NULL,
+        deal_count   INTEGER   NOT NULL DEFAULT 0,
+        generated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
     // insertProduct upserts ON CONFLICT (barcode); the prod table predates
     // schema.pg.sql's UNIQUE and was created without it, so every new-product
     // insert failed ("no unique or exclusion constraint") and the knowledge
@@ -467,6 +482,58 @@ async function saveRecipeCosts(rows) {
   return rows.length;
 }
 
+// ── Per-State Artifacts ───────────────────────────────────────────────────────
+
+/** Upsert one state's deal artifact: {state, deals, missingRetailers, fetchedAt}. */
+async function saveStateDeals(state, data) {
+  await _autoMigrate;
+  await pool.query(`
+    INSERT INTO state_deals_cache (state, data)
+    VALUES ($1, $2)
+    ON CONFLICT (state) DO UPDATE
+      SET data = EXCLUDED.data, fetched_at = CURRENT_TIMESTAMP
+  `, [state, JSON.stringify(data)]);
+}
+
+async function getStateDeals(state) {
+  await _autoMigrate;
+  const result = await pool.query(
+    'SELECT data, fetched_at FROM state_deals_cache WHERE state = $1', [state]
+  );
+  if (!result.rows[0]) return null;
+  const row = result.rows[0];
+  return {
+    data:      typeof row.data === 'string' ? JSON.parse(row.data) : row.data,
+    fetchedAt: row.fetched_at,
+  };
+}
+
+/** Upsert one state's weekly recipe artifact. */
+async function saveStateRecipes(state, recipes, dealCount = 0) {
+  await _autoMigrate;
+  await pool.query(`
+    INSERT INTO state_recipes_cache (state, recipes, deal_count)
+    VALUES ($1, $2, $3)
+    ON CONFLICT (state) DO UPDATE
+      SET recipes = EXCLUDED.recipes, deal_count = EXCLUDED.deal_count,
+          generated_at = CURRENT_TIMESTAMP
+  `, [state, JSON.stringify(recipes), dealCount]);
+}
+
+async function getStateRecipes(state) {
+  await _autoMigrate;
+  const result = await pool.query(
+    'SELECT recipes, deal_count, generated_at FROM state_recipes_cache WHERE state = $1', [state]
+  );
+  if (!result.rows[0]) return null;
+  const row = result.rows[0];
+  return {
+    recipes:     typeof row.recipes === 'string' ? JSON.parse(row.recipes) : row.recipes,
+    dealCount:   row.deal_count,
+    generatedAt: row.generated_at,
+  };
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 async function getStats() {
@@ -486,6 +553,10 @@ module.exports = {
   saveMatchEdges,
   getRecipeCosts,
   saveRecipeCosts,
+  saveStateDeals,
+  getStateDeals,
+  saveStateRecipes,
+  getStateRecipes,
   insertProduct,
   insertProductBatch,
   getProductById,

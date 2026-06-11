@@ -131,14 +131,13 @@ app.post('/api/admin/refresh-deals', (req, res) => {
         console.warn(`External cron: catalogue discovery failed — continuing: ${err.message}`);
       }
     }
-    // Step 2: Deal refresh
+    // Step 2: Deal refresh (national/NSW baseline; enrichment continues in background)
     const dealService = require('./services/dealService');
     const { cache } = await dealService.refreshDeals();
     const total = (cache.woolworths?.length || 0) + (cache.coles?.length || 0) + (cache.iga?.length || 0);
     console.log(`External cron: deal refresh complete — ${total} deals`);
-    dealService.clearStateDealCaches();
 
-    // Step 3: Regenerate weekly recipes against the new deals
+    // Step 3: Regenerate national weekly recipes against the new deals
     try {
       const recipeService = require('./services/recipeService');
       console.log('External cron: regenerating weekly recipes against new deals...');
@@ -146,6 +145,27 @@ app.post('/api/admin/refresh-deals', (req, res) => {
       console.log(`External cron: recipe generation complete — ${recipes.length} recipes`);
     } catch (err) {
       console.error('External cron: recipe generation failed:', err.message);
+    }
+
+    // Step 4: Per-state deal artifacts. Waits for the background image/PI
+    // enrichment of the national cache so shared deals can copy enrichment.
+    try {
+      console.log('External cron: waiting for enrichment, then building state artifacts...');
+      await dealService.waitForEnrichment();
+      await dealService.refreshStateDeals();
+    } catch (err) {
+      console.error('External cron: state deal artifacts failed:', err.message);
+    }
+    dealService.clearStateDealCaches();
+
+    // Step 5: Per-state recipe artifacts (edge verdicts shared with step 3,
+    // so this is matching + composition, near-zero tokens)
+    try {
+      const recipeService = require('./services/recipeService');
+      await recipeService.generateAllStateRecipes();
+      console.log('External cron: state recipe artifacts complete');
+    } catch (err) {
+      console.error('External cron: state recipe generation failed:', err.message);
     }
   })()
     .catch((err) => console.error('External cron: pipeline error:', err.message))

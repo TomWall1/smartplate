@@ -188,3 +188,18 @@ CREATE TABLE IF NOT EXISTS recipe_meta (
   model                TEXT,
   estimated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ── Per-State Artifacts (weekly pipeline output, keyed by state) ─────────────
+
+CREATE TABLE IF NOT EXISTS state_deals_cache (
+  state      TEXT PRIMARY KEY,
+  data       JSONB     NOT NULL,
+  fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS state_recipes_cache (
+  state        TEXT PRIMARY KEY,
+  recipes      JSONB     NOT NULL,
+  deal_count   INTEGER   NOT NULL DEFAULT 0,
+  generated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

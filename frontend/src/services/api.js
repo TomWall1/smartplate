@@ -62,9 +62,11 @@ api.interceptors.response.use(
 
 // Deal API calls
 export const dealsApi = {
-  getCurrentDeals: async () => {
+  getCurrentDeals: async (state = null) => {
     try {
-      const response = await api.get('/api/deals/current');
+      const response = await api.get('/api/deals/current', {
+        params: state ? { state } : {},
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching deals:', error);
