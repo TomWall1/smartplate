@@ -74,13 +74,48 @@ app.use('/api/pantry',   pantryRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/auth',     authRoutes);
 
-// External cron trigger — used by cron-job.org / GitHub Actions for weekly refresh
-// Returns 202 immediately; refresh runs in background to avoid proxy timeouts.
+// External cron trigger — used by GitHub Actions for the weekly refresh.
+// This is the ONLY writer of the deals/recipes artifacts (boot never computes).
+// Idempotent: a run-lock rejects concurrent triggers, and a freshness guard
+// skips the pipeline when deals were already refreshed recently (duplicate
+// trigger, Action retry, manual + scheduled overlap). Override with ?force=true.
+// Returns 202 immediately in all cases; the `status` field says what happened.
+let _pipelineRunning = false;
+const PIPELINE_FRESHNESS_MS = 12 * 60 * 60 * 1000; // 12 hours
+
 app.post('/api/admin/refresh-deals', (req, res) => {
   const skipDiscovery = req.query.skipDiscovery === 'true';
-  console.log(`External cron: triggered deal refresh (discovery: ${!skipDiscovery})`);
+  const force         = req.query.force === 'true';
+
+  if (_pipelineRunning) {
+    console.log('External cron: trigger ignored — pipeline already running');
+    return res.status(202).json({
+      success: true,
+      status: 'already-running',
+      message: 'Pipeline already in progress — duplicate trigger ignored.',
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  const dealService = require('./services/dealService');
+  const info  = dealService.getCacheInfo();
+  const ageMs = info?.lastUpdated ? Date.now() - new Date(info.lastUpdated).getTime() : Infinity;
+  if (!force && ageMs < PIPELINE_FRESHNESS_MS) {
+    const ageH = (ageMs / 3600000).toFixed(1);
+    console.log(`External cron: trigger skipped — deals are only ${ageH}h old`);
+    return res.status(202).json({
+      success: true,
+      status: 'skipped-fresh',
+      message: `Deals refreshed ${ageH}h ago (< 12h) — skipping. Use ?force=true to override.`,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  console.log(`External cron: triggered deal refresh (discovery: ${!skipDiscovery}, force: ${force})`);
+  _pipelineRunning = true;
   res.status(202).json({
     success: true,
+    status: 'started',
     message: 'Deal refresh pipeline started in background.',
     timestamp: new Date().toISOString(),
   });
@@ -112,7 +147,9 @@ app.post('/api/admin/refresh-deals', (req, res) => {
     } catch (err) {
       console.error('External cron: recipe generation failed:', err.message);
     }
-  })().catch((err) => console.error('External cron: pipeline error:', err.message));
+  })()
+    .catch((err) => console.error('External cron: pipeline error:', err.message))
+    .finally(() => { _pipelineRunning = false; });
 });
 
 // Health check
@@ -178,63 +215,46 @@ if (!process.env.VERCEL) {
     console.log(`SmartPlate API running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 
-    // Non-blocking startup cache check — populate deals if cache is empty.
-    // Registers the fetch promise with dealService so other endpoints can
-    // wait for it rather than failing immediately with "no deals".
+    // Non-blocking startup deals check — READ-ONLY.
+    // Boot loads the freshest deals from the database (which survives deploys
+    // and Render cold starts) and serves them, whatever their age. It never
+    // scrapes and never regenerates recipes: the weekly pipeline (GitHub
+    // Actions → POST /api/admin/refresh-deals) is the only writer. The old
+    // stale-check here re-ran the full pipeline — including paid Claude
+    // recipe generation — on every cold start, because the baked-in repo
+    // snapshot of cached-deals.json is always months old.
+    // Sole exception: a true first-run bootstrap with no deals anywhere.
     (async () => {
       try {
         const dealService = require('./services/dealService');
+        await dealService.loadDealsFromDb();
+
         const info = dealService.getCacheInfo();
-        const isEmpty = !info || info.counts.total === 0;
-        const STALE_MS = 8 * 24 * 60 * 60 * 1000; // 8 days
-        const isStale = info?.lastUpdated && (Date.now() - new Date(info.lastUpdated).getTime() > STALE_MS);
-
-        if (isEmpty || isStale) {
-          if (isStale) {
-            // Serve stale deals immediately while refresh runs in background
-            dealService.setDealsReady();
-            console.log(`Startup: deals cache is stale (last updated ${info.lastUpdated}) — serving stale data while refreshing...`);
-          } else {
-            console.log('Cache empty on startup — fetching live deals...');
-          }
-
-          // Run catalogue discovery first so we have working embed IDs
-          try {
-            const { discoverAndSaveStateCatalogues } = require('./services/salefinder');
-            console.log('Startup: running catalogue discovery before deal refresh...');
-            const changed = await discoverAndSaveStateCatalogues();
-            console.log(`Startup: catalogue discovery complete (changed: ${changed})`);
-          } catch (err) {
-            console.warn(`Startup: catalogue discovery failed — continuing: ${err.message}`);
-          }
-
-          const fetchPromise = dealService.refreshDeals();
-          dealService.setStartupFetch(fetchPromise);
-          const { cache } = await fetchPromise;
-          console.log(`Startup fetch complete — woolworths:${cache.woolworths.length} coles:${cache.coles.length} iga:${cache.iga.length}`);
-
-          // If any store got 0 deals, log a warning
-          for (const store of ['woolworths', 'coles', 'iga']) {
-            if ((cache[store]?.length || 0) === 0) {
-              console.error(`Startup WARNING: ${store} returned 0 deals — scraper may need attention`);
-            }
-          }
-
-          // Stale deals were refreshed — regenerate recipes too
-          if (isStale) {
-            console.log('Startup: deals were stale — regenerating weekly recipes...');
-            const recipeService = require('./services/recipeService');
-            recipeService.generateWeeklyRecipes()
-              .then(recipes => console.log(`Startup: regenerated ${recipes.length} weekly recipes after stale refresh`))
-              .catch(err => console.error('Startup: recipe regeneration failed:', err.message));
-          }
-        } else {
-          // Fresh cache exists — mark deals as ready immediately so endpoints can serve
+        if (info && info.counts.total > 0) {
           dealService.setDealsReady();
-          console.log(`Startup: deals cache OK (${info.counts.total} deals, last updated ${info.lastUpdated})`);
+          const ageDays = info.lastUpdated
+            ? ((Date.now() - new Date(info.lastUpdated).getTime()) / 86400000).toFixed(1)
+            : '?';
+          console.log(`Startup: deals ready (${info.counts.total} deals, ${ageDays}d old) — boot is read-only; refresh happens via the weekly pipeline`);
+          return;
         }
+
+        // Bootstrap: no deals in DB or on disk (first deployment ever).
+        console.log('Startup: no deals anywhere — running one-time bootstrap fetch...');
+        try {
+          const { discoverAndSaveStateCatalogues } = require('./services/salefinder');
+          const changed = await discoverAndSaveStateCatalogues();
+          console.log(`Startup: catalogue discovery complete (changed: ${changed})`);
+        } catch (err) {
+          console.warn(`Startup: catalogue discovery failed — continuing: ${err.message}`);
+        }
+
+        const fetchPromise = dealService.refreshDeals();
+        dealService.setStartupFetch(fetchPromise);
+        const { cache } = await fetchPromise;
+        console.log(`Startup bootstrap complete — woolworths:${cache.woolworths.length} coles:${cache.coles.length} iga:${cache.iga.length}`);
       } catch (err) {
-        console.error('Startup fetch failed:', err.message);
+        console.error('Startup deals check failed:', err.message);
       }
     })();
 
@@ -266,10 +286,10 @@ if (!process.env.VERCEL) {
         if (existing > 0) {
           console.log(`Startup: weekly recipes OK from filesystem (${existing} recipes)`);
         } else {
-          console.log('Startup: no weekly recipes found — generating in background...');
-          recipeService.generateWeeklyRecipes()
-            .then(recipes => console.log(`Startup: generated ${recipes.length} weekly recipes`))
-            .catch(err  => console.error('Startup: recipe generation failed:', err.message));
+          // Boot never generates (a persistent DB failure here would otherwise
+          // re-buy a full Claude generation on every cold start). Trigger
+          // POST /api/admin/refresh-deals to populate.
+          console.error('Startup ALERT: no weekly recipes in DB or filesystem — users see an empty recipe list until the weekly pipeline runs');
         }
       } catch (err) {
         console.error('Startup: recipe check failed:', err.message);
@@ -277,45 +297,11 @@ if (!process.env.VERCEL) {
     })();
   });
 
-  // ── Weekly pipeline — every Wednesday at 4:00 am Sydney time ───────────────
-  // Pipeline: (1) discover catalogue IDs → (2) refresh deals → (3) regenerate recipes
-  // Woolworths and Coles catalogues go live at the start of Wednesday, so this
-  // must run early Wednesday SYDNEY time (the timezone option handles AEST/AEDT).
-  const cron = require('node-cron');
-  cron.schedule('0 4 * * 3', async () => {
-    console.log('Cron: Starting weekly pipeline (catalogue discovery → deal refresh → recipe generation)...');
-
-    // Step 1: Discover current catalogue IDs for all states
-    try {
-      const { discoverAndSaveStateCatalogues } = require('./services/salefinder');
-      const changed = await discoverAndSaveStateCatalogues();
-      console.log(`Cron: Catalogue discovery complete (IDs changed: ${changed})`);
-    } catch (err) {
-      console.warn(`Cron: Catalogue discovery failed — using previous IDs: ${err.message}`);
-    }
-
-    // Step 2: Refresh deals (uses updated catalogue IDs)
-    try {
-      const dealService = require('./services/dealService');
-      const { cache } = await dealService.refreshDeals();
-      console.log(`Cron: Deals refreshed — ${cache.woolworths.length} WW, ${cache.coles.length} Coles, ${cache.iga.length} IGA`);
-      dealService.clearStateDealCaches();
-    } catch (err) {
-      console.error('Cron: Deals refresh failed:', err.message);
-    }
-
-    // Step 3: Regenerate weekly recipes against the new deals
-    try {
-      const recipeService = require('./services/recipeService');
-      console.log('Cron: Regenerating weekly recipes against new deals...');
-      const recipes = await recipeService.generateWeeklyRecipes();
-      console.log(`Cron: Recipe generation complete — ${recipes.length} recipes`);
-    } catch (err) {
-      console.error('Cron: Recipe generation failed:', err.message);
-    }
-  }, { timezone: 'Australia/Sydney' });
-
-  console.log('Cron: Scheduled weekly pipeline every Wednesday 4:00am Sydney time');
+  // NOTE: the in-process node-cron schedule was removed. It duplicated the
+  // GitHub Actions trigger (.github/workflows/weekly-refresh.yml) at the same
+  // hour, double-running the paid pipeline whenever the instance was awake,
+  // and never fired when the free-tier instance was asleep. GitHub Actions is
+  // the single scheduler; it wakes the server first, then POSTs the trigger.
 }
 
 // Export for serverless adapters (Vercel etc.)

@@ -156,3 +156,12 @@ CREATE INDEX IF NOT EXISTS idx_aliases_normalized       ON product_aliases(norma
 CREATE INDEX IF NOT EXISTS idx_aliases_product_id       ON product_aliases(product_id);
 CREATE INDEX IF NOT EXISTS idx_match_history_deal_name  ON match_history(deal_name);
 CREATE INDEX IF NOT EXISTS idx_match_history_matched_at ON match_history(matched_at);
+
+-- ── Deals Cache (survives deploys; authoritative copy of cached-deals.json) ──
+
+CREATE TABLE IF NOT EXISTS deals_cache (
+  id           SERIAL PRIMARY KEY,
+  data         JSONB     NOT NULL,
+  last_updated TIMESTAMP NOT NULL,
+  saved_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

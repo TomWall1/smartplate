@@ -109,7 +109,54 @@ function saveCache(byStore) {
   };
   // Mirror updates synchronously; the disk write is queued + atomic.
   _dealStore.set(cache);
+  _persistCacheToDb();
   return cache;
+}
+
+/**
+ * Persist the current cache to the database (fire-and-forget).
+ * The DB copy is what survives deploys/restarts — on Render the local file
+ * resets to the repo snapshot on every cold start, so without this the
+ * server wakes up with months-old deals.
+ */
+function _persistCacheToDb() {
+  const cache = _dealStore.get();
+  if (!db?.saveDealsCache || !cache) return;
+  Promise.resolve(db.saveDealsCache(cache)).then(() => {
+    console.log(`DealService: deals cache persisted to DB (lastUpdated ${cache.lastUpdated})`);
+  }).catch((err) => {
+    console.warn('DealService: DB persist of deals cache failed:', err.message);
+  });
+}
+
+/**
+ * Load the freshest deals cache from the database into the in-memory mirror.
+ * Called once at startup, BEFORE any fetch decision: if the DB copy is newer
+ * than the file snapshot (always true on Render cold starts), it wins.
+ * Returns true if the DB copy was loaded.
+ */
+async function loadDealsFromDb() {
+  if (!db?.getDealsCache) return false;
+  try {
+    const row = await db.getDealsCache();
+    if (!row?.data?.lastUpdated) return false;
+
+    const fileCache = _dealStore.get();
+    const dbTime    = new Date(row.data.lastUpdated).getTime() || 0;
+    const fileTime  = fileCache?.lastUpdated ? new Date(fileCache.lastUpdated).getTime() : 0;
+    if (dbTime <= fileTime) {
+      console.log('DealService: local deals snapshot is current — DB copy not newer');
+      return false;
+    }
+
+    _dealStore.set(row.data); // refreshes memory + local file mirror
+    const total = (row.data.woolworths?.length || 0) + (row.data.coles?.length || 0) + (row.data.iga?.length || 0);
+    console.log(`DealService: loaded ${total} deals from DB (lastUpdated ${row.data.lastUpdated})`);
+    return true;
+  } catch (err) {
+    console.warn('DealService: DB load of deals cache failed:', err.message);
+    return false;
+  }
 }
 
 function cacheToFlatArray(cache) {
@@ -304,6 +351,7 @@ function _updateCacheStore(storeName, enrichedDeals, label = '') {
   _dealStore.update((cache) => {
     cache[storeName] = enrichedDeals;
   });
+  _persistCacheToDb(); // keep the DB copy enriched too, or cold starts lose images/PI
   console.log(`DealService: ${storeName} cache updated${label ? ` (${label})` : ''} — ${enrichedDeals.length} deals`);
 }
 
@@ -512,6 +560,7 @@ module.exports = {
   clearStateDealCaches,
   getCacheInfo,
   loadCache,
+  loadDealsFromDb,
   setStartupFetch,
   setDealsReady,
   isReady,

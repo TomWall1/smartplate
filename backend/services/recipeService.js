@@ -119,10 +119,18 @@ class RecipeService {
     const matched = await recipeMatcher.matchDeals(enrichedDeals, 150);
     console.log(`RecipeService: Found ${matched.length} matching library recipes`);
 
-    // If no matches (library empty or no overlap), fall back to pure generation
+    // Hard rule: Claude NEVER invents recipes. Every recipe served must come
+    // from the scraped library. Zero matches means something is broken
+    // (library files missing from the deploy, corrupted data, or a matcher
+    // bug) — fail loudly and keep serving the last good set from the DB
+    // rather than silently fabricating 50 recipes.
     if (matched.length === 0) {
-      console.log('RecipeService: No library matches, falling back to full generation');
-      return this._generateFromScratch(deals);
+      throw new Error(
+        'No library recipes matched current deals (library size: ' +
+        `${recipeMatcher.loadLibrary().length}). Refusing to generate — ` +
+        'last good recipe set remains in weekly_recipes_cache. ' +
+        'Check recipe library files and the matcher before re-running.'
+      );
     }
 
     // Step 1b-AI: Refine deal matching with Claude AI for each candidate recipe.
@@ -320,85 +328,6 @@ Respond with ONLY a JSON array of ${batch.length} objects. No markdown, no expla
       console.error('RecipeService: Claude enrichment failed:', error.message);
       throw error;
     }
-  }
-
-  // ── Fallback: generate recipes from scratch (no library) ──────────
-
-  async _generateFromScratch(deals) {
-    const dealSummary = deals.map(d => {
-      const saving = d.originalPrice && d.price
-        ? `(was $${d.originalPrice.toFixed(2)}, now $${d.price.toFixed(2)})`
-        : `($${(d.price || 0).toFixed(2)})`;
-      return `- ${d.name} ${saving} [${d.store}] — ${d.category || 'General'}`;
-    }).join('\n');
-
-    const prompt = `You are a helpful Australian meal-planning assistant. Below is this week's supermarket specials from Woolworths, Coles, and IGA.
-
-THIS WEEK'S SPECIALS:
-${dealSummary}
-
-Generate exactly 50 diverse, practical recipes that make good use of these specials. Aim for variety:
-- Mix of quick weeknight dinners (under 30 min), meal-prep friendly dishes, breakfasts, and lunches
-- Range of cuisines (Australian, Asian, Mediterranean, Mexican, etc.)
-- Include vegetarian and meat options
-- Recipes should be achievable for a home cook with basic pantry staples (oil, salt, pepper, garlic, onion, common spices, flour, sugar, eggs, rice, pasta)
-
-For each recipe, return a JSON object with these exact fields:
-- "id": sequential number 1-50
-- "title": recipe name
-- "description": 1-2 sentence appetising description
-- "dealIngredients": array of ingredient names that are on special this week (must match names from the specials list above)
-- "allIngredients": array of ALL ingredients with quantities (e.g. "500g chicken breast", "2 tbsp soy sauce")
-- "estimatedSaving": dollar amount saved by using specials vs regular prices (number, e.g. 8.50)
-- "totalEstimatedCost": estimated total cost of all ingredients (number, e.g. 15.00)
-- "prepTime": total time in minutes (number)
-- "servings": number of servings (number)
-- "steps": array of step-by-step instructions (each step is a string)
-- "tags": array from ["quick", "meal-prep", "vegetarian", "vegan", "gluten-free", "dairy-free", "high-protein", "budget", "breakfast", "lunch", "dinner"]
-
-You must respond with valid JSON only. Do not include any text, explanation or commentary before or after the JSON array. Respond with ONLY a JSON array of 50 recipe objects.`;
-
-    const response = await this.anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const text = response.content[0].text.trim();
-    let jsonText = text;
-    const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (fenceMatch) jsonText = fenceMatch[1].trim();
-
-    const recipes = JSON.parse(jsonText);
-
-    if (!Array.isArray(recipes) || recipes.length === 0) {
-      throw new Error('Claude returned invalid recipe data');
-    }
-
-    const normalised = recipes.map((r, i) => ({
-      id: r.id || i + 1,
-      title: r.title || `Recipe ${i + 1}`,
-      description: r.description || '',
-      dealIngredients: Array.isArray(r.dealIngredients) ? r.dealIngredients : [],
-      allIngredients: Array.isArray(r.allIngredients) ? r.allIngredients : [],
-      estimatedSaving: typeof r.estimatedSaving === 'number' ? r.estimatedSaving : 0,
-      totalEstimatedCost: typeof r.totalEstimatedCost === 'number' ? r.totalEstimatedCost : 0,
-      prepTime: typeof r.prepTime === 'number' ? r.prepTime : 30,
-      servings: typeof r.servings === 'number' ? r.servings : 4,
-      steps: Array.isArray(r.steps) ? r.steps : [],
-      tags: Array.isArray(r.tags) ? r.tags : [],
-      image: `https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400`,
-      cookTime: typeof r.prepTime === 'number' ? r.prepTime : 30,
-      rating: 4.5,
-      ingredients: Array.isArray(r.allIngredients) ? r.allIngredients : [],
-      instructions: Array.isArray(r.steps) ? r.steps.join(' ') : '',
-      sourceUrl: '#',
-      nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 },
-    }));
-
-    await this._saveWeeklyRecipes(normalised);
-    console.log(`RecipeService: Generated ${normalised.length} weekly recipes from scratch (no library, target 50)`);
-    return normalised;
   }
 
   // ── Personalised filtering (local, no API call) ────────────────────

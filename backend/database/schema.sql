@@ -163,3 +163,12 @@ CREATE TRIGGER IF NOT EXISTS products_updated_at
 BEGIN
   UPDATE products SET updated_at = datetime('now') WHERE id = NEW.id;
 END;
+
+-- ── Deals Cache (survives deploys; mirror of cached-deals.json) ──────────────
+
+CREATE TABLE IF NOT EXISTS deals_cache (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  data         TEXT NOT NULL,
+  last_updated TEXT NOT NULL,
+  saved_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);

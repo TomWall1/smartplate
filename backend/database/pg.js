@@ -21,9 +21,10 @@ pool.on('error', (err) => {
   console.error('[PG] Unexpected pool error:', err.message);
 });
 
-// ── Auto-migrate: ensure weekly_recipes_cache table exists ────────────────────
+// ── Auto-migrate: ensure cache tables exist ───────────────────────────────────
 // Runs once per process start. Safe — uses CREATE TABLE IF NOT EXISTS.
-(async () => {
+// Cache readers/writers await this promise so a cold start can't race the DDL.
+const _autoMigrate = (async () => {
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS weekly_recipes_cache (
@@ -37,9 +38,17 @@ pool.on('error', (err) => {
       CREATE INDEX IF NOT EXISTS idx_weekly_recipes_generated_at
       ON weekly_recipes_cache(generated_at DESC)
     `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS deals_cache (
+        id           SERIAL PRIMARY KEY,
+        data         JSONB     NOT NULL,
+        last_updated TIMESTAMP NOT NULL,
+        saved_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
   } catch (err) {
-    // Non-fatal — log and continue. Server still works; recipes fall back to filesystem.
-    console.warn('[PG] weekly_recipes_cache auto-migrate warning:', err.message);
+    // Non-fatal — log and continue. Server still works; caches fall back to filesystem.
+    console.warn('[PG] cache-table auto-migrate warning:', err.message);
   }
 })();
 
@@ -298,6 +307,44 @@ async function getWeeklyRecipes() {
   };
 }
 
+// ── Deals Cache ───────────────────────────────────────────────────────────────
+
+async function saveDealsCache(cache) {
+  await _autoMigrate;
+  const result = await pool.query(`
+    INSERT INTO deals_cache (data, last_updated)
+    VALUES ($1, $2)
+    RETURNING id, saved_at
+  `, [JSON.stringify(cache), cache.lastUpdated ?? new Date().toISOString()]);
+
+  // Keep only the 2 most recent snapshots (current + previous week)
+  await pool.query(`
+    DELETE FROM deals_cache
+    WHERE id NOT IN (
+      SELECT id FROM deals_cache ORDER BY last_updated DESC LIMIT 2
+    )
+  `);
+
+  return result.rows[0] ?? null;
+}
+
+async function getDealsCache() {
+  await _autoMigrate;
+  const result = await pool.query(`
+    SELECT data, last_updated, saved_at
+    FROM deals_cache
+    ORDER BY last_updated DESC
+    LIMIT 1
+  `);
+  if (!result.rows[0]) return null;
+  const row = result.rows[0];
+  return {
+    data:        typeof row.data === 'string' ? JSON.parse(row.data) : row.data,
+    lastUpdated: row.last_updated,
+    savedAt:     row.saved_at,
+  };
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 async function getStats() {
@@ -311,6 +358,8 @@ module.exports = {
   initSchema,
   saveWeeklyRecipes,
   getWeeklyRecipes,
+  saveDealsCache,
+  getDealsCache,
   insertProduct,
   insertProductBatch,
   getProductById,
