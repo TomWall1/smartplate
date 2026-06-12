@@ -7,7 +7,7 @@ import RecipeCard from '../components/RecipeCard';
 import PreferencesPanel from '../components/PreferencesPanel';
 import { usePremium } from '../context/PremiumContext';
 import { useAuth } from '../context/AuthContext';
-import { TAG_FILTERS, PROTEIN_FILTERS, hasProteinDeal } from '../constants/filters';
+import { TAG_FILTERS, PROTEIN_FILTERS, hasProteinDeal, applyPreferenceOrdering } from '../constants/filters';
 
 function RecipeSkeleton() {
   return (
@@ -67,45 +67,10 @@ export default function Recipes() {
       );
     }
 
-    // ── Client-side preference filters (cover the default non-personalised path) ──
-
-    // 1. mealTypes — soft sort: recipes matching a preferred meal type come first.
-    //    The personalised path does this server-side via Claude; we do it here for
-    //    the default weekly view so preferences are always respected.
-    const mealTypes = (preferences.mealTypes ?? []).map((m) => m.toLowerCase());
-    if (mealTypes.length > 0 && !isPersonalised) {
-      list = [
-        ...list.filter((r) =>
-          (r.tags ?? []).some((t) => mealTypes.includes(t.toLowerCase()))
-        ),
-        ...list.filter((r) =>
-          !(r.tags ?? []).some((t) => mealTypes.includes(t.toLowerCase()))
-        ),
-      ];
-    }
-
-    // 2. excludeIngredients — soft sort + warning tag.
-    //    Server already does this for the personalised path; we apply it here for both
-    //    paths so the warning badges always appear.
-    const excluded = (preferences.excludeIngredients ?? [])
-      .map((e) => e.toLowerCase().trim())
-      .filter(Boolean);
-
-    if (excluded.length > 0) {
-      list = list.map((r) => {
-        if (r.excludedWarnings !== undefined) return r; // already tagged server-side
-        const allText = [
-          ...(r.allIngredients ?? []),
-          ...(r.ingredients ?? []),
-        ].join(' ').toLowerCase();
-        const warnings = excluded.filter((ex) => allText.includes(ex));
-        return { ...r, excludedWarnings: warnings };
-      });
-      list = [
-        ...list.filter((r) => r.excludedWarnings.length === 0),
-        ...list.filter((r) => r.excludedWarnings.length > 0),
-      ];
-    }
+    // ── Saved preferences (shared logic with StorePage) ──
+    // Meal-type ordering is skipped on the personalised path (the server
+    // already ordered it); exclusion warnings apply on both paths.
+    list = applyPreferenceOrdering(list, preferences, { mealTypeSort: !isPersonalised });
 
     // 3. Protein filter — premium only, must have a fresh/frozen matched deal for the protein
     if (activeProtein && isPremium) {

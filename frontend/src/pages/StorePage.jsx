@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChefHat, SlidersHorizontal, Crown, RefreshCw, AlertTriangle, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, ChefHat, RefreshCw, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { useApp } from '../App';
 import { dealsApi, recipesApi } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import CategorizedDeals from '../components/CategorizedDeals';
-import PreferencesPanel from '../components/PreferencesPanel';
 import { usePremium } from '../context/PremiumContext';
-import { TAG_FILTERS, PROTEIN_FILTERS, hasProteinDeal } from '../constants/filters';
+import { TAG_FILTERS, PROTEIN_FILTERS, hasProteinDeal, applyPreferenceOrdering } from '../constants/filters';
 import { STORE_COLORS, STORE_LOGOS } from '../constants/colors';
 import { useWarmupFetch } from '../hooks/useWarmupFetch';
 
@@ -48,7 +47,7 @@ function RecipeSkeleton() {
 export default function StorePage() {
   const { store } = useParams();
   const navigate = useNavigate();
-  const { setSelectedStore } = useApp();
+  const { setSelectedStore, preferences } = useApp();
   const { isPremium } = usePremium();
 
   const [storeDeals, setStoreDeals] = useState([]);
@@ -60,8 +59,6 @@ export default function StorePage() {
 
   const [activeTag, setActiveTag] = useState('all');
   const [activeProtein, setActiveProtein] = useState(null);
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [showPremiumNudge, setShowPremiumNudge] = useState(false);
 
   const colors = STORE_COLORS[store] || { bg: '#78716c', light: 'var(--color-blush)', text: '#ffffff' };
   const storeName = capitalize(store);
@@ -119,8 +116,11 @@ export default function StorePage() {
     if (activeProtein && isPremium) {
       list = list.filter((r) => hasProteinDeal(r, activeProtein));
     }
-    return list;
-  }, [storeRecipes, activeTag, activeProtein, isPremium]);
+    // Saved preferences apply silently everywhere recipes are shown:
+    // excluded ingredients get warning badges and sink to the bottom,
+    // preferred meal types float to the top. Edited on the Recipes page.
+    return applyPreferenceOrdering(list, preferences);
+  }, [storeRecipes, activeTag, activeProtein, isPremium, preferences]);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-parchment)' }}>
@@ -180,26 +180,13 @@ export default function StorePage() {
               <ChefHat className="w-5 h-5" style={{ color: colors.bg }} />
               Recipes Using These Deals
             </h2>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  if (!isPremium) { setShowPremiumNudge(true); return; }
-                  setPanelOpen(true);
-                }}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90"
-                style={{ background: isPremium ? 'var(--color-leaf)' : 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
-              >
-                {isPremium ? <SlidersHorizontal className="w-4 h-4" /> : <Crown className="w-4 h-4" />}
-                Filter
-              </button>
-              <Link
-                to="/recipes"
-                className="text-sm font-bold underline underline-offset-2 transition-colors hover:opacity-70 py-2.5"
-                style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
-              >
-                View all →
-              </Link>
-            </div>
+            <Link
+              to="/recipes"
+              className="text-sm font-bold underline underline-offset-2 transition-colors hover:opacity-70 py-2.5"
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              View all →
+            </Link>
           </div>
 
           {/* Tag filter chips */}
@@ -251,20 +238,6 @@ export default function StorePage() {
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Premium nudge */}
-          {showPremiumNudge && !isPremium && (
-            <div
-              className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm border mb-3"
-              style={{ background: '#fffbf0', borderColor: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
-            >
-              <span style={{ color: 'var(--color-bark)' }}>
-                <Crown className="w-3.5 h-3.5 inline mr-1.5" style={{ color: 'var(--color-honey)' }} />
-                Personalised filters are a <strong>Premium</strong> feature.
-              </span>
-              <button onClick={() => setShowPremiumNudge(false)} style={{ color: 'var(--color-text-muted)' }}>✕</button>
             </div>
           )}
 
@@ -413,14 +386,6 @@ export default function StorePage() {
         </section>
       </div>
 
-      {/* Preferences panel — premium only */}
-      {isPremium && (
-        <PreferencesPanel
-          isOpen={panelOpen}
-          onClose={() => setPanelOpen(false)}
-          onApply={() => setPanelOpen(false)}
-        />
-      )}
     </div>
   );
 }

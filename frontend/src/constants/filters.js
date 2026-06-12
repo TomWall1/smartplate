@@ -43,3 +43,49 @@ export function hasProteinDeal(recipe, proteinId) {
     return protein.keywords.some((kw) => name.includes(kw));
   });
 }
+
+/**
+ * Apply the user's saved preferences to a recipe list. The rule across the
+ * app: preferences are edited in one place and respected silently on every
+ * page that shows recipes — no per-page "Apply" step.
+ *
+ * - excludeIngredients: tag matching recipes with excludedWarnings (badge on
+ *   the card) and push them to the bottom. Never removes a recipe.
+ * - mealTypes: recipes matching a preferred meal type float to the top
+ *   (skippable — the premium personalised view orders server-side).
+ */
+export function applyPreferenceOrdering(list, preferences = {}, { mealTypeSort = true } = {}) {
+  let result = list;
+
+  if (mealTypeSort) {
+    const mealTypes = (preferences.mealTypes ?? []).map((m) => m.toLowerCase());
+    if (mealTypes.length > 0) {
+      result = [
+        ...result.filter((r) => (r.tags ?? []).some((t) => mealTypes.includes(t.toLowerCase()))),
+        ...result.filter((r) => !(r.tags ?? []).some((t) => mealTypes.includes(t.toLowerCase()))),
+      ];
+    }
+  }
+
+  const excluded = (preferences.excludeIngredients ?? [])
+    .map((e) => e.toLowerCase().trim())
+    .filter(Boolean);
+
+  if (excluded.length > 0) {
+    result = result.map((r) => {
+      if (r.excludedWarnings !== undefined) return r; // already tagged server-side
+      const allText = [
+        ...(r.allIngredients ?? []),
+        ...(r.ingredients ?? []),
+      ].join(' ').toLowerCase();
+      const warnings = excluded.filter((ex) => allText.includes(ex));
+      return { ...r, excludedWarnings: warnings };
+    });
+    result = [
+      ...result.filter((r) => r.excludedWarnings.length === 0),
+      ...result.filter((r) => r.excludedWarnings.length > 0),
+    ];
+  }
+
+  return result;
+}
