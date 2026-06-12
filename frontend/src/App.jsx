@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import StorePicker from './pages/StorePicker';
@@ -133,6 +133,26 @@ function AppInner() {
       usersApi.updatePreferences({ selected_store: storeId }).catch(() => {});
     }
   };
+
+  // ── Sign-out = clean slate ─────────────────────────────────────────────────
+  // When a signed-in user logs out, clear all device-level personalisation
+  // (store, state, household, preferences) so the next person on this browser
+  // starts fresh and the picker stops auto-forwarding to the previous user's
+  // store. Anonymous users who never signed in keep their device memory —
+  // only the signed-in → signed-out TRANSITION resets.
+  const prevUserRef = useRef(null);
+  useEffect(() => {
+    const wasSignedIn = !!prevUserRef.current;
+    prevUserRef.current = user;
+    if (!wasSignedIn || user) return; // only act on the logout transition
+
+    ['smartplate-store', 'smartplate-state', 'smartplate-household', 'smartplate-preferences']
+      .forEach((key) => localStorage.removeItem(key));
+    setSelectedStoreState(null);
+    setUserStateLocal('nsw');
+    setHouseholdSizeLocal(null);
+    setPreferencesState(DEFAULT_PREFERENCES);
+  }, [user]);
 
   // ── Sync user profile from Supabase when auth state changes ───────────────
   useEffect(() => {
