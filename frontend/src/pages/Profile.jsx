@@ -1,27 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Save, Check, User, RefreshCw, AlertCircle, MapPin, Loader2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Check, User, RefreshCw, AlertCircle, MapPin, Loader2 } from 'lucide-react';
 import { useApp } from '../App';
 import { recipesApi, usersApi } from '../services/api';
-import AllergenSelector from '../components/AllergenSelector';
 import { useAuth } from '../context/AuthContext';
 
-const DIETARY_OPTIONS = [
-  { id: 'vegetarian',  label: 'Vegetarian' },
-  { id: 'vegan',       label: 'Vegan' },
-  { id: 'gluten-free', label: 'Gluten Free' },
-  { id: 'dairy-free',  label: 'Dairy Free' },
-  { id: 'low-carb',    label: 'Low Carb' },
-  { id: 'keto',        label: 'Keto' },
-];
-
-const MEAL_TYPE_OPTIONS = [
-  { id: 'quick',           label: 'Quick (under 30 min)' },
-  { id: 'family-friendly', label: 'Family Friendly' },
-  { id: 'batch-cook',      label: 'Good for Batch Cooking' },
-  { id: 'one-pot',         label: 'One Pot Meals' },
-  { id: 'healthy',         label: 'Healthy' },
-  { id: 'comfort',         label: 'Comfort Food' },
-];
+// NOTE: dietary / meal-type / allergen preference cards were removed — they
+// saved fields the app never read (or matched tags the recipe library doesn't
+// have), which only confused users. Recipe filtering lives on the Recipes
+// page, where it works. The profile holds durable account facts only.
 
 const AU_STATES = [
   { id: 'nsw', label: 'NSW', full: 'New South Wales' },
@@ -44,12 +30,8 @@ const cardStyle = {
 
 
 export default function Profile() {
-  const { preferences, setPreferences, userState, setUserState } = useApp();
+  const { userState, setUserState } = useApp();
   const { user } = useAuth();
-
-  const [local, setLocal] = useState({ ...preferences });
-  const [saved, setSaved] = useState(false);
-  const saveTimerRef = useRef(null);
 
   const [regenStatus, setRegenStatus] = useState('idle');
   const [regenResult, setRegenResult] = useState(null);
@@ -57,32 +39,6 @@ export default function Profile() {
   // State selector
   const [stateStatus, setStateStatus] = useState('idle'); // idle | saving | saved | error
   const stateTimerRef = useRef(null);
-
-  useEffect(() => {
-    setLocal({ ...preferences });
-  }, [preferences]);
-
-  const toggleDietary = (id) => {
-    setLocal((prev) => ({
-      ...prev,
-      dietary: (prev.dietary ?? []).includes(id)
-        ? (prev.dietary ?? []).filter((d) => d !== id)
-        : [...(prev.dietary ?? []), id],
-    }));
-  };
-
-  const toggleMealType = (id) => {
-    setLocal((prev) => ({
-      ...prev,
-      mealTypes: (prev.mealTypes ?? []).includes(id)
-        ? (prev.mealTypes ?? []).filter((m) => m !== id)
-        : [...(prev.mealTypes ?? []), id],
-    }));
-  };
-
-  const handleDislikesChange = (newDislikes) => {
-    setLocal((prev) => ({ ...prev, dislikes: newDislikes }));
-  };
 
   const handleRegenerate = async () => {
     setRegenStatus('loading');
@@ -95,13 +51,6 @@ export default function Profile() {
       setRegenResult({ error: err.message || 'Generation failed' });
       setRegenStatus('error');
     }
-  };
-
-  const handleSave = () => {
-    setPreferences(local);
-    setSaved(true);
-    clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => setSaved(false), 3000);
   };
 
   const handleStateChange = async (stateId) => {
@@ -122,25 +71,6 @@ export default function Profile() {
     }
   };
 
-  const CheckboxRow = ({ id, label, checked, onToggle }) => (
-    <label className="flex items-center gap-2.5 cursor-pointer group">
-      <div
-        className="w-5 h-5 rounded flex items-center justify-center transition-colors flex-shrink-0"
-        style={{
-          border: `2px solid ${checked ? 'var(--color-leaf)' : 'var(--color-stone)'}`,
-          background: checked ? 'var(--color-leaf)' : 'transparent',
-        }}
-        onClick={() => onToggle(id)}
-      >
-        {checked && <Check className="w-3 h-3 text-white" />}
-      </div>
-      <input type="checkbox" checked={checked} onChange={() => onToggle(id)} className="sr-only" />
-      <span className="text-sm" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
-        {label}
-      </span>
-    </label>
-  );
-
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-parchment)' }}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -155,24 +85,12 @@ export default function Profile() {
           </div>
           <div>
             <h1 style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '24px' }}>
-              Your Preferences
+              Your Profile
             </h1>
             <p className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
-              Customise your recipe recommendations
+              Tell us where you shop so your deals and recipes match your local catalogue.
             </p>
           </div>
-        </div>
-
-        {/* ── Saved confirmation ─────────────────────────────────────────────── */}
-        <div
-          className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm border transition-all duration-300 ${
-            saved ? 'opacity-100 max-h-12' : 'opacity-0 max-h-0 overflow-hidden border-0 p-0'
-          }`}
-          style={{ background: 'var(--color-mist)', borderColor: 'var(--color-leaf)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
-          aria-live="polite"
-        >
-          <Check className="w-4 h-4 flex-shrink-0" />
-          <span>Preferences saved!</span>
         </div>
 
         {/* ── Location ─────────────────────────────────────────────────────── */}
@@ -244,65 +162,6 @@ export default function Profile() {
           )}
         </section>
 
-        {/* ── Dietary ──────────────────────────────────────────────────────── */}
-        <section style={cardStyle}>
-          <h2
-            className="mb-4"
-            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
-          >
-            Dietary Restrictions
-          </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {DIETARY_OPTIONS.map(({ id, label }) => (
-              <CheckboxRow
-                key={id}
-                id={id}
-                label={label}
-                checked={(local.dietary ?? []).includes(id)}
-                onToggle={toggleDietary}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* ── Meal types ───────────────────────────────────────────────────── */}
-        <section style={cardStyle}>
-          <h2
-            className="mb-4"
-            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
-          >
-            Preferred Meal Types
-          </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {MEAL_TYPE_OPTIONS.map(({ id, label }) => (
-              <CheckboxRow
-                key={id}
-                id={id}
-                label={label}
-                checked={(local.mealTypes ?? []).includes(id)}
-                onToggle={toggleMealType}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* ── Allergens & Exclusions ───────────────────────────────────────── */}
-        <section style={cardStyle}>
-          <h2
-            className="mb-1"
-            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
-          >
-            Allergens &amp; Exclusions
-          </h2>
-          <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
-            Select allergens or ingredients you want to avoid. Recipes containing these will be flagged or filtered out.
-          </p>
-          <AllergenSelector
-            selected={local.dislikes ?? []}
-            onChange={handleDislikesChange}
-          />
-        </section>
-
         {/* ── Admin: Regenerate Recipes ─────────────────────────────────────── */}
         <section style={cardStyle}>
           <h2
@@ -346,18 +205,6 @@ export default function Profile() {
             {regenStatus === 'loading' ? 'Generating… (2–3 min)' : 'Regenerate Recipes'}
           </button>
         </section>
-
-        {/* ── Save button ───────────────────────────────────────────────────── */}
-        <div className="flex justify-end pb-4">
-          <button
-            onClick={handleSave}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
-            style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
-          >
-            <Save className="w-4 h-4" />
-            Save Preferences
-          </button>
-        </div>
       </div>
     </div>
   );
