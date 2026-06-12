@@ -33,9 +33,9 @@ function RecipePreviewCard() {
     <div
       className="rounded-2xl overflow-hidden mx-auto"
       style={{
-        background: '#fff',
+        background: 'var(--color-surface)',
         border: '1.5px solid var(--color-stone)',
-        boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)',
+        boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)',
         maxWidth: 260,
       }}
     >
@@ -48,7 +48,7 @@ function RecipePreviewCard() {
       <div className="p-3">
         <div
           className="text-sm mb-1.5"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
         >
           One-Pan Chicken Curry
         </div>
@@ -57,7 +57,7 @@ function RecipePreviewCard() {
             <span
               key={tag}
               className="text-xs font-bold px-2 py-0.5 rounded-full"
-              style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
             >
               {tag}
             </span>
@@ -65,7 +65,7 @@ function RecipePreviewCard() {
         </div>
         <span
           className="text-xs font-bold px-2 py-0.5 rounded-full"
-          style={{ background: 'var(--color-peach)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+          style={{ background: 'var(--color-peach)', color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
         >
           Save $4.20/meal
         </span>
@@ -114,20 +114,20 @@ export default function Onboarding({ onDismiss }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(92, 74, 53, 0.45)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(42, 36, 31, 0.45)', backdropFilter: 'blur(4px)' }}
       onClick={(e) => { if (e.target === e.currentTarget) finish(); }}
     >
       <div
         className="relative w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden"
         style={{
           background: 'var(--color-parchment)',
-          boxShadow: '0 -4px 30px rgba(92, 74, 53, 0.15)',
+          boxShadow: '0 -4px 30px rgba(42, 36, 31, 0.15)',
         }}
       >
         {/* Skip / close */}
         <button
           onClick={finish}
-          className="absolute top-3 right-3 w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:bg-[#D6EDD4] z-10"
+          className="absolute top-3 right-3 w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:bg-[#DCE4D6] z-10"
           style={{ color: 'var(--color-text-muted)' }}
           aria-label="Skip onboarding"
         >
@@ -162,7 +162,7 @@ export default function Onboarding({ onDismiss }) {
           {/* Title */}
           <h2
             className="text-2xl mb-2"
-            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
           >
             {current.title}
           </h2>
@@ -170,7 +170,7 @@ export default function Onboarding({ onDismiss }) {
           {/* Body */}
           <p
             className="text-sm mb-5 max-w-xs mx-auto leading-relaxed"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}
           >
             {current.body}
           </p>
@@ -188,11 +188,11 @@ export default function Onboarding({ onDismiss }) {
               onClick={handleGoogle}
               className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px mb-3"
               style={{
-                background: '#ffffff',
+                background: 'var(--color-surface)',
                 border: '1.5px solid var(--color-stone)',
                 color: 'var(--color-bark)',
-                fontFamily: 'Nunito, sans-serif',
-                boxShadow: '0 1px 4px rgba(92, 74, 53, 0.08)',
+                fontFamily: 'var(--font-ui)',
+                boxShadow: '0 1px 4px rgba(42, 36, 31, 0.08)',
               }}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -213,7 +213,7 @@ export default function Onboarding({ onDismiss }) {
               style={{
                 background: 'transparent',
                 color: 'var(--color-text-muted)',
-                fontFamily: 'Nunito, sans-serif',
+                fontFamily: 'var(--font-ui)',
               }}
             >
               Skip
@@ -222,7 +222,7 @@ export default function Onboarding({ onDismiss }) {
               <button
                 onClick={() => setStep((s) => s + 1)}
                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 hover:-translate-y-px"
-                style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
               >
                 Next
                 <ArrowRight className="w-4 h-4" />
@@ -232,7 +232,7 @@ export default function Onboarding({ onDismiss }) {
               <button
                 onClick={finish}
                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 hover:-translate-y-px"
-                style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
               >
                 Get started
                 <ArrowRight className="w-4 h-4" />
@@ -250,7 +250,7 @@ export function HowItWorksLink({ onClick }) {
     <button
       onClick={onClick}
       className="inline-flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-70"
-      style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+      style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
     >
       <HelpCircle className="w-3.5 h-3.5" />
       How it works

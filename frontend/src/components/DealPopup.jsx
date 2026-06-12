@@ -59,14 +59,14 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-label={`Deal details for ${deal.ingredient}`}
-      className="absolute z-50 w-64 rounded-[20px] overflow-hidden"
+      className="absolute z-50 w-64 rounded-[12px] overflow-hidden"
       style={{
         top: '100%',
         left: 0,
         marginTop: '6px',
-        background: '#ffffff',
+        background: 'var(--color-surface)',
         border: '1.5px solid var(--color-stone)',
-        boxShadow: '0 6px 24px rgba(92, 74, 53, 0.15)',
+        boxShadow: '0 6px 24px rgba(42, 36, 31, 0.15)',
       }}
     >
       {/* Header strip */}
@@ -76,7 +76,7 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
       >
         <span
           className="text-white text-xs font-bold uppercase tracking-wide"
-          style={{ fontFamily: 'Nunito, sans-serif' }}
+          style={{ fontFamily: 'var(--font-ui)' }}
         >
           {storeName} Special
         </span>
@@ -93,7 +93,7 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
       <div className="px-3 py-3 space-y-2">
         <p
           className="text-sm font-semibold leading-snug"
-          style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+          style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
         >
           {deal.dealName}
         </p>
@@ -102,7 +102,7 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
           {deal.price != null && (
             <span
               className="text-xl font-bold"
-              style={{ color: storeColor, fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: storeColor, fontFamily: 'var(--font-ui)' }}
             >
               ${Number(deal.price).toFixed(2)}
             </span>
@@ -110,7 +110,7 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
           {hasWasNow && (
             <span
               className="text-sm line-through"
-              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
             >
               ${Number(deal.originalPrice).toFixed(2)}
             </span>
@@ -118,7 +118,7 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
           {discountLabel && (
             <span
               className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
-              style={{ background: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ background: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}
             >
               <Tag className="w-3 h-3" />
               {discountLabel}
@@ -131,7 +131,7 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-xs font-bold underline underline-offset-2 transition-opacity hover:opacity-70"
-          style={{ color: storeColor, fontFamily: 'Nunito, sans-serif' }}
+          style={{ color: storeColor, fontFamily: 'var(--font-ui)' }}
         >
           View at {storeName}
           <ExternalLink className="w-3 h-3" />

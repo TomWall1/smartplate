@@ -29,7 +29,7 @@ function AlertCard({ alert, onDelete }) {
   return (
     <div
       className="flex items-center gap-3 p-4 rounded-[16px] border"
-      style={{ background: '#ffffff', borderColor: 'var(--color-stone)' }}
+      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}
     >
       <div
         className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -38,10 +38,10 @@ function AlertCard({ alert, onDelete }) {
         <Bell className="w-5 h-5 text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold truncate" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+        <p className="text-sm font-bold truncate" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
           {alert.product_name}
         </p>
-        <p className="text-xs" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+        <p className="text-xs" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
           Alert when under <strong style={{ color: 'var(--color-text-green)' }}>${Number(alert.target_price).toFixed(2)}</strong>
           {alert.store && <span> · {STORE_OPTIONS.find(s => s.value === alert.store)?.label ?? alert.store}</span>}
         </p>
@@ -49,7 +49,7 @@ function AlertCard({ alert, onDelete }) {
       <button
         onClick={handleDelete}
         disabled={deleting}
-        className="p-2 rounded-lg transition-colors hover:bg-[#FBDFC3]"
+        className="p-2 rounded-lg transition-colors hover:bg-[#E7DECB]"
         style={{ color: 'var(--color-berry)' }}
         aria-label="Delete alert"
       >
@@ -107,10 +107,10 @@ export default function PriceAlerts() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--color-honey)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--color-brand)' }}>
               <Bell className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+            <h1 className="text-2xl sm:text-3xl" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
               Price Alerts
             </h1>
           </div>
@@ -118,7 +118,7 @@ export default function PriceAlerts() {
             <button
               onClick={() => setShowForm(s => !s)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
-              style={{ background: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ background: 'var(--color-brand)', fontFamily: 'var(--font-ui)' }}
             >
               {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
               {showForm ? 'Cancel' : 'New Alert'}
@@ -130,14 +130,14 @@ export default function PriceAlerts() {
           <PremiumGate feature="Price alerts" />
         ) : loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader className="w-8 h-8 animate-spin" style={{ color: 'var(--color-honey)' }} />
+            <Loader className="w-8 h-8 animate-spin" style={{ color: 'var(--color-brand-text)' }} />
           </div>
         ) : (
           <>
             {/* Info banner */}
             <div
               className="rounded-xl px-4 py-3 mb-5 text-sm border"
-              style={{ background: '#fffbf0', borderColor: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border-strong)', fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}
             >
               <strong>Coming soon:</strong> Alerts will notify you when ingredients drop below your target price during the weekly deal refresh.
             </div>
@@ -147,14 +147,14 @@ export default function PriceAlerts() {
               <form
                 onSubmit={handleCreate}
                 className="rounded-[16px] border p-4 mb-5"
-                style={{ background: '#ffffff', borderColor: 'var(--color-stone)' }}
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}
               >
-                <h3 className="text-base font-bold mb-3" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+                <h3 className="text-base font-bold mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                   New Price Alert
                 </h3>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+                    <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
                       Product name
                     </label>
                     <input
@@ -164,12 +164,12 @@ export default function PriceAlerts() {
                       onChange={e => setProductName(e.target.value)}
                       required
                       className="w-full px-3 py-2 rounded-xl text-sm outline-none"
-                      style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}
+                      style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}
                     />
                   </div>
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+                      <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
                         Alert when price is under ($)
                       </label>
                       <input
@@ -181,18 +181,18 @@ export default function PriceAlerts() {
                         onChange={e => setTargetPrice(e.target.value)}
                         required
                         className="w-full px-3 py-2 rounded-xl text-sm outline-none"
-                        style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}
+                        style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+                      <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
                         Store
                       </label>
                       <select
                         value={store}
                         onChange={e => setStore(e.target.value)}
                         className="w-full px-3 py-2 rounded-xl text-sm outline-none"
-                        style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}
+                        style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}
                       >
                         {STORE_OPTIONS.map(s => (
                           <option key={s.value} value={s.value}>{s.label}</option>
@@ -205,7 +205,7 @@ export default function PriceAlerts() {
                   type="submit"
                   disabled={saving}
                   className="mt-4 w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+                  style={{ background: 'var(--color-brand)', fontFamily: 'var(--font-ui)' }}
                 >
                   {saving ? <Loader className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
                   {saving ? 'Saving...' : 'Create Alert'}
@@ -215,7 +215,7 @@ export default function PriceAlerts() {
 
             {/* Alert list */}
             {alerts.length === 0 ? (
-              <div className="text-center py-20" style={{ fontFamily: 'Nunito, sans-serif' }}>
+              <div className="text-center py-20" style={{ fontFamily: 'var(--font-ui)' }}>
                 <p className="text-5xl mb-4">🔔</p>
                 <p className="text-lg font-bold mb-2" style={{ color: 'var(--color-bark)' }}>No price alerts yet</p>
                 <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>

@@ -8,13 +8,13 @@ function StatCard({ label, value, sub, color }) {
   return (
     <div
       className="rounded-[16px] border p-4 text-center"
-      style={{ background: '#ffffff', borderColor: 'var(--color-stone)' }}
+      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}
     >
-      <p className="text-3xl font-bold mb-0.5" style={{ fontFamily: '"Fredoka One", sans-serif', color: color ?? 'var(--color-bark)' }}>
+      <p className="text-3xl font-bold mb-0.5" style={{ fontFamily: 'var(--font-display)', color: color ?? 'var(--color-bark)' }}>
         {value}
       </p>
-      <p className="text-xs font-bold" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>{label}</p>
-      {sub && <p className="text-xs mt-0.5" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>{sub}</p>}
+      <p className="text-xs font-bold" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>{label}</p>
+      {sub && <p className="text-xs mt-0.5" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>{sub}</p>}
     </div>
   );
 }
@@ -80,7 +80,7 @@ export default function Admin() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-parchment)' }}>
-        <p style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>Please sign in to access the admin panel.</p>
+        <p style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>Please sign in to access the admin panel.</p>
       </div>
     );
   }
@@ -95,10 +95,10 @@ export default function Admin() {
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              <h1 className="text-2xl" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                 Admin Dashboard
               </h1>
-              <p className="text-xs" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+              <p className="text-xs" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                 {user.email}
               </p>
             </div>
@@ -106,8 +106,8 @@ export default function Admin() {
           <button
             onClick={load}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4] disabled:opacity-50"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#DCE4D6] disabled:opacity-50"
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -118,31 +118,31 @@ export default function Admin() {
         <div className="flex gap-2 mb-6">
           <button
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border"
-            style={{ fontFamily: 'Nunito, sans-serif', background: 'var(--color-bark)', color: '#fff', borderColor: 'var(--color-bark)' }}
+            style={{ fontFamily: 'var(--font-ui)', background: 'var(--color-bark)', color: '#fff', borderColor: 'var(--color-bark)' }}
           >
             <Users className="w-4 h-4" />
             Users
           </button>
           <button
             onClick={() => navigate('/admin/recipes')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#DCE4D6]"
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: 'var(--color-surface)' }}
           >
             <BookOpen className="w-4 h-4" />
             Recipes
           </button>
           <button
             onClick={() => navigate('/admin/blocklist')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#DCE4D6]"
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: 'var(--color-surface)' }}
           >
             <Ban className="w-4 h-4" />
             Blocklist
           </button>
           <button
             onClick={() => navigate('/admin/feedback')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#DCE4D6]"
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: 'var(--color-surface)' }}
           >
             <BarChart2 className="w-4 h-4" />
             Feedback
@@ -152,7 +152,7 @@ export default function Admin() {
         {error ? (
           <div
             className="rounded-xl p-4 text-sm border"
-            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}
           >
             {error}
           </div>
@@ -177,12 +177,12 @@ export default function Admin() {
                 {/* State Distribution */}
                 {stats.stateDistribution?.length > 0 && (
                   <div
-                    className="rounded-[20px] border p-4 mb-6"
-                    style={{ background: '#ffffff', borderColor: 'var(--color-stone)' }}
+                    className="rounded-[12px] border p-4 mb-6"
+                    style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <MapPin className="w-4 h-4" style={{ color: 'var(--color-leaf)' }} />
-                      <h2 className="text-sm font-bold" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+                      <h2 className="text-sm font-bold" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
                         Users by State
                       </h2>
                     </div>
@@ -191,7 +191,7 @@ export default function Admin() {
                         <div key={state} className="flex items-center gap-3">
                           <span
                             className="w-10 text-xs font-extrabold text-right flex-shrink-0"
-                            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}
+                            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}
                           >
                             {state}
                           </span>
@@ -205,7 +205,7 @@ export default function Admin() {
                               }}
                             />
                           </div>
-                          <span className="w-12 text-xs font-semibold flex-shrink-0" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+                          <span className="w-12 text-xs font-semibold flex-shrink-0" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                             {count} <span className="text-[10px]">({pct}%)</span>
                           </span>
                         </div>
@@ -224,7 +224,7 @@ export default function Admin() {
                   onClick={() => setFilter(val)}
                   className="px-4 py-1.5 rounded-full text-xs font-bold transition-colors"
                   style={{
-                    fontFamily: 'Nunito, sans-serif',
+                    fontFamily: 'var(--font-ui)',
                     background: filter === val ? 'var(--color-bark)' : 'var(--color-mist)',
                     color:      filter === val ? '#ffffff' : 'var(--color-bark)',
                   }}
@@ -232,14 +232,14 @@ export default function Admin() {
                   {label}
                 </button>
               ))}
-              <span className="ml-auto text-xs self-center" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+              <span className="ml-auto text-xs self-center" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                 {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
               </span>
             </div>
 
             {/* User table */}
             <div
-              className="rounded-[20px] border overflow-hidden"
+              className="rounded-[12px] border overflow-hidden"
               style={{ borderColor: 'var(--color-stone)' }}
             >
               {/* Table header */}
@@ -249,7 +249,7 @@ export default function Admin() {
                   gridTemplateColumns: '1fr auto auto auto auto',
                   gap: '12px',
                   background: 'var(--color-mist)',
-                  fontFamily: 'Nunito, sans-serif',
+                  fontFamily: 'var(--font-ui)',
                   color: 'var(--color-bark)',
                 }}
               >
@@ -261,7 +261,7 @@ export default function Admin() {
               </div>
 
               {filteredUsers.length === 0 ? (
-                <div className="text-center py-10 text-sm" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+                <div className="text-center py-10 text-sm" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                   No users found
                 </div>
               ) : filteredUsers.map((u, i) => (
@@ -276,11 +276,11 @@ export default function Admin() {
                   }}
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-bold truncate" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+                    <p className="text-sm font-bold truncate" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
                       {u.email}
                     </p>
                     {u.is_premium && u.premium_since && (
-                      <p className="text-xs" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-honey)' }}>
+                      <p className="text-xs" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-honey)' }}>
                         <Crown className="w-3 h-3 inline mr-0.5" />
                         Premium since {new Date(u.premium_since).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
@@ -289,17 +289,17 @@ export default function Admin() {
                   <span
                     className="text-xs font-bold px-1.5 py-0.5 rounded"
                     style={{
-                      fontFamily: 'Nunito, sans-serif',
+                      fontFamily: 'var(--font-ui)',
                       background: u.state ? 'var(--color-mist)' : 'transparent',
                       color: u.state ? 'var(--color-text-green)' : 'var(--color-text-muted)',
                     }}
                   >
                     {u.state ? u.state.toUpperCase() : '—'}
                   </span>
-                  <span className="text-xs capitalize" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+                  <span className="text-xs capitalize" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                     {u.selected_store ?? '—'}
                   </span>
-                  <span className="text-xs" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+                  <span className="text-xs" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                     {u.created_at ? new Date(u.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: '2-digit' }) : '—'}
                   </span>
                   <button
@@ -307,7 +307,7 @@ export default function Admin() {
                     disabled={toggling === u.id}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:opacity-90 disabled:opacity-50"
                     style={{
-                      fontFamily: 'Nunito, sans-serif',
+                      fontFamily: 'var(--font-ui)',
                       background: u.is_premium ? 'var(--color-honey)' : 'var(--color-mist)',
                       color:      u.is_premium ? '#ffffff' : 'var(--color-bark)',
                     }}

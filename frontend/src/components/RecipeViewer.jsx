@@ -26,14 +26,14 @@ export default function RecipeViewer({ url, publisherLabel, onClose }) {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: 'rgba(92, 74, 53, 0.5)' }}>
-      <div className="flex flex-col flex-1 m-2 sm:m-6 rounded-[20px] overflow-hidden shadow-2xl" style={{ background: '#ffffff' }}>
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: 'rgba(42, 36, 31, 0.5)' }}>
+      <div className="flex flex-col flex-1 m-2 sm:m-6 rounded-[12px] overflow-hidden shadow-2xl" style={{ background: 'var(--color-surface)' }}>
         {/* Header bar */}
         <div
           className="flex items-center justify-between gap-3 px-4 py-3 flex-shrink-0"
           style={{ background: 'var(--color-parchment)', borderBottom: '1.5px solid var(--color-stone)' }}
         >
-          <p className="text-sm min-w-0 truncate" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+          <p className="text-sm min-w-0 truncate" style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
             Viewing the original recipe on{' '}
             <span style={{ fontWeight: 800 }}>{publisherLabel}</span>
           </p>

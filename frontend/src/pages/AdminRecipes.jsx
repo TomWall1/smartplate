@@ -37,13 +37,13 @@ const ING_CATEGORIES  = ['meat','seafood','dairy','eggs','vegetables','fruit','g
 function SkillBadge({ level }) {
   const colors = { beginner: ['#d4edd4','var(--color-text-green)'], intermediate: ['#fff3cd','#856404'], advanced: ['#fde8eb','var(--color-berry)'] };
   const [bg, fg] = colors[level] ?? ['var(--color-mist)','var(--color-bark)'];
-  return <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: bg, color: fg, fontFamily: 'Nunito, sans-serif' }}>{level}</span>;
+  return <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: bg, color: fg, fontFamily: 'var(--font-ui)' }}>{level}</span>;
 }
 
 function MultiToggle({ label, options, value = [], onChange }) {
   return (
     <div className="mb-3">
-      <p className="text-xs font-bold mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>{label}</p>
+      <p className="text-xs font-bold mb-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>{label}</p>
       <div className="flex flex-wrap gap-1">
         {options.map(opt => {
           const active = value.includes(opt);
@@ -51,7 +51,7 @@ function MultiToggle({ label, options, value = [], onChange }) {
             <button key={opt ?? 'null'} type="button"
               onClick={() => onChange(active ? value.filter(v => v !== opt) : [...value, opt])}
               className="text-xs px-2 py-0.5 rounded-full border transition-colors"
-              style={{ fontFamily: 'Nunito, sans-serif', background: active ? 'var(--color-bark)' : 'transparent', color: active ? '#fff' : 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
+              style={{ fontFamily: 'var(--font-ui)', background: active ? 'var(--color-bark)' : 'transparent', color: active ? '#fff' : 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
               {opt ?? 'none'}
             </button>
           );
@@ -164,7 +164,7 @@ function IngredientEditor({ ingredients, onChange }) {
                   className="w-full border rounded-lg px-2 py-0.5 text-xs"
                   style={{
                     borderColor: 'var(--color-stone)',
-                    fontFamily: 'Nunito, sans-serif',
+                    fontFamily: 'var(--font-ui)',
                     fontWeight: isHeader ? 700 : 400,
                     color: isHeader ? '#4338ca' : isInactive ? 'var(--color-text-muted)' : 'var(--color-bark)',
                     textDecoration: isInactive ? 'line-through' : 'none',
@@ -180,21 +180,21 @@ function IngredientEditor({ ingredients, onChange }) {
                       onChange={e => update(idx, { quantity: e.target.value })}
                       placeholder="Qty"
                       className="w-14 border rounded-lg px-2 py-0.5 text-xs"
-                      style={{ borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif', outline: 'none' }}
+                      style={{ borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)', outline: 'none' }}
                     />
                     <input
                       value={ing.unit ?? ''}
                       onChange={e => update(idx, { unit: e.target.value })}
                       placeholder="Unit"
                       className="w-14 border rounded-lg px-2 py-0.5 text-xs"
-                      style={{ borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif', outline: 'none' }}
+                      style={{ borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)', outline: 'none' }}
                     />
                     {subheadings.length > 0 && (
                       <select
                         value={ing.subheadingGroup ?? ''}
                         onChange={e => update(idx, { subheadingGroup: e.target.value || null })}
                         className="flex-1 border rounded-lg px-1.5 py-0.5 text-xs"
-                        style={{ borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif' }}
+                        style={{ borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)' }}
                         title="Part of section"
                       >
                         <option value="">No section</option>
@@ -213,19 +213,19 @@ function IngredientEditor({ ingredients, onChange }) {
                   <div className="flex flex-wrap gap-1 mt-0.5">
                     {ing.ingredientTags.category && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                        style={{ background: 'var(--color-mist)', color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+                        style={{ background: 'var(--color-mist)', color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
                         {ing.ingredientTags.category}
                       </span>
                     )}
                     {ing.ingredientTags.proteinType && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                        style={{ background: '#fde8eb', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}>
+                        style={{ background: '#fde8eb', color: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}>
                         {ing.ingredientTags.proteinType}
                       </span>
                     )}
                     {ing.ingredientTags.essential === false && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                        style={{ background: '#fff3cd', color: '#856404', fontFamily: 'Nunito, sans-serif' }}>
+                        style={{ background: '#fff3cd', color: '#856404', fontFamily: 'var(--font-ui)' }}>
                         optional
                       </span>
                     )}
@@ -245,13 +245,13 @@ function IngredientEditor({ ingredients, onChange }) {
       {/* Add buttons */}
       <div className="flex gap-2 mt-3">
         <button type="button" onClick={addIngredient}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors hover:bg-[#D6EDD4]"
-          style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors hover:bg-[#DCE4D6]"
+          style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
           <Plus className="w-3.5 h-3.5" /> Add Ingredient
         </button>
         <button type="button" onClick={addSubheading}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors hover:bg-[#eef2ff]"
-          style={{ fontFamily: 'Nunito, sans-serif', color: '#4338ca', borderColor: '#c7d2fe' }}>
+          style={{ fontFamily: 'var(--font-ui)', color: '#4338ca', borderColor: '#c7d2fe' }}>
           <Plus className="w-3.5 h-3.5" /> Add Section Header
         </button>
       </div>
@@ -343,16 +343,16 @@ function EditModal({ recipe, onClose, onSave }) {
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-[20px] border overflow-hidden"
-        style={{ background: '#fff', borderColor: 'var(--color-stone)' }}
+        className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-[12px] border overflow-hidden"
+        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'var(--color-stone)' }}>
           <div>
-            <h2 className="text-base font-bold" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+            <h2 className="text-base font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
               Edit Recipe
             </h2>
-            <p className="text-xs mt-0.5 line-clamp-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+            <p className="text-xs mt-0.5 line-clamp-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
               #{recipe.id} · {recipe.title}
             </p>
           </div>
@@ -366,7 +366,7 @@ function EditModal({ recipe, onClose, onSave }) {
           {[['metadata','Metadata'],['ingredients','Ingredients']].map(([val,lbl]) => (
             <button key={val} onClick={() => setTab(val)}
               className="px-5 py-2.5 text-xs font-bold border-b-2 transition-colors"
-              style={{ fontFamily: 'Nunito, sans-serif', borderBottomColor: tab === val ? 'var(--color-leaf)' : 'transparent', color: tab === val ? 'var(--color-leaf)' : 'var(--color-text-muted)' }}>
+              style={{ fontFamily: 'var(--font-ui)', borderBottomColor: tab === val ? 'var(--color-leaf)' : 'transparent', color: tab === val ? 'var(--color-leaf)' : 'var(--color-text-muted)' }}>
               {lbl}
             </button>
           ))}
@@ -380,8 +380,8 @@ function EditModal({ recipe, onClose, onSave }) {
               <div className="mb-4 p-3 rounded-xl border" style={{ borderColor: isActive ? 'var(--color-stone)' : 'var(--color-berry)', background: isActive ? '#f9f9f9' : '#fff5f6' }}>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <div>
-                    <p className="text-xs font-bold" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>Recipe Status</p>
-                    <p className="text-[10px] mt-0.5" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+                    <p className="text-xs font-bold" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>Recipe Status</p>
+                    <p className="text-[10px] mt-0.5" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                       {isActive ? 'Active — included in matching and search' : 'Inactive — excluded from all matching'}
                     </p>
                   </div>
@@ -389,13 +389,13 @@ function EditModal({ recipe, onClose, onSave }) {
                     value={isActive ? 'active' : 'inactive'}
                     onChange={e => setIsActive(e.target.value === 'active')}
                     className="ml-auto border rounded-lg px-2 py-1 text-xs"
-                    style={{ borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif' }}>
+                    style={{ borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)' }}>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
                 </label>
                 {!isActive && (
-                  <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}>
+                  <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}>
                     <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
                     This recipe will not appear in search results or matching
                   </p>
@@ -406,9 +406,9 @@ function EditModal({ recipe, onClose, onSave }) {
               <div className="grid grid-cols-3 gap-3 mb-3">
                 {[['prepTime','Prep (min)'],['cookTime','Cook (min)'],['servings','Servings']].map(([k,lbl]) => (
                   <div key={k}>
-                    <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>{lbl}</label>
+                    <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>{lbl}</label>
                     <input type="number" min="0" value={meta[k]} onChange={e => setM(k, e.target.value)}
-                      className="w-full border rounded-lg px-2 py-1 text-xs" style={{ borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif', outline: 'none' }} />
+                      className="w-full border rounded-lg px-2 py-1 text-xs" style={{ borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)', outline: 'none' }} />
                   </div>
                 ))}
               </div>
@@ -421,9 +421,9 @@ function EditModal({ recipe, onClose, onSave }) {
                   ['prepComplexity','Complexity', ['simple','moderate','complex']],
                 ].map(([k,lbl,opts]) => (
                   <div key={k}>
-                    <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>{lbl}</label>
+                    <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>{lbl}</label>
                     <select value={meta[k]} onChange={e => setM(k, e.target.value)}
-                      className="w-full border rounded-lg px-2 py-1 text-xs" style={{ borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif' }}>
+                      className="w-full border rounded-lg px-2 py-1 text-xs" style={{ borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)' }}>
                       {opts.map(v => <option key={v} value={v}>{v}</option>)}
                     </select>
                   </div>
@@ -432,12 +432,12 @@ function EditModal({ recipe, onClose, onSave }) {
 
               {/* Primary protein */}
               <div className="mb-3">
-                <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>Primary Protein</label>
+                <label className="text-xs font-bold block mb-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>Primary Protein</label>
                 <div className="flex flex-wrap gap-1">
                   {PROTEIN_OPTIONS.map(opt => (
                     <button key={opt ?? 'none'} type="button" onClick={() => setM('primaryProtein', opt)}
                       className="text-xs px-2 py-0.5 rounded-full border transition-colors"
-                      style={{ fontFamily: 'Nunito, sans-serif', background: meta.primaryProtein === opt ? 'var(--color-bark)' : 'transparent', color: meta.primaryProtein === opt ? '#fff' : 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
+                      style={{ fontFamily: 'var(--font-ui)', background: meta.primaryProtein === opt ? 'var(--color-bark)' : 'transparent', color: meta.primaryProtein === opt ? '#fff' : 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
                       {opt ?? 'none'}
                     </button>
                   ))}
@@ -459,18 +459,18 @@ function EditModal({ recipe, onClose, onSave }) {
         {/* Footer */}
         {error && (
           <div className="px-5 pb-2">
-            <p className="text-xs" style={{ color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}>{error}</p>
+            <p className="text-xs" style={{ color: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}>{error}</p>
           </div>
         )}
         <div className="flex justify-end gap-2 px-5 py-3 border-t" style={{ borderColor: 'var(--color-stone)' }}>
           <button onClick={onClose}
             className="px-4 py-1.5 rounded-xl text-xs font-bold border transition-colors hover:bg-[#f5f5f5]"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
             Cancel
           </button>
           <button onClick={handleSave} disabled={saving}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
-            style={{ fontFamily: 'Nunito, sans-serif', background: 'var(--color-leaf)' }}>
+            style={{ fontFamily: 'var(--font-ui)', background: 'var(--color-leaf)' }}>
             {saving ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
             Save
           </button>
@@ -567,7 +567,7 @@ export default function AdminRecipes() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-parchment)' }}>
-        <p style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>Please sign in.</p>
+        <p style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>Please sign in.</p>
       </div>
     );
   }
@@ -583,13 +583,13 @@ export default function AdminRecipes() {
               <ChefHat className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>Recipe Manager</h1>
-              <p className="text-xs" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>{total.toLocaleString()} recipes</p>
+              <h1 className="text-2xl" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>Recipe Manager</h1>
+              <p className="text-xs" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>{total.toLocaleString()} recipes</p>
             </div>
           </div>
           <button onClick={() => load(page)} disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4] disabled:opacity-50"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#DCE4D6] disabled:opacity-50"
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
         </div>
@@ -598,31 +598,31 @@ export default function AdminRecipes() {
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => navigate('/admin')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#DCE4D6]"
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: 'var(--color-surface)' }}
           >
             <Users className="w-4 h-4" />
             Users
           </button>
           <button
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border"
-            style={{ fontFamily: 'Nunito, sans-serif', background: 'var(--color-bark)', color: '#fff', borderColor: 'var(--color-bark)' }}
+            style={{ fontFamily: 'var(--font-ui)', background: 'var(--color-bark)', color: '#fff', borderColor: 'var(--color-bark)' }}
           >
             <BookOpen className="w-4 h-4" />
             Recipes
           </button>
           <button
             onClick={() => navigate('/admin/blocklist')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#DCE4D6]"
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: 'var(--color-surface)' }}
           >
             <Ban className="w-4 h-4" />
             Blocklist
           </button>
           <button
             onClick={() => navigate('/admin/feedback')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#D6EDD4]"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: '#fff' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:bg-[#DCE4D6]"
+            style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)', background: 'var(--color-surface)' }}
           >
             <BarChart2 className="w-4 h-4" />
             Feedback
@@ -631,16 +631,16 @@ export default function AdminRecipes() {
 
         {/* Filters */}
         <form onSubmit={handleSearch}
-          className="rounded-[20px] border p-4 mb-5"
-          style={{ background: '#fff', borderColor: 'var(--color-stone)' }}>
+          className="rounded-[12px] border p-4 mb-5"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}>
           <div className="flex flex-wrap gap-3 items-end">
             <div className="flex-1 min-w-[160px]">
-              <label className="block text-xs font-bold mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>Search</label>
+              <label className="block text-xs font-bold mb-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>Search</label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: 'var(--color-text-muted)' }} />
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Recipe title…"
                   className="w-full border rounded-xl pl-7 pr-3 py-1.5 text-xs"
-                  style={{ borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif', outline: 'none' }} />
+                  style={{ borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)', outline: 'none' }} />
               </div>
             </div>
             {[
@@ -650,17 +650,17 @@ export default function AdminRecipes() {
               ['Status',   status,      setStatus,      [{v:'all',l:'All'},{v:'active',l:'Active'},{v:'inactive',l:'Inactive'}]],
             ].map(([lbl, val, setter, opts]) => (
               <div key={lbl} className="min-w-[110px]">
-                <label className="block text-xs font-bold mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>{lbl}</label>
+                <label className="block text-xs font-bold mb-1" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>{lbl}</label>
                 <select value={val} onChange={e => setter(e.target.value)}
                   className="w-full border rounded-xl px-2 py-1.5 text-xs"
-                  style={{ borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif' }}>
+                  style={{ borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)' }}>
                   {opts.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
                 </select>
               </div>
             ))}
             <button type="submit"
               className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold text-white"
-              style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}>
+              style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}>
               <Filter className="w-3.5 h-3.5" /> Filter
             </button>
           </div>
@@ -668,7 +668,7 @@ export default function AdminRecipes() {
 
         {error && (
           <div className="rounded-xl p-4 text-sm border mb-5 flex items-center gap-2"
-            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}>
+            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}>
             <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
           </div>
         )}
@@ -679,16 +679,16 @@ export default function AdminRecipes() {
           </div>
         ) : (
           <>
-            <div className="rounded-[20px] border overflow-hidden" style={{ borderColor: 'var(--color-stone)' }}>
+            <div className="rounded-[12px] border overflow-hidden" style={{ borderColor: 'var(--color-stone)' }}>
               {/* Table header */}
               <div className="grid text-xs font-bold px-4 py-2.5"
-                style={{ gridTemplateColumns: '48px 1fr 100px 80px 80px 70px 80px', gap: '8px', background: 'var(--color-mist)', fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+                style={{ gridTemplateColumns: '48px 1fr 100px 80px 80px 70px 80px', gap: '8px', background: 'var(--color-mist)', fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
                 <span>ID</span><span>Recipe</span><span>Source</span>
                 <span>Cuisine</span><span>Skill</span><span>Status</span><span className="text-right">Actions</span>
               </div>
 
               {recipes.length === 0 ? (
-                <div className="text-center py-10 text-sm" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>No recipes found</div>
+                <div className="text-center py-10 text-sm" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>No recipes found</div>
               ) : recipes.map(r => (
                 <div key={r.id}
                   className="grid items-center px-4 py-2.5 border-t"
@@ -697,16 +697,16 @@ export default function AdminRecipes() {
                   <span className="text-xs font-mono" style={{ color: 'var(--color-text-muted)' }}>{r.id}</span>
 
                   <div className="min-w-0">
-                    <p className="text-xs font-bold truncate" style={{ fontFamily: 'Nunito, sans-serif', color: r.is_active === false ? 'var(--color-text-muted)' : 'var(--color-bark)', textDecoration: r.is_active === false ? 'line-through' : 'none' }}>
+                    <p className="text-xs font-bold truncate" style={{ fontFamily: 'var(--font-ui)', color: r.is_active === false ? 'var(--color-text-muted)' : 'var(--color-bark)', textDecoration: r.is_active === false ? 'line-through' : 'none' }}>
                       {r.title}
                     </p>
                     {r.metadata?.mealOccasion?.length > 0 && (
-                      <p className="text-[10px] truncate" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>{r.metadata.mealOccasion.join(' · ')}</p>
+                      <p className="text-[10px] truncate" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>{r.metadata.mealOccasion.join(' · ')}</p>
                     )}
                   </div>
 
-                  <span className="text-[10px] truncate" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>{r.source}</span>
-                  <span className="text-[10px] truncate" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>{r.metadata?.cuisineType?.[0] ?? '—'}</span>
+                  <span className="text-[10px] truncate" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>{r.source}</span>
+                  <span className="text-[10px] truncate" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>{r.metadata?.cuisineType?.[0] ?? '—'}</span>
                   <span>{r.metadata?.skillLevel ? <SkillBadge level={r.metadata.skillLevel} /> : <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>—</span>}</span>
 
                   {/* Status toggle */}
@@ -716,7 +716,7 @@ export default function AdminRecipes() {
                     title={r.is_active === false ? 'Click to activate' : 'Click to deactivate'}
                     className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors disabled:opacity-50"
                     style={{
-                      fontFamily: 'Nunito, sans-serif',
+                      fontFamily: 'var(--font-ui)',
                       background:  r.is_active === false ? '#fff5f6' : '#d4edd4',
                       color:       r.is_active === false ? 'var(--color-berry)' : 'var(--color-text-green)',
                       borderColor: r.is_active === false ? '#fca5a5' : 'var(--color-mist)',
@@ -728,7 +728,7 @@ export default function AdminRecipes() {
 
                   {/* Actions */}
                   <div className="flex items-center justify-end gap-1">
-                    <button onClick={() => setEditing(r)} className="p-1.5 rounded-lg hover:bg-[#D6EDD4]" title="Edit">
+                    <button onClick={() => setEditing(r)} className="p-1.5 rounded-lg hover:bg-[#DCE4D6]" title="Edit">
                       <Edit2 className="w-3.5 h-3.5" style={{ color: 'var(--color-leaf)' }} />
                     </button>
                     {confirmDelete === r.id ? (
@@ -754,18 +754,18 @@ export default function AdminRecipes() {
             {/* Pagination */}
             {pages > 1 && (
               <div className="flex items-center justify-between mt-4">
-                <span className="text-xs" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+                <span className="text-xs" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                   Page {page} of {pages} · {total.toLocaleString()} recipes
                 </span>
                 <div className="flex gap-2">
                   <button onClick={() => load(page - 1)} disabled={page <= 1 || loading}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors hover:bg-[#D6EDD4] disabled:opacity-40"
-                    style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors hover:bg-[#DCE4D6] disabled:opacity-40"
+                    style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
                     <ChevronLeft className="w-3.5 h-3.5" /> Prev
                   </button>
                   <button onClick={() => load(page + 1)} disabled={page >= pages || loading}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors hover:bg-[#D6EDD4] disabled:opacity-40"
-                    style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors hover:bg-[#DCE4D6] disabled:opacity-40"
+                    style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}>
                     Next <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>

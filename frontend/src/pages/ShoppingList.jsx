@@ -165,7 +165,7 @@ export default function ShoppingList() {
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--color-leaf)' }}>
             <ShoppingCart className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-2xl sm:text-3xl" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+          <h1 className="text-2xl sm:text-3xl" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
             Shopping List
           </h1>
         </div>
@@ -184,7 +184,7 @@ export default function ShoppingList() {
                 onClick={handleGenerateFromRecipes}
                 disabled={saving}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
-                style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
               >
                 {saving ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                 Generate from this week's recipes
@@ -193,7 +193,7 @@ export default function ShoppingList() {
                 <button
                   onClick={handleDeleteList}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 border"
-                  style={{ color: 'var(--color-berry)', borderColor: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+                  style={{ color: 'var(--color-berry)', borderColor: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete list
@@ -202,7 +202,7 @@ export default function ShoppingList() {
               <button
                 onClick={() => window.print()}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 border"
-                style={{ color: 'var(--color-bark)', borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ color: 'var(--color-bark)', borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)' }}
               >
                 <Printer className="w-4 h-4" />
                 Print
@@ -218,7 +218,7 @@ export default function ShoppingList() {
                     onClick={() => { setActiveList(l); setItems(l.items ?? []); }}
                     className="flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-colors"
                     style={{
-                      fontFamily: 'Nunito, sans-serif',
+                      fontFamily: 'var(--font-ui)',
                       background: activeList?.id === l.id ? 'var(--color-leaf)' : 'var(--color-mist)',
                       color: activeList?.id === l.id ? '#ffffff' : 'var(--color-text-green)',
                     }}
@@ -233,10 +233,10 @@ export default function ShoppingList() {
               <>
                 {/* Progress */}
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+                  <h2 className="text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                     {activeList.name}
                   </h2>
-                  <p className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+                  <p className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
                     {checkedCount}/{items.length} done
                   </p>
                 </div>
@@ -258,12 +258,12 @@ export default function ShoppingList() {
                     onChange={e => setNewItemName(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && addItem()}
                     className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-                    style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}
+                    style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}
                   />
                   <button
                     onClick={addItem}
                     className="px-4 py-2 rounded-xl text-sm font-bold text-white"
-                    style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+                    style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
                   >
                     Add
                   </button>
@@ -282,7 +282,7 @@ export default function ShoppingList() {
                         className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg mb-1"
                         style={{ background: allDone ? 'var(--color-mist)' : 'var(--color-blush)' }}
                       >
-                        <span className="text-xs font-bold" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+                        <span className="text-xs font-bold" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
                           {cat}
                           <span className="ml-2 font-normal" style={{ color: 'var(--color-text-muted)' }}>
                             {catItems.filter(i => i.checked).length}/{catItems.length}
@@ -314,7 +314,7 @@ export default function ShoppingList() {
                                 <span
                                   className="flex-1 text-sm"
                                   style={{
-                                    fontFamily: 'Nunito, sans-serif',
+                                    fontFamily: 'var(--font-ui)',
                                     color: item.checked ? 'var(--color-text-muted)' : 'var(--color-bark)',
                                     textDecoration: item.checked ? 'line-through' : 'none',
                                   }}
@@ -335,7 +335,7 @@ export default function ShoppingList() {
                 })}
               </>
             ) : (
-              <div className="text-center py-20" style={{ fontFamily: 'Nunito, sans-serif' }}>
+              <div className="text-center py-20" style={{ fontFamily: 'var(--font-ui)' }}>
                 <p className="text-5xl mb-4">🛒</p>
                 <p className="text-lg font-bold mb-2" style={{ color: 'var(--color-bark)' }}>No shopping list yet</p>
                 <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>

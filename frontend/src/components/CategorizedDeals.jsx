@@ -18,11 +18,11 @@ function CategorySection({ categoryName, deals, isExpanded, onToggle }) {
   return (
     <div
       style={{
-        background: '#ffffff',
+        background: 'var(--color-surface)',
         border: '1.5px solid var(--color-stone)',
-        borderRadius: '20px',
+        borderRadius: '12px',
         overflow: 'hidden',
-        boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)',
+        boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)',
       }}
     >
       {/* Section header — always visible, acts as toggle */}
@@ -38,7 +38,7 @@ function CategorySection({ categoryName, deals, isExpanded, onToggle }) {
           </span>
           <span
             style={{
-              fontFamily: '"Fredoka One", sans-serif',
+              fontFamily: 'var(--font-display)',
               color: 'var(--color-bark)',
               fontSize: '18px',
             }}
@@ -50,7 +50,7 @@ function CategorySection({ categoryName, deals, isExpanded, onToggle }) {
             style={{
               background: 'var(--color-mist)',
               color: 'var(--color-text-green)',
-              fontFamily: 'Nunito, sans-serif',
+              fontFamily: 'var(--font-ui)',
             }}
           >
             {deals.length} deal{deals.length !== 1 ? 's' : ''}
@@ -114,7 +114,7 @@ export default function CategorizedDeals({ deals }) {
     return (
       <div
         className="text-center py-12"
-        style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+        style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
       >
         No deals to display.
       </div>
@@ -128,7 +128,7 @@ export default function CategorizedDeals({ deals }) {
         <button
           onClick={toggleAll}
           className="text-xs font-bold underline underline-offset-2 transition-opacity hover:opacity-70"
-          style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+          style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
         >
           {allExpanded ? 'Collapse all' : 'Expand all'}
         </button>

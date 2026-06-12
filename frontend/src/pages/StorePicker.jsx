@@ -80,16 +80,16 @@ export default function StorePicker() {
       {/* ── Continue banner ─────────────────────────────────────────────── */}
       {selectedMeta && (
         <div
-          className="w-full max-w-lg mb-8 rounded-[20px] p-4 flex items-center justify-between"
+          className="w-full max-w-lg mb-8 rounded-[12px] p-4 flex items-center justify-between"
           style={{
             background: selectedMeta.lightBg,
             border: `1.5px solid ${selectedMeta.borderColor}`,
-            boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)',
+            boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)',
           }}
         >
           <span
             className="text-sm font-semibold"
-            style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
           >
             Continuing with{' '}
             <span style={{ color: selectedMeta.headerBg }}>{selectedMeta.label}</span>
@@ -97,7 +97,7 @@ export default function StorePicker() {
           <button
             onClick={handleContinue}
             className="text-sm font-bold px-5 py-2.5 rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-px"
-            style={{ background: selectedMeta.headerBg, fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: selectedMeta.headerBg, fontFamily: 'var(--font-ui)' }}
           >
             Continue →
           </button>
@@ -107,20 +107,20 @@ export default function StorePicker() {
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <div className="text-center mb-10">
         <div
-          className="flex items-center justify-center w-16 h-16 rounded-[20px] mx-auto mb-4"
-          style={{ background: 'var(--color-honey)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.15)' }}
+          className="flex items-center justify-center w-16 h-16 rounded-[12px] mx-auto mb-4"
+          style={{ background: 'var(--color-brand)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.15)' }}
         >
           <UtensilsCrossed className="w-9 h-9 text-white" />
         </div>
         <h1
           className="text-4xl mb-2"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
         >
           Deal to Dish
         </h1>
         <p
           className="text-lg max-w-sm mx-auto"
-          style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+          style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
         >
           Your weekly specials, matched to real recipes
         </p>
@@ -129,7 +129,7 @@ export default function StorePicker() {
       {/* ── Pick a store heading ─────────────────────────────────────────── */}
       <p
         className="font-bold mb-5 text-sm uppercase tracking-wider"
-        style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+        style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
       >
         Choose your supermarket
       </p>
@@ -144,15 +144,15 @@ export default function StorePicker() {
             <button
               key={store.id}
               onClick={() => handleSelectStore(store.id)}
-              className="store-card rounded-[20px] overflow-hidden text-left focus:outline-none"
+              className="store-card rounded-[12px] overflow-hidden text-left focus:outline-none"
               style={{
-                background: '#ffffff',
+                background: 'var(--color-surface)',
                 border: isSelected
                   ? `2px solid ${store.headerBg}`
                   : `1.5px solid var(--color-stone)`,
                 boxShadow: isSelected
                   ? `0 0 0 3px ${store.headerBg}25`
-                  : '0 2px 12px rgba(92, 74, 53, 0.08)',
+                  : '0 2px 12px rgba(42, 36, 31, 0.08)',
               }}
               aria-label={`Shop at ${store.label}`}
             >
@@ -169,14 +169,14 @@ export default function StorePicker() {
                 />
                 <span
                   className="text-xl"
-                  style={{ fontFamily: '"Fredoka One", sans-serif', color: store.headerText }}
+                  style={{ fontFamily: 'var(--font-display)', color: store.headerText }}
                 >
                   {store.label}
                 </span>
                 {isSelected && (
                   <span
                     className="ml-auto text-xs bg-white/25 px-2 py-0.5 rounded-full font-bold"
-                    style={{ color: store.headerText, fontFamily: 'Nunito, sans-serif' }}
+                    style={{ color: store.headerText, fontFamily: 'var(--font-ui)' }}
                   >
                     ✓
                   </span>
@@ -187,14 +187,14 @@ export default function StorePicker() {
               <div className="px-4 py-3" style={{ background: store.lightBg }}>
                 <p
                   className="text-xs mb-2"
-                  style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                  style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                 >
                   {store.tagline}
                 </p>
                 {loading ? (
                   <div
                     className="flex items-center gap-2 text-sm"
-                    style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                    style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                   >
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                     <span>Loading deals...</span>
@@ -202,7 +202,7 @@ export default function StorePicker() {
                 ) : (
                   <p
                     className="text-sm font-bold"
-                    style={{ color: store.headerBg, fontFamily: 'Nunito, sans-serif' }}
+                    style={{ color: store.headerBg, fontFamily: 'var(--font-ui)' }}
                   >
                     {count > 0
                       ? `${count} deal${count !== 1 ? 's' : ''} this week`
@@ -219,7 +219,7 @@ export default function StorePicker() {
       {selectedStore && (
         <p
           className="mt-6 text-sm"
-          style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+          style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
         >
           Want a different store?{' '}
           <button
@@ -236,7 +236,7 @@ export default function StorePicker() {
       <button
         onClick={startOnboarding}
         className="mt-8 inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors hover:opacity-70"
-        style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+        style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
       >
         <HelpCircle className="w-4 h-4" />
         How it works

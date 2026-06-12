@@ -29,11 +29,11 @@ const PREP_TIME_OPTIONS = [
 ];
 
 const inputStyle = {
-  background: '#ffffff',
+  background: 'var(--color-surface)',
   border: '1.5px solid var(--color-stone)',
   borderRadius: '12px',
   padding: '10px 12px',
-  fontFamily: 'Nunito, sans-serif',
+  fontFamily: 'var(--font-ui)',
   fontSize: '16px',
   color: 'var(--color-bark)',
   outline: 'none',
@@ -119,13 +119,13 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
   };
 
   const SectionLabel = ({ children }) => (
-    <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+    <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
       {children}
     </p>
   );
 
   const CheckOption = ({ id, label, checked, onToggle }) => (
-    <label className="flex items-center gap-2 cursor-pointer text-sm" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+    <label className="flex items-center gap-2 cursor-pointer text-sm" style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
       <input
         type="checkbox"
         checked={checked}
@@ -147,7 +147,7 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 flex-shrink-0 border-b" style={{ borderColor: 'var(--color-stone)' }}>
-          <h2 style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '20px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)', fontSize: '20px' }}>
             Personalise Recipes
           </h2>
           <button onClick={onClose} className="p-1.5 rounded-xl transition-colors hover:opacity-70" style={{ color: 'var(--color-text-muted)' }} aria-label="Close panel">
@@ -192,7 +192,7 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
 
           {/* ── Max prep time ────────────────────────────────────────── */}
           <div>
-            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
               Max prep time
             </label>
             <select
@@ -236,7 +236,7 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
                 <span
                   key={i}
                   className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
-                  style={{ background: 'var(--color-peach)', color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                  style={{ background: 'var(--color-peach)', color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
                 >
                   {item}
                   <button
@@ -258,14 +258,14 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
           <button
             onClick={handleClear}
             className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-80"
-            style={{ border: '1.5px solid var(--color-stone)', color: 'var(--color-bark)', background: 'transparent', fontFamily: 'Nunito, sans-serif' }}
+            style={{ border: '1.5px solid var(--color-stone)', color: 'var(--color-bark)', background: 'transparent', fontFamily: 'var(--font-ui)' }}
           >
             Clear All
           </button>
           <button
             onClick={handleApply}
             className="flex-1 px-4 py-2.5 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px"
-            style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
           >
             Apply
           </button>

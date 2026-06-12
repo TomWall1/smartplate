@@ -7,43 +7,43 @@ import { useAuth } from '../context/AuthContext';
 const FEATURES = [
   {
     icon: ChefHat,
-    color: '#7DB87A',
+    color: '#36453B',
     title: '150 AI-Matched Recipes Weekly',
     desc: '3× more recipes than the free tier. Every recipe matched to this week\'s specials so you always cook with deals.',
   },
   {
     icon: Refrigerator,
-    color: '#7DB87A',
+    color: '#36453B',
     title: 'What I Have at Home',
     desc: 'Tell us what\'s in your fridge and we\'ll find recipes you can make right now — with deals on what\'s missing.',
   },
   {
     icon: Sparkles,
-    color: '#D4667A',
+    color: '#BE6A43',
     title: 'Personalised Recommendations',
     desc: 'AI-powered recipe suggestions tailored to your dietary preferences, cooking time, and household size.',
   },
   {
     icon: Heart,
-    color: '#D4667A',
+    color: '#BE6A43',
     title: 'Save Favourite Recipes',
     desc: 'Build your personal recipe collection. Save recipes you love and access them any time.',
   },
   {
     icon: Calendar,
-    color: '#F4A94E',
+    color: '#BE6A43',
     title: 'Weekly Meal Planner',
     desc: 'Plan your breakfasts, lunches and dinners for the week. Never wonder "what\'s for dinner?" again.',
   },
   {
     icon: ShoppingCart,
-    color: '#F4A94E',
+    color: '#BE6A43',
     title: 'Smart Shopping Lists',
     desc: 'Auto-generate combined shopping lists from your meal plan. Organised by aisle category.',
   },
   {
     icon: Bell,
-    color: '#F4A94E',
+    color: '#BE6A43',
     title: 'Price Alerts',
     desc: 'Set alerts for ingredients and get notified when they drop below your target price.',
   },
@@ -76,31 +76,31 @@ export default function Premium() {
       {/* Hero */}
       <div
         className="py-16 px-4 text-center"
-        style={{ background: 'linear-gradient(135deg, #7DB87A 0%, #5C4A35 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #36453B 0%, #2A241F 100%)' }}
       >
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
           style={{ background: 'rgba(244,169,78,0.25)' }}
         >
-          <Crown className="w-8 h-8" style={{ color: '#F4A94E' }} />
+          <Crown className="w-8 h-8" style={{ color: '#BE6A43' }} />
         </div>
         <h1
           className="text-3xl sm:text-4xl text-white mb-3"
-          style={{ fontFamily: '"Fredoka One", sans-serif' }}
+          style={{ fontFamily: 'var(--font-display)' }}
         >
-          SmartPlate Premium
+          Deals to Dish Premium
         </h1>
-        <p className="text-white/80 text-sm sm:text-base max-w-md mx-auto" style={{ fontFamily: 'Nunito, sans-serif' }}>
+        <p className="text-white/80 text-sm sm:text-base max-w-md mx-auto" style={{ fontFamily: 'var(--font-ui)' }}>
           Get more from your grocery deals. Personalised recipes, meal planning, and smart shopping — all in one place.
         </p>
 
         {isPremium ? (
           <div
             className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl text-sm font-bold"
-            style={{ background: 'rgba(255,255,255,0.15)', color: '#ffffff', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'rgba(255,255,255,0.15)', color: '#ffffff', fontFamily: 'var(--font-ui)' }}
           >
             <Star className="w-4 h-4" fill="currentColor" />
-            Premium unlocked by admin
+            Premium enabled by admin
             {premiumSince && (
               <span className="font-normal opacity-80">
                 · since {new Date(premiumSince).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -111,11 +111,11 @@ export default function Premium() {
           <div className="mt-6">
             <div
               className="inline-flex items-center gap-1 px-5 py-2.5 rounded-xl text-white font-bold text-lg mb-2"
-              style={{ background: '#F4A94E', fontFamily: '"Fredoka One", sans-serif' }}
+              style={{ background: '#BE6A43', fontFamily: 'var(--font-display)' }}
             >
               $9.99 / month
             </div>
-            <p className="text-white/60 text-xs" style={{ fontFamily: 'Nunito, sans-serif' }}>
+            <p className="text-white/60 text-xs" style={{ fontFamily: 'var(--font-ui)' }}>
               Coming soon: Payment integration via Stripe
             </p>
           </div>
@@ -126,7 +126,7 @@ export default function Premium() {
         {/* Premium features */}
         <h2
           className="text-2xl text-center mb-8"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
         >
           Everything included
         </h2>
@@ -136,8 +136,8 @@ export default function Premium() {
             return (
               <div
                 key={i}
-                className="rounded-[20px] p-5 border"
-                style={{ background: '#ffffff', borderColor: 'var(--color-stone)' }}
+                className="rounded-[12px] p-5 border"
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
@@ -145,10 +145,10 @@ export default function Premium() {
                 >
                   <Icon className="w-5 h-5" style={{ color: f.color }} />
                 </div>
-                <h3 className="text-base font-bold mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+                <h3 className="text-base font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                   {f.title}
                 </h3>
-                <p className="text-xs leading-relaxed" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+                <p className="text-xs leading-relaxed" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                   {f.desc}
                 </p>
               </div>
@@ -159,16 +159,16 @@ export default function Premium() {
         {/* Comparison table */}
         <h2
           className="text-2xl text-center mb-6"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
         >
           Free vs Premium
         </h2>
         <div
-          className="rounded-[20px] overflow-hidden border mb-10"
+          className="rounded-[12px] overflow-hidden border mb-10"
           style={{ borderColor: 'var(--color-stone)' }}
         >
           <div className="grid grid-cols-3 text-sm font-bold text-center py-3"
-            style={{ background: 'var(--color-mist)', fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+            style={{ background: 'var(--color-mist)', fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
             <div className="px-4">Feature</div>
             <div>Free</div>
             <div style={{ color: 'var(--color-honey)' }}>Premium</div>
@@ -180,7 +180,7 @@ export default function Premium() {
               style={{
                 borderColor: 'var(--color-stone)',
                 background: item.premium ? '#fffbf0' : '#ffffff',
-                fontFamily: 'Nunito, sans-serif',
+                fontFamily: 'var(--font-ui)',
                 color: 'var(--color-bark)',
               }}
             >
@@ -203,26 +203,26 @@ export default function Premium() {
         {!isPremium && (
           <div className="text-center">
             <div
-              className="inline-block rounded-[20px] border p-6 mb-6"
+              className="inline-block rounded-[12px] border p-6 mb-6"
               style={{ background: '#fffbf0', borderColor: 'var(--color-honey)' }}
             >
               <Crown className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--color-honey)' }} />
-              <p className="text-lg font-bold mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              <p className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                 Payment integration coming soon
               </p>
-              <p className="text-sm mb-4" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+              <p className="text-sm mb-4" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                 We're working on Stripe integration. In the meantime, premium access is granted manually by the admin.
               </p>
               {!user ? (
                 <Link
                   to="/auth"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
-                  style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+                  style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
                 >
                   Sign up to get notified
                 </Link>
               ) : (
-                <p className="text-sm font-bold" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-green)' }}>
+                <p className="text-sm font-bold" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-green)' }}>
                   ✓ You're signed in as {user.email}
                 </p>
               )}
@@ -232,20 +232,20 @@ export default function Premium() {
 
         {isPremium && (
           <div className="text-center space-y-4">
-            <p className="text-lg font-bold" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+            <p className="text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
               You have Premium access! Start exploring:
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link to="/recipes" className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}>
+              <Link to="/recipes" className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}>
                 <Sparkles className="w-4 h-4" /> Personalise Recipes
               </Link>
-              <Link to="/favorites" className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: '#D4667A', fontFamily: 'Nunito, sans-serif' }}>
+              <Link to="/favorites" className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: '#BE6A43', fontFamily: 'var(--font-ui)' }}>
                 <Heart className="w-4 h-4" /> Favourites
               </Link>
-              <Link to="/meal-planner" className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}>
+              <Link to="/meal-planner" className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}>
                 <Calendar className="w-4 h-4" /> Meal Planner
               </Link>
-              <Link to="/shopping-list" className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}>
+              <Link to="/shopping-list" className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: 'var(--color-brand)', fontFamily: 'var(--font-ui)' }}>
                 <ShoppingCart className="w-4 h-4" /> Shopping List
               </Link>
             </div>

@@ -18,11 +18,11 @@ export default function PremiumGate({ feature, children }) {
 
   return (
     <div
-      className="rounded-[20px] p-8 text-center border"
+      className="rounded-[12px] p-8 text-center border"
       style={{
         background: '#fffbf0',
         borderColor: 'var(--color-honey)',
-        fontFamily: 'Nunito, sans-serif',
+        fontFamily: 'var(--font-ui)',
       }}
     >
       <div
@@ -33,12 +33,12 @@ export default function PremiumGate({ feature, children }) {
       </div>
       <h3
         className="text-xl mb-2"
-        style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+        style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
       >
         Premium Feature
       </h3>
       <p className="text-sm mb-5 max-w-sm mx-auto" style={{ color: 'var(--color-text-muted)' }}>
-        {feature ? `${feature} is` : 'This feature is'} available with SmartPlate Premium
+        {feature ? `${feature} is` : 'This feature is'} available with Deals to Dish Premium
         for just <strong style={{ color: 'var(--color-bark)' }}>$9.99/month</strong>.
       </p>
       {user ? (

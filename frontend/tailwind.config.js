@@ -7,25 +7,32 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['"Fredoka One"', 'sans-serif'],
-        body: ['Nunito', 'sans-serif'],
+        heading: ['Fraunces', 'Georgia', 'serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // SmartPlate brand palette
-        leaf:      '#7DB87A',
-        sprout:    '#A8D5A2',
-        mist:      '#D6EDD4',
-        honey:     '#F4A94E',
-        peach:     '#FBDFC3',
-        blush:     '#F7EDE2',
-        parchment: '#FDFAF5',
-        stone:     '#E8E2D9',
-        bark:      '#5C4A35',
-        berry:     '#D4667A',
-        sky:       '#89C4D8',
-        cream:     '#FFF8EF',
-        'text-muted': '#a09080',
-        'text-green': '#3D7A3A',
+        // Deals to Dish — Direction 01 palette (see STYLE_GUIDE.md)
+        bone:      '#F4EEE2',
+        espresso:  '#2A241F',
+        oat:       '#E7DECB',
+        clay:      '#BE6A43',
+        gum:       '#36453B',
+        // Legacy SmartPlate names mapped to Direction-01 equivalents so
+        // existing utility classes re-skin without per-file edits.
+        leaf:      '#36453B',
+        sprout:    '#2A352D',
+        mist:      '#DCE4D6',
+        honey:     '#BE6A43',
+        peach:     '#E7DECB',
+        blush:     '#E7DECB',
+        parchment: '#F4EEE2',
+        stone:     '#E0D8C8',
+        bark:      '#2A241F',
+        berry:     '#BE6A43',
+        sky:       '#DCE4D6',
+        cream:     '#FCFAF4',
+        'text-muted': '#6B5F52',
+        'text-green': '#36453B',
         // Store brand colours (keep as-is)
         woolworths: {
           DEFAULT: '#007833',

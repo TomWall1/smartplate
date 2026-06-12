@@ -50,11 +50,11 @@ const DealCard = ({ deal }) => {
 
   return (
     <div
-      className="deal-card flex items-center justify-between p-3 rounded-[20px] cursor-pointer group"
+      className="deal-card flex items-center justify-between p-3 rounded-[12px] cursor-pointer group"
       style={{
-        background: '#ffffff',
+        background: 'var(--color-surface)',
         border: '1.5px solid var(--color-stone)',
-        boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)',
+        boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)',
       }}
       onClick={handleClick}
       onKeyPress={handleKeyPress}
@@ -78,7 +78,7 @@ const DealCard = ({ deal }) => {
         <div className="flex items-center gap-2">
           <h3
             className="font-bold leading-snug"
-            style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif', fontSize: '14px', lineHeight: '1.4' }}
+            style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)', fontSize: '14px', lineHeight: '1.4' }}
           >
             {deal.name}
           </h3>
@@ -89,26 +89,26 @@ const DealCard = ({ deal }) => {
           {deal.category && (
             <span
               className="text-xs font-bold px-3 py-0.5 rounded-full"
-              style={{ background: catStyle.bg, color: catStyle.color, fontFamily: 'Nunito, sans-serif' }}
+              style={{ background: catStyle.bg, color: catStyle.color, fontFamily: 'var(--font-ui)' }}
             >
               {deal.category}
             </span>
           )}
           {deal.unit && (
-            <span className="text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            <span className="text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
               {deal.unit}
             </span>
           )}
         </div>
 
         {deal.description && (
-          <p className="text-xs mt-1 line-clamp-1" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+          <p className="text-xs mt-1 line-clamp-1" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
             {deal.description}
           </p>
         )}
 
         {deal.validUntil && (
-          <div className="text-xs mt-1" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+          <div className="text-xs mt-1" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
             Valid until {new Date(deal.validUntil).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}
           </div>
         )}
@@ -118,12 +118,12 @@ const DealCard = ({ deal }) => {
         <div className="flex items-baseline gap-2">
           <span
             className="text-xl font-bold"
-            style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
           >
             ${deal.price.toFixed(2)}
           </span>
           {deal.originalPrice && (
-            <span className="text-sm line-through" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            <span className="text-sm line-through" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
               ${deal.originalPrice.toFixed(2)}
             </span>
           )}
@@ -132,7 +132,7 @@ const DealCard = ({ deal }) => {
         {discountPercentage > 0 && (
           <span
             className="discount-badge inline-flex items-center gap-1 text-xs font-bold px-3 py-0.5 rounded-full text-white"
-            style={{ background: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}
           >
             <TrendingDown className="w-3 h-3" />
             {discountPercentage}% off

@@ -31,8 +31,8 @@ function FavoriteCard({ fav, onRemove }) {
 
   return (
     <div
-      className="recipe-card rounded-[20px] cursor-pointer overflow-hidden"
-      style={{ background: '#ffffff' }}
+      className="recipe-card rounded-[12px] cursor-pointer overflow-hidden"
+      style={{ background: 'var(--color-surface)' }}
       onClick={() => navigate(`/recipes/${fav.recipe_id}`)}
       role="button"
       tabIndex={0}
@@ -64,11 +64,11 @@ function FavoriteCard({ fav, onRemove }) {
       <div className="p-4">
         <h3
           className="leading-snug line-clamp-2 mb-2"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '17px' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)', fontSize: '17px' }}
         >
           {data.title ?? fav.recipe_id}
         </h3>
-        <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif', fontWeight: 600 }}>
+        <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600 }}>
           {data.prepTime && (
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
@@ -88,14 +88,14 @@ function FavoriteCard({ fav, onRemove }) {
               <span
                 key={i}
                 className="text-xs font-bold px-3 py-0.5 rounded-full"
-                style={{ background: 'var(--color-blush)', color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ background: 'var(--color-blush)', color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
               >
                 {tag}
               </span>
             ))}
           </div>
         )}
-        <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+        <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
           Saved {new Date(fav.saved_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
         </p>
       </div>
@@ -134,7 +134,7 @@ export default function Favorites() {
           </div>
           <h1
             className="text-2xl sm:text-3xl"
-            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
           >
             Saved Recipes
           </h1>
@@ -145,7 +145,7 @@ export default function Favorites() {
         ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="rounded-[20px] overflow-hidden border animate-pulse" style={{ background: '#fff', borderColor: 'var(--color-stone)' }}>
+              <div key={i} className="rounded-[12px] overflow-hidden border animate-pulse" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}>
                 <div className="aspect-video" style={{ background: 'var(--color-mist)' }} />
                 <div className="p-4 space-y-2">
                   <div className="h-4 rounded" style={{ background: 'var(--color-stone)', width: '75%' }} />
@@ -155,11 +155,11 @@ export default function Favorites() {
             ))}
           </div>
         ) : error ? (
-          <div className="rounded-xl p-4 text-sm" style={{ background: 'var(--color-peach)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}>
+          <div className="rounded-xl p-4 text-sm" style={{ background: 'var(--color-peach)', color: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}>
             Failed to load favourites: {error}
           </div>
         ) : favorites.length === 0 ? (
-          <div className="text-center py-20" style={{ fontFamily: 'Nunito, sans-serif' }}>
+          <div className="text-center py-20" style={{ fontFamily: 'var(--font-ui)' }}>
             <p className="text-5xl mb-4">❤️</p>
             <p className="text-lg font-bold mb-2" style={{ color: 'var(--color-bark)' }}>No saved recipes yet</p>
             <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
@@ -168,7 +168,7 @@ export default function Favorites() {
           </div>
         ) : (
           <>
-            <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
               {favorites.length} saved recipe{favorites.length !== 1 ? 's' : ''}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

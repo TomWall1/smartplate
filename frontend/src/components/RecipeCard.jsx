@@ -77,8 +77,8 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
 
   return (
     <div
-      className="recipe-card rounded-[20px] cursor-pointer overflow-hidden"
-      style={{ background: '#ffffff' }}
+      className="recipe-card rounded-[12px] cursor-pointer overflow-hidden"
+      style={{ background: 'var(--color-surface)' }}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -127,7 +127,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
         {/* Title */}
         <h3
           className="leading-snug line-clamp-2 mb-1"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '17px' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)', fontSize: '17px' }}
         >
           {recipe.title}
         </h3>
@@ -136,7 +136,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
         {showMatchReason && recipe.matchReason && (
           <p
             className="text-sm italic mt-1 mb-2"
-            style={{ color: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ color: 'var(--color-honey)', fontFamily: 'var(--font-ui)' }}
           >
             {recipe.matchReason}
           </p>
@@ -145,7 +145,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
         {/* Stats row */}
         <div
           className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2 mb-3 text-sm"
-          style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif', fontWeight: 600 }}
+          style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600 }}
         >
           <span className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
@@ -169,7 +169,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
                 background: breakdownOpen ? 'var(--color-mist)' : 'transparent',
                 color: 'var(--color-text-green)',
                 border: breakdownOpen ? '1px solid var(--color-sprout)' : '1px solid transparent',
-                fontFamily: 'Nunito, sans-serif',
+                fontFamily: 'var(--font-ui)',
                 fontSize: '13px',
               }}
               aria-label="Show savings breakdown"
@@ -191,7 +191,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
               <span
                 key={i}
                 className="inline-flex items-center gap-0.5 text-sm font-bold px-3 py-0.5 rounded-full"
-                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
               >
                 • {ing}
               </span>
@@ -199,7 +199,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
             {extraDeals > 0 && (
               <span
                 className="text-sm font-bold px-3 py-0.5 rounded-full"
-                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
               >
                 +{extraDeals} more
               </span>
@@ -227,7 +227,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
               <span
                 key={i}
                 className="text-sm font-bold px-3 py-0.5 rounded-full"
-                style={{ background: 'var(--color-blush)', color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ background: 'var(--color-blush)', color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
               >
                 {tag}
               </span>
@@ -249,7 +249,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
             />
             <span
               className="text-sm"
-              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
             >
               {SOURCE_META[recipe.source].label}
             </span>
@@ -276,7 +276,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
             />
             <span
               className="text-xs"
-              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif', fontWeight: 600 }}
+              style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)', fontWeight: 600 }}
             >
               Contains {excludedWarnings.join(', ')}
               {excludedWarnings.length === 1 ? ' (your excluded ingredient)' : ' (your excluded ingredients)'}

@@ -11,7 +11,7 @@ import { TAG_FILTERS, PROTEIN_FILTERS, hasProteinDeal, applyPreferenceOrdering }
 
 function RecipeSkeleton() {
   return (
-    <div className="rounded-[20px] overflow-hidden border" style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}>
+    <div className="rounded-[12px] overflow-hidden border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)' }}>
       <div className="skeleton aspect-video w-full" />
       <div className="p-4 space-y-2">
         <div className="skeleton h-4 w-4/5" />
@@ -102,7 +102,7 @@ export default function Recipes() {
       console.error('Personalisation failed:', err);
       const status = err?.response?.status;
       if (status === 403) {
-        setPersonalisedError('Personalised recommendations require a Premium account. Upgrade to unlock this feature.');
+        setPersonalisedError('Personalised recommendations are part of Premium.');
         setShowPremiumNudge(true);
       } else {
         setPersonalisedError('Could not personalise recipes. Showing all results.');
@@ -135,9 +135,9 @@ export default function Recipes() {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <h1
             className="text-2xl sm:text-3xl"
-            style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
           >
-            This Week's Recipes
+            This week's recipes
           </h1>
           <button
             onClick={() => {
@@ -145,7 +145,7 @@ export default function Recipes() {
               setPanelOpen(true);
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
-            style={{ background: isPremium ? 'var(--color-leaf)' : 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-brand)', fontFamily: 'var(--font-ui)' }}
           >
             {isPremium
               ? <SlidersHorizontal className="w-4 h-4" />
@@ -158,17 +158,17 @@ export default function Recipes() {
         {showPremiumNudge && !isPremium && (
           <div
             className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm border"
-            style={{ background: '#fffbf0', borderColor: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border-strong)', fontFamily: 'var(--font-ui)' }}
           >
             <span className="flex items-center gap-2" style={{ color: 'var(--color-bark)' }}>
-              <Crown className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-honey)' }} />
-              Personalised recommendations are a <strong>Premium</strong> feature ($9.99/month).
+              <Crown className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-accent)' }} />
+              Personalised recommendations are part of <strong>Premium</strong> ($9.99/month).
             </span>
             <div className="flex items-center gap-2 flex-shrink-0">
               <Link
                 to="/premium"
                 className="text-xs font-bold underline underline-offset-2"
-                style={{ color: 'var(--color-honey)' }}
+                style={{ color: 'var(--color-brand-text)' }}
               >
                 Upgrade
               </Link>
@@ -195,10 +195,10 @@ export default function Recipes() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-10 py-3 rounded-xl shadow-sm outline-none"
             style={{
-              background: '#ffffff',
+              background: 'var(--color-surface)',
               border: '1.5px solid var(--color-stone)',
               color: 'var(--color-bark)',
-              fontFamily: 'Nunito, sans-serif',
+              fontFamily: 'var(--font-ui)',
               fontSize: '16px',
             }}
             onFocus={(e) => {
@@ -239,14 +239,14 @@ export default function Recipes() {
         {isPremium && (
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-700" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif', fontWeight: 700 }}>
+              <span className="text-xs font-700" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 700 }}>
                 🥩 Filter by protein on special
               </span>
               {activeProtein && (
                 <button
                   onClick={() => setActiveProtein(null)}
                   className="text-xs font-bold underline underline-offset-2"
-                  style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                  style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                 >
                   Clear
                 </button>
@@ -263,7 +263,7 @@ export default function Recipes() {
                     borderColor: activeProtein === id ? 'var(--color-honey)' : 'var(--color-stone)',
                     background: activeProtein === id ? 'var(--color-honey)' : '#ffffff',
                     color: activeProtein === id ? '#ffffff' : 'var(--color-text-muted)',
-                    fontFamily: 'Nunito, sans-serif',
+                    fontFamily: 'var(--font-ui)',
                   }}
                 >
                   {label}
@@ -277,7 +277,7 @@ export default function Recipes() {
         {isPersonalised && personalisedRecipes !== null && !personalisedLoading && (
           <div
             className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm border"
-            style={{ background: 'var(--color-blush)', borderColor: 'var(--color-honey)', color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-blush)', borderColor: 'var(--color-honey)', color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
           >
             <span className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-honey)' }} />
@@ -298,7 +298,7 @@ export default function Recipes() {
         {personalisedError && (
           <div
             className="rounded-xl px-4 py-3 text-sm border"
-            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}
           >
             {personalisedError}
           </div>
@@ -312,7 +312,7 @@ export default function Recipes() {
                 className="w-8 h-8 mx-auto mb-2 animate-spin"
                 style={{ color: 'var(--color-leaf)', animationDuration: '3s' }}
               />
-              <p className="text-sm font-bold" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              <p className="text-sm font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                 Finding this week's best deals...
               </p>
             </div>
@@ -326,11 +326,11 @@ export default function Recipes() {
         ) : warmingUp && weeklyRecipes.length === 0 ? (
           /* ── Backend warming up: friendly message + countdown ────────── */
           <div
-            className="rounded-[20px] border p-8 text-center"
-            style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+            className="rounded-[12px] border p-8 text-center"
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)', fontFamily: 'var(--font-ui)' }}
           >
             <ShoppingCart className="w-10 h-10 mx-auto mb-3 animate-spin" style={{ color: 'var(--color-honey)', animationDuration: '3s' }} />
-            <h3 className="text-lg mb-2" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+            <h3 className="text-lg mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
               Getting this week's specials ready
             </h3>
             <p className="text-sm mb-4 max-w-sm mx-auto" style={{ color: 'var(--color-text-muted)' }}>
@@ -346,11 +346,11 @@ export default function Recipes() {
         ) : apiError && weeklyRecipes.length === 0 ? (
           /* ── API error: retry button ────────────────────────────────── */
           <div
-            className="rounded-[20px] border p-8 text-center"
-            style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+            className="rounded-[12px] border p-8 text-center"
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)', fontFamily: 'var(--font-ui)' }}
           >
             <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--color-honey)' }} />
-            <h3 className="text-lg mb-2" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+            <h3 className="text-lg mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
               Something went wrong on our end
             </h3>
             <p className="text-sm mb-5 max-w-sm mx-auto" style={{ color: 'var(--color-text-muted)' }}>
@@ -359,7 +359,7 @@ export default function Recipes() {
             <button
               onClick={retryFetch}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 hover:-translate-y-px"
-              style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
             >
               <RefreshCw className="w-4 h-4" />
               Try again
@@ -369,11 +369,11 @@ export default function Recipes() {
         ) : !loading && weeklyRecipes.length === 0 && !personalisedError ? (
           /* ── No recipes matched ─────────────────────────────────────── */
           <div
-            className="rounded-[20px] border p-8 text-center"
-            style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+            className="rounded-[12px] border p-8 text-center"
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)', fontFamily: 'var(--font-ui)' }}
           >
             <p className="text-3xl mb-3">🍽️</p>
-            <h3 className="text-lg mb-2" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+            <h3 className="text-lg mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
               No strong matches this week
             </h3>
             <p className="text-sm mb-5 max-w-md mx-auto" style={{ color: 'var(--color-text-muted)' }}>
@@ -383,7 +383,7 @@ export default function Recipes() {
               to="/"
               state={{ choose: true }}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 hover:-translate-y-px"
-              style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
             >
               <ShoppingCart className="w-4 h-4" />
               Pick a store
@@ -410,7 +410,7 @@ export default function Recipes() {
                     <button
                       onClick={() => setDisplayCount((n) => Math.min(n + RECIPES_PER_PAGE, filteredRecipes.length))}
                       className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
-                      style={{ background: 'var(--color-leaf)', color: '#ffffff', fontFamily: 'Nunito, sans-serif' }}
+                      style={{ background: 'var(--color-leaf)', color: '#ffffff', fontFamily: 'var(--font-ui)' }}
                     >
                       Show more recipes ({filteredRecipes.length - displayCount} remaining)
                     </button>
@@ -418,7 +418,7 @@ export default function Recipes() {
                 ) : filteredRecipes.length > RECIPES_PER_PAGE ? (
                   <p
                     className="text-center text-sm pt-2"
-                    style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                    style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                   >
                     Showing all {filteredRecipes.length} recipes
                   </p>
@@ -427,8 +427,8 @@ export default function Recipes() {
                 {/* Upsell banner for free-tier users at end of results */}
                 {!isPremium && filteredRecipes.length > 0 && displayCount >= filteredRecipes.length && (
                   <div
-                    className="rounded-[20px] border p-5 text-center"
-                    style={{ background: '#fffbf0', borderColor: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+                    className="rounded-[12px] border p-5 text-center"
+                    style={{ background: '#fffbf0', borderColor: 'var(--color-honey)', fontFamily: 'var(--font-ui)' }}
                   >
                     <Crown className="w-6 h-6 mx-auto mb-2" style={{ color: 'var(--color-honey)' }} />
                     <p className="font-bold text-sm mb-1" style={{ color: 'var(--color-bark)' }}>
@@ -440,7 +440,7 @@ export default function Recipes() {
                     <Link
                       to="/premium"
                       className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
-                      style={{ background: 'var(--color-honey)' }}
+                      style={{ background: 'var(--color-brand)' }}
                     >
                       <Crown className="w-4 h-4" />
                       Upgrade to Premium — $9.99/month
@@ -452,7 +452,7 @@ export default function Recipes() {
               /* ── Filtered to zero (search/tag produced no results) ───── */
               <div
                 className="text-center py-16"
-                style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
               >
                 <p className="text-2xl mb-2">🍽️</p>
                 <p

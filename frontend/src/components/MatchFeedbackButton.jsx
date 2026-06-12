@@ -18,7 +18,7 @@ export default function MatchFeedbackButton({ recipeId, recipeTitle, ingredientN
 
   if (done) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+      <span className="inline-flex items-center gap-1 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
         <Check className="w-3 h-3" /> Reported
       </span>
     );
@@ -51,7 +51,7 @@ export default function MatchFeedbackButton({ recipeId, recipeTitle, ingredientN
         onClick={() => setOpen(o => !o)}
         title="Report incorrect match"
         className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-lg border transition-all hover:bg-red-50"
-        style={{ color: 'var(--color-text-muted)', borderColor: 'var(--color-stone)', fontFamily: 'Nunito, sans-serif' }}
+        style={{ color: 'var(--color-text-muted)', borderColor: 'var(--color-stone)', fontFamily: 'var(--font-ui)' }}
       >
         <ThumbsDown className="w-3 h-3" /> Wrong match
       </button>
@@ -59,15 +59,15 @@ export default function MatchFeedbackButton({ recipeId, recipeTitle, ingredientN
       {open && (
         <div
           className="absolute z-50 right-0 top-7 w-64 rounded-xl border shadow-lg p-3"
-          style={{ background: '#fff', borderColor: 'var(--color-stone)' }}
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-bold" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+            <p className="text-xs font-bold" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
               Why is this wrong?
             </p>
             <button onClick={() => setOpen(false)}><X className="w-3 h-3" style={{ color: 'var(--color-text-muted)' }} /></button>
           </div>
-          <p className="text-xs mb-2" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+          <p className="text-xs mb-2" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
             <strong>{ingredientName}</strong> → {productName}
           </p>
           <div className="flex flex-col gap-1">
@@ -77,7 +77,7 @@ export default function MatchFeedbackButton({ recipeId, recipeTitle, ingredientN
                 onClick={() => submit(r)}
                 disabled={sending}
                 className="text-left text-xs px-2 py-1.5 rounded-lg border transition-all hover:bg-red-50 disabled:opacity-50"
-                style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}
+                style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)', borderColor: 'var(--color-stone)' }}
               >
                 {sending ? <Loader className="w-3 h-3 animate-spin inline mr-1" /> : null}
                 {r}

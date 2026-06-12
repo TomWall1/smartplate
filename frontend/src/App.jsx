@@ -270,7 +270,7 @@ function AppInner() {
             style={{ background: 'var(--color-mist)', borderColor: 'var(--color-leaf)', color: 'var(--color-bark)' }}
           >
             <span className="inline-block w-3 h-3 border-2 rounded-full animate-spin flex-shrink-0" style={{ borderColor: 'var(--color-leaf)', borderTopColor: 'transparent' }} />
-            <span style={{ fontFamily: 'Nunito, sans-serif' }}>
+            <span style={{ fontFamily: 'var(--font-ui)' }}>
               Getting this week's specials ready — usually takes about 30 seconds on first load
               {retryCountdown > 0 && (
                 <span style={{ color: 'var(--color-text-muted)' }}> · trying again in {retryCountdown}s</span>

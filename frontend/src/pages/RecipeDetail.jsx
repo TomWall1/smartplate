@@ -59,13 +59,16 @@ function IngredientRow({ item, globalIdx, matchedDeals, openPopupIndex, setOpenP
           ref={(el) => { badgeRefs.current[globalIdx] = el; }}
           onClick={() => setOpenPopupIndex(isOpen ? null : globalIdx)}
           className="w-full text-left flex items-start gap-2 text-sm px-3 py-2 rounded-xl transition-colors cursor-pointer"
-          style={{ background: 'var(--color-mist)', border: '1.5px solid var(--color-sprout)', fontFamily: 'Nunito, sans-serif' }}
+          style={{ background: 'var(--color-mist)', border: '1.5px solid var(--color-sprout)', fontFamily: 'var(--font-ui)' }}
           aria-expanded={isOpen}
           aria-haspopup="dialog"
         >
           <span className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'var(--color-text-green)' }} />
           <span className="font-semibold" style={{ color: 'var(--color-text-green)' }}>{item.text}</span>
-          <span className="ml-auto flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0 text-white" style={{ background: 'var(--color-berry)' }}>
+          <span
+            className="ml-auto flex items-center gap-1 text-xs font-medium px-2 py-0.5 whitespace-nowrap flex-shrink-0"
+            style={{ background: 'var(--color-brand-tint)', color: 'var(--color-brand-text)', borderRadius: 'var(--radius-sm)', letterSpacing: '0.02em' }}
+          >
             on special
           </span>
         </button>
@@ -88,7 +91,7 @@ function IngredientRow({ item, globalIdx, matchedDeals, openPopupIndex, setOpenP
   return (
     <div
       className="flex items-start gap-2 text-sm px-3 py-2 rounded-xl"
-      style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', fontFamily: 'Nunito, sans-serif' }}
+      style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-stone)', fontFamily: 'var(--font-ui)' }}
     >
       <span className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'var(--color-stone)' }} />
       <span style={{ color: 'var(--color-bark)' }}>{item.text}</span>
@@ -100,14 +103,14 @@ function IngredientList({ ingredients, matchedDeals, openPopupIndex, setOpenPopu
   const sections = groupIngredients(ingredients);
   return (
     <div>
-      <h2 className="mb-3" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '20px' }}>
+      <h2 className="mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)', fontSize: '20px' }}>
         Ingredients
       </h2>
       {sections.map((section, si) => (
         <div key={si} className={si > 0 ? 'mt-4' : ''}>
           {section.heading && (
             <p className="text-xs font-extrabold uppercase tracking-wide mb-2"
-              style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}>
+              style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}>
               {section.heading}
             </p>
           )}
@@ -220,17 +223,17 @@ export default function RecipeDetail() {
         <p className="text-2xl mb-2">🍽️</p>
         <h2
           className="text-xl mb-2"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
         >
           Recipe not found
         </h2>
-        <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+        <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
           {error || 'This recipe could not be loaded.'}
         </p>
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px"
-          style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+          style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Recipes
@@ -300,7 +303,7 @@ export default function RecipeDetail() {
         <button
           onClick={() => navigate(-1)}
           className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-sm font-bold transition-colors backdrop-blur-sm"
-          style={{ background: 'rgba(92, 74, 53, 0.55)', fontFamily: 'Nunito, sans-serif' }}
+          style={{ background: 'rgba(42, 36, 31, 0.55)', fontFamily: 'var(--font-ui)' }}
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -313,7 +316,7 @@ export default function RecipeDetail() {
         {/* Title */}
         <h1
           className="leading-tight"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: 'clamp(22px, 4vw, 28px)' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)', fontSize: 'clamp(22px, 4vw, 28px)' }}
         >
           {title}
         </h1>
@@ -328,7 +331,7 @@ export default function RecipeDetail() {
                 className="w-4 h-4 rounded-sm object-contain"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
-              <span className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+              <span className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
                 Recipe from{' '}
                 <span style={{ color: 'var(--color-bark)', fontWeight: 700 }}>
                   {SOURCE_META[recipe.source].label}
@@ -339,7 +342,7 @@ export default function RecipeDetail() {
               <button
                 onClick={openOriginalRecipe}
                 className="inline-flex items-center gap-1.5 text-sm font-bold underline underline-offset-2 transition-opacity hover:opacity-70"
-                style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 View original recipe
@@ -350,7 +353,7 @@ export default function RecipeDetail() {
 
         {/* Description */}
         {description && (
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
             {description}
           </p>
         )}
@@ -362,7 +365,7 @@ export default function RecipeDetail() {
               <span
                 key={i}
                 className="text-xs font-bold px-3 py-1 rounded-full"
-                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
               >
                 {tag}
               </span>
@@ -382,16 +385,16 @@ export default function RecipeDetail() {
             <div
               key={label}
               className="rounded-xl px-4 py-3 flex flex-col items-center min-w-[80px]"
-              style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}
+              style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)' }}
             >
               <Icon className="w-5 h-5 mb-1" style={{ color: 'var(--color-text-muted)' }} />
               <span
                 className="text-lg font-bold"
-                style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
               >
                 {value}
               </span>
-              <span className="text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+              <span className="text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
                 {label}
               </span>
             </div>
@@ -412,22 +415,22 @@ export default function RecipeDetail() {
         {/* Deal highlights (shopping tip) — collapsed by default */}
         {matchedDeals.length > 0 && (
           <div
-            className="rounded-[20px] overflow-hidden"
-            style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}
+            className="rounded-[12px] overflow-hidden"
+            style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)' }}
           >
             <button
               onClick={() => setIsDealsExpanded((v) => !v)}
               className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-stone-50"
-              style={{ fontFamily: 'Nunito, sans-serif' }}
+              style={{ fontFamily: 'var(--font-ui)' }}
               aria-expanded={isDealsExpanded}
             >
               <h2
-                style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '18px' }}
+                style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)', fontSize: '18px' }}
               >
                 This week's deals used
                 <span
                   className="ml-2 text-sm font-bold px-2 py-0.5 rounded-full align-middle"
-                  style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                  style={{ background: 'var(--color-mist)', color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
                 >
                   {matchedDeals.length}
                 </span>
@@ -457,13 +460,13 @@ export default function RecipeDetail() {
                       <div className="min-w-0 flex-1">
                         <p
                           className="text-sm font-semibold leading-snug truncate"
-                          style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                          style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
                         >
                           {deal.dealName}
                         </p>
                         <p
                           className="text-xs"
-                          style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                          style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                         >
                           {deal.store && (
                             <span
@@ -480,7 +483,7 @@ export default function RecipeDetail() {
                         {deal.price > 0 && (
                           <p
                             className="text-sm font-bold"
-                            style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                            style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
                           >
                             ${deal.price.toFixed(2)}
                           </p>
@@ -488,7 +491,7 @@ export default function RecipeDetail() {
                         {deal.saving > 0 && (
                           <p
                             className="text-xs font-bold"
-                            style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                            style={{ color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
                           >
                             save ${deal.saving.toFixed(2)}
                           </p>
@@ -500,7 +503,7 @@ export default function RecipeDetail() {
                 {totalMealSaving > 0 && (
                   <p
                     className="text-sm font-bold mt-4 pt-3"
-                    style={{ borderTop: '1px solid var(--color-stone)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                    style={{ borderTop: '1px solid var(--color-stone)', color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
                   >
                     🛒 Up to ${matchedDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2)} off full price on all items
                   </p>
@@ -529,16 +532,16 @@ export default function RecipeDetail() {
             when the site allows embedding, new tab otherwise. */}
         {sourceUrl && sourceUrl !== '#' && (
           <div
-            className="rounded-[20px] px-5 py-5 text-center"
-            style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}
+            className="rounded-[12px] px-5 py-5 text-center"
+            style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)' }}
           >
             <h2
               className="mb-1"
-              style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '20px' }}
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)', fontSize: '20px' }}
             >
               Ready to cook?
             </h2>
-            <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
               The full method and quantities are on{' '}
               <span style={{ fontWeight: 700, color: 'var(--color-bark)' }}>
                 {SOURCE_META[recipe.source]?.label ?? recipe.source}
@@ -550,7 +553,7 @@ export default function RecipeDetail() {
             <button
               onClick={openOriginalRecipe}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
-              style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
             >
               <BookOpen className="w-4 h-4" />
               Get the full recipe
@@ -563,7 +566,7 @@ export default function RecipeDetail() {
           <div>
             <h2
               className="mb-3 flex items-center gap-2"
-              style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '20px' }}
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)', fontSize: '20px' }}
             >
               <Flame className="w-5 h-5" style={{ color: 'var(--color-honey)' }} />
               Nutrition (per serving)
@@ -580,15 +583,15 @@ export default function RecipeDetail() {
                   <div
                     key={label}
                     className="rounded-xl px-4 py-3 text-center"
-                    style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.06)' }}
+                    style={{ background: 'var(--color-surface)', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.06)' }}
                   >
-                    <p className="text-lg font-bold" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+                    <p className="text-lg font-bold" style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
                       {value}
                       <span className="text-xs font-normal ml-0.5" style={{ color: 'var(--color-text-muted)' }}>
                         {unit}
                       </span>
                     </p>
-                    <p className="text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+                    <p className="text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
                       {label}
                     </p>
                   </div>

@@ -14,7 +14,7 @@ const QUICK_ADD = [
 
 // ── Coverage badge colour ─────────────────────────────────────────────────────
 function coverageStyle(coverage) {
-  if (coverage >= 0.7) return { bg: '#D6EDD4', color: '#3D7A3A', label: 'Ready to cook!' };
+  if (coverage >= 0.7) return { bg: '#DCE4D6', color: '#3D7A3A', label: 'Ready to cook!' };
   if (coverage >= 0.5) return { bg: '#FEF3C7', color: '#92400E', label: 'Almost there' };
   return { bg: '#F3F4F6', color: '#6B7280', label: 'Needs a few items' };
 }
@@ -32,7 +32,7 @@ function UpsellScreen() {
           <ChefHat style={{ width: 36, height: 36, color: 'var(--color-leaf)' }} />
         </div>
 
-        <h1 style={{ fontFamily: '"Fredoka One", sans-serif', fontSize: 28, color: 'var(--color-bark)', marginBottom: 8 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--color-bark)', marginBottom: 8 }}>
           What I Have at Home
         </h1>
         <p style={{ color: 'var(--color-text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
@@ -95,7 +95,7 @@ function UpsellScreen() {
             display: 'inline-flex', alignItems: 'center', gap: 8,
             background: 'var(--color-leaf)', color: 'white',
             borderRadius: 12, padding: '12px 28px', fontWeight: 700, fontSize: 15,
-            textDecoration: 'none', fontFamily: 'Nunito, sans-serif',
+            textDecoration: 'none', fontFamily: 'var(--font-ui)',
           }}
         >
           <Crown style={{ width: 16, height: 16 }} />
@@ -113,7 +113,7 @@ function IngredientChip({ label, onRemove }) {
       display: 'inline-flex', alignItems: 'center', gap: 6,
       background: 'var(--color-mist)', color: 'var(--color-text-green)',
       borderRadius: 999, padding: '5px 12px', fontSize: 13, fontWeight: 600,
-      fontFamily: 'Nunito, sans-serif',
+      fontFamily: 'var(--font-ui)',
     }}>
       {label}
       <button
@@ -139,7 +139,7 @@ function PantryRecipeCard({ result, userIngredients }) {
     <div style={{
       background: 'white', border: '1.5px solid var(--color-stone)',
       borderRadius: 20, overflow: 'hidden',
-      boxShadow: '0 2px 12px rgba(92,74,53,0.07)',
+      boxShadow: '0 2px 12px rgba(42, 36, 31,0.07)',
     }}>
       <div style={{ display: 'flex', gap: 0 }}>
         {recipe.image && (
@@ -153,7 +153,7 @@ function PantryRecipeCard({ result, userIngredients }) {
         <div style={{ padding: '14px 16px', flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
             <h3 style={{
-              fontFamily: '"Fredoka One", sans-serif', fontSize: 16,
+              fontFamily: 'var(--font-display)', fontSize: 16,
               color: 'var(--color-bark)', margin: 0, lineHeight: 1.3,
             }}>
               {recipe.title}
@@ -161,25 +161,25 @@ function PantryRecipeCard({ result, userIngredients }) {
             <span style={{
               background: cs.bg, color: cs.color, borderRadius: 999,
               padding: '3px 10px', fontSize: 12, fontWeight: 700, flexShrink: 0,
-              fontFamily: 'Nunito, sans-serif',
+              fontFamily: 'var(--font-ui)',
             }}>
               {pct}%
             </span>
           </div>
 
-          <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: '0 0 8px', fontFamily: 'Nunito, sans-serif' }}>
+          <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: '0 0 8px', fontFamily: 'var(--font-ui)' }}>
             {cs.label} · You have {matchedIngredients.length}/{matchedIngredients.length + missingIngredients.length} ingredients
             {recipe.totalTime ? ` · ${recipe.totalTime} min` : ''}
           </p>
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {dealsCount > 0 && (
-              <span style={{ fontSize: 11, color: 'var(--color-text-green)', background: 'var(--color-mist)', borderRadius: 999, padding: '2px 8px', fontFamily: 'Nunito, sans-serif', fontWeight: 700 }}>
+              <span style={{ fontSize: 11, color: 'var(--color-text-green)', background: 'var(--color-mist)', borderRadius: 999, padding: '2px 8px', fontFamily: 'var(--font-ui)', fontWeight: 700 }}>
                 {dealsCount} item{dealsCount !== 1 ? 's' : ''} on sale
               </span>
             )}
             {totalCostToComplete > 0 && (
-              <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+              <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
                 ~${totalCostToComplete.toFixed(2)} to complete
                 {totalSavings > 0 && <span style={{ color: 'var(--color-text-green)' }}> (save ${totalSavings.toFixed(2)})</span>}
               </span>
@@ -195,7 +195,7 @@ function PantryRecipeCard({ result, userIngredients }) {
           style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: 0,
             display: 'flex', alignItems: 'center', gap: 6,
-            color: 'var(--color-text-muted)', fontSize: 12, fontFamily: 'Nunito, sans-serif', fontWeight: 600,
+            color: 'var(--color-text-muted)', fontSize: 12, fontFamily: 'var(--font-ui)', fontWeight: 600,
           }}
         >
           {expanded ? <ChevronUp style={{ width: 14, height: 14 }} /> : <ChevronDown style={{ width: 14, height: 14 }} />}
@@ -206,7 +206,7 @@ function PantryRecipeCard({ result, userIngredients }) {
           <div style={{ marginTop: 12 }}>
             {matchedIngredients.length > 0 && (
               <div style={{ marginBottom: 10 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-green)', marginBottom: 6, fontFamily: 'Nunito, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-green)', marginBottom: 6, fontFamily: 'var(--font-ui)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   You have
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -214,7 +214,7 @@ function PantryRecipeCard({ result, userIngredients }) {
                     <span key={i} style={{
                       display: 'inline-flex', alignItems: 'center', gap: 4,
                       fontSize: 12, color: 'var(--color-bark)', background: '#F0FDF4',
-                      borderRadius: 999, padding: '3px 10px', fontFamily: 'Nunito, sans-serif',
+                      borderRadius: 999, padding: '3px 10px', fontFamily: 'var(--font-ui)',
                     }}>
                       <Check style={{ width: 11, height: 11, color: 'var(--color-leaf)' }} />
                       {ing.name || ing.raw}
@@ -226,13 +226,13 @@ function PantryRecipeCard({ result, userIngredients }) {
 
             {missingIngredients.length > 0 && (
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-berry)', marginBottom: 6, fontFamily: 'Nunito, sans-serif', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-berry)', marginBottom: 6, fontFamily: 'var(--font-ui)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Still needed
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                   {missingIngredients.map((ing, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
                         <ShoppingCart style={{ width: 11, height: 11, color: 'var(--color-text-muted)', flexShrink: 0 }} />
                         {ing.name || ing.raw}
                       </span>
@@ -240,7 +240,7 @@ function PantryRecipeCard({ result, userIngredients }) {
                         <span style={{
                           fontSize: 11, color: 'var(--color-text-green)', fontWeight: 700,
                           background: 'var(--color-mist)', borderRadius: 999, padding: '2px 8px',
-                          whiteSpace: 'nowrap', fontFamily: 'Nunito, sans-serif',
+                          whiteSpace: 'nowrap', fontFamily: 'var(--font-ui)',
                         }}>
                           ${parseFloat(ing.deal.price).toFixed(2)} at {ing.deal.store?.charAt(0).toUpperCase() + ing.deal.store?.slice(1)}
                           {ing.deal.wasPrice && parseFloat(ing.deal.wasPrice) > parseFloat(ing.deal.price) && (
@@ -260,7 +260,7 @@ function PantryRecipeCard({ result, userIngredients }) {
                 style={{
                   flex: 1, textAlign: 'center', background: 'var(--color-leaf)', color: 'white',
                   borderRadius: 10, padding: '8px 12px', fontSize: 13, fontWeight: 700,
-                  textDecoration: 'none', fontFamily: 'Nunito, sans-serif',
+                  textDecoration: 'none', fontFamily: 'var(--font-ui)',
                 }}
               >
                 View Recipe
@@ -388,11 +388,11 @@ export default function PantryMatcher() {
           }}>
             <ChefHat style={{ width: 22, height: 22, color: 'var(--color-leaf)' }} />
           </div>
-          <h1 style={{ fontFamily: '"Fredoka One", sans-serif', fontSize: 26, color: 'var(--color-bark)', margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--color-bark)', margin: 0 }}>
             What I Have at Home
           </h1>
         </div>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: 14, fontFamily: 'Nunito, sans-serif', margin: 0 }}>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: 14, fontFamily: 'var(--font-ui)', margin: 0 }}>
           Enter your ingredients and we'll find recipes you can make, with deals on what's missing.
         </p>
       </div>
@@ -401,9 +401,9 @@ export default function PantryMatcher() {
       <div style={{
         background: 'white', border: '1.5px solid var(--color-stone)',
         borderRadius: 20, padding: 16, marginBottom: 16,
-        boxShadow: '0 2px 8px rgba(92,74,53,0.06)',
+        boxShadow: '0 2px 8px rgba(42, 36, 31,0.06)',
       }}>
-        <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: 'var(--color-bark)', marginBottom: 10, fontFamily: 'Nunito, sans-serif' }}>
+        <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: 'var(--color-bark)', marginBottom: 10, fontFamily: 'var(--font-ui)' }}>
           Your ingredients
         </label>
 
@@ -429,7 +429,7 @@ export default function PantryMatcher() {
               placeholder="Type an ingredient and press Enter…"
               style={{
                 border: 'none', outline: 'none', background: 'transparent',
-                fontSize: 14, color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif',
+                fontSize: 14, color: 'var(--color-bark)', fontFamily: 'var(--font-ui)',
                 width: '100%',
               }}
             />
@@ -448,7 +448,7 @@ export default function PantryMatcher() {
 
         {/* Quick-add */}
         <div style={{ marginTop: 12 }}>
-          <p style={{ fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 7, fontFamily: 'Nunito, sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <p style={{ fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 7, fontFamily: 'var(--font-ui)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Quick add
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -459,7 +459,7 @@ export default function PantryMatcher() {
                 style={{
                   background: 'var(--color-parchment)', border: '1px solid var(--color-stone)',
                   borderRadius: 999, padding: '4px 12px', fontSize: 12, cursor: 'pointer',
-                  color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif', fontWeight: 600,
+                  color: 'var(--color-bark)', fontFamily: 'var(--font-ui)', fontWeight: 600,
                   transition: 'background 0.15s',
                 }}
               >
@@ -472,7 +472,7 @@ export default function PantryMatcher() {
         {/* Pantry staples toggle */}
         <label style={{
           display: 'flex', alignItems: 'center', gap: 10, marginTop: 14,
-          cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 13, color: 'var(--color-bark)',
+          cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 13, color: 'var(--color-bark)',
         }}>
           <input
             type="checkbox"
@@ -496,7 +496,7 @@ export default function PantryMatcher() {
             flex: 1, background: ingredients.length === 0 ? 'var(--color-stone)' : 'var(--color-leaf)',
             color: 'white', border: 'none', borderRadius: 12, padding: '12px',
             fontWeight: 700, fontSize: 15, cursor: ingredients.length === 0 ? 'not-allowed' : 'pointer',
-            fontFamily: 'Nunito, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            fontFamily: 'var(--font-ui)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           }}
         >
           {isMatching ? (
@@ -513,7 +513,7 @@ export default function PantryMatcher() {
               style={{
                 background: 'white', color: 'var(--color-bark)', border: '1.5px solid var(--color-stone)',
                 borderRadius: 12, padding: '12px 16px', fontWeight: 600, fontSize: 13,
-                cursor: 'pointer', fontFamily: 'Nunito, sans-serif',
+                cursor: 'pointer', fontFamily: 'var(--font-ui)',
               }}
             >
               {isSaving ? 'Saving…' : 'Save'}
@@ -537,7 +537,7 @@ export default function PantryMatcher() {
         <div style={{
           background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 12,
           padding: '12px 16px', color: '#991B1B', fontSize: 14, marginBottom: 16,
-          fontFamily: 'Nunito, sans-serif',
+          fontFamily: 'var(--font-ui)',
         }}>
           {error}
         </div>
@@ -547,8 +547,8 @@ export default function PantryMatcher() {
       {results !== null && (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h2 style={{ fontFamily: '"Fredoka One", sans-serif', fontSize: 20, color: 'var(--color-bark)', margin: 0 }}>
-              {results.length === 0 ? 'No recipes found' : `Found ${results.length} recipe${results.length !== 1 ? 's' : ''}!`}
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--color-bark)', margin: 0 }}>
+              {results.length === 0 ? 'No recipes found' : `Found ${results.length} recipe${results.length !== 1 ? 's' : ''}`}
             </h2>
             {results.length > 1 && (
               <select
@@ -556,7 +556,7 @@ export default function PantryMatcher() {
                 onChange={e => setSortBy(e.target.value)}
                 style={{
                   border: '1px solid var(--color-stone)', borderRadius: 8, padding: '6px 10px',
-                  fontSize: 12, color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif',
+                  fontSize: 12, color: 'var(--color-bark)', fontFamily: 'var(--font-ui)',
                   background: 'white', cursor: 'pointer',
                 }}
               >
@@ -571,7 +571,7 @@ export default function PantryMatcher() {
             <div style={{
               background: 'white', border: '1.5px solid var(--color-stone)', borderRadius: 20,
               padding: 24, textAlign: 'center', color: 'var(--color-text-muted)',
-              fontFamily: 'Nunito, sans-serif',
+              fontFamily: 'var(--font-ui)',
             }}>
               <p style={{ marginBottom: 8, fontSize: 15 }}>We couldn't find recipes with ≥40% ingredient coverage.</p>
               <p style={{ fontSize: 13 }}>Try adding more common ingredients like onions, garlic, rice, or eggs.</p>

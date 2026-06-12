@@ -5,6 +5,7 @@ import { useApp } from '../App';
 import { dealsApi, recipesApi } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import CategorizedDeals from '../components/CategorizedDeals';
+import SavingsHero from '../components/SavingsHero';
 import { usePremium } from '../context/PremiumContext';
 import { TAG_FILTERS, PROTEIN_FILTERS, hasProteinDeal, applyPreferenceOrdering } from '../constants/filters';
 import { STORE_COLORS, STORE_LOGOS } from '../constants/colors';
@@ -18,8 +19,8 @@ function capitalize(str) {
 function DealSkeleton() {
   return (
     <div
-      className="rounded-[20px] p-3 border"
-      style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}
+      className="rounded-[12px] p-3 border"
+      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)' }}
     >
       <div className="skeleton h-4 w-3/4 mb-2" />
       <div className="skeleton h-3 w-1/2 mb-3" />
@@ -31,8 +32,8 @@ function DealSkeleton() {
 function RecipeSkeleton() {
   return (
     <div
-      className="rounded-[20px] overflow-hidden border"
-      style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}
+      className="rounded-[12px] overflow-hidden border"
+      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)' }}
     >
       <div className="skeleton aspect-video w-full" />
       <div className="p-4 space-y-2">
@@ -142,16 +143,16 @@ export default function StorePage() {
             <div>
               <h1
                 className="text-2xl sm:text-3xl"
-                style={{ fontFamily: '"Fredoka One", sans-serif' }}
+                style={{ fontFamily: 'var(--font-display)' }}
               >
                 {storeName}
               </h1>
               {dealsLoading ? (
-                <p className="text-sm opacity-80 mt-0.5" style={{ fontFamily: 'Nunito, sans-serif' }}>
+                <p className="text-sm opacity-80 mt-0.5" style={{ fontFamily: 'var(--font-ui)' }}>
                   Loading deals...
                 </p>
               ) : (
-                <p className="text-sm opacity-80 mt-0.5" style={{ fontFamily: 'Nunito, sans-serif' }}>
+                <p className="text-sm opacity-80 mt-0.5" style={{ fontFamily: 'var(--font-ui)' }}>
                   {storeDeals.length} deal{storeDeals.length !== 1 ? 's' : ''} this week
                 </p>
               )}
@@ -160,7 +161,7 @@ export default function StorePage() {
           <button
             onClick={handleChangeStore}
             className="flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl transition-opacity hover:opacity-80"
-            style={{ background: 'rgba(255,255,255,0.2)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'rgba(255,255,255,0.2)', fontFamily: 'var(--font-ui)' }}
           >
             <ArrowLeft className="w-4 h-4" />
             Change store
@@ -170,20 +171,31 @@ export default function StorePage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
 
+        {/* ── The weekly savings moment ─────────────────────────────────────── */}
+        {!recipesLoading && filteredRecipes.length > 0 && (
+          <SavingsHero
+            amount={filteredRecipes
+              .slice(0, 6)
+              .reduce((sum, r) => sum + (r.totalMealSaving ?? r.estimatedSaving ?? 0), 0)}
+            storeName={storeName}
+            recipeCount={Math.min(filteredRecipes.length, 6)}
+          />
+        )}
+
         {/* ── Section 1: Recipes ────────────────────────────────────────────── */}
         <section>
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <h2
               className="text-xl flex items-center gap-2"
-              style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
             >
               <ChefHat className="w-5 h-5" style={{ color: colors.bg }} />
-              Recipes Using These Deals
+              Recipes using these deals
             </h2>
             <Link
               to="/recipes"
               className="text-sm font-bold underline underline-offset-2 transition-colors hover:opacity-70 py-2.5"
-              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
             >
               View all →
             </Link>
@@ -206,14 +218,14 @@ export default function StorePage() {
           {isPremium && (
             <div className="mb-3">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-bold" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+                <span className="text-xs font-bold" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
                   🥩 Filter by protein on special
                 </span>
                 {activeProtein && (
                   <button
                     onClick={() => { setActiveProtein(null); setDisplayCount(RECIPES_PER_PAGE); }}
                     className="text-xs font-bold underline underline-offset-2"
-                    style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                    style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                   >
                     Clear
                   </button>
@@ -231,7 +243,7 @@ export default function StorePage() {
                       borderColor: activeProtein === id ? 'var(--color-honey)' : 'var(--color-stone)',
                       background: activeProtein === id ? 'var(--color-honey)' : '#ffffff',
                       color: activeProtein === id ? '#ffffff' : 'var(--color-text-muted)',
-                      fontFamily: 'Nunito, sans-serif',
+                      fontFamily: 'var(--font-ui)',
                     }}
                   >
                     {label}
@@ -249,11 +261,11 @@ export default function StorePage() {
             </div>
           ) : recipesError === 'warming' ? (
             <div
-              className="rounded-[20px] border p-6 text-center"
-              style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+              className="rounded-[12px] border p-6 text-center"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)', fontFamily: 'var(--font-ui)' }}
             >
               <ChefHat className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--color-honey)' }} />
-              <p className="text-sm mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              <p className="text-sm mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                 Recipes are on the way
               </p>
               <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
@@ -262,11 +274,11 @@ export default function StorePage() {
             </div>
           ) : filteredRecipes.length === 0 && storeRecipes.length === 0 ? (
             <div
-              className="rounded-[20px] border p-6 text-center"
-              style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+              className="rounded-[12px] border p-6 text-center"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)', fontFamily: 'var(--font-ui)' }}
             >
               <p className="text-2xl mb-2">🍽️</p>
-              <p className="text-sm font-bold mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              <p className="text-sm font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                 No strong matches this week
               </p>
               <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
@@ -275,8 +287,8 @@ export default function StorePage() {
             </div>
           ) : filteredRecipes.length === 0 ? (
             <div
-              className="rounded-[20px] p-6 text-center text-sm border border-dashed"
-              style={{ background: colors.light, borderColor: 'var(--color-stone)', color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              className="rounded-[12px] p-6 text-center text-sm border border-dashed"
+              style={{ background: colors.light, borderColor: 'var(--color-stone)', color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
             >
               <p>No recipes match this filter. Try a different tag.</p>
             </div>
@@ -292,7 +304,7 @@ export default function StorePage() {
                   <button
                     onClick={() => setDisplayCount((n) => Math.min(n + RECIPES_PER_PAGE, filteredRecipes.length))}
                     className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
-                    style={{ background: 'var(--color-leaf)', color: '#ffffff', fontFamily: 'Nunito, sans-serif' }}
+                    style={{ background: 'var(--color-leaf)', color: '#ffffff', fontFamily: 'var(--font-ui)' }}
                   >
                     Show more recipes ({filteredRecipes.length - displayCount} remaining)
                   </button>
@@ -300,7 +312,7 @@ export default function StorePage() {
               ) : filteredRecipes.length > RECIPES_PER_PAGE ? (
                 <p
                   className="text-center text-sm mt-4"
-                  style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                  style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                 >
                   Showing all {filteredRecipes.length} recipes
                 </p>
@@ -314,7 +326,7 @@ export default function StorePage() {
           <div className="mb-4">
             <h2
               className="text-xl"
-              style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
             >
               This Week's Deals at {storeName}
             </h2>
@@ -322,11 +334,11 @@ export default function StorePage() {
 
           {dealsError?.type === 'warming' ? (
             <div
-              className="rounded-[20px] border p-6 text-center"
-              style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+              className="rounded-[12px] border p-6 text-center"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)', fontFamily: 'var(--font-ui)' }}
             >
               <ShoppingCart className="w-8 h-8 mx-auto mb-2 animate-spin" style={{ color: 'var(--color-honey)', animationDuration: '3s' }} />
-              <p className="text-sm font-bold mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              <p className="text-sm font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                 Getting this week's specials ready
               </p>
               <p className="text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>
@@ -340,11 +352,11 @@ export default function StorePage() {
             </div>
           ) : dealsError?.type === 'server' ? (
             <div
-              className="rounded-[20px] border p-6 text-center"
-              style={{ background: '#ffffff', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)', fontFamily: 'Nunito, sans-serif' }}
+              className="rounded-[12px] border p-6 text-center"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)', fontFamily: 'var(--font-ui)' }}
             >
               <AlertTriangle className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--color-honey)' }} />
-              <p className="text-sm font-bold mb-1" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+              <p className="text-sm font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
                 Something went wrong on our end
               </p>
               <p className="text-xs mb-3" style={{ color: 'var(--color-text-muted)' }}>
@@ -353,7 +365,7 @@ export default function StorePage() {
               <button
                 onClick={() => fetchStoreDeals(0)}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
-                style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Try again
@@ -361,8 +373,8 @@ export default function StorePage() {
             </div>
           ) : dealsError ? (
             <div
-              className="rounded-[20px] p-4 text-sm mb-4 border"
-              style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+              className="rounded-[12px] p-4 text-sm mb-4 border"
+              style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}
             >
               Could not load deals. Please try again.
             </div>
@@ -375,7 +387,7 @@ export default function StorePage() {
           ) : storeDeals.length === 0 ? (
             <div
               className="text-center py-12"
-              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
             >
               <p className="text-lg mb-1">No deals found for {storeName}.</p>
               <p className="text-sm">Check back later or try refreshing.</p>

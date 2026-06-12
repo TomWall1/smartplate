@@ -29,7 +29,7 @@ export default function SavingsBreakdown({
       style={{
         background: 'linear-gradient(135deg, #f0f8ef 0%, #fdf9f0 100%)',
         border: '1.5px solid var(--color-sprout)',
-        borderRadius: '20px',
+        borderRadius: '12px',
         overflow: 'hidden',
       }}
     >
@@ -50,13 +50,13 @@ export default function SavingsBreakdown({
           <div className="text-left min-w-0">
             <p
               className="font-bold leading-tight"
-              style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '16px' }}
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)', fontSize: '16px' }}
             >
               Save ${totalMealSaving.toFixed(2)} on this meal
             </p>
             <p
               className="text-xs"
-              style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
             >
               ${totalPerServingSaving.toFixed(2)} per serving · {servings} servings
             </p>
@@ -83,13 +83,13 @@ export default function SavingsBreakdown({
           >
             <span
               className="flex-1 text-xs font-bold uppercase tracking-wide"
-              style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
             >
               Ingredient on special
             </span>
             <span
               className="text-xs font-bold uppercase tracking-wide w-16 text-right"
-              style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
             >
               Saves
             </span>
@@ -107,7 +107,7 @@ export default function SavingsBreakdown({
                 key={i}
                 className="px-5 py-3"
                 style={{
-                  borderTop: i > 0 ? '1px solid rgba(92, 74, 53, 0.06)' : 'none',
+                  borderTop: i > 0 ? '1px solid rgba(42, 36, 31, 0.06)' : 'none',
                   background: i % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.5)',
                 }}
               >
@@ -116,13 +116,13 @@ export default function SavingsBreakdown({
                   <div className="flex-1 min-w-0">
                     <p
                       className="text-sm font-bold leading-snug truncate"
-                      style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+                      style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
                     >
                       {deal.ingredient}
                     </p>
                     <p
                       className="text-xs leading-snug mt-0.5 truncate"
-                      style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                      style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                     >
                       {deal.dealName}
                     </p>
@@ -134,14 +134,14 @@ export default function SavingsBreakdown({
                       )}
                       <span
                         className="text-xs"
-                        style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                        style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                       >
                         {s?.breakdown || ''}
                       </span>
                       {isEstimate && (
                         <span
                           className="inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded-full"
-                          style={{ background: 'rgba(244, 169, 78, 0.15)', color: 'var(--color-honey)', fontFamily: 'Nunito, sans-serif' }}
+                          style={{ background: 'rgba(244, 169, 78, 0.15)', color: 'var(--color-honey)', fontFamily: 'var(--font-ui)' }}
                         >
                           <Info className="w-2.5 h-2.5" />
                           est.
@@ -154,13 +154,13 @@ export default function SavingsBreakdown({
                   <div className="text-right flex-shrink-0">
                     <p
                       className="text-sm font-bold"
-                      style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+                      style={{ color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
                     >
                       ${(s?.mealSaving || 0).toFixed(2)}
                     </p>
                     <p
                       className="text-xs"
-                      style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                      style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
                     >
                       /meal
                     </p>
@@ -180,13 +180,13 @@ export default function SavingsBreakdown({
           >
             <p
               className="text-sm font-bold"
-              style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}
             >
               Total per serving
             </p>
             <p
               className="text-base font-bold"
-              style={{ color: 'var(--color-text-green)', fontFamily: '"Fredoka One", sans-serif' }}
+              style={{ color: 'var(--color-text-green)', fontFamily: 'var(--font-display)' }}
             >
               ${totalPerServingSaving.toFixed(2)} saved
             </p>
@@ -207,7 +207,7 @@ function UsageBar({ pct, isFullPack }) {
     >
       <div
         className="rounded-full overflow-hidden"
-        style={{ width: 40, height: 5, background: 'rgba(92, 74, 53, 0.12)' }}
+        style={{ width: 40, height: 5, background: 'rgba(42, 36, 31, 0.12)' }}
       >
         <div
           className="h-full rounded-full transition-all"
@@ -216,7 +216,7 @@ function UsageBar({ pct, isFullPack }) {
       </div>
       <span
         className="text-xs font-bold"
-        style={{ color, fontFamily: 'Nunito, sans-serif', fontSize: '10px' }}
+        style={{ color, fontFamily: 'var(--font-ui)', fontSize: '10px' }}
       >
         {pct.toFixed(0)}%
       </span>

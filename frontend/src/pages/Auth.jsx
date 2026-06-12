@@ -65,11 +65,11 @@ export default function Auth() {
   };
 
   const inputStyle = {
-    background: '#ffffff',
+    background: 'var(--color-surface)',
     border: '1.5px solid var(--color-stone)',
     borderRadius: '12px',
     padding: '12px 12px 12px 40px',
-    fontFamily: 'Nunito, sans-serif',
+    fontFamily: 'var(--font-ui)',
     fontSize: '16px',
     color: 'var(--color-bark)',
     outline: 'none',
@@ -95,13 +95,13 @@ export default function Auth() {
       <Link to="/" className="flex items-center gap-2 mb-8">
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: 'var(--color-honey)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.15)' }}
+          style={{ background: 'var(--color-brand)', boxShadow: '0 2px 12px rgba(42, 36, 31, 0.15)' }}
         >
           <UtensilsCrossed className="w-6 h-6 text-white" />
         </div>
         <span
           className="text-2xl"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
         >
           Deal to Dish
         </span>
@@ -109,20 +109,20 @@ export default function Auth() {
 
       {/* Card */}
       <div
-        className="w-full max-w-sm rounded-[20px] p-8"
+        className="w-full max-w-sm rounded-[12px] p-8"
         style={{
-          background: '#ffffff',
+          background: 'var(--color-surface)',
           border: '1.5px solid var(--color-stone)',
-          boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)',
+          boxShadow: '0 2px 12px rgba(42, 36, 31, 0.08)',
         }}
       >
         <h1
           className="text-xl mb-1"
-          style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
         >
           {mode === 'signin' ? 'Welcome back' : mode === 'signup' ? 'Create an account' : mode === 'forgot' ? 'Reset your password' : 'Set new password'}
         </h1>
-        <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+        <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
           {mode === 'signin'  ? 'Sign in to save your store and preferences.'
           : mode === 'signup' ? 'Save your store and preferences across devices.'
           : mode === 'forgot' ? "Enter your email and we'll send you a reset link."
@@ -133,7 +133,7 @@ export default function Auth() {
         {error && (
           <div
             className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-sm mb-4 border"
-            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-peach)', borderColor: 'var(--color-berry)', color: 'var(--color-berry)', fontFamily: 'var(--font-ui)' }}
           >
             <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
             <span>{error}</span>
@@ -144,7 +144,7 @@ export default function Auth() {
         {message && (
           <div
             className="rounded-xl px-3 py-2.5 text-sm mb-4 border"
-            style={{ background: 'var(--color-mist)', borderColor: 'var(--color-leaf)', color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-mist)', borderColor: 'var(--color-leaf)', color: 'var(--color-text-green)', fontFamily: 'var(--font-ui)' }}
           >
             {message}
           </div>
@@ -158,8 +158,8 @@ export default function Auth() {
           style={{
             border: '1.5px solid var(--color-stone)',
             color: 'var(--color-bark)',
-            background: '#ffffff',
-            fontFamily: 'Nunito, sans-serif',
+            background: 'var(--color-surface)',
+            fontFamily: 'var(--font-ui)',
           }}
           onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-blush)'}
           onMouseLeave={(e) => e.currentTarget.style.background = '#ffffff'}
@@ -186,7 +186,7 @@ export default function Auth() {
           {/* Email field — shown for signin, signup, forgot */}
           {mode !== 'reset' && (
             <div>
-              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
                 Email
               </label>
               <div className="relative">
@@ -209,7 +209,7 @@ export default function Auth() {
           {mode !== 'forgot' && (
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+                <label className="text-xs font-bold" style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
                   {mode === 'reset' ? 'New password' : 'Password'}
                 </label>
                 {mode === 'signin' && (
@@ -217,7 +217,7 @@ export default function Auth() {
                     type="button"
                     onClick={() => { setMode('forgot'); setError(''); setMessage(''); }}
                     className="text-xs font-semibold hover:opacity-70 transition-opacity"
-                    style={{ color: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+                    style={{ color: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
                   >
                     Forgot password?
                   </button>
@@ -243,7 +243,7 @@ export default function Auth() {
           {/* Confirm password — only for reset mode */}
           {mode === 'reset' && (
             <div>
-              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>
+              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>
                 Confirm new password
               </label>
               <div className="relative">
@@ -267,7 +267,7 @@ export default function Auth() {
             type="submit"
             disabled={loading}
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-white text-sm font-bold transition-all disabled:opacity-60 mt-1 hover:opacity-90 hover:-translate-y-px"
-            style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {mode === 'signin'  ? 'Sign in'
@@ -277,7 +277,7 @@ export default function Auth() {
           </button>
         </form>
 
-        <p className="text-center text-sm mt-5" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+        <p className="text-center text-sm mt-5" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
           {mode === 'forgot' || mode === 'reset' ? (
             <button
               onClick={() => { setMode('signin'); setError(''); setMessage(''); }}
@@ -301,7 +301,7 @@ export default function Auth() {
         </p>
       </div>
 
-      <p className="mt-6 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+      <p className="mt-6 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
         <Link to="/" className="hover:underline">← Back to home</Link>
       </p>
     </div>

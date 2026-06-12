@@ -33,14 +33,14 @@ function RecipePickerModal({ recipes, onSelect, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: 'rgba(92,74,53,0.4)' }} onClick={onClose}>
+      style={{ background: 'rgba(42, 36, 31,0.4)' }} onClick={onClose}>
       <div
-        className="w-full max-w-lg rounded-[20px] overflow-hidden shadow-xl"
-        style={{ background: '#ffffff', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}
+        className="w-full max-w-lg rounded-[12px] overflow-hidden shadow-xl"
+        style={{ background: 'var(--color-surface)', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="p-4 border-b" style={{ borderColor: 'var(--color-stone)' }}>
-          <h3 className="text-lg mb-2" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+          <h3 className="text-lg mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
             Pick a Recipe
           </h3>
           <input
@@ -50,19 +50,19 @@ function RecipePickerModal({ recipes, onSelect, onClose }) {
             onChange={e => setQ(e.target.value)}
             autoFocus
             className="w-full px-3 py-2 rounded-xl text-sm outline-none"
-            style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}
+            style={{ border: '1.5px solid var(--color-stone)', fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}
           />
         </div>
         <div className="overflow-y-auto flex-1">
           {filtered.length === 0 ? (
-            <p className="text-center py-8 text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            <p className="text-center py-8 text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
               No recipes found
             </p>
           ) : filtered.map(r => (
             <button
               key={r.id}
               onClick={() => onSelect(r)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#D6EDD4] transition-colors border-b"
+              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#DCE4D6] transition-colors border-b"
               style={{ borderColor: 'var(--color-stone)' }}
             >
               {r.image && (
@@ -70,8 +70,8 @@ function RecipePickerModal({ recipes, onSelect, onClose }) {
                   onError={e => e.target.style.display = 'none'} />
               )}
               <div>
-                <p className="text-sm font-bold" style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}>{r.title}</p>
-                <p className="text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+                <p className="text-sm font-bold" style={{ color: 'var(--color-bark)', fontFamily: 'var(--font-ui)' }}>{r.title}</p>
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
                   {r.prepTime ?? r.cookTime ?? 30} min · {r.servings ?? 4} servings
                 </p>
               </div>
@@ -80,7 +80,7 @@ function RecipePickerModal({ recipes, onSelect, onClose }) {
         </div>
         <div className="p-3 border-t" style={{ borderColor: 'var(--color-stone)' }}>
           <button onClick={onClose} className="w-full py-2 rounded-xl text-sm font-bold"
-            style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
             Cancel
           </button>
         </div>
@@ -180,7 +180,7 @@ export default function MealPlanner() {
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--color-leaf)' }}>
               <Calendar className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl" style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}>
+            <h1 className="text-2xl sm:text-3xl" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
               Meal Planner
             </h1>
           </div>
@@ -189,7 +189,7 @@ export default function MealPlanner() {
               onClick={handleGenerateShoppingList}
               disabled={Object.keys(mealPlan).length === 0}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-40"
-              style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
             >
               <ShoppingCart className="w-4 h-4" />
               Generate Shopping List
@@ -203,15 +203,15 @@ export default function MealPlanner() {
           <>
             {/* Week navigator */}
             <div className="flex items-center justify-between mb-4">
-              <button onClick={prevWeek} className="p-2 rounded-xl hover:bg-[#D6EDD4] transition-colors" style={{ color: 'var(--color-bark)' }}>
+              <button onClick={prevWeek} className="p-2 rounded-xl hover:bg-[#DCE4D6] transition-colors" style={{ color: 'var(--color-bark)' }}>
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <p className="text-sm font-bold" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}>
+              <p className="text-sm font-bold" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}>
                 {weekDates[0].toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
                 {' – '}
                 {weekDates[6].toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
               </p>
-              <button onClick={nextWeek} className="p-2 rounded-xl hover:bg-[#D6EDD4] transition-colors" style={{ color: 'var(--color-bark)' }}>
+              <button onClick={nextWeek} className="p-2 rounded-xl hover:bg-[#DCE4D6] transition-colors" style={{ color: 'var(--color-bark)' }}>
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
@@ -231,7 +231,7 @@ export default function MealPlanner() {
                         key={d}
                         className="text-center text-xs font-bold py-2 rounded-lg"
                         style={{
-                          fontFamily: 'Nunito, sans-serif',
+                          fontFamily: 'var(--font-ui)',
                           color: toISO(d) === today ? '#ffffff' : 'var(--color-bark)',
                           background: toISO(d) === today ? 'var(--color-leaf)' : 'transparent',
                         }}
@@ -246,7 +246,7 @@ export default function MealPlanner() {
                   {MEAL_TYPES.map(mealType => (
                     <div key={mealType} className="grid mb-1" style={{ gridTemplateColumns: '80px repeat(7, 1fr)', gap: '4px' }}>
                       {/* Row label */}
-                      <div className="flex items-center gap-1 pr-2 text-xs font-bold" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-text-muted)' }}>
+                      <div className="flex items-center gap-1 pr-2 text-xs font-bold" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
                         <span>{MEAL_EMOJI[mealType]}</span>
                         <span>{MEAL_LABELS[mealType]}</span>
                       </div>
@@ -277,13 +277,13 @@ export default function MealPlanner() {
                                 </button>
                                 <p
                                   className="text-xs font-bold leading-tight line-clamp-2 pr-5 cursor-pointer hover:underline"
-                                  style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--color-bark)' }}
+                                  style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}
                                   onClick={() => navigate(`/recipes/${meal.recipe_id}`)}
                                 >
                                   {rd.title ?? meal.recipe_id}
                                 </p>
                                 {rd.prepTime && (
-                                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+                                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
                                     {rd.prepTime} min
                                   </p>
                                 )}
@@ -291,7 +291,7 @@ export default function MealPlanner() {
                             ) : (
                               <button
                                 onClick={() => setPicker({ date: dateStr, mealType })}
-                                className="w-full h-full flex flex-col items-center justify-center gap-0.5 transition-colors hover:bg-[#D6EDD4]"
+                                className="w-full h-full flex flex-col items-center justify-center gap-0.5 transition-colors hover:bg-[#DCE4D6]"
                                 style={{ minHeight: '70px' }}
                               >
                                 <Plus className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />

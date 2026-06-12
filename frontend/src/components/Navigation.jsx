@@ -29,7 +29,7 @@ function Dropdown({ open, onClose, children }) {
     <div
       ref={ref}
       className="absolute top-full right-0 mt-1 rounded-2xl border shadow-lg z-50 min-w-[180px] overflow-hidden"
-      style={{ background: 'var(--color-parchment)', borderColor: 'var(--color-stone)', boxShadow: '0 4px 20px rgba(92,74,53,0.12)' }}
+      style={{ background: 'var(--color-parchment)', borderColor: 'var(--color-stone)', boxShadow: '0 4px 20px rgba(42, 36, 31,0.12)' }}
     >
       {children}
     </div>
@@ -37,9 +37,9 @@ function Dropdown({ open, onClose, children }) {
 }
 
 function DropdownLink({ to, onClick, icon: Icon, children, active }) {
-  const base = "flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-[#D6EDD4]";
+  const base = "flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-[#DCE4D6]";
   const style = {
-    fontFamily: 'Nunito, sans-serif',
+    fontFamily: 'var(--font-ui)',
     color: active ? 'var(--color-leaf)' : 'var(--color-bark)',
   };
   if (to) {
@@ -97,7 +97,7 @@ const Navigation = () => {
   const activeLinkStyle = (isActive, storeColor) => ({
     color: isActive ? (storeColor || 'var(--color-leaf)') : 'var(--color-text-muted)',
     fontWeight: isActive ? 700 : 600,
-    fontFamily: 'Nunito, sans-serif',
+    fontFamily: 'var(--font-ui)',
   });
 
   return (
@@ -113,15 +113,15 @@ const Navigation = () => {
             <Link to="/" className="flex items-center gap-2 flex-shrink-0">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ background: 'var(--color-honey)' }}
+                style={{ background: 'var(--color-brand)' }}
               >
                 <UtensilsCrossed className="w-5 h-5 text-white" />
               </div>
               <span
                 className="text-xl"
-                style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)' }}
+                style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}
               >
-                Deal to Dish
+                Deals to Dish
               </span>
             </Link>
 
@@ -129,14 +129,14 @@ const Navigation = () => {
             <div className="hidden md:flex items-center gap-1">
               <Link
                 to={dealsPath}
-                className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#DCE4D6]"
                 style={activeLinkStyle(isDealsActive, storeMeta?.color)}
               >
                 {dealsLabel}
               </Link>
               <Link
                 to="/recipes"
-                className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                className="px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#DCE4D6]"
                 style={activeLinkStyle(isRecipesActive)}
               >
                 Recipes
@@ -147,9 +147,9 @@ const Navigation = () => {
                 <div className="relative">
                   <button
                     onClick={() => { setPremiumOpen(o => !o); setAccountOpen(false); }}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#DCE4D6]"
                     style={{
-                      fontFamily: 'Nunito, sans-serif',
+                      fontFamily: 'var(--font-ui)',
                       color: isPremiumDropActive ? 'var(--color-leaf)' : 'var(--color-text-muted)',
                       fontWeight: isPremiumDropActive ? 700 : 600,
                     }}
@@ -169,7 +169,7 @@ const Navigation = () => {
               ) : (
                 <Link
                   to="/premium"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#FBDFC3]"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#E7DECB]"
                   style={activeLinkStyle(isPremiumActive)}
                 >
                   <Crown className="w-3.5 h-3.5" style={{ color: 'var(--color-honey)' }} />
@@ -182,8 +182,8 @@ const Navigation = () => {
             <div className="hidden md:flex items-center gap-3">
               <button
                 onClick={startOnboarding}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-colors hover:bg-[#D6EDD4]"
-                style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-colors hover:bg-[#DCE4D6]"
+                style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
               >
                 <HelpCircle className="w-4 h-4" />
                 How it works
@@ -192,8 +192,8 @@ const Navigation = () => {
                 <Link
                   to="/profile"
                   title="Change your state"
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-colors hover:bg-[#D6EDD4]"
-                  style={{ color: 'var(--color-text-green)', background: 'var(--color-mist)', fontFamily: 'Nunito, sans-serif' }}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-colors hover:bg-[#DCE4D6]"
+                  style={{ color: 'var(--color-text-green)', background: 'var(--color-mist)', fontFamily: 'var(--font-ui)' }}
                 >
                   <MapPin className="w-3 h-3" />
                   {userState.toUpperCase()}
@@ -204,9 +204,9 @@ const Navigation = () => {
                 <div className="relative">
                   <button
                     onClick={() => { setAccountOpen(o => !o); setPremiumOpen(false); }}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#D6EDD4]"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-colors hover:bg-[#DCE4D6]"
                     style={{
-                      fontFamily: 'Nunito, sans-serif',
+                      fontFamily: 'var(--font-ui)',
                       color: isProfileActive || isAdminActive ? 'var(--color-leaf)' : 'var(--color-text-muted)',
                       fontWeight: isProfileActive || isAdminActive ? 700 : 600,
                     }}
@@ -228,7 +228,7 @@ const Navigation = () => {
                 <Link
                   to="/auth"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 hover:-translate-y-px"
-                  style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+                  style={{ background: 'var(--color-leaf)', fontFamily: 'var(--font-ui)' }}
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   Login
@@ -252,7 +252,7 @@ const Navigation = () => {
           <Link
             to={dealsPath}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
-            style={{ color: isDealsActive ? (storeMeta?.color || 'var(--color-leaf)') : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ color: isDealsActive ? (storeMeta?.color || 'var(--color-leaf)') : 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
           >
             <Home className="w-5 h-5" />
             <span>{storeMeta ? storeMeta.label.slice(0, 4) : 'Home'}</span>
@@ -261,7 +261,7 @@ const Navigation = () => {
           <Link
             to="/recipes"
             className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
-            style={{ color: isRecipesActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ color: isRecipesActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
           >
             <BookOpen className="w-5 h-5" />
             <span>Recipes</span>
@@ -272,7 +272,7 @@ const Navigation = () => {
               <Link
                 to="/favorites"
                 className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
-                style={{ color: isFavoritesActive ? 'var(--color-berry)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ color: isFavoritesActive ? 'var(--color-berry)' : 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
               >
                 <Heart className="w-5 h-5" />
                 <span>Saved</span>
@@ -280,7 +280,7 @@ const Navigation = () => {
               <Link
                 to="/shopping-list"
                 className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
-                style={{ color: isListActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ color: isListActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
               >
                 <ShoppingCart className="w-5 h-5" />
                 <span>List</span>
@@ -288,7 +288,7 @@ const Navigation = () => {
               <Link
                 to="/price-alerts"
                 className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
-                style={{ color: isAlertsActive ? 'var(--color-honey)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ color: isAlertsActive ? 'var(--color-brand-text)' : 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
               >
                 <Bell className="w-5 h-5" />
                 <span>Alerts</span>
@@ -296,7 +296,7 @@ const Navigation = () => {
               <Link
                 to="/pantry"
                 className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
-                style={{ color: isPantryActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+                style={{ color: isPantryActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
               >
                 <Refrigerator className="w-5 h-5" />
                 <span>Pantry</span>
@@ -308,7 +308,7 @@ const Navigation = () => {
             <Link
               to="/premium"
               className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
-              style={{ color: isPremiumActive ? 'var(--color-honey)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: isPremiumActive ? 'var(--color-brand-text)' : 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
             >
               <Crown className="w-5 h-5" />
               <span>Premium</span>
@@ -319,7 +319,7 @@ const Navigation = () => {
             <Link
               to="/admin"
               className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
-              style={{ color: isAdminActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: isAdminActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
             >
               <Shield className="w-5 h-5" />
               <span>Admin</span>
@@ -329,7 +329,7 @@ const Navigation = () => {
           <Link
             to="/profile"
             className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-semibold transition-colors"
-            style={{ color: isProfileActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}
+            style={{ color: isProfileActive ? 'var(--color-leaf)' : 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}
           >
             <div className="relative">
               <User className="w-5 h-5" />
