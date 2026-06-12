@@ -36,15 +36,15 @@ export default {
         // Store brand colours (keep as-is)
         woolworths: {
           DEFAULT: '#007833',
-          light: '#e8f5e9',
+          light: '#E3E7D6',
         },
         coles: {
           DEFAULT: '#e31837',
-          light: '#ffeaed',
+          light: '#F2DFD6',
         },
         iga: {
           DEFAULT: '#003da5',
-          light: '#e8eeff',
+          light: '#DFE1E6',
         },
       },
     },

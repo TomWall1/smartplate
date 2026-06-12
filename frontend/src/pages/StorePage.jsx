@@ -61,7 +61,7 @@ export default function StorePage() {
   const [activeTag, setActiveTag] = useState('all');
   const [activeProtein, setActiveProtein] = useState(null);
 
-  const colors = STORE_COLORS[store] || { bg: '#78716c', light: 'var(--color-blush)', text: '#ffffff' };
+  const colors = STORE_COLORS[store] || { bg: '#6B5F52', light: 'var(--color-surface-sunken)', text: '#ffffff' };
   const storeName = capitalize(store);
 
   const fetchDeals = React.useCallback(async () => {

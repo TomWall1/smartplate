@@ -5,36 +5,38 @@ import { useApp } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { usersApi } from '../services/api';
 
+import { STORE_COLORS, STORE_LOGOS } from '../constants/colors';
+
 const STORES = [
   {
     id: 'woolworths',
     label: 'Woolworths',
-    headerBg: '#007833',
+    headerBg: STORE_COLORS.woolworths.bg,
     headerText: '#ffffff',
-    lightBg: '#e8f5e9',
-    borderColor: '#007833',
+    lightBg: STORE_COLORS.woolworths.light,
+    borderColor: STORE_COLORS.woolworths.bg,
     tagline: 'The fresh food people',
-    logoUrl: 'https://www.woolworths.com.au/favicon.ico',
+    logoUrl: STORE_LOGOS.woolworths,
   },
   {
     id: 'coles',
     label: 'Coles',
-    headerBg: '#e31837',
+    headerBg: STORE_COLORS.coles.bg,
     headerText: '#ffffff',
-    lightBg: '#ffeaed',
-    borderColor: '#e31837',
+    lightBg: STORE_COLORS.coles.light,
+    borderColor: STORE_COLORS.coles.bg,
     tagline: 'Good food, great value',
-    logoUrl: 'https://www.coles.com.au/favicon.ico',
+    logoUrl: STORE_LOGOS.coles,
   },
   {
     id: 'iga',
     label: 'IGA',
-    headerBg: '#003da5',
+    headerBg: STORE_COLORS.iga.bg,
     headerText: '#ffffff',
-    lightBg: '#e8eeff',
-    borderColor: '#003da5',
+    lightBg: STORE_COLORS.iga.light,
+    borderColor: STORE_COLORS.iga.bg,
     tagline: 'Your local supermarket',
-    logoUrl: 'https://www.iga.com.au/favicon.ico',
+    logoUrl: STORE_LOGOS.iga,
   },
 ];
 

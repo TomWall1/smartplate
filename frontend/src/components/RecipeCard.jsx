@@ -5,13 +5,7 @@ import SavingsBreakdown from './SavingsBreakdown';
 import { usePremium } from '../context/PremiumContext';
 import { useAuth } from '../context/AuthContext';
 import { premiumApi } from '../services/api';
-
-const SOURCE_META = {
-  jamieoliver:   { label: 'Jamie Oliver',       logo: 'https://www.jamieoliver.com/favicon.ico' },
-  recipetineats: { label: 'RecipeTin Eats',     logo: 'https://www.recipetineats.com/favicon.ico' },
-  donnahay:      { label: 'Donna Hay',          logo: 'https://www.donnahay.com.au/favicon.ico' },
-  womensweekly:  { label: "Women's Weekly Food", logo: 'https://www.womensweeklyfood.com.au/favicon.ico' },
-};
+import { SOURCE_META } from '../constants/publishers';
 
 function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFavoriteChange }) {
   const navigate = useNavigate();
