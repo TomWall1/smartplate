@@ -271,8 +271,9 @@ router.get('/search', async (req, res) => {
 router.get('/:recipeId', async (req, res) => {
   try {
     const { recipeId } = req.params;
-    const { store } = req.query;
-    const recipe = await recipeService.getRecipeDetails(recipeId, store || null);
+    const { store, state } = req.query;
+    const userState = state ? state.toLowerCase() : await extractUserState(req).catch(() => null);
+    const recipe = await recipeService.getRecipeDetails(recipeId, store || null, userState);
     if (!recipe) {
       return res.status(404).json({ error: 'Recipe not found' });
     }

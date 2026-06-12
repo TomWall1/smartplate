@@ -161,6 +161,24 @@ class RecipeService {
   }
 
   /**
+   * Stable numeric identity for a library recipe (FNV-1a over source:title).
+   * Positional ids (i + 1) made /recipes/:id resolve to a DIFFERENT recipe
+   * depending on which list the id came from — the per-state artifacts each
+   * number their own list, and every weekly regeneration reshuffled ids,
+   * breaking deep links and favourites. A content-derived id is identical
+   * across national/state artifacts and across weeks.
+   */
+  _stableRecipeId(libRecipe) {
+    const key = recipeCostService.recipeKey(libRecipe);
+    let h = 0x811c9dc5;
+    for (let i = 0; i < key.length; i++) {
+      h ^= key.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0; // 32-bit unsigned int
+  }
+
+  /**
    * Compose the serving shape for one matched library recipe: deal-aware
    * fields computed in code from its matchedDeals, everything else from the
    * library. Shared by the national and per-state generation paths.
@@ -195,7 +213,7 @@ class RecipeService {
     const libIngredients = libRecipe.ingredients || [];
     const allIngredients = libIngredients.map(ing => ing.raw || ing.name).filter(Boolean);
     return {
-      id: i + 1,
+      id: this._stableRecipeId(libRecipe),
       title: decodeHtml(libRecipe.title) || `Recipe ${i + 1}`,
       description: decodeHtml(libRecipe.description) || '',
       dealIngredients,
@@ -540,9 +558,21 @@ class RecipeService {
     return this.getWeeklyRecipes(store);
   }
 
-  async getRecipeDetails(recipeId, store = null) {
-    const recipes = this.getWeeklyRecipes();
-    const recipe = recipes.find(r => r.id == recipeId) || null;
+  /**
+   * Look up a recipe by its stable id. The user's state artifact is checked
+   * first (it carries that state's own deals and prices); the national set
+   * is the fallback. Ids are content-derived, so the same recipe resolves
+   * everywhere — the list a card came from no longer matters.
+   */
+  async getRecipeDetails(recipeId, store = null, state = null) {
+    let recipe = null;
+    if (state) {
+      const stateRecipes = await this.getRecipesByState(state, null);
+      recipe = stateRecipes.find(r => r.id == recipeId) || null;
+    }
+    if (!recipe) {
+      recipe = this.getWeeklyRecipes().find(r => r.id == recipeId) || null;
+    }
     if (!recipe || !store) return recipe;
     // Apply store isolation so detail page never shows cross-store deal data
     const filtered = this._filterRecipesByStore([recipe], store);

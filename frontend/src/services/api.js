@@ -112,9 +112,12 @@ export const recipesApi = {
     }
   },
 
-  getRecipeDetails: async (recipeId, store = null) => {
+  getRecipeDetails: async (recipeId, store = null, state = null) => {
     try {
-      const params = store ? { store } : {};
+      const params = {
+        ...(store ? { store } : {}),
+        ...(state ? { state } : {}),
+      };
       const response = await api.get(`/api/recipes/${recipeId}`, { params });
       return response.data;
     } catch (error) {

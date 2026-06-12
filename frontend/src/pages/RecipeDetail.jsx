@@ -161,7 +161,7 @@ function findMatchedDeal(ingredientLine, matchedDeals = []) {
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedStore } = useApp();
+  const { selectedStore, userState } = useApp();
 
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -181,7 +181,7 @@ export default function RecipeDetail() {
     setLoading(true);
     setError(null);
 
-    recipesApi.getRecipeDetails(id, selectedStore)
+    recipesApi.getRecipeDetails(id, selectedStore, userState)
       .then((data) => {
         if (!data) throw new Error('Recipe not found');
         setRecipe(data);
@@ -191,7 +191,7 @@ export default function RecipeDetail() {
         setError(err.message || 'Recipe not found');
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, selectedStore, userState]);
 
   if (loading) return <RecipeDetailSkeleton />;
 
