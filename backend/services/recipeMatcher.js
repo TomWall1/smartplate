@@ -105,7 +105,19 @@ class RecipeMatcher {
 
     const allRecipes = [];
 
+    // Per-publisher kill switch: EXCLUDED_RECIPE_SOURCES="donnahay,jamieoliver"
+    // removes a source from matching AND serving entirely (good-faith response
+    // if a publisher objects to inclusion). Takes effect on next generation.
+    const excludedSources = new Set(
+      (process.env.EXCLUDED_RECIPE_SOURCES || '')
+        .split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+    );
+
     for (const lib of LIBRARIES) {
+      if (excludedSources.has(lib.source.toLowerCase())) {
+        console.warn(`RecipeMatcher: source "${lib.source}" EXCLUDED via EXCLUDED_RECIPE_SOURCES`);
+        continue;
+      }
       // Prefer enriched file if it exists; fall back to original
       const filePath = fs.existsSync(lib.enriched) ? lib.enriched : lib.src;
       const isEnriched = filePath === lib.enriched;

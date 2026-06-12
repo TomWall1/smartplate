@@ -410,6 +410,25 @@ function getStateRecipes(state) {
   };
 }
 
+// ── Outbound Clicks (publisher lead-gen receipts) ─────────────────────────────
+
+function recordOutboundClick(source) {
+  getDb().prepare(`
+    INSERT INTO outbound_clicks (source, day, clicks)
+    VALUES (?, date('now'), 1)
+    ON CONFLICT(source, day) DO UPDATE SET clicks = clicks + 1
+  `).run(source);
+}
+
+function getOutboundClickStats() {
+  return getDb().prepare(`
+    SELECT source,
+           SUM(clicks) AS total,
+           SUM(CASE WHEN day >= date('now', '-30 days') THEN clicks ELSE 0 END) AS last_30_days
+    FROM outbound_clicks GROUP BY source ORDER BY total DESC
+  `).all();
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 function deserializeProduct(row) {
@@ -443,6 +462,8 @@ module.exports = {
   getStateDeals,
   saveStateRecipes,
   getStateRecipes,
+  recordOutboundClick,
+  getOutboundClickStats,
   insertProduct,
   insertProductBatch,
   getProductById,

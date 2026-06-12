@@ -112,6 +112,11 @@ export const recipesApi = {
     }
   },
 
+  // Fire-and-forget lead-gen counter — never blocks navigation
+  recordOutboundClick: (source) => {
+    api.post('/api/recipes/outbound-click', { source }).catch(() => {});
+  },
+
   getRecipeDetails: async (recipeId, store = null, state = null) => {
     try {
       const params = {

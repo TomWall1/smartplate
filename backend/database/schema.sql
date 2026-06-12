@@ -210,3 +210,12 @@ CREATE TABLE IF NOT EXISTS state_recipes_cache (
   deal_count   INTEGER NOT NULL DEFAULT 0,
   generated_at TEXT    NOT NULL DEFAULT (datetime('now'))
 );
+
+-- ── Outbound Clicks (publisher lead-gen receipts) ─────────────────────────────
+
+CREATE TABLE IF NOT EXISTS outbound_clicks (
+  source TEXT    NOT NULL,
+  day    TEXT    NOT NULL,
+  clicks INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (source, day)
+);

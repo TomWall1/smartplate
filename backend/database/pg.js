@@ -91,6 +91,14 @@ const _autoMigrate = (async () => {
         generated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS outbound_clicks (
+        source TEXT NOT NULL,
+        day    DATE NOT NULL,
+        clicks INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (source, day)
+      )
+    `);
     // insertProduct upserts ON CONFLICT (barcode); the prod table predates
     // schema.pg.sql's UNIQUE and was created without it, so every new-product
     // insert failed ("no unique or exclusion constraint") and the knowledge
@@ -534,6 +542,30 @@ async function getStateRecipes(state) {
   };
 }
 
+// ── Outbound Clicks (publisher lead-gen receipts) ─────────────────────────────
+
+/** Increment today's outbound-click counter for a publisher source. */
+async function recordOutboundClick(source) {
+  await _autoMigrate;
+  await pool.query(`
+    INSERT INTO outbound_clicks (source, day, clicks)
+    VALUES ($1, CURRENT_DATE, 1)
+    ON CONFLICT (source, day) DO UPDATE SET clicks = outbound_clicks.clicks + 1
+  `, [source]);
+}
+
+/** Per-source click totals (all time + last 30 days). */
+async function getOutboundClickStats() {
+  await _autoMigrate;
+  const result = await pool.query(`
+    SELECT source,
+           SUM(clicks)::int AS total,
+           SUM(clicks) FILTER (WHERE day >= CURRENT_DATE - 30)::int AS last_30_days
+    FROM outbound_clicks GROUP BY source ORDER BY total DESC
+  `);
+  return result.rows;
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 async function getStats() {
@@ -557,6 +589,8 @@ module.exports = {
   getStateDeals,
   saveStateRecipes,
   getStateRecipes,
+  recordOutboundClick,
+  getOutboundClickStats,
   insertProduct,
   insertProductBatch,
   getProductById,

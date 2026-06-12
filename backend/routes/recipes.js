@@ -266,6 +266,32 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// ── Outbound click tracking (must be before /:recipeId) ─────────────
+// Counts clicks through to publisher sites — the lead-gen receipts for
+// partnership conversations. Aggregated per (source, day); no user data.
+router.post('/outbound-click', async (req, res) => {
+  try {
+    const source = String(req.body?.source || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40);
+    if (!source) return res.status(400).json({ error: 'source required' });
+    const db = require('../database/db');
+    await db.recordOutboundClick(source);
+    res.json({ ok: true });
+  } catch (err) {
+    console.warn('outbound-click failed:', err.message);
+    res.json({ ok: false }); // never block the user's navigation
+  }
+});
+
+// ── Outbound click stats ─────────────────────────────────────────────
+router.get('/outbound-stats', async (_req, res) => {
+  try {
+    const db = require('../database/db');
+    res.json(await db.getOutboundClickStats());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── Get detailed recipe by ID (must be AFTER named routes) ──────────
 // Optional ?store=woolworths query param applies store isolation
 router.get('/:recipeId', async (req, res) => {

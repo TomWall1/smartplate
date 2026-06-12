@@ -151,8 +151,9 @@ class RecipeService {
       console.warn('RecipeService: cost estimates unavailable — price chips hidden this week:', costErr.message);
     }
 
+    const embedMap = await this._buildEmbedMap(matchedWithSavings, { fresh: true });
     const normalised = matchedWithSavings.map((libRecipe, i) =>
-      this._composeWeeklyRecipe(libRecipe, i, costMap)
+      this._composeWeeklyRecipe(libRecipe, i, costMap, embedMap)
     );
 
     await this._saveWeeklyRecipes(normalised);
@@ -179,11 +180,53 @@ class RecipeService {
   }
 
   /**
-   * Compose the serving shape for one matched library recipe: deal-aware
-   * fields computed in code from its matchedDeals, everything else from the
-   * library. Shared by the national and per-state generation paths.
+   * Probe (or reuse this run's) per-publisher iframe capability so the
+   * frontend knows whether the in-app viewer can show the original page.
    */
-  _composeWeeklyRecipe(libRecipe, i, costMap) {
+  async _buildEmbedMap(recipes, { fresh = false } = {}) {
+    try {
+      const { getEmbedMap, resetEmbedCache } = require('./publisherEmbedService');
+      if (fresh) resetEmbedCache(); // re-probe once per weekly run; state runs reuse
+      const samples = new Map();
+      for (const r of recipes) {
+        const src = (r.source || '').toLowerCase();
+        if (src && r.url && !samples.has(src)) samples.set(src, r.url);
+      }
+      return await getEmbedMap(samples);
+    } catch (err) {
+      console.warn('RecipeService: embed-capability probe failed — defaulting to new-tab:', err.message);
+      return null;
+    }
+  }
+
+  /**
+   * Clean ingredient NAME (no quantities, no publisher phrasing) for display
+   * and exclusion matching. The parsed `name` is preferred; when the scraper
+   * couldn't parse one, strip leading quantities/units from the raw line.
+   */
+  _ingredientName(ing) {
+    if (typeof ing === 'string') return ing;
+    if (ing.name) return ing.name;
+    return (ing.raw || '')
+      .replace(/^[\d\s/.,x×–-]+/, '')              // leading quantities
+      .replace(/^(g|kg|ml|l|litre|cup|cups|tbsp|tsp|oz|lb|bunch|cloves?|pieces?|slices?)\b\s*/i, '')
+      .replace(/\(.*?\)/g, '')                      // parenthetical notes
+      .trim()
+      .toLowerCase();
+  }
+
+  /**
+   * Compose the serving shape for one matched library recipe.
+   *
+   * CONTENT BOUNDARY (IP / lead-gen design): the card carries only OUR
+   * intelligence — savings, matched deals, costs, times, ingredient NAMES —
+   * plus attribution. The publisher's expression (method steps, quantified
+   * ingredient lines, descriptions) is NOT republished; users get it on the
+   * original site via the in-app viewer / outbound link, where the
+   * publisher's ads serve. Full recipe text stays server-side purely as the
+   * matching index.
+   */
+  _composeWeeklyRecipe(libRecipe, i, costMap, embedMap = null) {
     const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
     // Best deal per unique ingredient (deduped), then top 5 by saving.
@@ -210,19 +253,24 @@ class RecipeService {
       return `${cap(d.ingredient)}${price}${store}${save}`;
     });
 
-    const libIngredients = libRecipe.ingredients || [];
-    const allIngredients = libIngredients.map(ing => ing.raw || ing.name).filter(Boolean);
+    const libIngredients = (libRecipe.ingredients || []).filter(ing => !ing?.isSubheading);
+    // Ingredient NAMES only — facts the matcher derived, used for the card's
+    // key-ingredients list and the exclusion-warning logic.
+    const allIngredients = [...new Set(
+      libIngredients.map(ing => this._ingredientName(ing)).filter(Boolean)
+    )];
+    const source = (libRecipe.source || 'recipetineats').toLowerCase();
     return {
       id: this._stableRecipeId(libRecipe),
       title: decodeHtml(libRecipe.title) || `Recipe ${i + 1}`,
-      description: decodeHtml(libRecipe.description) || '',
+      description: '',
       dealIngredients,
       allIngredients,
       estimatedSaving,
       totalEstimatedCost: costMap.get(recipeCostService.recipeKey(libRecipe)) ?? 0,
       prepTime: libRecipe.totalTime || libRecipe.prepTime || 30,
       servings: libRecipe.servings || 4,
-      steps: libRecipe.steps || [],
+      steps: [],
       tags: libRecipe.tags || [],
       dealHighlights,
       matchedDeals:          libRecipe.matchedDeals         || [],
@@ -234,9 +282,10 @@ class RecipeService {
       cookTime: libRecipe.cookTime || libRecipe.totalTime || 30,
       rating: 4.5,
       ingredients: allIngredients,
-      instructions: Array.isArray(libRecipe.steps) ? libRecipe.steps.join(' ') : '',
-      source: libRecipe.source || 'recipetineats',
+      instructions: '',
+      source,
       sourceUrl: libRecipe.url || '#',
+      embedAllowed: embedMap?.get(source) ?? false,
       nutrition: libRecipe.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 },
     };
   }
@@ -279,7 +328,8 @@ class RecipeService {
           console.warn(`RecipeService: ${state.toUpperCase()} cost estimates unavailable: ${costErr.message}`);
         }
 
-        const recipes = withSavings.map((r, i) => this._composeWeeklyRecipe(r, i, costMap));
+        const embedMap = await this._buildEmbedMap(withSavings);
+        const recipes = withSavings.map((r, i) => this._composeWeeklyRecipe(r, i, costMap, embedMap));
         await db.saveStateRecipes(state, recipes, deals.length);
         console.log(`RecipeService: ${state.toUpperCase()} recipe artifact stored — ${recipes.length} recipes against ${deals.length} deals`);
       } catch (err) {

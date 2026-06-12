@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Users, ExternalLink, Flame, DollarSign } from 'lucide-react';
+import { ArrowLeft, Clock, Users, ExternalLink, Flame, DollarSign, BookOpen } from 'lucide-react';
 import DealPopup from '../components/DealPopup';
 import SavingsBreakdown from '../components/SavingsBreakdown';
+import RecipeViewer from '../components/RecipeViewer';
 import MatchFeedbackButton from '../components/MatchFeedbackButton';
 import { recipesApi } from '../services/api';
 import { useApp } from '../App';
 
 const SOURCE_META = {
-  jamieoliver:   { label: 'Jamie Oliver',       logo: 'https://www.jamieoliver.com/favicon.ico' },
-  recipetineats: { label: 'RecipeTin Eats',     logo: 'https://www.recipetineats.com/favicon.ico' },
-  donnahay:      { label: 'Donna Hay',          logo: 'https://www.donnahay.com.au/favicon.ico' },
+  jamieoliver:   { label: 'Jamie Oliver',        logo: 'https://www.jamieoliver.com/favicon.ico' },
+  recipetineats: { label: 'RecipeTin Eats',      logo: 'https://www.recipetineats.com/favicon.ico' },
+  donnahay:      { label: 'Donna Hay',           logo: 'https://www.donnahay.com.au/favicon.ico' },
   womensweekly:  { label: "Women's Weekly Food", logo: 'https://www.womensweeklyfood.com.au/favicon.ico' },
+  juliegoodwin:  { label: 'Julie Goodwin',       logo: 'https://juliegoodwin.com.au/favicon.ico' },
 };
 
 // ── Ingredient helpers ────────────────────────────────────────────────────────
@@ -168,7 +170,21 @@ export default function RecipeDetail() {
   const [error, setError] = useState(null);
   const [openPopupIndex, setOpenPopupIndex] = useState(null);
   const [isDealsExpanded, setIsDealsExpanded] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
   const badgeRefs = useRef({});
+
+  // Open the ORIGINAL publisher recipe — in-app viewer when the publisher's
+  // site permits framing, new tab otherwise. Either way they get the page
+  // view (and the ad impressions); the click is counted as lead-gen proof.
+  const openOriginalRecipe = useCallback(() => {
+    if (!recipe?.sourceUrl || recipe.sourceUrl === '#') return;
+    recipesApi.recordOutboundClick(recipe.source);
+    if (recipe.embedAllowed) {
+      setViewerOpen(true);
+    } else {
+      window.open(recipe.sourceUrl, '_blank', 'noopener,noreferrer');
+    }
+  }, [recipe]);
 
   const closePopup = useCallback(() => setOpenPopupIndex(null), []);
 
@@ -244,7 +260,6 @@ export default function RecipeDetail() {
   } = recipe;
 
   const displayIngredients = allIngredients.length > 0 ? allIngredients : ingredients;
-  const displaySteps = steps.length > 0 ? steps : (instructions ? [instructions] : []);
   const totalTime = (prepTime ?? 0) + (cookTime ?? 0) || prepTime || cookTime || 30;
 
   // Household-scaled cost: the stored estimate covers the recipe as written
@@ -321,16 +336,14 @@ export default function RecipeDetail() {
               </span>
             </div>
             {sourceUrl && sourceUrl !== '#' && (
-              <a
-                href={sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={openOriginalRecipe}
                 className="inline-flex items-center gap-1.5 text-sm font-bold underline underline-offset-2 transition-opacity hover:opacity-70"
                 style={{ color: 'var(--color-text-green)', fontFamily: 'Nunito, sans-serif' }}
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 View original recipe
-              </a>
+              </button>
             )}
           </div>
         )}
@@ -511,37 +524,37 @@ export default function RecipeDetail() {
           />
         )}
 
-        {/* Steps */}
-        {displaySteps.length > 0 && (
-          <div>
+        {/* Get the full recipe — the method lives on the publisher's site
+            (their content, their page, their ad impressions). In-app viewer
+            when the site allows embedding, new tab otherwise. */}
+        {sourceUrl && sourceUrl !== '#' && (
+          <div
+            className="rounded-[20px] px-5 py-5 text-center"
+            style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.08)' }}
+          >
             <h2
-              className="mb-3"
+              className="mb-1"
               style={{ fontFamily: '"Fredoka One", sans-serif', color: 'var(--color-bark)', fontSize: '20px' }}
             >
-              Method
+              Ready to cook?
             </h2>
-            <ol className="space-y-3">
-              {displaySteps.map((step, i) => (
-                <li
-                  key={i}
-                  className="flex gap-3 rounded-xl px-4 py-3"
-                  style={{ background: '#ffffff', border: '1.5px solid var(--color-stone)', boxShadow: '0 2px 12px rgba(92, 74, 53, 0.06)' }}
-                >
-                  <span
-                    className="flex-shrink-0 w-7 h-7 rounded-full text-sm font-bold flex items-center justify-center text-white"
-                    style={{ background: 'var(--color-leaf)' }}
-                  >
-                    {i + 1}
-                  </span>
-                  <span
-                    className="text-sm leading-relaxed pt-0.5"
-                    style={{ color: 'var(--color-bark)', fontFamily: 'Nunito, sans-serif' }}
-                  >
-                    {step}
-                  </span>
-                </li>
-              ))}
-            </ol>
+            <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+              The full method and quantities are on{' '}
+              <span style={{ fontWeight: 700, color: 'var(--color-bark)' }}>
+                {SOURCE_META[recipe.source]?.label ?? recipe.source}
+              </span>
+              {recipe.embedAllowed
+                ? ' — it opens right here, your deals stay put.'
+                : ' — it opens in a new tab, your deals stay right here.'}
+            </p>
+            <button
+              onClick={openOriginalRecipe}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 hover:-translate-y-px shadow-sm"
+              style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
+            >
+              <BookOpen className="w-4 h-4" />
+              Get the full recipe
+            </button>
           </div>
         )}
 
@@ -587,6 +600,15 @@ export default function RecipeDetail() {
         {/* bottom spacer */}
         <div className="pb-4" />
       </div>
+
+      {/* In-app original-recipe viewer (embeddable publishers only) */}
+      {viewerOpen && (
+        <RecipeViewer
+          url={sourceUrl}
+          publisherLabel={SOURCE_META[recipe.source]?.label ?? recipe.source}
+          onClose={() => setViewerOpen(false)}
+        />
+      )}
     </div>
   );
 }

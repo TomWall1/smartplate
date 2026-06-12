@@ -53,7 +53,7 @@ const FREE_FEATURES = [
   { text: '50 recipes weekly', free: true },
   { text: 'Store-specific browsing', free: true },
   { text: 'Deal filtering and search', free: true },
-  { text: 'Recipe details and instructions', free: true },
+  { text: 'Recipe details and savings breakdowns', free: true },
   { text: 'Ingredient-to-deal matching', free: true },
 ];
 
