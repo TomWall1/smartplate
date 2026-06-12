@@ -205,14 +205,20 @@ class RecipeService {
    * couldn't parse one, strip leading quantities/units from the raw line.
    */
   _ingredientName(ing) {
-    if (typeof ing === 'string') return ing;
-    if (ing.name) return ing.name;
-    return (ing.raw || '')
-      .replace(/^[\d\s/.,x×–-]+/, '')              // leading quantities
-      .replace(/^(g|kg|ml|l|litre|cup|cups|tbsp|tsp|oz|lb|bunch|cloves?|pieces?|slices?)\b\s*/i, '')
-      .replace(/\(.*?\)/g, '')                      // parenthetical notes
-      .trim()
-      .toLowerCase();
+    // The scraper's parsed `name` is preferred but itself sometimes carries
+    // quantities ("2 fresh red chillies") or fragments ("1, finely chopped"),
+    // so EVERY candidate goes through the same cleaner.
+    let s = (typeof ing === 'string' ? ing : (ing.name || ing.raw || ''))
+      .replace(/\(.*?\)/g, ' ')   // parenthetical notes
+      .replace(/[()]/g, ' ');     // stray unmatched parens
+    // Multi-pass: "5 slices of smoked pancetta" → "slices of …" → "of …" → "smoked pancetta"
+    for (let pass = 0; pass < 3; pass++) {
+      s = s
+        .replace(/^[\d\s/.,x×–-]+/, '')
+        .replace(/^(g|kg|ml|l|litre|cups?|tbsp|tsp|oz|lb|bunch(es)?|cloves?|pieces?|slices?|sheets?|sprigs?|cans?|tins?|of|medium|large|small|heaped|level)\b[\s,]*/i, '');
+    }
+    s = s.replace(/[\s,]+$/, '').replace(/\s{2,}/g, ' ').trim().toLowerCase();
+    return s.length >= 3 ? s : '';
   }
 
   /**
