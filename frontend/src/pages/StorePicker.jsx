@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { UtensilsCrossed, RefreshCw, HelpCircle } from 'lucide-react';
 import { useApp } from '../App';
 import { useAuth } from '../context/AuthContext';
@@ -42,6 +42,16 @@ export default function StorePicker() {
   const { deals, loading, selectedStore, setSelectedStore, startOnboarding } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Returning customers with a saved store go straight to their store's page.
+  // Links that explicitly mean "let me choose" pass state.choose to opt out.
+  useEffect(() => {
+    if (selectedStore && !location.state?.choose) {
+      navigate(`/store/${selectedStore}`, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const dealCountFor = (storeId) =>
     deals.filter((d) => d.store === storeId).length;

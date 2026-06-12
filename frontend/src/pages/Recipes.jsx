@@ -416,6 +416,7 @@ export default function Recipes() {
             </p>
             <Link
               to="/"
+              state={{ choose: true }}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 hover:-translate-y-px"
               style={{ background: 'var(--color-leaf)', fontFamily: 'Nunito, sans-serif' }}
             >

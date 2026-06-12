@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Users, ExternalLink, Flame } from 'lucide-react';
+import { ArrowLeft, Clock, Users, ExternalLink, Flame, DollarSign } from 'lucide-react';
 import DealPopup from '../components/DealPopup';
 import SavingsBreakdown from '../components/SavingsBreakdown';
 import MatchFeedbackButton from '../components/MatchFeedbackButton';
@@ -161,7 +161,7 @@ function findMatchedDeal(ingredientLine, matchedDeals = []) {
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedStore, userState } = useApp();
+  const { selectedStore, userState, householdSize } = useApp();
 
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -240,11 +240,20 @@ export default function RecipeDetail() {
     tags = [],
     totalMealSaving,
     totalPerServingSaving,
+    totalEstimatedCost,
   } = recipe;
 
   const displayIngredients = allIngredients.length > 0 ? allIngredients : ingredients;
   const displaySteps = steps.length > 0 ? steps : (instructions ? [instructions] : []);
   const totalTime = (prepTime ?? 0) + (cookTime ?? 0) || prepTime || cookTime || 30;
+
+  // Household-scaled cost: the stored estimate covers the recipe as written
+  // (recipe.servings serves); scale it to the user's household size.
+  const recipeServings = servings ?? 4;
+  const householdCost =
+    householdSize && totalEstimatedCost > 0
+      ? (totalEstimatedCost / recipeServings) * householdSize
+      : null;
 
   const hasNutrition =
     nutrition &&
@@ -349,10 +358,13 @@ export default function RecipeDetail() {
         )}
 
         {/* Stats */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           {[
             { icon: Clock, label: 'min', value: totalTime },
             { icon: Users, label: 'servings', value: servings ?? 4 },
+            ...(householdCost
+              ? [{ icon: DollarSign, label: `for ${householdSize} ${householdSize === 1 ? 'person' : 'people'}`, value: `$${householdCost.toFixed(0)}` }]
+              : []),
           ].map(({ icon: Icon, label, value }) => (
             <div
               key={label}

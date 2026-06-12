@@ -82,6 +82,10 @@ function AppInner() {
     loadFromStorage('smartplate-state', 'nsw')
   );
 
+  const [householdSize, setHouseholdSizeLocal] = useState(() =>
+    loadFromStorage('smartplate-household', null)
+  );
+
   // Wrapped setters that also persist to localStorage
   const setSelectedStore = (store) => {
     setSelectedStoreState(store);
@@ -108,6 +112,28 @@ function AppInner() {
     }
   };
 
+  // setHouseholdSize: persist locally + save to backend when logged in
+  const setHouseholdSize = (size) => {
+    setHouseholdSizeLocal(size);
+    if (size === null) {
+      localStorage.removeItem('smartplate-household');
+    } else {
+      saveToStorage('smartplate-household', size);
+    }
+    if (user) {
+      usersApi.updatePreferences({ household_size: size }).catch(() => {});
+    }
+  };
+
+  // setDefaultStore: the account-level store (same selected_store field the
+  // picker saves) — set from the Profile page; the picker auto-forwards to it
+  const setDefaultStore = (storeId) => {
+    setSelectedStore(storeId);
+    if (user) {
+      usersApi.updatePreferences({ selected_store: storeId }).catch(() => {});
+    }
+  };
+
   // ── Sync user profile from Supabase when auth state changes ───────────────
   useEffect(() => {
     if (!user) return;
@@ -123,6 +149,11 @@ function AppInner() {
         if (profile.state) {
           setUserStateLocal(profile.state);
           saveToStorage('smartplate-state', profile.state);
+        }
+        // Apply saved household size (Supabase wins over localStorage)
+        if (profile.household_size) {
+          setHouseholdSizeLocal(profile.household_size);
+          saveToStorage('smartplate-household', profile.household_size);
         }
         // Merge saved dietary/excluded preferences into existing prefs
         if (profile.dietary_restrictions?.length || profile.excluded_ingredients?.length) {
@@ -207,6 +238,9 @@ function AppInner() {
     setPreferences,
     userState,
     setUserState,
+    householdSize,
+    setHouseholdSize,
+    setDefaultStore,
     apiStatus,
     loading,
     dealsLoading,

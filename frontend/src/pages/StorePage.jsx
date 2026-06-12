@@ -104,8 +104,9 @@ export default function StorePage() {
   }, [store]);
 
   const handleChangeStore = () => {
-    setSelectedStore(null);
-    navigate('/');
+    // Keep the saved store (it's the account default) — `choose` tells the
+    // picker not to auto-forward straight back here.
+    navigate('/', { state: { choose: true } });
   };
 
   const filteredRecipes = useMemo(() => {
