@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontWeight: '800',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
     textAlign: 'center',
   },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   storeName: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
   },
 });

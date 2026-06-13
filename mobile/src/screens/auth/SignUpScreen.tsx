@@ -12,6 +12,8 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { fonts } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation';
@@ -63,9 +65,7 @@ export default function SignUpScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <View style={styles.logoCircle}>
-            <Ionicons name="leaf" size={36} color="#36453B" />
-          </View>
+          <Image source={require('../../../assets/icon.png')} style={styles.logoImage} contentFit="cover" />
           <Text style={styles.logoText}>Deal to Dish</Text>
           <Text style={styles.tagline}>Cook smart. Save more.</Text>
         </View>
@@ -173,18 +173,15 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     gap: 8,
   },
-  logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#DCE4D6',
-    justifyContent: 'center',
-    alignItems: 'center',
+  logoImage: {
+    width: 76,
+    height: 76,
+    borderRadius: 18,
     marginBottom: 4,
   },
   logoText: {
     fontSize: 28,
-    fontWeight: '800',
+    fontFamily: fonts.display,
     color: '#2A241F',
   },
   tagline: {
@@ -206,7 +203,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: fonts.display,
     color: '#2A241F',
     marginBottom: 4,
   },
@@ -215,7 +212,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: '#2A241F',
   },
   input: {
@@ -254,7 +251,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
   linkRow: {
     alignItems: 'center',
@@ -266,6 +263,6 @@ const styles = StyleSheet.create({
   },
   linkAccent: {
     color: '#36453B',
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
 });

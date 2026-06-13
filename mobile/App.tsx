@@ -11,7 +11,7 @@ import {
   Fraunces_400Regular,
   Fraunces_500Medium,
 } from '@expo-google-fonts/fraunces';
-import { Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 
 import { AuthProvider } from './src/context/AuthContext';
 import { PremiumProvider } from './src/context/PremiumContext';
@@ -34,6 +34,8 @@ export default function App() {
     Fraunces_500Medium,
     Inter_400Regular,
     Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
   });
 
   const onLayout = useCallback(() => {

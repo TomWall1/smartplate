@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
     marginBottom: 8,
     textAlign: 'center',
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: '#2A241F',
   },
   input: {
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
   linkRow: {
     alignItems: 'center',
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   linkAccent: {
     color: '#36453B',
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   successCard: {
     backgroundColor: '#ffffff',
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
   },
   successText: {
@@ -267,6 +267,6 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: '#ffffff',
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
 });

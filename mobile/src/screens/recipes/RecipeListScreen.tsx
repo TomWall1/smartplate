@@ -16,8 +16,8 @@ import { useStore } from '../../context/StoreContext';
 import { usePremium } from '../../context/PremiumContext';
 import { Recipe, FilterType } from '../../types';
 import RecipeCard from '../../components/RecipeCard';
-import LoadingState from '../../components/LoadingState';
 import ErrorState from '../../components/ErrorState';
+import RecipeListSkeleton from '../../components/RecipeListSkeleton';
 
 type Props = NativeStackScreenProps<RecipesStackParamList, 'RecipeList'>;
 
@@ -91,7 +91,7 @@ export default function RecipeListScreen({ navigation }: Props) {
   );
 
   if (isLoading) {
-    return <LoadingState message="Finding recipes with deals…" />;
+    return <RecipeListSkeleton />;
   }
 
   if (isError) {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: '#6B5F52',
   },
   chipTextActive: {
@@ -240,14 +240,14 @@ const styles = StyleSheet.create({
   },
   proteinLabel: {
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#6B5F52',
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
   clearText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#6B5F52',
     textDecorationLine: 'underline',
   },

@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
   },
   subheading: {
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
     marginBottom: 10,
     textTransform: 'uppercase',
@@ -251,11 +251,11 @@ const styles = StyleSheet.create({
   quickChipText: {
     fontSize: 14,
     color: '#6B5F52',
-    fontWeight: '500',
+    fontFamily: 'Inter_500Medium',
   },
   quickChipTextActive: {
     color: '#36453B',
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
   chipsList: {
     flexDirection: 'row',
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   itemChipText: {
     fontSize: 13,
     color: '#ffffff',
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   staplesRow: {
     flexDirection: 'row',
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   staplesLabel: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: '#2A241F',
   },
   staplesHint: {
@@ -314,6 +314,6 @@ const styles = StyleSheet.create({
   ctaText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
 });

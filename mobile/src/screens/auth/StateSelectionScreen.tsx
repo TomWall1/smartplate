@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontWeight: '800',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
     textAlign: 'center',
   },
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   },
   stateLabel: {
     fontSize: 22,
-    fontWeight: '800',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
   },
   stateLabelSelected: {
@@ -179,6 +179,6 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
 });

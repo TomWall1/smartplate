@@ -48,17 +48,17 @@ const styles = StyleSheet.create({
   storeText: {
     color: '#ffffff',
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     letterSpacing: 0.2,
   },
   price: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: '#2A241F',
   },
   savings: {
     fontSize: 13,
     color: '#36453B',
-    fontWeight: '500',
+    fontFamily: 'Inter_500Medium',
   },
 });

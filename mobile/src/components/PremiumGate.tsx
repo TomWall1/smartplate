@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
   },
   subtitle: {
@@ -98,6 +98,6 @@ const styles = StyleSheet.create({
   upgradeText: {
     color: '#ffffff',
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
 });

@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   resultsSummaryText: {
     fontSize: 14,
     color: '#6B5F52',
-    fontWeight: '500',
+    fontFamily: 'Inter_500Medium',
   },
   list: {
     padding: 16,
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     flex: 1,
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
     lineHeight: 22,
   },
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   coverageBadgeText: {
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'Inter_700Bold',
   },
   coverageRow: {
     gap: 6,
@@ -228,13 +228,13 @@ const styles = StyleSheet.create({
   },
   dealsSectionLabel: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: '#2A241F',
   },
   moreDeals: {
     fontSize: 12,
     color: '#36453B',
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   empty: {
     flex: 1,
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
   },
   emptyText: {
@@ -265,6 +265,6 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: '#ffffff',
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
 });

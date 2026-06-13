@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
   email: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
   },
   premiumBadge: {
@@ -283,14 +283,14 @@ const styles = StyleSheet.create({
   premiumBadgeText: {
     color: '#ffffff',
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
   section: {
     gap: 10,
   },
   sectionTitle: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   stateText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: '#2A241F',
   },
   statePicker: {
@@ -338,10 +338,10 @@ const styles = StyleSheet.create({
   stateOptionText: {
     fontSize: 15,
     color: '#2A241F',
-    fontWeight: '500',
+    fontFamily: 'Inter_500Medium',
   },
   stateOptionTextActive: {
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#36453B',
   },
   upgradeCard: {
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   upgradeTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
   },
   upgradeText: {
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   upgradeButtonText: {
     color: '#ffffff',
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
   accountCard: {
     backgroundColor: '#ffffff',
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   },
   accountValue: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     color: '#2A241F',
     maxWidth: 200,
   },
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   },
   signOutText: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#D4667A',
   },
 });

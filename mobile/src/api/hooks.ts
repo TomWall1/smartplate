@@ -12,7 +12,7 @@ import { Recipe } from '../types';
 
 export const keys = {
   deals: (store: string) => ['deals', store] as const,
-  recipes: (state: string) => ['recipes', state] as const,
+  recipes: (state: string, store: string) => ['recipes', state, store] as const,
   recipe: (id: string) => ['recipe', id] as const,
   favorites: () => ['favorites'] as const,
   pantry: () => ['pantry'] as const,
@@ -26,10 +26,10 @@ export function useDeals(store: string | null | undefined) {
   });
 }
 
-export function useRecipes(state: string | null | undefined) {
+export function useRecipes(state: string | null | undefined, store?: string | null) {
   return useQuery({
-    queryKey: keys.recipes(state ?? ''),
-    queryFn: () => getRecipeSuggestions(state as string),
+    queryKey: keys.recipes(state ?? '', store ?? 'all'),
+    queryFn: () => getRecipeSuggestions(state as string, store),
     enabled: !!state,
   });
 }

@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   // Guest view
   guestContent: { paddingHorizontal: 20, paddingTop: 40, paddingBottom: 40, gap: 24 },
   guestHeader: { alignItems: 'center', gap: 12 },
-  guestTitle: { fontSize: 20, fontWeight: '800', color: '#2A241F', textAlign: 'center' },
+  guestTitle: { fontSize: 20, fontFamily: 'Inter_700Bold', color: '#2A241F', textAlign: 'center' },
   guestSubtitle: { fontSize: 14, color: '#6B5F52', textAlign: 'center', lineHeight: 22 },
   authButtons: { gap: 12 },
   signInButton: {
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
   },
-  signInButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
+  signInButtonText: { color: '#ffffff', fontSize: 16, fontFamily: 'Inter_700Bold' },
   createButton: {
     backgroundColor: '#ffffff',
     paddingVertical: 14,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#E2D8C6',
   },
-  createButtonText: { color: '#2A241F', fontSize: 16, fontWeight: '700' },
+  createButtonText: { color: '#2A241F', fontSize: 16, fontFamily: 'Inter_700Bold' },
 
   // Profile header
   profileHeader: { alignItems: 'center', gap: 8, paddingVertical: 8 },
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
-  emailText: { fontSize: 16, fontWeight: '600', color: '#2A241F' },
+  emailText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: '#2A241F' },
   premiumBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,11 +233,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 999,
   },
-  premiumBadgeText: { fontSize: 12, fontWeight: '700', color: '#BE6A43' },
+  premiumBadgeText: { fontSize: 12, fontFamily: 'Inter_700Bold', color: '#BE6A43' },
 
   // Sections
   section: { gap: 10 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#6B5F52', textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionTitle: { fontSize: 13, fontFamily: 'Inter_700Bold', color: '#6B5F52', textTransform: 'uppercase', letterSpacing: 0.5 },
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rowContent: { flex: 1 },
-  rowLabel: { fontSize: 15, fontWeight: '600', color: '#2A241F' },
+  rowLabel: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#2A241F' },
   rowValue: { fontSize: 13, color: '#6B5F52', marginTop: 1 },
   divider: { height: 1, backgroundColor: '#f0ede8', marginLeft: 60 },
 
@@ -277,5 +277,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#f9d5da',
   },
-  signOutText: { fontSize: 15, fontWeight: '700', color: '#D4667A' },
+  signOutText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#D4667A' },
 });

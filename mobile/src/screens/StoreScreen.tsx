@@ -40,7 +40,7 @@ export default function StoreScreen() {
   const cfg = storeColors[store] ?? storeColors.woolworths;
 
   const dealsQuery = useDeals(store);
-  const recipesQuery = useRecipes(effectiveState);
+  const recipesQuery = useRecipes(effectiveState, store);
 
   const onRefresh = useCallback(() => {
     dealsQuery.refetch();

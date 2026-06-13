@@ -195,7 +195,7 @@ function GoogleIcon() {
   return (
     <View style={{ width: 18, height: 18 }}>
       {/* Simple coloured G using a text character — no SVG needed in RN */}
-      <Text style={{ fontSize: 15, fontWeight: '700', color: '#4285F4', lineHeight: 18 }}>G</Text>
+      <Text style={{ fontSize: 15, fontFamily: 'Inter_700Bold', color: '#4285F4', lineHeight: 18 }}>G</Text>
     </View>
   );
 }
@@ -210,24 +210,24 @@ const styles = StyleSheet.create({
   card: { backgroundColor: '#ffffff', borderRadius: 20, padding: 24, gap: 16, borderWidth: 1.5, borderColor: '#E2D8C6', shadowColor: 'rgba(92,74,53,0.08)', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 4 },
   cardTitle: { fontFamily: fonts.display, fontSize: 22, color: '#2A241F', marginBottom: 4 },
   googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1.5, borderColor: '#E2D8C6', borderRadius: 12, paddingVertical: 13, backgroundColor: '#ffffff' },
-  googleButtonText: { fontSize: 15, fontWeight: '600', color: '#2A241F' },
+  googleButtonText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#2A241F' },
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#E2D8C6' },
   dividerText: { fontSize: 12, color: '#6B5F52' },
   field: { gap: 6 },
   labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  label: { fontSize: 13, fontWeight: '600', color: '#2A241F' },
-  forgotLink: { fontSize: 13, fontWeight: '600', color: '#36453B' },
+  label: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#2A241F' },
+  forgotLink: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#36453B' },
   input: { borderWidth: 1.5, borderColor: '#E2D8C6', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#2A241F', backgroundColor: '#F4EEE2' },
   passwordWrapper: { position: 'relative' },
   passwordInput: { paddingRight: 48 },
   eyeButton: { position: 'absolute', right: 14, top: 0, bottom: 0, justifyContent: 'center' },
   primaryButton: { backgroundColor: '#36453B', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 4 },
   buttonDisabled: { opacity: 0.7 },
-  primaryButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
+  primaryButtonText: { color: '#ffffff', fontSize: 16, fontFamily: 'Inter_700Bold' },
   linkRow: { alignItems: 'center', paddingVertical: 4 },
   linkText: { fontSize: 14, color: '#6B5F52' },
-  linkAccent: { color: '#36453B', fontWeight: '600' },
+  linkAccent: { color: '#36453B', fontFamily: 'Inter_600SemiBold' },
   guestButton: { marginTop: 24, alignItems: 'center', paddingVertical: 12 },
-  guestButtonText: { fontSize: 14, color: '#6B5F52', fontWeight: '600' },
+  guestButtonText: { fontSize: 14, color: '#6B5F52', fontFamily: 'Inter_600SemiBold' },
 });

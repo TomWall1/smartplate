@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,8 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PremiumStackParamList } from '../navigation';
-import { getFavorites } from '../api/recipes';
-import { Recipe } from '../types';
+import { useFavorites } from '../api/hooks';
 import RecipeCard from '../components/RecipeCard';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
@@ -19,36 +18,13 @@ import ErrorState from '../components/ErrorState';
 type Props = NativeStackScreenProps<PremiumStackParamList, 'Favourites'>;
 
 export default function FavouritesScreen({ navigation }: Props) {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { data: recipes = [], isLoading, isError, isFetching, refetch } = useFavorites();
 
-  const fetchFavourites = useCallback(async () => {
-    setError(null);
-    try {
-      const data = await getFavorites();
-      setRecipes(data);
-    } catch {
-      setError('Could not load your favourites.');
-    }
-  }, []);
+  // Re-check favourites when the tab regains focus (they change elsewhere).
+  useFocusEffect(useCallback(() => { refetch(); }, [refetch]));
 
-  useFocusEffect(
-    useCallback(() => {
-      setLoading(true);
-      fetchFavourites().finally(() => setLoading(false));
-    }, [fetchFavourites])
-  );
-
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await fetchFavourites();
-    setRefreshing(false);
-  }, [fetchFavourites]);
-
-  if (loading) return <LoadingState message="Loading your favourites..." />;
-  if (error) return <ErrorState message={error} onRetry={() => { setLoading(true); fetchFavourites().finally(() => setLoading(false)); }} />;
+  if (isLoading) return <LoadingState message="Loading your favourites…" />;
+  if (isError) return <ErrorState message="Could not load your favourites." onRetry={() => refetch()} />;
 
   return (
     <View style={styles.container}>
@@ -65,8 +41,8 @@ export default function FavouritesScreen({ navigation }: Props) {
         )}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
+            refreshing={isFetching}
+            onRefresh={refetch}
             tintColor="#36453B"
             colors={['#36453B']}
           />
@@ -104,7 +80,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#2A241F',
   },
   emptyText: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,16 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
-  Image,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
-import { getRecipeById, toggleFavorite } from '../../api/recipes';
-import { Recipe } from '../../types';
+import { useRecipe, useToggleFavorite } from '../../api/hooks';
 import DealBadge from '../../components/DealBadge';
 import LoadingState from '../../components/LoadingState';
 import ErrorState from '../../components/ErrorState';
+import { fonts } from '../../theme';
 
 type Props = NativeStackScreenProps<RecipesStackParamList, 'RecipeDetail'>;
 
@@ -25,25 +25,16 @@ const IMAGE_HEIGHT = 260;
 
 export default function RecipeDetailScreen({ route, navigation }: Props) {
   const { id } = route.params;
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: recipe, isLoading, isError, refetch } = useRecipe(id);
+  const toggleFav = useToggleFavorite();
   const [favorited, setFavorited] = useState(false);
-  const [favLoading, setFavLoading] = useState(false);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await getRecipeById(id);
-        setRecipe(data);
-      } catch {
-        setError('Could not load this recipe. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [id]);
+  function handleToggleFavorite() {
+    toggleFav.mutate(id, {
+      onSuccess: () => setFavorited((v) => !v),
+      onError: () => Alert.alert('Error', 'Could not update favourite. Please try again.'),
+    });
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -51,47 +42,31 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
         <TouchableOpacity
           onPress={handleToggleFavorite}
           style={styles.favButton}
-          disabled={favLoading}
+          disabled={toggleFav.isPending}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Ionicons
             name={favorited ? 'heart' : 'heart-outline'}
             size={24}
-            color={favorited ? '#D4667A' : '#2A241F'}
+            color={favorited ? '#BE6A43' : '#2A241F'}
           />
         </TouchableOpacity>
       ),
     });
-  }, [navigation, favorited, favLoading]);
+  }, [navigation, favorited, toggleFav.isPending]);
 
-  async function handleToggleFavorite() {
-    setFavLoading(true);
-    try {
-      await toggleFavorite(id);
-      setFavorited((v) => !v);
-    } catch {
-      Alert.alert('Error', 'Could not update favourite. Please try again.');
-    } finally {
-      setFavLoading(false);
-    }
+  if (isLoading) return <LoadingState message="Loading recipe…" />;
+  if (isError || !recipe) {
+    return <ErrorState message="Could not load this recipe." onRetry={() => refetch()} />;
   }
-
-  if (loading) return <LoadingState message="Loading recipe..." />;
-  if (error || !recipe) return <ErrorState message={error ?? 'Recipe not found.'} onRetry={() => { setLoading(true); setError(null); getRecipeById(id).then(setRecipe).catch(() => setError('Could not load this recipe.')).finally(() => setLoading(false)); }} />;
 
   const totalSavings = recipe.matchedDeals.reduce((sum, d) => sum + (d.savings ?? 0), 0);
 
   return (
     <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-      {/* Hero image */}
-      <Image
-        source={{ uri: recipe.image_url }}
-        style={styles.heroImage}
-        resizeMode="cover"
-      />
+      <Image source={recipe.image_url} style={styles.heroImage} contentFit="cover" transition={200} />
 
       <View style={styles.body}>
-        {/* Title + meta */}
         <Text style={styles.title}>{recipe.title}</Text>
 
         <View style={styles.chips}>
@@ -131,15 +106,12 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        {recipe.description ? (
-          <Text style={styles.description}>{recipe.description}</Text>
-        ) : null}
+        {recipe.description ? <Text style={styles.description}>{recipe.description}</Text> : null}
 
-        {/* Savings summary */}
         {recipe.matchedDeals.length > 0 && (
           <View style={styles.savingsCard}>
             <View style={styles.savingsRow}>
-              <Ionicons name="cart" size={18} color="#BE6A43" />
+              <Ionicons name="pricetag" size={18} color="#BE6A43" />
               <Text style={styles.savingsTitle}>
                 {recipe.matchedDeals.length} deal{recipe.matchedDeals.length !== 1 ? 's' : ''} available
               </Text>
@@ -152,7 +124,6 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        {/* Ingredients */}
         <Text style={styles.sectionTitle}>Ingredients</Text>
         <View style={styles.ingredientsList}>
           {recipe.ingredients.map((ing, idx) => {
@@ -174,7 +145,6 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           })}
         </View>
 
-        {/* Steps */}
         {recipe.steps && recipe.steps.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Method</Text>
@@ -196,159 +166,33 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-    backgroundColor: '#F4EEE2',
-  },
-  heroImage: {
-    width: SCREEN_WIDTH,
-    height: IMAGE_HEIGHT,
-  },
-  favButton: {
-    marginRight: 4,
-    padding: 4,
-  },
-  body: {
-    padding: 20,
-    gap: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#2A241F',
-    lineHeight: 32,
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: '#DCE4D6',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  chipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#36453B',
-  },
-  tagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  dietTag: {
-    backgroundColor: '#fff3e0',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  dietTagText: {
-    fontSize: 12,
-    color: '#c07820',
-    fontWeight: '600',
-  },
-  description: {
-    fontSize: 15,
-    color: '#2A241F',
-    lineHeight: 23,
-  },
-  savingsCard: {
-    backgroundColor: '#FFF8EE',
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1.5,
-    borderColor: '#F4E0C0',
-  },
-  savingsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  savingsTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#2A241F',
-    flex: 1,
-  },
-  savingsBadge: {
-    backgroundColor: '#BE6A43',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  savingsBadgeText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2A241F',
-    marginTop: 4,
-    marginBottom: -4,
-  },
-  ingredientsList: {
-    gap: 12,
-  },
-  ingredientItem: {
-    gap: 4,
-  },
-  ingredientRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
-  bulletDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: '#36453B',
-    marginTop: 6,
-    flexShrink: 0,
-  },
-  ingredientName: {
-    fontSize: 15,
-    color: '#2A241F',
-    lineHeight: 22,
-    flex: 1,
-  },
-  ingredientNameBold: {
-    fontWeight: '600',
-  },
-  stepsList: {
-    gap: 16,
-  },
-  stepItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 14,
-  },
-  stepNumber: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#36453B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexShrink: 0,
-    marginTop: 1,
-  },
-  stepNumberText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  stepText: {
-    fontSize: 15,
-    color: '#2A241F',
-    lineHeight: 23,
-    flex: 1,
-  },
+  scroll: { flex: 1, backgroundColor: '#F4EEE2' },
+  heroImage: { width: SCREEN_WIDTH, height: IMAGE_HEIGHT, backgroundColor: '#E7DECB' },
+  favButton: { marginRight: 4, padding: 4 },
+  body: { padding: 20, gap: 16 },
+  title: { fontSize: 26, fontFamily: fonts.display, color: '#2A241F', lineHeight: 32 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#DCE4D6', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
+  chipText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: '#36453B' },
+  tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  dietTag: { backgroundColor: '#F2E2D6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  dietTagText: { fontSize: 12, color: '#BE6A43', fontFamily: 'Inter_600SemiBold' },
+  description: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 23 },
+  savingsCard: { backgroundColor: '#F2E2D6', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#E6C9B3' },
+  savingsRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  savingsTitle: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#2A241F', flex: 1 },
+  savingsBadge: { backgroundColor: '#BE6A43', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  savingsBadgeText: { color: '#ffffff', fontSize: 12, fontFamily: 'Inter_700Bold' },
+  sectionTitle: { fontSize: 18, fontFamily: fonts.display, color: '#2A241F', marginTop: 4, marginBottom: -4 },
+  ingredientsList: { gap: 12 },
+  ingredientItem: { gap: 4 },
+  ingredientRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  bulletDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#36453B', marginTop: 6, flexShrink: 0 },
+  ingredientName: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 22, flex: 1 },
+  ingredientNameBold: { fontFamily: 'Inter_600SemiBold' },
+  stepsList: { gap: 16 },
+  stepItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
+  stepNumber: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#36453B', justifyContent: 'center', alignItems: 'center', flexShrink: 0, marginTop: 1 },
+  stepNumberText: { color: '#ffffff', fontSize: 14, fontFamily: 'Inter_700Bold' },
+  stepText: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 23, flex: 1 },
 });

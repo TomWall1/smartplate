@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
-  upgradeTitle: { fontSize: 24, fontWeight: '800', color: '#2A241F', textAlign: 'center' },
+  upgradeTitle: { fontSize: 24, fontFamily: 'Inter_700Bold', color: '#2A241F', textAlign: 'center' },
   upgradeSubtitle: { fontSize: 15, color: '#6B5F52', textAlign: 'center', lineHeight: 22 },
   featureList: {
     backgroundColor: '#ffffff',
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   featureRowText: { flex: 1 },
-  featureRowTitle: { fontSize: 15, fontWeight: '700', color: '#2A241F' },
+  featureRowTitle: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#2A241F' },
   featureRowDesc: { fontSize: 13, color: '#6B5F52', marginTop: 1 },
   upgradeButton: {
     backgroundColor: '#BE6A43',
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
   },
-  upgradeButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
+  upgradeButtonText: { color: '#ffffff', fontSize: 16, fontFamily: 'Inter_700Bold' },
   upgradeNote: { fontSize: 13, color: '#6B5F52', textAlign: 'center' },
 
   // Premium hub view (for premium users)
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 20,
   },
-  hubTitle: { fontSize: 22, fontWeight: '800', color: '#2A241F' },
+  hubTitle: { fontSize: 22, fontFamily: 'Inter_700Bold', color: '#2A241F' },
   hubSubtitle: { fontSize: 14, color: '#6B5F52', marginTop: -12 },
   grid: {
     flexDirection: 'row',
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  featureTitle: { fontSize: 15, fontWeight: '700', color: '#2A241F' },
+  featureTitle: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#2A241F' },
   featureDesc: { fontSize: 12, color: '#6B5F52', lineHeight: 18 },
   comingSoonBadge: {
     alignSelf: 'flex-start',
@@ -236,5 +236,5 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 999,
   },
-  comingSoonText: { fontSize: 10, fontWeight: '700', color: '#6B5F52' },
+  comingSoonText: { fontSize: 10, fontFamily: 'Inter_700Bold', color: '#6B5F52' },
 });
