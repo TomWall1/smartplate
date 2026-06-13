@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,7 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { useDeals, useRecipes } from '../api/hooks';
-import { Deal } from '../types';
+import { Deal, FilterType } from '../types';
+import { FILTERS, applyFilter } from '../lib/recipeFilters';
 import RecipeCard from '../components/RecipeCard';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
@@ -41,6 +42,7 @@ export default function StoreScreen() {
 
   const dealsQuery = useDeals(store);
   const recipesQuery = useRecipes(effectiveState, store);
+  const [filter, setFilter] = useState<FilterType>('all');
 
   const onRefresh = useCallback(() => {
     dealsQuery.refetch();
@@ -54,6 +56,7 @@ export default function StoreScreen() {
 
   const deals = dealsQuery.data ?? [];
   const recipes = recipesQuery.data ?? [];
+  const shownRecipes = applyFilter(recipes, filter);
 
   return (
     <ScrollView
@@ -85,12 +88,30 @@ export default function StoreScreen() {
           <View style={styles.sectionTitleRow}>
             <Ionicons name="restaurant-outline" size={18} color={colors.ink} />
             <Text style={styles.sectionTitle}>Recipes using these deals</Text>
-            <Text style={styles.sectionCount}>{recipes.length}</Text>
+            <Text style={styles.sectionCount}>{shownRecipes.length}</Text>
           </View>
+
+          {recipes.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContent}>
+              {FILTERS.map((f) => (
+                <TouchableOpacity
+                  key={f.key}
+                  style={[styles.chip, filter === f.key && styles.chipActive]}
+                  onPress={() => setFilter(f.key)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.chipText, filter === f.key && styles.chipTextActive]}>{f.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+
           {recipes.length === 0 ? (
             <View style={styles.emptyCard}><Text style={styles.emptyText}>No recipes found. Try refreshing.</Text></View>
+          ) : shownRecipes.length === 0 ? (
+            <View style={styles.emptyCard}><Text style={styles.emptyText}>No recipes match this filter.</Text></View>
           ) : (
-            recipes.map((recipe) => (
+            shownRecipes.map((recipe) => (
               <RecipeCard
                 key={String(recipe.id)}
                 recipe={recipe}
@@ -148,6 +169,11 @@ const styles = StyleSheet.create({
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
   sectionTitle: { ...type.heading, fontFamily: fonts.display, color: colors.ink, flex: 1 },
   sectionCount: { fontFamily: fonts.uiMedium, fontSize: 14, color: colors.inkFaint },
+  chipsContent: { gap: spacing.sm, paddingBottom: spacing.md },
+  chip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, marginRight: spacing.sm },
+  chipActive: { backgroundColor: colors.brand, borderColor: colors.brand },
+  chipText: { fontFamily: fonts.uiMedium, fontSize: 13, color: colors.inkSecondary },
+  chipTextActive: { color: colors.onBrand },
   dealCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.card, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, gap: spacing.md, ...shadow.card },
   dealInfo: { flex: 1, gap: spacing.xs },
   dealName: { fontFamily: fonts.uiMedium, fontSize: 14, color: colors.ink, lineHeight: 20 },

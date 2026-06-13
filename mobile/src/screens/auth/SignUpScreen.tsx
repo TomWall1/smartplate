@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { fonts } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
+import { useStore } from '../../context/StoreContext';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation';
 
@@ -22,6 +23,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 
 export default function SignUpScreen({ navigation }: Props) {
   const { signup } = useAuth();
+  const { selectedStore, selectedState } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -44,8 +46,10 @@ export default function SignUpScreen({ navigation }: Props) {
     setLoading(true);
     try {
       await signup(email.trim().toLowerCase(), password);
-      // RootNavigator switches to the onboarding flow automatically once the
-      // user is set — no manual navigation needed (matches LoginScreen).
+      // Guest upgrading via the in-app modal (already has store + state) →
+      // dismiss the modal. Brand-new user (no store/state) → RootNavigator
+      // swaps to the onboarding flow automatically.
+      if (selectedStore && selectedState && navigation.canGoBack()) navigation.goBack();
     } catch (err: any) {
       const message =
         err?.response?.data?.error ?? 'Sign up failed. The email may already be in use.';

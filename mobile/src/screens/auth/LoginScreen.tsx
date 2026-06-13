@@ -32,6 +32,11 @@ export default function LoginScreen() {
   const navigation = useNavigation<any>();
   const { login, googleLogin, enterGuestMode } = useAuth();
 
+  // When this screen is the auth wall, RootNavigator swaps trees on success.
+  // When it's opened as a modal over the app (a guest upgrading), there's no
+  // tree swap — so dismiss the modal ourselves.
+  const dismissIfModal = () => { if (navigation.canGoBack()) navigation.goBack(); };
+
   const [email, setEmail]             = useState('');
   const [password, setPassword]       = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -52,7 +57,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email.trim().toLowerCase(), password);
-      // Navigation resolves automatically via AuthContext — no navigate() needed
+      dismissIfModal();
     } catch (err: any) {
       const message = err?.response?.data?.error ?? 'Login failed. Please check your credentials.';
       Alert.alert('Login failed', message);
@@ -78,7 +83,7 @@ export default function LoginScreen() {
 
         if (accessToken) {
           await googleLogin(accessToken, refreshToken);
-          // AuthContext updates → RootNavigator re-renders → modal dismissed automatically
+          dismissIfModal();
         } else {
           Alert.alert('Sign-in failed', 'Could not retrieve access token. Please try again.');
         }
@@ -97,6 +102,7 @@ export default function LoginScreen() {
     try {
       const session = await signInWithGoogleNative();
       await googleLogin(session.token, session.refresh_token);
+      dismissIfModal();
     } catch (err: any) {
       if (!/cancel/i.test(err?.message ?? '')) {
         Alert.alert('Google sign-in failed', err?.message ?? 'Something went wrong.');
@@ -111,6 +117,7 @@ export default function LoginScreen() {
     try {
       const session = await signInWithAppleNative();
       await googleLogin(session.token, session.refresh_token);
+      dismissIfModal();
     } catch (err: any) {
       if (err?.code !== 'ERR_REQUEST_CANCELED' && !/cancel/i.test(err?.message ?? '')) {
         Alert.alert('Apple sign-in failed', err?.message ?? 'Something went wrong.');
@@ -122,7 +129,8 @@ export default function LoginScreen() {
 
   async function handleGuestMode() {
     await enterGuestMode();
-    // RootNavigator re-renders to show main app automatically
+    // Already a guest (in-app modal) → dismiss it; first-run → tree swaps.
+    dismissIfModal();
   }
 
   return (

@@ -7,9 +7,9 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
-  Linking,
 } from 'react-native';
 import { Image } from 'expo-image';
+import * as WebBrowser from 'expo-web-browser';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
@@ -144,7 +144,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           <TouchableOpacity
             style={styles.viewFullButton}
             activeOpacity={0.85}
-            onPress={() => Linking.openURL(recipe.sourceUrl as string)}
+            onPress={() => WebBrowser.openBrowserAsync(recipe.sourceUrl as string)}
           >
             <Text style={styles.viewFullText}>View full recipe & method</Text>
             <Ionicons name="open-outline" size={16} color="#F4EEE2" />
