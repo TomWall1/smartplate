@@ -10,8 +10,12 @@ export async function getRecipeSuggestions(state: string, store?: string | null)
   return Array.isArray(data) ? data : (data?.recipes ?? []);
 }
 
-export async function getRecipeById(id: string): Promise<Recipe> {
-  const response = await client.get<Recipe>(`/api/recipes/${id}`);
+export async function getRecipeById(id: string, store?: string | null, state?: string | null): Promise<Recipe> {
+  // Pass store + state so the backend isolates deals to the selected store
+  // (otherwise matchedDeals include other stores — e.g. IGA on a Woolworths page).
+  const response = await client.get<Recipe>(`/api/recipes/${id}`, {
+    params: { store: store ?? undefined, state: state ?? undefined },
+  });
   return response.data;
 }
 

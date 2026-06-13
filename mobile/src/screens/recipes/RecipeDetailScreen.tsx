@@ -14,6 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
 import { useRecipe, useToggleFavorite } from '../../api/hooks';
+import { useAuth } from '../../context/AuthContext';
+import { useStore } from '../../context/StoreContext';
 import DealBadge from '../../components/DealBadge';
 import LoadingState from '../../components/LoadingState';
 import ErrorState from '../../components/ErrorState';
@@ -26,9 +28,14 @@ const IMAGE_HEIGHT = 260;
 
 export default function RecipeDetailScreen({ route, navigation }: Props) {
   const { id } = route.params;
-  const { data: recipe, isLoading, isError, refetch } = useRecipe(String(id));
+  const { user } = useAuth();
+  const { selectedStore, selectedState } = useStore();
+  const store = selectedStore;
+  const state = user?.state || selectedState;
+  const { data: recipe, isLoading, isError, refetch } = useRecipe(String(id), store, state);
   const toggleFav = useToggleFavorite();
   const [favorited, setFavorited] = useState(false);
+  const [dealsOpen, setDealsOpen] = useState(false);
 
   function handleToggleFavorite() {
     toggleFav.mutate(String(id), {
@@ -107,7 +114,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
 
         {matchedDeals.length > 0 && (
           <View style={styles.savingsCard}>
-            <View style={styles.savingsRow}>
+            <TouchableOpacity style={styles.savingsRow} activeOpacity={0.8} onPress={() => setDealsOpen((v) => !v)}>
               <Ionicons name="pricetag" size={18} color="#BE6A43" />
               <Text style={styles.savingsTitle}>
                 {matchedDeals.length} deal{matchedDeals.length !== 1 ? 's' : ''} this week
@@ -117,7 +124,22 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
                   <Text style={styles.savingsBadgeText}>Save ${totalSavings.toFixed(2)}</Text>
                 </View>
               )}
-            </View>
+              <Ionicons name={dealsOpen ? 'chevron-up' : 'chevron-down'} size={16} color="#BE6A43" />
+            </TouchableOpacity>
+            {dealsOpen && (
+              <View style={styles.dealsList}>
+                {matchedDeals.map((d, i) => (
+                  <View key={i} style={styles.dealListRow}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.dealListIngredient} numberOfLines={1}>{d.ingredient}</Text>
+                      <Text style={styles.dealListName} numberOfLines={1}>{d.dealName}</Text>
+                    </View>
+                    {d.price != null && <Text style={styles.dealListPrice}>${d.price.toFixed(2)}</Text>}
+                    {(d.saving ?? 0) > 0 && <Text style={styles.dealListSave}>save ${(d.saving as number).toFixed(2)}</Text>}
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         )}
 
@@ -175,6 +197,12 @@ const styles = StyleSheet.create({
   savingsTitle: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#2A241F', flex: 1 },
   savingsBadge: { backgroundColor: '#BE6A43', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   savingsBadgeText: { color: '#ffffff', fontSize: 12, fontFamily: 'Inter_700Bold' },
+  dealsList: { marginTop: 10, borderTopWidth: 1, borderTopColor: '#E6C9B3', paddingTop: 8, gap: 8 },
+  dealListRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dealListIngredient: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#2A241F', textTransform: 'capitalize' },
+  dealListName: { fontFamily: 'Inter_400Regular', fontSize: 12, color: '#6B5F52' },
+  dealListPrice: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#2A241F' },
+  dealListSave: { fontFamily: 'Inter_500Medium', fontSize: 12, color: '#BE6A43' },
   sectionTitle: { fontSize: 18, fontFamily: fonts.display, color: '#2A241F', marginTop: 4, marginBottom: -4 },
   ingredientsList: { gap: 12 },
   ingredientItem: { gap: 4 },

@@ -13,7 +13,7 @@ import { Recipe } from '../types';
 export const keys = {
   deals: (store: string) => ['deals', store] as const,
   recipes: (state: string, store: string) => ['recipes', state, store] as const,
-  recipe: (id: string) => ['recipe', id] as const,
+  recipe: (id: string, store: string, state: string) => ['recipe', id, store, state] as const,
   favorites: () => ['favorites'] as const,
   pantry: () => ['pantry'] as const,
 };
@@ -34,10 +34,10 @@ export function useRecipes(state: string | null | undefined, store?: string | nu
   });
 }
 
-export function useRecipe(id: string) {
+export function useRecipe(id: string, store?: string | null, state?: string | null) {
   return useQuery({
-    queryKey: keys.recipe(id),
-    queryFn: () => getRecipeById(id),
+    queryKey: keys.recipe(id, store ?? '', state ?? ''),
+    queryFn: () => getRecipeById(id, store, state),
     enabled: !!id,
   });
 }
