@@ -101,17 +101,20 @@ class RecipeService {
       console.warn('RecipeService: Deal enrichment unavailable — using text matching:', enrichErr.message);
     }
 
-    // Step 1b: Find top 150 library recipes that match current deals (text + PI matching).
-    // Free tier sees 50; premium users see all 150. Limit applied at the route level.
-    const matched = await recipeMatcher.matchDeals(enrichedDeals, 150);
-    console.log(`RecipeService: Found ${matched.length} matching library recipes`);
+    // Step 1b: Score the WHOLE library against current deals and take a
+    // generous candidate pool. Selection is deferred until AFTER edge
+    // verification — the old code selected the top 150 and applied the protein
+    // guarantee here, then verification silently dropped the qualifying
+    // protein, leaving 67% of served recipes anchored on pantry items.
+    const candidates = await recipeMatcher.scoreCandidates(enrichedDeals, 400);
+    console.log(`RecipeService: Scored ${candidates.length} candidate recipes`);
 
     // Hard rule: Claude NEVER invents recipes. Every recipe served must come
-    // from the scraped library. Zero matches means something is broken
+    // from the scraped library. Zero candidates means something is broken
     // (library files missing from the deploy, corrupted data, or a matcher
     // bug) — fail loudly and keep serving the last good set from the DB
-    // rather than silently fabricating 50 recipes.
-    if (matched.length === 0) {
+    // rather than silently fabricating recipes.
+    if (candidates.length === 0) {
       throw new Error(
         'No library recipes matched current deals (library size: ' +
         `${recipeMatcher.loadLibrary().length}). Refusing to generate — ` +
@@ -120,22 +123,31 @@ class RecipeService {
       );
     }
 
-    // Step 1b-AI: validate every ingredient↔deal pairing against the
-    // persisted edge store (match_edges). Verdicts already stored are free;
-    // only never-seen pairs go to Claude, once, and are persisted forever.
-    // This replaces the old per-recipe AI matching + verification passes,
-    // which re-purchased the same judgments every week.
+    // Step 1b-AI: validate every ingredient↔deal pairing against the persisted
+    // edge store (match_edges) BEFORE selection. Verdicts already stored are
+    // free; only never-seen pairs go to Claude, once, and persist forever.
     try {
       const matchEdgeService = require('./matchEdgeService');
-      await matchEdgeService.filterRecipesByEdges(matched);
+      await matchEdgeService.filterRecipesByEdges(candidates);
     } catch (edgeErr) {
       console.warn('RecipeService: edge filtering unavailable — keeping text-matched deals:', edgeErr.message);
     }
-    const aiRefined = matched.filter(r => (r.matchedDeals || []).length > 0);
-    console.log(`RecipeService: ${aiRefined.length}/${matched.length} recipes have verified deal matches`);
+    const verified = candidates.filter(r => (r.matchedDeals || []).length > 0);
 
-    // Step 1c: Attach per-serving savings to each matched recipe's deals.
-    const matchedWithSavings = aiRefined.map(r =>
+    // Step 1b-select: hero-anchored menu. Keep only recipes that still hold a
+    // driver deal (a protein/centrepiece special in a household pack) after
+    // verification, then round-robin across hero groups for variety. Falls
+    // back to the legacy diversity selector only if nothing qualifies, so we
+    // never serve an empty set.
+    let selected = recipeMatcher.selectMenu(verified, 150);
+    if (selected.length === 0) {
+      console.warn('RecipeService: no hero-anchored recipes after verification — falling back to legacy diversity selection');
+      selected = recipeMatcher._diversifyResults(verified, 150);
+    }
+    console.log(`RecipeService: selected ${selected.length} hero-anchored recipes (of ${verified.length} verified candidates)`);
+
+    // Step 1c: Attach per-serving savings to each selected recipe's deals.
+    const matchedWithSavings = selected.map(r =>
       enrichMatchedDealsWithSavings(r, r.matchedDeals)
     );
 
@@ -235,12 +247,18 @@ class RecipeService {
   _composeWeeklyRecipe(libRecipe, i, costMap, embedMap = null) {
     const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
-    // Best deal per unique ingredient (deduped), then top 5 by saving.
+    // Per-meal saving (realistic usage of the pack) is the honest headline.
+    // The old code summed each deal's WHOLE-PACK saving, which inflated "save
+    // $X" by the cost of buying a 4 L bottle of oil. mealSaving is attached by
+    // enrichMatchedDealsWithSavings; fall back to the raw pack saving if absent.
+    const mealSaveOf = (d) => (d.savings?.mealSaving ?? d.saving ?? 0);
+
+    // Best deal per unique ingredient (deduped), then top 5 by per-meal saving.
     // Without dedup, "rice" can match 4+ rice products and the savings
     // double-count, making estimatedSaving exceed the meal's cost.
     const seenIngredients = new Set();
     const topDeals = [...(libRecipe.matchedDeals || [])]
-      .sort((a, b) => (b.saving || 0) - (a.saving || 0))
+      .sort((a, b) => mealSaveOf(b) - mealSaveOf(a))
       .filter(md => {
         if (!md.ingredient || seenIngredients.has(md.ingredient)) return false;
         seenIngredients.add(md.ingredient);
@@ -248,14 +266,15 @@ class RecipeService {
       })
       .slice(0, 5);
 
-    const estimatedSaving = +topDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2);
+    const estimatedSaving = +topDeals.reduce((sum, d) => sum + mealSaveOf(d), 0).toFixed(2);
     const dealIngredients = topDeals.map(d => d.dealName);
     // Format matches the old Claude output ("Ingredient $X.XX at Store (save $Y.YY)");
     // _filterRecipesByStore relies on the store name appearing in the string.
     const dealHighlights = topDeals.map(d => {
       const price = d.price != null ? ` $${d.price.toFixed(2)}` : '';
       const store = d.store ? ` at ${cap(d.store)}` : '';
-      const save  = d.saving ? ` (save $${d.saving.toFixed(2)})` : '';
+      const ms    = mealSaveOf(d);
+      const save  = ms ? ` (save $${ms.toFixed(2)})` : '';
       return `${cap(d.ingredient)}${price}${store}${save}`;
     });
 
@@ -317,15 +336,17 @@ class RecipeService {
           continue;
         }
 
-        const matched = await recipeMatcher.matchDeals(deals, 150);
-        if (!matched.length) {
+        const candidates = await recipeMatcher.scoreCandidates(deals, 400);
+        if (!candidates.length) {
           console.warn(`RecipeService: ${state.toUpperCase()} matched 0 recipes — skipping`);
           continue;
         }
 
-        await matchEdgeService.filterRecipesByEdges(matched);
-        const withDeals = matched.filter(r => (r.matchedDeals || []).length > 0);
-        const withSavings = withDeals.map(r => enrichMatchedDealsWithSavings(r, r.matchedDeals));
+        await matchEdgeService.filterRecipesByEdges(candidates);
+        const verified = candidates.filter(r => (r.matchedDeals || []).length > 0);
+        let selected = recipeMatcher.selectMenu(verified, 150);
+        if (selected.length === 0) selected = recipeMatcher._diversifyResults(verified, 150);
+        const withSavings = selected.map(r => enrichMatchedDealsWithSavings(r, r.matchedDeals));
 
         let costMap = new Map();
         try {
@@ -550,7 +571,7 @@ class RecipeService {
         );
         if (storeDeals.length === 0) return null;
 
-        const storeSaving = +storeDeals.reduce((sum, d) => sum + (d.saving || 0), 0).toFixed(2);
+        const storeSaving = +storeDeals.reduce((sum, d) => sum + (d.savings?.mealSaving ?? d.saving ?? 0), 0).toFixed(2);
 
         // dealHighlights are Claude strings like "Chicken $5 at Woolworths (save $2)"
         // Filter to only highlights that mention this store.

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { validateMatch, isAboveThreshold } = require('./matchingValidator');
 const { quantityRelevanceScore } = require('./quantityParser');
+const { parseDealSize } = require('./savingsCalculator');
 const { normalizeName } = require('../lib/normalize');
 
 // ── Ingredient blocklist (DB-backed negative match cache) ────────────────────
@@ -567,7 +568,7 @@ class RecipeMatcher {
    * @param {number} limit - Max recipes to return (default 150; free tier slices to 50 at the route level)
    * @returns {Array} Top N matched recipes with matchedDeals, matchScore, totalSaving, weightedScore
    */
-  async matchDeals(deals, limit = 150) {
+  async _scoreAllRecipes(deals) {
     const recipes = this.loadLibrary();
     if (recipes.length === 0) return [];
 
@@ -678,7 +679,42 @@ class RecipeMatcher {
       };
     });
 
-    return this._diversifyResults(scored, limit);
+    return scored;
+  }
+
+  /**
+   * Legacy public matcher: score the whole library then apply the old
+   * diversity selection. Retained for backward compatibility and A/B; it is
+   * also the fallback selector when the hero-anchored path qualifies nothing.
+   * The production pipeline now uses scoreCandidates() + edge verification +
+   * selectMenu() so the hero guarantee runs on VERIFIED deals.
+   */
+  async matchDeals(deals, limit = 150) {
+    return this._diversifyResults(await this._scoreAllRecipes(deals), limit);
+  }
+
+  /**
+   * Score the whole library, keep recipes with any text/PI match, attach a
+   * weighted score, and return the top `poolSize` candidates.
+   *
+   * This pool goes to edge verification BEFORE selection. The old code
+   * selected + applied the protein guarantee inside matchDeals, THEN verified
+   * — so when the edge judge dropped the qualifying protein (e.g. a marinated
+   * or spurious match), the recipe stayed in the list anchored on whatever
+   * pantry scrap survived (the "kebabs because of olive oil" failure). Scoring
+   * a generous pool and deferring selection fixes that inversion.
+   */
+  async scoreCandidates(deals, poolSize = 400) {
+    const scored = (await this._scoreAllRecipes(deals)).filter(r => r.matchScore > 0);
+    for (const r of scored) {
+      r.weightedScore = +this._calculateRecipeScore(r).toFixed(2);
+    }
+    scored.sort((a, b) =>
+      b.weightedScore - a.weightedScore
+      || b.matchScore - a.matchScore
+      || b.totalSaving - a.totalSaving
+    );
+    return scored.slice(0, poolSize);
   }
 
   /**
@@ -721,6 +757,142 @@ class RecipeMatcher {
       return true;
     }
     return false;
+  }
+
+  // ── Hero-anchored selection (Stage 0 / 3 / 4) ────────────────────────────────
+
+  /**
+   * Per-deal version of the protein test in _hasProteinMatch: true when this
+   * matched deal's RECIPE INGREDIENT is a core protein. PI meat/seafood is the
+   * fast path; the text path requires a protein keyword with no compound
+   * disqualifier (so "fish sauce" / "chicken stock" never count).
+   */
+  _isProteinDeal(deal) {
+    if (deal.productCategory === 'meat' || deal.productCategory === 'seafood') return true;
+    const ing = (deal.ingredient || '').toLowerCase().trim();
+    if (ing.length < 2) return false;
+    const words = ing.split(/\s+/).map(w => this._singularise(w));
+    if (!PROTEIN_KEYWORDS.some(p => words.includes(p))) return false;
+    if (words.some(w => PROTEIN_COMPOUND_DISQUALIFIERS.has(w))) return false;
+    return true;
+  }
+
+  /** Centrepiece-but-not-protein categories that CAN anchor a meal on a strong special. */
+  _isCentrepieceDeal(deal) {
+    const c = deal.productCategory;
+    return c === 'vegetables' || c === 'fruit' || c === 'eggs' || c === 'dairy';
+  }
+
+  /**
+   * Reject catering / bulk pack sizes a normal household wouldn't buy for a
+   * single meal (the "4 litres of olive oil" problem). Unknown/unparseable
+   * sizes pass — we never penalise a deal just because we couldn't read its pack.
+   */
+  _isHouseholdPack(deal) {
+    const size = parseDealSize(deal.dealName);
+    if (!size) return true;
+    const cat = deal.productCategory;
+    if (size.unit === 'ml' && size.amount > 3000) return false;                       // > 3 L liquid
+    if (size.unit === 'g') {
+      if ((cat === 'meat' || cat === 'seafood') && size.amount > 3000) return false;  // > 3 kg meat
+      if (size.amount > 5000) return false;                                           // > 5 kg anything
+    }
+    return true;
+  }
+
+  /**
+   * A "driver" is a deal a shopper would actually change their dinner plan
+   * for: a protein hero, or a non-protein centrepiece on a STRONG special, in
+   * a realistic pack. Pantry items (oil, condiments, spices, grains) never
+   * drive — they were the reason 67% of served recipes had no real centrepiece
+   * on special and 77% of claimed savings came from oil/rice/butter/cheese.
+   */
+  _isDriverDeal(deal) {
+    if (!this._isHouseholdPack(deal)) return false;
+    const pct  = deal.discountPercentage ?? null;
+    const save = deal.saving ?? null;
+    if (this._isProteinDeal(deal)) {
+      // The protein itself is the draw — accept on a modest discount, or when
+      // discount data is unavailable (many deals carry no originalPrice).
+      if (save == null && pct == null) return true;
+      return (pct != null && pct >= 5) || (save != null && save >= 1);
+    }
+    if (this._isCentrepieceDeal(deal)) {
+      // A non-protein centrepiece must be a strong special to drive a choice
+      // (mushrooms or pumpkin at half price), otherwise it's just a side.
+      return (pct != null && pct >= 25) || (save != null && save >= 3);
+    }
+    return false;
+  }
+
+  /**
+   * Post-verification menu selection. Replaces _diversifyResults for the
+   * hero-anchored pipeline:
+   *   1. recompute match counts / savings on the VERIFIED deals
+   *   2. keep only recipes that still hold a driver deal (Stage 3 gate) — this
+   *      is what kills "kebabs because of olive oil"
+   *   3. round-robin draft across hero groups so no single protein dominates
+   *      (Stage 4) — directly answers "don't return 150 chicken dishes"
+   */
+  selectMenu(candidates, limit = 150) {
+    const qualified = [];
+    for (const r of candidates) {
+      r.matchedDeals = r.matchedDeals || [];
+      r.matchScore   = r.matchedDeals.length;
+      r.totalSaving  = +r.matchedDeals.reduce((s, d) => s + (d.saving || 0), 0).toFixed(2);
+
+      const drivers = r.matchedDeals.filter(d => this._isDriverDeal(d));
+      if (drivers.length === 0) continue;
+
+      let anchor = null, bestWeight = -1;
+      for (const d of drivers) {
+        const w = this._getIngredientWeight(d);
+        if (w > bestWeight) { bestWeight = w; anchor = d; }
+      }
+      const proteinBucket = this._getProteinBucket(r);
+      const heroGroup = proteinBucket !== 'other'
+        ? proteinBucket
+        : (this._cleanIngredientName(anchor?.ingredient || '') || 'other');
+
+      r.weightedScore    = +this._calculateRecipeScore(r).toFixed(2);
+      r.anchorIngredient = anchor ? anchor.ingredient : null;
+      r.proteinBucket    = proteinBucket;
+      r.heroGroup        = heroGroup;
+      qualified.push(r);
+    }
+
+    qualified.sort((a, b) =>
+      b.weightedScore - a.weightedScore
+      || b.matchScore - a.matchScore
+      || b.totalSaving - a.totalSaving
+    );
+
+    // Group by hero. Insertion order follows the score sort, so the strongest
+    // group leads — the top of the menu is "best chicken, best beef, best
+    // seafood, best lamb, …" rather than 40 chicken dishes.
+    const groups = new Map();
+    for (const r of qualified) {
+      if (!groups.has(r.heroGroup)) groups.set(r.heroGroup, []);
+      groups.get(r.heroGroup).push(r);
+    }
+
+    // Round-robin: take the Nth-best of each group per round. A hero with 100
+    // matching dishes contributes only one per round, so the menu stays varied.
+    const order  = [...groups.keys()];
+    const result = [];
+    for (let round = 0; result.length < limit; round++) {
+      let placed = false;
+      for (const g of order) {
+        const q = groups.get(g);
+        if (q.length > round) {
+          result.push(q[round]);
+          placed = true;
+          if (result.length >= limit) break;
+        }
+      }
+      if (!placed) break;
+    }
+    return result;
   }
 }
 
