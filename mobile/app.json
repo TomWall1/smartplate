@@ -13,7 +13,8 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.smartplate.dealstodish"
+      "bundleIdentifier": "com.smartplate.dealstodish",
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +30,14 @@
     "plugins": [
       "expo-secure-store",
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.TODO_IOS_CLIENT_ID"
+        }
+      ]
     ],
     "extra": {
       "apiBaseUrl": "https://deals-to-dish-api.onrender.com"

@@ -19,6 +19,12 @@ import * as AuthSession from 'expo-auth-session';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import { SUPABASE_URL } from '../../api/auth';
+import {
+  isNativeAuthAvailable,
+  signInWithGoogleNative,
+  signInWithAppleNative,
+  isAppleAvailable,
+} from '../../api/nativeAuth';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -31,6 +37,12 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading]         = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading]   = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
+
+  useEffect(() => {
+    isAppleAvailable().then(setAppleAvailable).catch(() => {});
+  }, []);
 
   async function handleLogin() {
     if (!email.trim() || !password) {
@@ -79,6 +91,35 @@ export default function LoginScreen() {
     }
   }
 
+  // Native Google (dev build only) — Expo Go uses handleGoogleSignIn instead.
+  async function handleNativeGoogle() {
+    setGoogleLoading(true);
+    try {
+      const session = await signInWithGoogleNative();
+      await googleLogin(session.token, session.refresh_token);
+    } catch (err: any) {
+      if (!/cancel/i.test(err?.message ?? '')) {
+        Alert.alert('Google sign-in failed', err?.message ?? 'Something went wrong.');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
+
+  async function handleApple() {
+    setAppleLoading(true);
+    try {
+      const session = await signInWithAppleNative();
+      await googleLogin(session.token, session.refresh_token);
+    } catch (err: any) {
+      if (err?.code !== 'ERR_REQUEST_CANCELED' && !/cancel/i.test(err?.message ?? '')) {
+        Alert.alert('Apple sign-in failed', err?.message ?? 'Something went wrong.');
+      }
+    } finally {
+      setAppleLoading(false);
+    }
+  }
+
   async function handleGuestMode() {
     await enterGuestMode();
     // RootNavigator re-renders to show main app automatically
@@ -100,8 +141,8 @@ export default function LoginScreen() {
           {/* Google Sign In */}
           <TouchableOpacity
             style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
-            onPress={handleGoogleSignIn}
-            disabled={googleLoading || loading}
+            onPress={isNativeAuthAvailable ? handleNativeGoogle : handleGoogleSignIn}
+            disabled={googleLoading || appleLoading || loading}
             activeOpacity={0.85}
           >
             {googleLoading ? (
@@ -113,6 +154,25 @@ export default function LoginScreen() {
               </>
             )}
           </TouchableOpacity>
+
+          {/* Apple Sign In — only in a dev build on iOS (hidden in Expo Go) */}
+          {appleAvailable && (
+            <TouchableOpacity
+              style={[styles.appleButton, appleLoading && styles.buttonDisabled]}
+              onPress={handleApple}
+              disabled={googleLoading || appleLoading || loading}
+              activeOpacity={0.85}
+            >
+              {appleLoading ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <>
+                  <Ionicons name="logo-apple" size={18} color="#ffffff" />
+                  <Text style={styles.appleButtonText}>Continue with Apple</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
 
           {/* Divider */}
           <View style={styles.dividerRow}>
@@ -211,6 +271,8 @@ const styles = StyleSheet.create({
   cardTitle: { fontFamily: fonts.display, fontSize: 22, color: '#2A241F', marginBottom: 4 },
   googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1.5, borderColor: '#E2D8C6', borderRadius: 12, paddingVertical: 13, backgroundColor: '#ffffff' },
   googleButtonText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#2A241F' },
+  appleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12, paddingVertical: 13, backgroundColor: '#000000' },
+  appleButtonText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#ffffff' },
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#E2D8C6' },
   dividerText: { fontSize: 12, color: '#6B5F52' },
