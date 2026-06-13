@@ -777,10 +777,21 @@ class RecipeMatcher {
     return true;
   }
 
-  /** Centrepiece-but-not-protein categories that CAN anchor a meal on a strong special. */
+  /**
+   * Non-protein categories that CAN anchor a meal on a strong special:
+   * substantial vegetables (mushroom, pumpkin, broccoli…) and eggs.
+   * Deliberately EXCLUDES dairy and fruit (ingredients, not meal heroes — a
+   * cheese or apple special doesn't drive a dinner choice) and starchy
+   * staples (potato/sweet potato are cheap sides, and processed forms like
+   * fries/wedges slip through PI matching as "potato").
+   */
   _isCentrepieceDeal(deal) {
     const c = deal.productCategory;
-    return c === 'vegetables' || c === 'fruit' || c === 'eggs' || c === 'dairy';
+    if (c === 'eggs') return true;
+    if (c !== 'vegetables') return false;
+    const text = `${deal.ingredient || ''} ${deal.dealName || ''}`.toLowerCase();
+    if (/\b(sweet\s+)?potato(es)?\b/.test(text)) return false; // starchy staple / fries / wedges
+    return true;
   }
 
   /**

@@ -25,8 +25,12 @@ ok(matcher._isDriverDeal(deal({ dealName: 'Olive Oil 4L', ingredient: 'olive oil
   'olive oil (pantry, 4L) is NOT a driver');
 ok(matcher._isDriverDeal(deal({ dealName: 'SunRice White Rice 1kg', ingredient: 'rice', cat: 'grains', orig: 4, price: 2.5 })) === false,
   'rice (pantry) is NOT a driver');
-ok(matcher._isDriverDeal(deal({ dealName: 'Tasty Cheese Block 500g', ingredient: 'tasty cheese', cat: 'dairy', orig: 6, price: 5.5 })) === false,
-  'cheese with weak discount is NOT a driver');
+ok(matcher._isDriverDeal(deal({ dealName: 'Tasty Cheese Block 500g', ingredient: 'tasty cheese', cat: 'dairy', orig: 12, price: 6, pct: 50 })) === false,
+  'cheese (dairy) is NOT a driver even at 50% off');
+ok(matcher._isDriverDeal(deal({ dealName: 'Brushed Potatoes 2kg', ingredient: 'potato', cat: 'vegetables', orig: 6, price: 3, pct: 50 })) === false,
+  'potatoes (starchy staple) are NOT a driver even at 50% off');
+ok(matcher._isDriverDeal(deal({ dealName: 'Potato Wedges 750g', ingredient: 'potato', cat: 'vegetables', orig: 5, price: 2.5, pct: 50 })) === false,
+  'processed potato (wedges) is NOT a driver');
 ok(matcher._isDriverDeal(deal({ dealName: 'RSPCA Chicken Thigh Fillets 1kg', ingredient: 'chicken thigh', cat: 'meat', orig: 13, price: 9, pct: 30 })) === true,
   'discounted chicken thigh (1kg) IS a driver');
 ok(matcher._isDriverDeal(deal({ dealName: 'Beef Mince Bulk 5kg', ingredient: 'beef mince', cat: 'meat', orig: 50, price: 35, pct: 30 })) === false,
