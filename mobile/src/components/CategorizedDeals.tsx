@@ -19,10 +19,10 @@ const ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
   Other: 'pricetags-outline',
 };
 
-function DealRow({ deal }: { deal: Deal }) {
+function DealRow({ deal, onPress }: { deal: Deal; onPress?: () => void }) {
   const saving = deal.originalPrice && deal.price ? +(deal.originalPrice - deal.price).toFixed(2) : 0;
   return (
-    <View style={styles.dealRow}>
+    <TouchableOpacity style={styles.dealRow} activeOpacity={0.7} onPress={onPress} disabled={!onPress}>
       <View style={{ flex: 1, gap: spacing.xs }}>
         <Text style={styles.dealName} numberOfLines={2}>{deal.name}</Text>
         {saving > 0 && (
@@ -30,11 +30,12 @@ function DealRow({ deal }: { deal: Deal }) {
         )}
       </View>
       <Text style={styles.dealPrice}>${deal.price.toFixed(2)}</Text>
-    </View>
+      {onPress && <Ionicons name="chevron-forward" size={16} color={colors.inkFaint} />}
+    </TouchableOpacity>
   );
 }
 
-function CategoryCard({ name, deals }: { name: string; deals: Deal[] }) {
+function CategoryCard({ name, deals, onDealPress }: { name: string; deals: Deal[]; onDealPress?: (deal: Deal) => void }) {
   const [open, setOpen] = useState(false); // all collapsed by default
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -52,14 +53,16 @@ function CategoryCard({ name, deals }: { name: string; deals: Deal[] }) {
       </TouchableOpacity>
       {open && (
         <View style={styles.body}>
-          {deals.map((d, i) => <DealRow key={`${d.name}-${i}`} deal={d} />)}
+          {deals.map((d, i) => (
+            <DealRow key={`${d.name}-${i}`} deal={d} onPress={onDealPress ? () => onDealPress(d) : undefined} />
+          ))}
         </View>
       )}
     </View>
   );
 }
 
-export default function CategorizedDeals({ deals }: { deals: Deal[] }) {
+export default function CategorizedDeals({ deals, onDealPress }: { deals: Deal[]; onDealPress?: (deal: Deal) => void }) {
   const groups = groupDealsByCategory(deals);
   if (groups.length === 0) {
     return (
@@ -68,7 +71,7 @@ export default function CategorizedDeals({ deals }: { deals: Deal[] }) {
   }
   return (
     <View style={{ gap: spacing.md }}>
-      {groups.map((g) => <CategoryCard key={g.name} name={g.name} deals={g.deals} />)}
+      {groups.map((g) => <CategoryCard key={g.name} name={g.name} deals={g.deals} onDealPress={onDealPress} />)}
     </View>
   );
 }

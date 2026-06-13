@@ -26,6 +26,7 @@ import FavouritesScreen from '../screens/FavouritesScreen';
 import PantryInputScreen from '../screens/pantry/PantryInputScreen';
 import PantryResultsScreen from '../screens/pantry/PantryResultsScreen';
 import AccountScreen from '../screens/AccountScreen';
+import DealRecipesScreen from '../screens/DealRecipesScreen';
 
 import { PantryMatchResult } from '../types';
 
@@ -54,6 +55,7 @@ export type RootStackParamList = {
 export type StoreStackParamList = {
   Store: undefined;
   StoreRecipeDetail: { id: string; title: string };
+  DealRecipes: { dealName: string };
 };
 
 export type RecipesStackParamList = {
@@ -110,6 +112,11 @@ function StoreNavigator() {
         name="StoreRecipeDetail"
         component={RecipeDetailScreen as any}
         options={({ route }) => ({ title: route.params.title })}
+      />
+      <StoreStack.Screen
+        name="DealRecipes"
+        component={DealRecipesScreen}
+        options={{ title: 'Recipes with this deal' }}
       />
     </StoreStack.Navigator>
   );

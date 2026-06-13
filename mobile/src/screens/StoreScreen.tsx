@@ -147,7 +147,10 @@ export default function StoreScreen() {
           <Text style={styles.sectionTitle}>Deals this week</Text>
           <Text style={styles.sectionCount}>{deals.length}</Text>
         </View>
-        <CategorizedDeals deals={deals} />
+        <CategorizedDeals
+          deals={deals}
+          onDealPress={(d) => navigation.navigate('DealRecipes', { dealName: d.name })}
+        />
       </View>
 
       <View style={{ height: spacing.xxl }} />
