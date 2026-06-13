@@ -60,9 +60,10 @@ export default function LoginScreen() {
         const hash = result.url.split('#')[1] ?? '';
         const params = new URLSearchParams(hash);
         const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token') ?? undefined;
 
         if (accessToken) {
-          await googleLogin(accessToken);
+          await googleLogin(accessToken, refreshToken);
           // AuthContext updates → RootNavigator re-renders → modal dismissed automatically
         } else {
           Alert.alert('Sign-in failed', 'Could not retrieve access token. Please try again.');

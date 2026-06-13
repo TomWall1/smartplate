@@ -20,6 +20,7 @@ router.post('/signup', async (req, res) => {
 
   res.json({
     token: session.access_token,
+    refresh_token: session.refresh_token,
     user: {
       id: data.user.id,
       email: data.user.email,
@@ -49,12 +50,31 @@ router.post('/login', async (req, res) => {
 
   res.json({
     token: session.access_token,
+    refresh_token: session.refresh_token,
     user: profile ?? {
       id: user.id,
       email: user.email,
       is_premium: false,
       state: null,
     },
+  });
+});
+
+// ── POST /api/auth/refresh ────────────────────────────────────────────────────
+// Exchange a Supabase refresh token for a fresh access token. Lets clients
+// (esp. mobile) keep a session alive past the ~1h access-token expiry instead
+// of being force-logged-out. Keeps the Supabase interaction server-side.
+router.post('/refresh', async (req, res) => {
+  const { refresh_token } = req.body;
+  if (!refresh_token) return res.status(400).json({ error: 'refresh_token is required' });
+  if (!supabase) return res.status(503).json({ error: 'Auth service not configured' });
+
+  const { data, error } = await supabase.auth.refreshSession({ refresh_token });
+  if (error || !data?.session) return res.status(401).json({ error: error?.message ?? 'Could not refresh session' });
+
+  res.json({
+    token: data.session.access_token,
+    refresh_token: data.session.refresh_token,
   });
 });
 

@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { User } from '../types';
 import { login as apiLogin, signup as apiSignup } from '../api/auth';
 import { getProfile } from '../api/users';
-import { TOKEN_KEY, registerUnauthorizedHandler } from '../api/client';
+import { TOKEN_KEY, REFRESH_KEY, registerUnauthorizedHandler } from '../api/client';
 
 const GUEST_KEY = 'smartplate-guest-mode';
 
@@ -14,7 +14,7 @@ interface AuthContextValue {
   guestMode: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
-  googleLogin: (accessToken: string) => Promise<void>;
+  googleLogin: (accessToken: string, refreshToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   enterGuestMode: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await SecureStore.deleteItemAsync(REFRESH_KEY);
     await SecureStore.deleteItemAsync(GUEST_KEY);
     setToken(null);
     setUser(null);
@@ -61,33 +62,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     restoreSession();
   }, []);
 
+  const persistTokens = useCallback(async (accessToken: string, refreshToken?: string) => {
+    await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+    if (refreshToken) await SecureStore.setItemAsync(REFRESH_KEY, refreshToken);
+    await SecureStore.deleteItemAsync(GUEST_KEY);
+  }, []);
+
   const login = useCallback(async (email: string, password: string) => {
     const data = await apiLogin(email, password);
-    await SecureStore.setItemAsync(TOKEN_KEY, data.token);
-    await SecureStore.deleteItemAsync(GUEST_KEY);
+    await persistTokens(data.token, data.refresh_token);
     setToken(data.token);
     setUser(data.user);
     setGuestMode(false);
-  }, []);
+  }, [persistTokens]);
 
   const signup = useCallback(async (email: string, password: string) => {
     const data = await apiSignup(email, password);
-    await SecureStore.setItemAsync(TOKEN_KEY, data.token);
-    await SecureStore.deleteItemAsync(GUEST_KEY);
+    await persistTokens(data.token, data.refresh_token);
     setToken(data.token);
     setUser(data.user);
     setGuestMode(false);
-  }, []);
+  }, [persistTokens]);
 
-  // Called after a successful Google OAuth flow — token is the Supabase JWT
-  const googleLogin = useCallback(async (accessToken: string) => {
-    await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
-    await SecureStore.deleteItemAsync(GUEST_KEY);
+  // Called after a successful Google OAuth flow — tokens come from the Supabase
+  // redirect hash. Store the refresh token too so the session survives access-
+  // token expiry (the client auto-refreshes on 401).
+  const googleLogin = useCallback(async (accessToken: string, refreshToken?: string) => {
+    await persistTokens(accessToken, refreshToken);
     setToken(accessToken);
     const profile = await getProfile();
     setUser(profile);
     setGuestMode(false);
-  }, []);
+  }, [persistTokens]);
 
   const enterGuestMode = useCallback(async () => {
     await SecureStore.setItemAsync(GUEST_KEY, 'true');
