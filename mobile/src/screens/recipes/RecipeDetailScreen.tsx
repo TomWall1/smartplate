@@ -57,7 +57,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           <Ionicons
             name={favorited ? 'heart' : 'heart-outline'}
             size={24}
-            color={favorited ? '#D4667A' : '#5C4A35'}
+            color={favorited ? '#D4667A' : '#2A241F'}
           />
         </TouchableOpacity>
       ),
@@ -97,25 +97,25 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
         <View style={styles.chips}>
           {recipe.prep_time > 0 && (
             <View style={styles.chip}>
-              <Ionicons name="time-outline" size={14} color="#7DB87A" />
+              <Ionicons name="time-outline" size={14} color="#36453B" />
               <Text style={styles.chipText}>{recipe.prep_time} min</Text>
             </View>
           )}
           {recipe.servings > 0 && (
             <View style={styles.chip}>
-              <Ionicons name="people-outline" size={14} color="#7DB87A" />
+              <Ionicons name="people-outline" size={14} color="#36453B" />
               <Text style={styles.chipText}>{recipe.servings} servings</Text>
             </View>
           )}
           {recipe.cuisine ? (
             <View style={styles.chip}>
-              <Ionicons name="restaurant-outline" size={14} color="#7DB87A" />
+              <Ionicons name="restaurant-outline" size={14} color="#36453B" />
               <Text style={styles.chipText}>{recipe.cuisine}</Text>
             </View>
           ) : null}
           {recipe.meal_type ? (
             <View style={styles.chip}>
-              <Ionicons name="sunny-outline" size={14} color="#7DB87A" />
+              <Ionicons name="sunny-outline" size={14} color="#36453B" />
               <Text style={styles.chipText}>{recipe.meal_type}</Text>
             </View>
           ) : null}
@@ -139,7 +139,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
         {recipe.matchedDeals.length > 0 && (
           <View style={styles.savingsCard}>
             <View style={styles.savingsRow}>
-              <Ionicons name="cart" size={18} color="#F4A94E" />
+              <Ionicons name="cart" size={18} color="#BE6A43" />
               <Text style={styles.savingsTitle}>
                 {recipe.matchedDeals.length} deal{recipe.matchedDeals.length !== 1 ? 's' : ''} available
               </Text>
@@ -198,7 +198,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: '#FDFAF5',
+    backgroundColor: '#F4EEE2',
   },
   heroImage: {
     width: SCREEN_WIDTH,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#5C4A35',
+    color: '#2A241F',
     lineHeight: 32,
   },
   chips: {
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#D6EDD4',
+    backgroundColor: '#DCE4D6',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#3D7A3A',
+    color: '#36453B',
   },
   tagsRow: {
     flexDirection: 'row',
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 15,
-    color: '#5C4A35',
+    color: '#2A241F',
     lineHeight: 23,
   },
   savingsCard: {
@@ -273,11 +273,11 @@ const styles = StyleSheet.create({
   savingsTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
     flex: 1,
   },
   savingsBadge: {
-    backgroundColor: '#F4A94E',
+    backgroundColor: '#BE6A43',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
     marginTop: 4,
     marginBottom: -4,
   },
@@ -309,13 +309,13 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: '#7DB87A',
+    backgroundColor: '#36453B',
     marginTop: 6,
     flexShrink: 0,
   },
   ingredientName: {
     fontSize: 15,
-    color: '#5C4A35',
+    color: '#2A241F',
     lineHeight: 22,
     flex: 1,
   },
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#7DB87A',
+    backgroundColor: '#36453B',
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   stepText: {
     fontSize: 15,
-    color: '#5C4A35',
+    color: '#2A241F',
     lineHeight: 23,
     flex: 1,
   },

@@ -72,34 +72,34 @@ export default function ProfileScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
-            <Ionicons name="person-outline" size={36} color="#a09080" />
+            <Ionicons name="person-outline" size={36} color="#6B5F52" />
           </View>
           <Text style={styles.email}>Guest</Text>
-          <Text style={{ fontSize: 13, color: '#a09080', marginTop: 2 }}>Browse free recipes below</Text>
+          <Text style={{ fontSize: 13, color: '#6B5F52', marginTop: 2 }}>Browse free recipes below</Text>
         </View>
 
         <View style={styles.section}>
-          <View style={[styles.upgradeCard, { borderColor: '#D6EDD4', backgroundColor: '#f6fff5' }]}>
+          <View style={[styles.upgradeCard, { borderColor: '#DCE4D6', backgroundColor: '#f6fff5' }]}>
             <View style={styles.upgradeIconRow}>
-              <Ionicons name="person-circle-outline" size={24} color="#7DB87A" />
+              <Ionicons name="person-circle-outline" size={24} color="#36453B" />
               <Text style={styles.upgradeTitle}>Sign in to unlock more</Text>
             </View>
             <Text style={styles.upgradeText}>
               Create a free account to save your state, favourite recipes, and access premium features.
             </Text>
             <TouchableOpacity
-              style={[styles.upgradeButton, { backgroundColor: '#7DB87A' }]}
+              style={[styles.upgradeButton, { backgroundColor: '#36453B' }]}
               onPress={() => navigation.navigate('Login')}
               activeOpacity={0.85}
             >
               <Text style={styles.upgradeButtonText}>Sign in</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.upgradeButton, { backgroundColor: '#ffffff', borderWidth: 1.5, borderColor: '#7DB87A', marginTop: -4 }]}
+              style={[styles.upgradeButton, { backgroundColor: '#ffffff', borderWidth: 1.5, borderColor: '#36453B', marginTop: -4 }]}
               onPress={() => navigation.navigate('SignUp')}
               activeOpacity={0.85}
             >
-              <Text style={[styles.upgradeButtonText, { color: '#7DB87A' }]}>Create account</Text>
+              <Text style={[styles.upgradeButtonText, { color: '#36453B' }]}>Create account</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -107,7 +107,7 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <View style={styles.upgradeCard}>
             <View style={styles.upgradeIconRow}>
-              <Ionicons name="star" size={24} color="#F4A94E" />
+              <Ionicons name="star" size={24} color="#BE6A43" />
               <Text style={styles.upgradeTitle}>Unlock Premium</Text>
             </View>
             <Text style={styles.upgradeText}>
@@ -127,7 +127,7 @@ export default function ProfileScreen() {
       {/* Avatar + name */}
       <View style={styles.profileHeader}>
         <View style={styles.avatar}>
-          <Ionicons name="person" size={36} color="#7DB87A" />
+          <Ionicons name="person" size={36} color="#36453B" />
         </View>
         <Text style={styles.email}>{user?.email}</Text>
         {isPremium && (
@@ -147,13 +147,13 @@ export default function ProfileScreen() {
           activeOpacity={0.8}
         >
           <View style={styles.stateRowLeft}>
-            <Ionicons name="location-outline" size={18} color="#7DB87A" />
+            <Ionicons name="location-outline" size={18} color="#36453B" />
             <Text style={styles.stateText}>{currentStateLabel}</Text>
           </View>
           <Ionicons
             name={showStatePicker ? 'chevron-up' : 'chevron-down'}
             size={18}
-            color="#a09080"
+            color="#6B5F52"
           />
         </TouchableOpacity>
 
@@ -170,14 +170,14 @@ export default function ProfileScreen() {
                   activeOpacity={0.8}
                 >
                   {savingState && isActive ? (
-                    <ActivityIndicator size="small" color="#7DB87A" />
+                    <ActivityIndicator size="small" color="#36453B" />
                   ) : (
                     <Text style={[styles.stateOptionText, isActive && styles.stateOptionTextActive]}>
                       {state.label}
                     </Text>
                   )}
                   {isActive && !savingState && (
-                    <Ionicons name="checkmark" size={16} color="#3D7A3A" />
+                    <Ionicons name="checkmark" size={16} color="#36453B" />
                   )}
                 </TouchableOpacity>
               );
@@ -191,7 +191,7 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <View style={styles.upgradeCard}>
             <View style={styles.upgradeIconRow}>
-              <Ionicons name="star" size={24} color="#F4A94E" />
+              <Ionicons name="star" size={24} color="#BE6A43" />
               <Text style={styles.upgradeTitle}>Unlock Premium</Text>
             </View>
             <Text style={styles.upgradeText}>
@@ -209,13 +209,13 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Account</Text>
         <View style={styles.accountCard}>
           <View style={styles.accountRow}>
-            <Ionicons name="mail-outline" size={18} color="#a09080" />
+            <Ionicons name="mail-outline" size={18} color="#6B5F52" />
             <Text style={styles.accountLabel}>Email</Text>
             <Text style={styles.accountValue} numberOfLines={1}>{user?.email}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.accountRow}>
-            <Ionicons name="shield-checkmark-outline" size={18} color="#a09080" />
+            <Ionicons name="shield-checkmark-outline" size={18} color="#6B5F52" />
             <Text style={styles.accountLabel}>Plan</Text>
             <Text style={styles.accountValue}>{isPremium ? 'Premium' : 'Free'}</Text>
           </View>
@@ -245,7 +245,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: '#FDFAF5',
+    backgroundColor: '#F4EEE2',
   },
   container: {
     padding: 20,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#D6EDD4',
+    backgroundColor: '#DCE4D6',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 4,
@@ -269,13 +269,13 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   premiumBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#F4A94E',
+    backgroundColor: '#BE6A43',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 999,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     paddingHorizontal: 4,
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
   },
   stateRowLeft: {
     flexDirection: 'row',
@@ -314,13 +314,13 @@ const styles = StyleSheet.create({
   stateText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   statePicker: {
     backgroundColor: '#ffffff',
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     overflow: 'hidden',
   },
   stateOption: {
@@ -333,16 +333,16 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0e8e0',
   },
   stateOptionActive: {
-    backgroundColor: '#D6EDD4',
+    backgroundColor: '#DCE4D6',
   },
   stateOptionText: {
     fontSize: 15,
-    color: '#5C4A35',
+    color: '#2A241F',
     fontWeight: '500',
   },
   stateOptionTextActive: {
     fontWeight: '700',
-    color: '#3D7A3A',
+    color: '#36453B',
   },
   upgradeCard: {
     backgroundColor: '#FFF8EE',
@@ -360,15 +360,15 @@ const styles = StyleSheet.create({
   upgradeTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   upgradeText: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
     lineHeight: 21,
   },
   upgradeButton: {
-    backgroundColor: '#F4A94E',
+    backgroundColor: '#BE6A43',
     paddingVertical: 13,
     borderRadius: 12,
     alignItems: 'center',
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     overflow: 'hidden',
   },
   accountRow: {
@@ -394,13 +394,13 @@ const styles = StyleSheet.create({
   },
   accountLabel: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
     flex: 1,
   },
   accountValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#5C4A35',
+    color: '#2A241F',
     maxWidth: 200,
   },
   divider: {

@@ -9,15 +9,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { PantryStackParamList } from '../../navigation';
+import { PremiumStackParamList } from '../../navigation';
 import { PantryMatchResult } from '../../types';
 import DealBadge from '../../components/DealBadge';
 
-type Props = NativeStackScreenProps<PantryStackParamList, 'PantryResults'>;
+type Props = NativeStackScreenProps<PremiumStackParamList, 'PantryResults'>;
 
 function CoverageBar({ percent }: { percent: number }) {
   const clamped = Math.min(100, Math.max(0, percent));
-  const color = clamped >= 75 ? '#7DB87A' : clamped >= 50 ? '#F4A94E' : '#D4667A';
+  const color = clamped >= 75 ? '#36453B' : clamped >= 50 ? '#BE6A43' : '#D4667A';
   return (
     <View style={styles.barTrack}>
       <View style={[styles.barFill, { width: `${clamped}%` as any, backgroundColor: color }]} />
@@ -40,11 +40,11 @@ function ResultCard({ result, onPress }: { result: PantryMatchResult; onPress: (
           <Text style={styles.cardTitle} numberOfLines={2}>{recipe.title}</Text>
           <View style={[
             styles.coverageBadge,
-            { backgroundColor: coveragePercent >= 75 ? '#D6EDD4' : coveragePercent >= 50 ? '#FFF3E0' : '#FDECEA' }
+            { backgroundColor: coveragePercent >= 75 ? '#DCE4D6' : coveragePercent >= 50 ? '#FFF3E0' : '#FDECEA' }
           ]}>
             <Text style={[
               styles.coverageBadgeText,
-              { color: coveragePercent >= 75 ? '#3D7A3A' : coveragePercent >= 50 ? '#c07820' : '#b03060' }
+              { color: coveragePercent >= 75 ? '#36453B' : coveragePercent >= 50 ? '#c07820' : '#b03060' }
             ]}>
               {Math.round(coveragePercent)}%
             </Text>
@@ -60,7 +60,7 @@ function ResultCard({ result, onPress }: { result: PantryMatchResult; onPress: (
 
         {recipe.prep_time > 0 && (
           <View style={styles.metaRow}>
-            <Ionicons name="time-outline" size={13} color="#a09080" />
+            <Ionicons name="time-outline" size={13} color="#6B5F52" />
             <Text style={styles.metaText}>{recipe.prep_time} min</Text>
           </View>
         )}
@@ -89,7 +89,7 @@ export default function PantryResultsScreen({ route, navigation }: Props) {
   if (!results || results.length === 0) {
     return (
       <View style={styles.empty}>
-        <Ionicons name="search-outline" size={48} color="#D6EDD4" />
+        <Ionicons name="search-outline" size={48} color="#DCE4D6" />
         <Text style={styles.emptyTitle}>No matches found</Text>
         <Text style={styles.emptyText}>
           Try adding more pantry items or enabling pantry staples.
@@ -132,18 +132,18 @@ export default function PantryResultsScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDFAF5',
+    backgroundColor: '#F4EEE2',
   },
   resultsSummary: {
     paddingHorizontal: 20,
     paddingVertical: 14,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e8e0d4',
+    borderBottomColor: '#E2D8C6',
   },
   resultsSummaryText: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
     fontWeight: '500',
   },
   list: {
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     overflow: 'hidden',
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     shadowColor: 'rgba(92, 74, 53, 0.08)',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
     lineHeight: 22,
   },
   coverageBadge: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   },
   barTrack: {
     height: 6,
-    backgroundColor: '#e8e0d4',
+    backgroundColor: '#E2D8C6',
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   coverageText: {
     fontSize: 12,
-    color: '#a09080',
+    color: '#6B5F52',
   },
   metaRow: {
     flexDirection: 'row',
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: '#a09080',
+    color: '#6B5F52',
   },
   dealsSection: {
     gap: 6,
@@ -229,16 +229,16 @@ const styles = StyleSheet.create({
   dealsSectionLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   moreDeals: {
     fontSize: 12,
-    color: '#7DB87A',
+    color: '#36453B',
     fontWeight: '600',
   },
   empty: {
     flex: 1,
-    backgroundColor: '#FDFAF5',
+    backgroundColor: '#F4EEE2',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
@@ -247,17 +247,17 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   emptyText: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
     textAlign: 'center',
     lineHeight: 21,
   },
   backButton: {
     marginTop: 8,
-    backgroundColor: '#7DB87A',
+    backgroundColor: '#36453B',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, fonts, spacing, radius } from '../theme';
 
 interface Props {
   message?: string;
@@ -13,10 +14,10 @@ export default function ErrorState({
 }: Props) {
   return (
     <View style={styles.container}>
-      <Ionicons name="alert-circle-outline" size={48} color="#D4667A" />
+      <Ionicons name="cloud-offline-outline" size={44} color={colors.accent} />
       <Text style={styles.message}>{message}</Text>
       {onRetry && (
-        <TouchableOpacity style={styles.button} onPress={onRetry} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.button} onPress={onRetry} activeOpacity={0.85}>
           <Text style={styles.buttonText}>Try again</Text>
         </TouchableOpacity>
       )}
@@ -25,30 +26,8 @@ export default function ErrorState({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FDFAF5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    gap: 16,
-  },
-  message: {
-    fontSize: 15,
-    color: '#5C4A35',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  button: {
-    marginTop: 4,
-    backgroundColor: '#7DB87A',
-    paddingHorizontal: 28,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
+  container: { flex: 1, backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center', paddingHorizontal: spacing.xxl, gap: spacing.lg },
+  message: { fontFamily: fonts.ui, fontSize: 15, color: colors.ink, textAlign: 'center', lineHeight: 22 },
+  button: { marginTop: spacing.xs, backgroundColor: colors.brand, paddingHorizontal: spacing.xxl, paddingVertical: spacing.md, borderRadius: radius.card },
+  buttonText: { fontFamily: fonts.uiMedium, color: colors.onBrand, fontSize: 15 },
 });

@@ -25,7 +25,7 @@ const PREMIUM_FEATURES = [
     title: 'Meal Planner',
     description: 'Plan your week ahead',
     icon: 'calendar-outline' as const,
-    color: '#7DB87A',
+    color: '#36453B',
     screen: null, // coming soon
   },
   {
@@ -33,7 +33,7 @@ const PREMIUM_FEATURES = [
     title: 'Shopping List',
     description: 'Auto-build from recipes',
     icon: 'bag-handle-outline' as const,
-    color: '#F4A94E',
+    color: '#BE6A43',
     screen: null,
   },
   {
@@ -64,7 +64,7 @@ export default function PremiumHubScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.upgradeContent}>
         <View style={styles.upgradeHeader}>
           <View style={styles.crownCircle}>
-            <Ionicons name="star" size={36} color="#F4A94E" />
+            <Ionicons name="star" size={36} color="#BE6A43" />
           </View>
           <Text style={styles.upgradeTitle}>Deal to Dish Premium</Text>
           <Text style={styles.upgradeSubtitle}>
@@ -138,7 +138,7 @@ export default function PremiumHubScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FDFAF5' },
+  container: { flex: 1, backgroundColor: '#F4EEE2' },
 
   // Premium upgrade view
   upgradeContent: {
@@ -157,14 +157,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
-  upgradeTitle: { fontSize: 24, fontWeight: '800', color: '#5C4A35', textAlign: 'center' },
-  upgradeSubtitle: { fontSize: 15, color: '#a09080', textAlign: 'center', lineHeight: 22 },
+  upgradeTitle: { fontSize: 24, fontWeight: '800', color: '#2A241F', textAlign: 'center' },
+  upgradeSubtitle: { fontSize: 15, color: '#6B5F52', textAlign: 'center', lineHeight: 22 },
   featureList: {
     backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 4,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     gap: 2,
   },
   featureRow: {
@@ -181,16 +181,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   featureRowText: { flex: 1 },
-  featureRowTitle: { fontSize: 15, fontWeight: '700', color: '#5C4A35' },
-  featureRowDesc: { fontSize: 13, color: '#a09080', marginTop: 1 },
+  featureRowTitle: { fontSize: 15, fontWeight: '700', color: '#2A241F' },
+  featureRowDesc: { fontSize: 13, color: '#6B5F52', marginTop: 1 },
   upgradeButton: {
-    backgroundColor: '#F4A94E',
+    backgroundColor: '#BE6A43',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   upgradeButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
-  upgradeNote: { fontSize: 13, color: '#a09080', textAlign: 'center' },
+  upgradeNote: { fontSize: 13, color: '#6B5F52', textAlign: 'center' },
 
   // Premium hub view (for premium users)
   hubContent: {
@@ -199,8 +199,8 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 20,
   },
-  hubTitle: { fontSize: 22, fontWeight: '800', color: '#5C4A35' },
-  hubSubtitle: { fontSize: 14, color: '#a09080', marginTop: -12 },
+  hubTitle: { fontSize: 22, fontWeight: '800', color: '#2A241F' },
+  hubSubtitle: { fontSize: 14, color: '#6B5F52', marginTop: -12 },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -212,9 +212,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 18,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     gap: 10,
-    shadowColor: '#5C4A35',
+    shadowColor: '#2A241F',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -227,8 +227,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  featureTitle: { fontSize: 15, fontWeight: '700', color: '#5C4A35' },
-  featureDesc: { fontSize: 12, color: '#a09080', lineHeight: 18 },
+  featureTitle: { fontSize: 15, fontWeight: '700', color: '#2A241F' },
+  featureDesc: { fontSize: 12, color: '#6B5F52', lineHeight: 18 },
   comingSoonBadge: {
     alignSelf: 'flex-start',
     backgroundColor: '#f0ede8',
@@ -236,5 +236,5 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 999,
   },
-  comingSoonText: { fontSize: 10, fontWeight: '700', color: '#a09080' },
+  comingSoonText: { fontSize: 10, fontWeight: '700', color: '#6B5F52' },
 });

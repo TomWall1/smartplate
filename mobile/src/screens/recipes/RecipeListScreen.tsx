@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
-import { getRecipeSuggestions } from '../../api/recipes';
+import { useRecipes } from '../../api/hooks';
 import { useAuth } from '../../context/AuthContext';
 import { useStore } from '../../context/StoreContext';
 import { usePremium } from '../../context/PremiumContext';
@@ -82,45 +82,20 @@ export default function RecipeListScreen({ navigation }: Props) {
   const { selectedState } = useStore();
   const { isPremium } = usePremium();
   const effectiveState = user?.state || selectedState;
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { data: recipes = [], isLoading, isError, isFetching, refetch } = useRecipes(effectiveState);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [activeProtein, setActiveProtein] = useState<string | null>(null);
-
-  const fetchRecipes = useCallback(async () => {
-    if (!effectiveState) return;
-    setError(null);
-    try {
-      const data = await getRecipeSuggestions(effectiveState);
-      setRecipes(data);
-    } catch (err: any) {
-      setError('Could not load recipes. Please check your connection.');
-    }
-  }, [effectiveState]);
-
-  useEffect(() => {
-    setLoading(true);
-    fetchRecipes().finally(() => setLoading(false));
-  }, [fetchRecipes]);
-
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await fetchRecipes();
-    setRefreshing(false);
-  }, [fetchRecipes]);
 
   const filtered = applyFilter(recipes, activeFilter).filter((r) =>
     hasProteinDeal(r, activeProtein)
   );
 
-  if (loading) {
-    return <LoadingState message="Finding recipes with deals..." />;
+  if (isLoading) {
+    return <LoadingState message="Finding recipes with deals…" />;
   }
 
-  if (error) {
-    return <ErrorState message={error} onRetry={() => { setLoading(true); fetchRecipes().finally(() => setLoading(false)); }} />;
+  if (isError) {
+    return <ErrorState message="Could not load recipes. Check your connection." onRetry={() => refetch()} />;
   }
 
   return (
@@ -151,7 +126,7 @@ export default function RecipeListScreen({ navigation }: Props) {
       {isPremium && (
         <View style={styles.proteinSection}>
           <View style={styles.proteinHeader}>
-            <Text style={styles.proteinLabel}>🥩 Filter by protein on special</Text>
+            <Text style={styles.proteinLabel}>Filter by protein on special</Text>
             {activeProtein && (
               <TouchableOpacity onPress={() => setActiveProtein(null)}>
                 <Text style={styles.clearText}>Clear</Text>
@@ -190,10 +165,10 @@ export default function RecipeListScreen({ navigation }: Props) {
         )}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor="#7DB87A"
-            colors={['#7DB87A']}
+            refreshing={isFetching}
+            onRefresh={refetch}
+            tintColor="#36453B"
+            colors={['#36453B']}
           />
         }
         contentContainerStyle={styles.list}
@@ -215,11 +190,11 @@ export default function RecipeListScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDFAF5',
+    backgroundColor: '#F4EEE2',
   },
   filtersWrapper: {
     borderBottomWidth: 1,
-    borderBottomColor: '#e8e0d4',
+    borderBottomColor: '#E2D8C6',
     backgroundColor: '#ffffff',
   },
   filtersContent: {
@@ -232,18 +207,18 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     backgroundColor: '#ffffff',
     marginRight: 8,
   },
   chipActive: {
-    backgroundColor: '#7DB87A',
-    borderColor: '#7DB87A',
+    backgroundColor: '#36453B',
+    borderColor: '#36453B',
   },
   chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#a09080',
+    color: '#6B5F52',
   },
   chipTextActive: {
     color: '#ffffff',
@@ -252,7 +227,7 @@ const styles = StyleSheet.create({
   proteinSection: {
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e8e0d4',
+    borderBottomColor: '#E2D8C6',
     paddingTop: 8,
     paddingBottom: 4,
   },
@@ -266,14 +241,14 @@ const styles = StyleSheet.create({
   proteinLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#a09080',
+    color: '#6B5F52',
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
   clearText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#a09080',
+    color: '#6B5F52',
     textDecorationLine: 'underline',
   },
   proteinChip: {
@@ -281,13 +256,13 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     backgroundColor: '#ffffff',
     marginRight: 8,
   },
   proteinChipActive: {
-    backgroundColor: '#F4A94E',
-    borderColor: '#F4A94E',
+    backgroundColor: '#BE6A43',
+    borderColor: '#BE6A43',
   },
   proteinChipTextActive: {
     color: '#ffffff',
@@ -303,7 +278,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    color: '#a09080',
+    color: '#6B5F52',
     textAlign: 'center',
     lineHeight: 22,
   },

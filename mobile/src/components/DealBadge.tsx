@@ -17,7 +17,7 @@ function capitalize(s: string): string {
 }
 
 export default function DealBadge({ deal }: Props) {
-  const storeColor = STORE_COLORS[deal.store.toLowerCase()] ?? '#7DB87A';
+  const storeColor = STORE_COLORS[deal.store.toLowerCase()] ?? '#36453B';
 
   return (
     <View style={styles.container}>
@@ -54,11 +54,11 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   savings: {
     fontSize: 13,
-    color: '#3D7A3A',
+    color: '#36453B',
     fontWeight: '500',
   },
 });

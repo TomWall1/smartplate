@@ -37,7 +37,7 @@ export default function StoreSelectionScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <View style={styles.logoCircle}>
-            <Ionicons name="leaf" size={32} color="#7DB87A" />
+            <Ionicons name="leaf" size={32} color="#36453B" />
           </View>
           <Text style={styles.title}>Choose your store</Text>
           <Text style={styles.subtitle}>
@@ -57,7 +57,7 @@ export default function StoreSelectionScreen() {
                 <Ionicons name={store.icon} size={28} color="#ffffff" />
               </View>
               <Text style={styles.storeName}>{store.name}</Text>
-              <Ionicons name="chevron-forward" size={20} color="#a09080" />
+              <Ionicons name="chevron-forward" size={20} color="#6B5F52" />
             </TouchableOpacity>
           ))}
         </View>
@@ -67,7 +67,7 @@ export default function StoreSelectionScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FDFAF5' },
+  safe: { flex: 1, backgroundColor: '#F4EEE2' },
   container: {
     flex: 1,
     paddingHorizontal: 24,
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#D6EDD4',
+    backgroundColor: '#DCE4D6',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 4,
@@ -87,12 +87,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#5C4A35',
+    color: '#2A241F',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 15,
-    color: '#a09080',
+    color: '#6B5F52',
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -104,8 +104,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
-    shadowColor: '#5C4A35',
+    borderColor: '#E2D8C6',
+    shadowColor: '#2A241F',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
@@ -123,6 +123,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
 });

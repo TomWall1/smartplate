@@ -9,14 +9,14 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FavouritesStackParamList } from '../navigation';
+import { PremiumStackParamList } from '../navigation';
 import { getFavorites } from '../api/recipes';
 import { Recipe } from '../types';
 import RecipeCard from '../components/RecipeCard';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 
-type Props = NativeStackScreenProps<FavouritesStackParamList, 'Favourites'>;
+type Props = NativeStackScreenProps<PremiumStackParamList, 'Favourites'>;
 
 export default function FavouritesScreen({ navigation }: Props) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -67,14 +67,14 @@ export default function FavouritesScreen({ navigation }: Props) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor="#7DB87A"
-            colors={['#7DB87A']}
+            tintColor="#36453B"
+            colors={['#36453B']}
           />
         }
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Ionicons name="heart-outline" size={52} color="#D6EDD4" />
+            <Ionicons name="heart-outline" size={52} color="#DCE4D6" />
             <Text style={styles.emptyTitle}>No favourites yet</Text>
             <Text style={styles.emptyText}>
               Tap the heart icon on any recipe to save it here.
@@ -90,7 +90,7 @@ export default function FavouritesScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDFAF5',
+    backgroundColor: '#F4EEE2',
   },
   list: {
     paddingTop: 8,
@@ -105,11 +105,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   emptyText: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
     textAlign: 'center',
     lineHeight: 21,
   },

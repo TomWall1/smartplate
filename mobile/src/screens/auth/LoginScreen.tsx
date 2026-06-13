@@ -12,6 +12,8 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { fonts } from '../../theme';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import { useNavigation } from '@react-navigation/native';
@@ -87,9 +89,7 @@ export default function LoginScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
 
         <View style={styles.header}>
-          <View style={styles.logoCircle}>
-            <Ionicons name="leaf" size={36} color="#7DB87A" />
-          </View>
+          <Image source={require('../../../assets/icon.png')} style={styles.logoImage} contentFit="cover" />
           <Text style={styles.logoText}>Deal to Dish</Text>
           <Text style={styles.tagline}>Cook smart. Save more.</Text>
         </View>
@@ -105,7 +105,7 @@ export default function LoginScreen() {
             activeOpacity={0.85}
           >
             {googleLoading ? (
-              <ActivityIndicator color="#5C4A35" />
+              <ActivityIndicator color="#2A241F" />
             ) : (
               <>
                 <GoogleIcon />
@@ -129,7 +129,7 @@ export default function LoginScreen() {
               value={email}
               onChangeText={setEmail}
               placeholder="you@example.com"
-              placeholderTextColor="#c8b8a8"
+              placeholderTextColor="#9A8E7E"
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
@@ -151,14 +151,14 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Your password"
-                placeholderTextColor="#c8b8a8"
+                placeholderTextColor="#9A8E7E"
                 secureTextEntry={!showPassword}
                 autoComplete="password"
                 returnKeyType="done"
                 onSubmitEditing={handleLogin}
               />
               <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword((v) => !v)}>
-                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#a09080" />
+                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#6B5F52" />
               </TouchableOpacity>
             </View>
           </View>
@@ -201,33 +201,33 @@ function GoogleIcon() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#FDFAF5' },
+  flex: { flex: 1, backgroundColor: '#F4EEE2' },
   container: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 48 },
   header: { alignItems: 'center', marginBottom: 32, gap: 8 },
-  logoCircle: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#D6EDD4', justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
-  logoText: { fontSize: 28, fontWeight: '800', color: '#5C4A35' },
-  tagline: { fontSize: 14, color: '#a09080' },
-  card: { backgroundColor: '#ffffff', borderRadius: 20, padding: 24, gap: 16, borderWidth: 1.5, borderColor: '#e8e0d4', shadowColor: 'rgba(92,74,53,0.08)', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 4 },
-  cardTitle: { fontSize: 22, fontWeight: '700', color: '#5C4A35', marginBottom: 4 },
-  googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1.5, borderColor: '#e8e0d4', borderRadius: 12, paddingVertical: 13, backgroundColor: '#ffffff' },
-  googleButtonText: { fontSize: 15, fontWeight: '600', color: '#5C4A35' },
+  logoImage: { width: 76, height: 76, borderRadius: 18, marginBottom: 4 },
+  logoText: { fontFamily: fonts.display, fontSize: 28, color: '#2A241F' },
+  tagline: { fontFamily: fonts.ui, fontSize: 14, color: '#6B5F52' },
+  card: { backgroundColor: '#ffffff', borderRadius: 20, padding: 24, gap: 16, borderWidth: 1.5, borderColor: '#E2D8C6', shadowColor: 'rgba(92,74,53,0.08)', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 4 },
+  cardTitle: { fontFamily: fonts.display, fontSize: 22, color: '#2A241F', marginBottom: 4 },
+  googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1.5, borderColor: '#E2D8C6', borderRadius: 12, paddingVertical: 13, backgroundColor: '#ffffff' },
+  googleButtonText: { fontSize: 15, fontWeight: '600', color: '#2A241F' },
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#e8e0d4' },
-  dividerText: { fontSize: 12, color: '#a09080' },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#E2D8C6' },
+  dividerText: { fontSize: 12, color: '#6B5F52' },
   field: { gap: 6 },
   labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  label: { fontSize: 13, fontWeight: '600', color: '#5C4A35' },
-  forgotLink: { fontSize: 13, fontWeight: '600', color: '#7DB87A' },
-  input: { borderWidth: 1.5, borderColor: '#e8e0d4', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#5C4A35', backgroundColor: '#FDFAF5' },
+  label: { fontSize: 13, fontWeight: '600', color: '#2A241F' },
+  forgotLink: { fontSize: 13, fontWeight: '600', color: '#36453B' },
+  input: { borderWidth: 1.5, borderColor: '#E2D8C6', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#2A241F', backgroundColor: '#F4EEE2' },
   passwordWrapper: { position: 'relative' },
   passwordInput: { paddingRight: 48 },
   eyeButton: { position: 'absolute', right: 14, top: 0, bottom: 0, justifyContent: 'center' },
-  primaryButton: { backgroundColor: '#7DB87A', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 4 },
+  primaryButton: { backgroundColor: '#36453B', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 4 },
   buttonDisabled: { opacity: 0.7 },
   primaryButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
   linkRow: { alignItems: 'center', paddingVertical: 4 },
-  linkText: { fontSize: 14, color: '#a09080' },
-  linkAccent: { color: '#7DB87A', fontWeight: '600' },
+  linkText: { fontSize: 14, color: '#6B5F52' },
+  linkAccent: { color: '#36453B', fontWeight: '600' },
   guestButton: { marginTop: 24, alignItems: 'center', paddingVertical: 12 },
-  guestButtonText: { fontSize: 14, color: '#a09080', fontWeight: '600' },
+  guestButtonText: { fontSize: 14, color: '#6B5F52', fontWeight: '600' },
 });

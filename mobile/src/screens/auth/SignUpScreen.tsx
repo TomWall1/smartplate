@@ -42,8 +42,8 @@ export default function SignUpScreen({ navigation }: Props) {
     setLoading(true);
     try {
       await signup(email.trim().toLowerCase(), password);
-      // After signup, navigate to StateSelection
-      navigation.navigate('StateSelection');
+      // RootNavigator switches to the onboarding flow automatically once the
+      // user is set — no manual navigation needed (matches LoginScreen).
     } catch (err: any) {
       const message =
         err?.response?.data?.error ?? 'Sign up failed. The email may already be in use.';
@@ -64,7 +64,7 @@ export default function SignUpScreen({ navigation }: Props) {
       >
         <View style={styles.header}>
           <View style={styles.logoCircle}>
-            <Ionicons name="leaf" size={36} color="#7DB87A" />
+            <Ionicons name="leaf" size={36} color="#36453B" />
           </View>
           <Text style={styles.logoText}>Deal to Dish</Text>
           <Text style={styles.tagline}>Cook smart. Save more.</Text>
@@ -80,7 +80,7 @@ export default function SignUpScreen({ navigation }: Props) {
               value={email}
               onChangeText={setEmail}
               placeholder="you@example.com"
-              placeholderTextColor="#c8b8a8"
+              placeholderTextColor="#9A8E7E"
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
@@ -96,7 +96,7 @@ export default function SignUpScreen({ navigation }: Props) {
                 value={password}
                 onChangeText={setPassword}
                 placeholder="At least 6 characters"
-                placeholderTextColor="#c8b8a8"
+                placeholderTextColor="#9A8E7E"
                 secureTextEntry={!showPassword}
                 autoComplete="new-password"
                 returnKeyType="next"
@@ -108,7 +108,7 @@ export default function SignUpScreen({ navigation }: Props) {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color="#a09080"
+                  color="#6B5F52"
                 />
               </TouchableOpacity>
             </View>
@@ -121,7 +121,7 @@ export default function SignUpScreen({ navigation }: Props) {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Repeat your password"
-              placeholderTextColor="#c8b8a8"
+              placeholderTextColor="#9A8E7E"
               secureTextEntry={!showPassword}
               autoComplete="new-password"
               returnKeyType="done"
@@ -160,7 +160,7 @@ export default function SignUpScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: '#FDFAF5',
+    backgroundColor: '#F4EEE2',
   },
   container: {
     flexGrow: 1,
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#D6EDD4',
+    backgroundColor: '#DCE4D6',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 4,
@@ -185,11 +185,11 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   tagline: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
   },
   card: {
     backgroundColor: '#ffffff',
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 16,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     shadowColor: 'rgba(92, 74, 53, 0.08)',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
     marginBottom: 4,
   },
   field: {
@@ -216,17 +216,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   input: {
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#5C4A35',
-    backgroundColor: '#FDFAF5',
+    color: '#2A241F',
+    backgroundColor: '#F4EEE2',
   },
   passwordWrapper: {
     position: 'relative',
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primaryButton: {
-    backgroundColor: '#7DB87A',
+    backgroundColor: '#36453B',
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
@@ -262,10 +262,10 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
   },
   linkAccent: {
-    color: '#7DB87A',
+    color: '#36453B',
     fontWeight: '600',
   },
 });

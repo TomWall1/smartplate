@@ -110,7 +110,7 @@ export default function StateSelectionScreen() {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: '#FDFAF5',
+    backgroundColor: '#F4EEE2',
   },
   container: {
     paddingHorizontal: 24,
@@ -120,12 +120,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#5C4A35',
+    color: '#2A241F',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 15,
-    color: '#a09080',
+    color: '#6B5F52',
     textAlign: 'center',
     lineHeight: 22,
     marginTop: -8,
@@ -142,32 +142,32 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     borderWidth: 2,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     alignItems: 'center',
     gap: 4,
   },
   stateButtonSelected: {
-    borderColor: '#7DB87A',
-    backgroundColor: '#D6EDD4',
+    borderColor: '#36453B',
+    backgroundColor: '#DCE4D6',
   },
   stateLabel: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   stateLabelSelected: {
-    color: '#3D7A3A',
+    color: '#36453B',
   },
   stateName: {
     fontSize: 11,
-    color: '#a09080',
+    color: '#6B5F52',
     textAlign: 'center',
   },
   stateNameSelected: {
-    color: '#3D7A3A',
+    color: '#36453B',
   },
   saveButton: {
-    backgroundColor: '#7DB87A',
+    backgroundColor: '#36453B',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',

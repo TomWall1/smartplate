@@ -8,6 +8,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { usePremium } from '../context/PremiumContext';
+import { colors, fonts } from '../theme';
 
 // Auth / onboarding screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -92,10 +93,11 @@ const AccountStack   = createNativeStackNavigator<AccountStackParamList>();
 const MainTab        = createBottomTabNavigator<MainTabParamList>();
 
 const headerOptions = {
-  headerStyle: { backgroundColor: '#ffffff' },
-  headerTintColor: '#5C4A35',
-  headerTitleStyle: { fontWeight: '700' as const, fontSize: 17, color: '#5C4A35' },
+  headerStyle: { backgroundColor: colors.surface },
+  headerTintColor: colors.ink,
+  headerTitleStyle: { fontFamily: fonts.display, fontSize: 18, color: colors.ink },
   headerBackTitleVisible: false,
+  headerShadowVisible: false,
 };
 
 // ─── Tab stack navigators ─────────────────────────────────────────────────────
@@ -106,7 +108,7 @@ function StoreNavigator() {
       <StoreStack.Screen name="Store" component={StoreScreen} options={{ headerShown: false }} />
       <StoreStack.Screen
         name="StoreRecipeDetail"
-        component={RecipeDetailScreen}
+        component={RecipeDetailScreen as any}
         options={({ route }) => ({ title: route.params.title })}
       />
     </StoreStack.Navigator>
@@ -168,16 +170,16 @@ function MainTabNavigator() {
     <MainTab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#7DB87A',
-        tabBarInactiveTintColor: '#a09080',
+        tabBarActiveTintColor: colors.brand,
+        tabBarInactiveTintColor: colors.inkFaint,
         tabBarStyle: {
-          backgroundColor: '#ffffff',
-          borderTopColor: '#e8e0d4',
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
           paddingBottom: 4,
           height: 60,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: { fontFamily: fonts.uiMedium, fontSize: 11 },
       }}
     >
       <MainTab.Screen
@@ -203,7 +205,7 @@ function MainTabNavigator() {
           tabBarLabel: 'Premium',
           tabBarIcon: ({ color, size }) => (
             <View>
-              <Ionicons name="star-outline" size={size} color={isPremium ? '#F4A94E' : color} />
+              <Ionicons name="star-outline" size={size} color={isPremium ? '#BE6A43' : color} />
               {!isPremium && (
                 <View style={styles.lockBadge}>
                   <Ionicons name="lock-closed" size={9} color="#ffffff" />
@@ -311,7 +313,7 @@ export default function RootNavigator() {
   if (authLoading || storeLoading) {
     return (
       <View style={styles.splash}>
-        <ActivityIndicator size="large" color="#7DB87A" />
+        <ActivityIndicator size="large" color="#36453B" />
       </View>
     );
   }
@@ -333,7 +335,7 @@ export default function RootNavigator() {
 }
 
 const styles = StyleSheet.create({
-  splash: { flex: 1, backgroundColor: '#FDFAF5', justifyContent: 'center', alignItems: 'center' },
+  splash: { flex: 1, backgroundColor: '#F4EEE2', justifyContent: 'center', alignItems: 'center' },
   lockBadge: {
     position: 'absolute',
     top: -2,
@@ -341,7 +343,7 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: '#F4A94E',
+    backgroundColor: '#BE6A43',
     justifyContent: 'center',
     alignItems: 'center',
   },

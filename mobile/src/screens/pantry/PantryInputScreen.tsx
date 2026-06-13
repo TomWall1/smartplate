@@ -14,10 +14,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { PantryStackParamList } from '../../navigation';
+import { PremiumStackParamList } from '../../navigation';
 import { matchPantry } from '../../api/pantry';
 
-type Props = NativeStackScreenProps<PantryStackParamList, 'PantryInput'>;
+type Props = NativeStackScreenProps<PremiumStackParamList, 'PantryInput'>;
 
 const QUICK_ADD_ITEMS = [
   'Chicken', 'Rice', 'Eggs', 'Pasta',
@@ -92,7 +92,7 @@ export default function PantryInputScreen({ navigation }: Props) {
             value={inputText}
             onChangeText={setInputText}
             placeholder="Type an ingredient..."
-            placeholderTextColor="#c8b8a8"
+            placeholderTextColor="#9A8E7E"
             returnKeyType="done"
             onSubmitEditing={handleInputSubmit}
           />
@@ -114,7 +114,7 @@ export default function PantryInputScreen({ navigation }: Props) {
                   onPress={() => toggleQuickAdd(item)}
                   activeOpacity={0.8}
                 >
-                  {isAdded && <Ionicons name="checkmark" size={13} color="#3D7A3A" />}
+                  {isAdded && <Ionicons name="checkmark" size={13} color="#36453B" />}
                   <Text style={[styles.quickChipText, isAdded && styles.quickChipTextActive]}>
                     {item}
                   </Text>
@@ -136,7 +136,7 @@ export default function PantryInputScreen({ navigation }: Props) {
                     onPress={() => removeItem(item)}
                     hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
                   >
-                    <Ionicons name="close" size={14} color="#a09080" />
+                    <Ionicons name="close" size={14} color="#6B5F52" />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -153,7 +153,7 @@ export default function PantryInputScreen({ navigation }: Props) {
           <Switch
             value={includeStaples}
             onValueChange={setIncludeStaples}
-            trackColor={{ false: '#e8e0d4', true: '#7DB87A' }}
+            trackColor={{ false: '#E2D8C6', true: '#36453B' }}
             thumbColor="#ffffff"
           />
         </View>
@@ -180,7 +180,7 @@ export default function PantryInputScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#FDFAF5' },
+  flex: { flex: 1, backgroundColor: '#F4EEE2' },
   scroll: { flex: 1 },
   container: {
     padding: 20,
@@ -190,11 +190,11 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   subheading: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
     lineHeight: 21,
     marginTop: -8,
   },
@@ -205,16 +205,16 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#5C4A35',
+    color: '#2A241F',
     backgroundColor: '#ffffff',
   },
   addButton: {
-    backgroundColor: '#7DB87A',
+    backgroundColor: '#36453B',
     width: 48,
     borderRadius: 12,
     justifyContent: 'center',
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
     marginBottom: 10,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -241,20 +241,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 999,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     backgroundColor: '#ffffff',
   },
   quickChipActive: {
-    backgroundColor: '#D6EDD4',
-    borderColor: '#7DB87A',
+    backgroundColor: '#DCE4D6',
+    borderColor: '#36453B',
   },
   quickChipText: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
     fontWeight: '500',
   },
   quickChipTextActive: {
-    color: '#3D7A3A',
+    color: '#36453B',
     fontWeight: '700',
   },
   chipsList: {
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 999,
-    backgroundColor: '#5C4A35',
+    backgroundColor: '#2A241F',
   },
   itemChipText: {
     fontSize: 13,
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
   },
   staplesText: {
     flex: 1,
@@ -292,18 +292,18 @@ const styles = StyleSheet.create({
   staplesLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   staplesHint: {
     fontSize: 12,
-    color: '#a09080',
+    color: '#6B5F52',
   },
   ctaButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: '#7DB87A',
+    backgroundColor: '#36453B',
     paddingVertical: 16,
     borderRadius: 12,
     marginTop: 4,

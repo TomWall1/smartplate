@@ -48,13 +48,13 @@ function RowItem({
       activeOpacity={onPress ? 0.7 : 1}
     >
       <View style={styles.rowIcon}>
-        <Ionicons name={icon} size={20} color="#7DB87A" />
+        <Ionicons name={icon} size={20} color="#36453B" />
       </View>
       <View style={styles.rowContent}>
         <Text style={styles.rowLabel}>{label}</Text>
         {value ? <Text style={styles.rowValue}>{value}</Text> : null}
       </View>
-      {onPress && <Ionicons name="chevron-forward" size={18} color="#c8b8a8" />}
+      {onPress && <Ionicons name="chevron-forward" size={18} color="#9A8E7E" />}
     </TouchableOpacity>
   );
 }
@@ -84,7 +84,7 @@ export default function AccountScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.guestContent}>
         <View style={styles.guestHeader}>
           <View style={styles.avatarCircle}>
-            <Ionicons name="person-outline" size={36} color="#a09080" />
+            <Ionicons name="person-outline" size={36} color="#6B5F52" />
           </View>
           <Text style={styles.guestTitle}>You're browsing as a guest</Text>
           <Text style={styles.guestSubtitle}>
@@ -137,12 +137,12 @@ export default function AccountScreen() {
       {/* Profile header */}
       <View style={styles.profileHeader}>
         <View style={styles.avatarCircle}>
-          <Ionicons name="person" size={36} color="#7DB87A" />
+          <Ionicons name="person" size={36} color="#36453B" />
         </View>
         <Text style={styles.emailText}>{user?.email}</Text>
         {user?.is_premium && (
           <View style={styles.premiumBadge}>
-            <Ionicons name="star" size={12} color="#F4A94E" />
+            <Ionicons name="star" size={12} color="#BE6A43" />
             <Text style={styles.premiumBadgeText}>Premium</Text>
           </View>
         )}
@@ -186,17 +186,17 @@ export default function AccountScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FDFAF5' },
+  container: { flex: 1, backgroundColor: '#F4EEE2' },
   content: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40, gap: 24 },
 
   // Guest view
   guestContent: { paddingHorizontal: 20, paddingTop: 40, paddingBottom: 40, gap: 24 },
   guestHeader: { alignItems: 'center', gap: 12 },
-  guestTitle: { fontSize: 20, fontWeight: '800', color: '#5C4A35', textAlign: 'center' },
-  guestSubtitle: { fontSize: 14, color: '#a09080', textAlign: 'center', lineHeight: 22 },
+  guestTitle: { fontSize: 20, fontWeight: '800', color: '#2A241F', textAlign: 'center' },
+  guestSubtitle: { fontSize: 14, color: '#6B5F52', textAlign: 'center', lineHeight: 22 },
   authButtons: { gap: 12 },
   signInButton: {
-    backgroundColor: '#7DB87A',
+    backgroundColor: '#36453B',
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
@@ -208,9 +208,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
   },
-  createButtonText: { color: '#5C4A35', fontSize: 16, fontWeight: '700' },
+  createButtonText: { color: '#2A241F', fontSize: 16, fontWeight: '700' },
 
   // Profile header
   profileHeader: { alignItems: 'center', gap: 8, paddingVertical: 8 },
@@ -218,12 +218,12 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#D6EDD4',
+    backgroundColor: '#DCE4D6',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 4,
   },
-  emailText: { fontSize: 16, fontWeight: '600', color: '#5C4A35' },
+  emailText: { fontSize: 16, fontWeight: '600', color: '#2A241F' },
   premiumBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,16 +233,16 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 999,
   },
-  premiumBadgeText: { fontSize: 12, fontWeight: '700', color: '#F4A94E' },
+  premiumBadgeText: { fontSize: 12, fontWeight: '700', color: '#BE6A43' },
 
   // Sections
   section: { gap: 10 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#a09080', textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#6B5F52', textTransform: 'uppercase', letterSpacing: 0.5 },
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     overflow: 'hidden',
   },
   row: {
@@ -256,13 +256,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: '#D6EDD4',
+    backgroundColor: '#DCE4D6',
     justifyContent: 'center',
     alignItems: 'center',
   },
   rowContent: { flex: 1 },
-  rowLabel: { fontSize: 15, fontWeight: '600', color: '#5C4A35' },
-  rowValue: { fontSize: 13, color: '#a09080', marginTop: 1 },
+  rowLabel: { fontSize: 15, fontWeight: '600', color: '#2A241F' },
+  rowValue: { fontSize: 13, color: '#6B5F52', marginTop: 1 },
   divider: { height: 1, backgroundColor: '#f0ede8', marginLeft: 60 },
 
   // Sign out

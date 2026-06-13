@@ -21,7 +21,7 @@ export default function PremiumGate({ feature, children, onUpgrade }: Props) {
       <View style={styles.overlay}>
         <View style={styles.lockCard}>
           <View style={styles.lockIcon}>
-            <Ionicons name="lock-closed" size={32} color="#F4A94E" />
+            <Ionicons name="lock-closed" size={32} color="#BE6A43" />
           </View>
           <Text style={styles.title}>Premium Feature</Text>
           <Text style={styles.subtitle}>{feature} is available on the Premium plan.</Text>
@@ -42,7 +42,7 @@ export default function PremiumGate({ feature, children, onUpgrade }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDFAF5',
+    backgroundColor: '#F4EEE2',
   },
   overlay: {
     flex: 1,
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     borderWidth: 1.5,
-    borderColor: '#e8e0d4',
+    borderColor: '#E2D8C6',
     shadowColor: 'rgba(92, 74, 53, 0.08)',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
@@ -77,11 +77,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#5C4A35',
+    color: '#2A241F',
   },
   subtitle: {
     fontSize: 14,
-    color: '#a09080',
+    color: '#6B5F52',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginTop: 8,
-    backgroundColor: '#F4A94E',
+    backgroundColor: '#BE6A43',
     paddingHorizontal: 24,
     paddingVertical: 13,
     borderRadius: 12,
