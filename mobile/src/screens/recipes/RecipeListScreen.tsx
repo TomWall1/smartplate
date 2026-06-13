@@ -59,19 +59,16 @@ function hasProteinDeal(recipe: Recipe, proteinId: string | null): boolean {
 function applyFilter(recipes: Recipe[], filter: FilterType): Recipe[] {
   switch (filter) {
     case 'quick':
-      return recipes.filter((r) => r.prep_time > 0 && r.prep_time < 30);
+      return recipes.filter((r) => {
+        const p = r.prepTime ?? r.cookTime ?? 0;
+        return p > 0 && p < 30;
+      });
     case 'vegetarian':
-      return recipes.filter((r) =>
-        r.dietary_tags?.some((t) => t.toLowerCase() === 'vegetarian')
-      );
+      return recipes.filter((r) => r.tags?.some((t) => t.toLowerCase() === 'vegetarian'));
     case 'vegan':
-      return recipes.filter((r) =>
-        r.dietary_tags?.some((t) => t.toLowerCase() === 'vegan')
-      );
+      return recipes.filter((r) => r.tags?.some((t) => t.toLowerCase() === 'vegan'));
     case 'gluten-free':
-      return recipes.filter((r) =>
-        r.dietary_tags?.some((t) => t.toLowerCase() === 'gluten-free')
-      );
+      return recipes.filter((r) => r.tags?.some((t) => t.toLowerCase() === 'gluten-free'));
     default:
       return recipes;
   }
@@ -156,11 +153,11 @@ export default function RecipeListScreen({ navigation }: Props) {
 
       <FlatList
         data={filtered}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <RecipeCard
             recipe={item}
-            onPress={() => navigation.navigate('RecipeDetail', { id: item.id, title: item.title })}
+            onPress={() => navigation.navigate('RecipeDetail', { id: String(item.id), title: item.title })}
           />
         )}
         refreshControl={

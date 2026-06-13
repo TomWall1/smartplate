@@ -18,22 +18,20 @@ export default function RecipeCard({ recipe, onPress }: Props) {
     Haptics.selectionAsync().catch(() => {});
     onPress();
   };
+
+  const dealCount = recipe.matchedDeals?.length ?? 0;
+  const prep = recipe.prepTime ?? recipe.cookTime;
+  const saving = recipe.estimatedSaving ?? 0;
+  const tags = recipe.tags ?? [];
+
   return (
     <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.9}>
       <View style={styles.imageWrapper}>
-        <Image
-          source={recipe.image_url}
-          style={styles.image}
-          contentFit="cover"
-          transition={200}
-          placeholder={BLUR}
-        />
-        {recipe.deal_count > 0 && (
+        <Image source={recipe.image} style={styles.image} contentFit="cover" transition={200} placeholder={BLUR} />
+        {dealCount > 0 && (
           <View style={styles.dealBadge}>
             <Ionicons name="pricetag" size={11} color={colors.onBrand} />
-            <Text style={styles.dealBadgeText}>
-              {recipe.deal_count} deal{recipe.deal_count !== 1 ? 's' : ''}
-            </Text>
+            <Text style={styles.dealBadgeText}>{dealCount} deal{dealCount !== 1 ? 's' : ''}</Text>
           </View>
         )}
       </View>
@@ -42,29 +40,28 @@ export default function RecipeCard({ recipe, onPress }: Props) {
         <Text style={styles.title} numberOfLines={2}>{recipe.title}</Text>
 
         <View style={styles.meta}>
-          {recipe.prep_time > 0 && (
+          {prep ? (
             <View style={styles.metaItem}>
               <Ionicons name="time-outline" size={14} color={colors.inkSecondary} />
-              <Text style={styles.metaText}>{recipe.prep_time} min</Text>
+              <Text style={styles.metaText}>{prep} min</Text>
             </View>
-          )}
-          {recipe.servings > 0 && (
+          ) : null}
+          {recipe.servings ? (
             <View style={styles.metaItem}>
               <Ionicons name="people-outline" size={14} color={colors.inkSecondary} />
               <Text style={styles.metaText}>{recipe.servings} servings</Text>
             </View>
-          )}
-          {recipe.cuisine ? (
-            <View style={styles.metaItem}>
-              <Ionicons name="restaurant-outline" size={14} color={colors.inkSecondary} />
-              <Text style={styles.metaText}>{recipe.cuisine}</Text>
-            </View>
           ) : null}
+          {saving > 0 && (
+            <View style={styles.savingItem}>
+              <Text style={styles.savingText}>Save ${saving.toFixed(2)}</Text>
+            </View>
+          )}
         </View>
 
-        {recipe.dietary_tags && recipe.dietary_tags.length > 0 && (
+        {tags.length > 0 && (
           <View style={styles.tags}>
-            {recipe.dietary_tags.slice(0, 3).map((tag) => (
+            {tags.slice(0, 3).map((tag) => (
               <View key={tag} style={styles.tag}>
                 <Text style={styles.tagText}>{tag}</Text>
               </View>
@@ -104,9 +101,11 @@ const styles = StyleSheet.create({
   dealBadgeText: { color: colors.onBrand, fontSize: 12, fontFamily: fonts.uiMedium },
   body: { padding: spacing.lg, gap: spacing.sm },
   title: { fontFamily: fonts.display, fontSize: 18, lineHeight: 24, color: colors.ink },
-  meta: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.md },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   metaText: { fontFamily: fonts.ui, fontSize: 13, color: colors.inkSecondary },
+  savingItem: { backgroundColor: colors.accentTint, paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill },
+  savingText: { fontFamily: fonts.uiMedium, fontSize: 12, color: colors.accent },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   tag: { backgroundColor: colors.brandTint, paddingHorizontal: 10, paddingVertical: 3, borderRadius: radius.pill },
   tagText: { fontFamily: fonts.uiMedium, fontSize: 11, color: colors.brand },

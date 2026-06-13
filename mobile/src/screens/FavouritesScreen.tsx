@@ -30,12 +30,12 @@ export default function FavouritesScreen({ navigation }: Props) {
     <View style={styles.container}>
       <FlatList
         data={recipes}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <RecipeCard
             recipe={item}
             onPress={() =>
-              navigation.navigate('FavouriteDetail', { id: item.id, title: item.title })
+              navigation.navigate('FavouriteDetail', { id: String(item.id), title: item.title })
             }
           />
         )}

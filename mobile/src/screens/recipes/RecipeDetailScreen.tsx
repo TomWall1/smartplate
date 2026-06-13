@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
+  Linking,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,12 +26,12 @@ const IMAGE_HEIGHT = 260;
 
 export default function RecipeDetailScreen({ route, navigation }: Props) {
   const { id } = route.params;
-  const { data: recipe, isLoading, isError, refetch } = useRecipe(id);
+  const { data: recipe, isLoading, isError, refetch } = useRecipe(String(id));
   const toggleFav = useToggleFavorite();
   const [favorited, setFavorited] = useState(false);
 
   function handleToggleFavorite() {
-    toggleFav.mutate(id, {
+    toggleFav.mutate(String(id), {
       onSuccess: () => setFavorited((v) => !v),
       onError: () => Alert.alert('Error', 'Could not update favourite. Please try again.'),
     });
@@ -60,45 +61,43 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
     return <ErrorState message="Could not load this recipe." onRetry={() => refetch()} />;
   }
 
-  const totalSavings = recipe.matchedDeals.reduce((sum, d) => sum + (d.savings ?? 0), 0);
+  const matchedDeals = recipe.matchedDeals ?? [];
+  const ingredients = recipe.allIngredients ?? recipe.ingredients ?? [];
+  const tags = recipe.tags ?? [];
+  const prep = recipe.prepTime ?? recipe.cookTime;
+  const totalSavings = recipe.estimatedSaving ?? matchedDeals.reduce((s, d) => s + (d.saving ?? 0), 0);
 
   return (
     <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-      <Image source={recipe.image_url} style={styles.heroImage} contentFit="cover" transition={200} />
+      <Image source={recipe.image} style={styles.heroImage} contentFit="cover" transition={200} />
 
       <View style={styles.body}>
         <Text style={styles.title}>{recipe.title}</Text>
 
         <View style={styles.chips}>
-          {recipe.prep_time > 0 && (
+          {prep ? (
             <View style={styles.chip}>
               <Ionicons name="time-outline" size={14} color="#36453B" />
-              <Text style={styles.chipText}>{recipe.prep_time} min</Text>
+              <Text style={styles.chipText}>{prep} min</Text>
             </View>
-          )}
-          {recipe.servings > 0 && (
+          ) : null}
+          {recipe.servings ? (
             <View style={styles.chip}>
               <Ionicons name="people-outline" size={14} color="#36453B" />
               <Text style={styles.chipText}>{recipe.servings} servings</Text>
             </View>
-          )}
-          {recipe.cuisine ? (
-            <View style={styles.chip}>
-              <Ionicons name="restaurant-outline" size={14} color="#36453B" />
-              <Text style={styles.chipText}>{recipe.cuisine}</Text>
-            </View>
           ) : null}
-          {recipe.meal_type ? (
+          {recipe.totalEstimatedCost ? (
             <View style={styles.chip}>
-              <Ionicons name="sunny-outline" size={14} color="#36453B" />
-              <Text style={styles.chipText}>{recipe.meal_type}</Text>
+              <Ionicons name="wallet-outline" size={14} color="#36453B" />
+              <Text style={styles.chipText}>~${recipe.totalEstimatedCost.toFixed(0)}</Text>
             </View>
           ) : null}
         </View>
 
-        {recipe.dietary_tags && recipe.dietary_tags.length > 0 && (
+        {tags.length > 0 && (
           <View style={styles.tagsRow}>
-            {recipe.dietary_tags.map((tag) => (
+            {tags.map((tag) => (
               <View key={tag} style={styles.dietTag}>
                 <Text style={styles.dietTagText}>{tag}</Text>
               </View>
@@ -106,14 +105,12 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        {recipe.description ? <Text style={styles.description}>{recipe.description}</Text> : null}
-
-        {recipe.matchedDeals.length > 0 && (
+        {matchedDeals.length > 0 && (
           <View style={styles.savingsCard}>
             <View style={styles.savingsRow}>
               <Ionicons name="pricetag" size={18} color="#BE6A43" />
               <Text style={styles.savingsTitle}>
-                {recipe.matchedDeals.length} deal{recipe.matchedDeals.length !== 1 ? 's' : ''} available
+                {matchedDeals.length} deal{matchedDeals.length !== 1 ? 's' : ''} this week
               </Text>
               {totalSavings > 0 && (
                 <View style={styles.savingsBadge}>
@@ -126,18 +123,16 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
 
         <Text style={styles.sectionTitle}>Ingredients</Text>
         <View style={styles.ingredientsList}>
-          {recipe.ingredients.map((ing, idx) => {
-            const deal = recipe.matchedDeals.find(
-              (d) => d.ingredient.toLowerCase() === ing.name.toLowerCase()
+          {ingredients.map((ing, idx) => {
+            const name = typeof ing === 'string' ? ing : '';
+            const deal = matchedDeals.find(
+              (d) => (d.ingredient ?? '').toLowerCase() === name.toLowerCase()
             );
             return (
               <View key={idx} style={styles.ingredientItem}>
                 <View style={styles.ingredientRow}>
                   <View style={styles.bulletDot} />
-                  <Text style={styles.ingredientName}>
-                    {ing.quantity ? `${ing.quantity} ` : ''}
-                    <Text style={styles.ingredientNameBold}>{ing.name}</Text>
-                  </Text>
+                  <Text style={styles.ingredientName}>{name}</Text>
                 </View>
                 {deal && <DealBadge deal={deal} />}
               </View>
@@ -145,21 +140,19 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           })}
         </View>
 
-        {recipe.steps && recipe.steps.length > 0 && (
-          <>
-            <Text style={styles.sectionTitle}>Method</Text>
-            <View style={styles.stepsList}>
-              {recipe.steps.map((step, idx) => (
-                <View key={idx} style={styles.stepItem}>
-                  <View style={styles.stepNumber}>
-                    <Text style={styles.stepNumberText}>{idx + 1}</Text>
-                  </View>
-                  <Text style={styles.stepText}>{step}</Text>
-                </View>
-              ))}
-            </View>
-          </>
+        {recipe.sourceUrl && recipe.sourceUrl !== '#' && (
+          <TouchableOpacity
+            style={styles.viewFullButton}
+            activeOpacity={0.85}
+            onPress={() => Linking.openURL(recipe.sourceUrl as string)}
+          >
+            <Text style={styles.viewFullText}>View full recipe & method</Text>
+            <Ionicons name="open-outline" size={16} color="#F4EEE2" />
+          </TouchableOpacity>
         )}
+        {recipe.source ? (
+          <Text style={styles.attribution}>Recipe from {recipe.source}</Text>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -177,7 +170,6 @@ const styles = StyleSheet.create({
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   dietTag: { backgroundColor: '#F2E2D6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   dietTagText: { fontSize: 12, color: '#BE6A43', fontFamily: 'Inter_600SemiBold' },
-  description: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 23 },
   savingsCard: { backgroundColor: '#F2E2D6', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#E6C9B3' },
   savingsRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   savingsTitle: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#2A241F', flex: 1 },
@@ -188,11 +180,8 @@ const styles = StyleSheet.create({
   ingredientItem: { gap: 4 },
   ingredientRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   bulletDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#36453B', marginTop: 6, flexShrink: 0 },
-  ingredientName: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 22, flex: 1 },
-  ingredientNameBold: { fontFamily: 'Inter_600SemiBold' },
-  stepsList: { gap: 16 },
-  stepItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
-  stepNumber: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#36453B', justifyContent: 'center', alignItems: 'center', flexShrink: 0, marginTop: 1 },
-  stepNumberText: { color: '#ffffff', fontSize: 14, fontFamily: 'Inter_700Bold' },
-  stepText: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 23, flex: 1 },
+  ingredientName: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 22, flex: 1, textTransform: 'capitalize' },
+  viewFullButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#36453B', paddingVertical: 14, borderRadius: 12, marginTop: 4 },
+  viewFullText: { color: '#F4EEE2', fontSize: 15, fontFamily: 'Inter_600SemiBold' },
+  attribution: { fontSize: 12, fontFamily: 'Inter_400Regular', color: '#6B5F52', textAlign: 'center', textTransform: 'capitalize' },
 });

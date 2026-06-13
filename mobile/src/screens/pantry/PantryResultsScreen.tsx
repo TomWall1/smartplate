@@ -31,7 +31,7 @@ function ResultCard({ result, onPress }: { result: PantryMatchResult; onPress: (
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.88}>
       <Image
-        source={{ uri: recipe.image_url }}
+        source={{ uri: recipe.image }}
         style={styles.cardImage}
         resizeMode="cover"
       />
@@ -58,10 +58,10 @@ function ResultCard({ result, onPress }: { result: PantryMatchResult; onPress: (
           </Text>
         </View>
 
-        {recipe.prep_time > 0 && (
+        {(recipe.prepTime ?? 0) > 0 && (
           <View style={styles.metaRow}>
             <Ionicons name="time-outline" size={13} color="#6B5F52" />
-            <Text style={styles.metaText}>{recipe.prep_time} min</Text>
+            <Text style={styles.metaText}>{recipe.prepTime} min</Text>
           </View>
         )}
 
@@ -110,13 +110,13 @@ export default function PantryResultsScreen({ route, navigation }: Props) {
       </View>
       <FlatList
         data={results}
-        keyExtractor={(item) => item.recipe.id}
+        keyExtractor={(item) => String(item.recipe.id)}
         renderItem={({ item }) => (
           <ResultCard
             result={item}
             onPress={() =>
               navigation.navigate('PantryRecipeDetail', {
-                id: item.recipe.id,
+                id: String(item.recipe.id),
                 title: item.recipe.title,
               })
             }

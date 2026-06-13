@@ -13,14 +13,14 @@ import ErrorState from '../components/ErrorState';
 import { colors, fonts, type, spacing, radius, shadow, storeColors } from '../theme';
 
 function DealItem({ deal }: { deal: Deal }) {
-  const hasSaving = deal.savings > 0;
+  const saving = deal.originalPrice && deal.price ? +(deal.originalPrice - deal.price).toFixed(2) : 0;
   return (
     <View style={styles.dealCard}>
       <View style={styles.dealInfo}>
-        <Text style={styles.dealName} numberOfLines={2}>{deal.dealName || deal.ingredient}</Text>
-        {hasSaving && (
+        <Text style={styles.dealName} numberOfLines={2}>{deal.name}</Text>
+        {saving > 0 && (
           <View style={styles.savingsBadge}>
-            <Text style={styles.savingsText}>Save ${deal.savings.toFixed(2)}</Text>
+            <Text style={styles.savingsText}>Save ${saving.toFixed(2)}</Text>
           </View>
         )}
       </View>
@@ -54,8 +54,6 @@ export default function StoreScreen() {
 
   const deals = dealsQuery.data ?? [];
   const recipes = recipesQuery.data ?? [];
-  const storeRecipes = recipes.filter((r) => r.matchedDeals?.some((d) => d.store?.toLowerCase() === store));
-  const displayRecipes = storeRecipes.length > 0 ? storeRecipes : recipes;
 
   return (
     <ScrollView
@@ -74,49 +72,29 @@ export default function StoreScreen() {
       <View style={[styles.storeHeader, { backgroundColor: cfg.color, paddingTop: insets.top + spacing.md }]}>
         <View style={{ flex: 1 }}>
           <Text style={styles.storeHeaderName}>{cfg.name}</Text>
-          <Text style={styles.storeHeaderSub}>This week's deals</Text>
+          <Text style={styles.storeHeaderSub}>This week's deals & recipes</Text>
         </View>
         <TouchableOpacity style={styles.changeStoreBtn} onPress={() => navigation.navigate('StoreSelection')} activeOpacity={0.85}>
           <Text style={styles.changeStoreTxt}>Change</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Deals */}
-      <View style={styles.section}>
-        <View style={styles.sectionTitleRow}>
-          <Ionicons name="pricetags-outline" size={18} color={colors.ink} />
-          <Text style={styles.sectionTitle}>Deals this week</Text>
-          <Text style={styles.sectionCount}>{deals.length}</Text>
-        </View>
-        {deals.length === 0 ? (
-          <View style={styles.emptyCard}><Text style={styles.emptyText}>No deals loaded yet. Pull to refresh.</Text></View>
-        ) : (
-          <FlatList
-            data={deals.slice(0, 30)}
-            keyExtractor={(item, index) => `${item.ingredient}-${index}`}
-            renderItem={({ item }) => <DealItem deal={item} />}
-            scrollEnabled={false}
-            ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
-          />
-        )}
-      </View>
-
-      {/* Recipes */}
+      {/* Recipes first (matches the website) */}
       {effectiveState ? (
         <View style={styles.section}>
           <View style={styles.sectionTitleRow}>
             <Ionicons name="restaurant-outline" size={18} color={colors.ink} />
-            <Text style={styles.sectionTitle}>Recipes using deals</Text>
-            <Text style={styles.sectionCount}>{displayRecipes.length}</Text>
+            <Text style={styles.sectionTitle}>Recipes using these deals</Text>
+            <Text style={styles.sectionCount}>{recipes.length}</Text>
           </View>
-          {displayRecipes.length === 0 ? (
+          {recipes.length === 0 ? (
             <View style={styles.emptyCard}><Text style={styles.emptyText}>No recipes found. Try refreshing.</Text></View>
           ) : (
-            displayRecipes.map((recipe) => (
+            recipes.map((recipe) => (
               <RecipeCard
-                key={recipe.id}
+                key={String(recipe.id)}
                 recipe={recipe}
-                onPress={() => navigation.navigate('StoreRecipeDetail', { id: recipe.id, title: recipe.title })}
+                onPress={() => navigation.navigate('StoreRecipeDetail', { id: String(recipe.id), title: recipe.title })}
               />
             ))
           )}
@@ -133,6 +111,26 @@ export default function StoreScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Deals below */}
+      <View style={styles.section}>
+        <View style={styles.sectionTitleRow}>
+          <Ionicons name="pricetags-outline" size={18} color={colors.ink} />
+          <Text style={styles.sectionTitle}>Deals this week</Text>
+          <Text style={styles.sectionCount}>{deals.length}</Text>
+        </View>
+        {deals.length === 0 ? (
+          <View style={styles.emptyCard}><Text style={styles.emptyText}>No deals loaded yet. Pull to refresh.</Text></View>
+        ) : (
+          <FlatList
+            data={deals.slice(0, 30)}
+            keyExtractor={(item, index) => `${item.name}-${index}`}
+            renderItem={({ item }) => <DealItem deal={item} />}
+            scrollEnabled={false}
+            ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
+          />
+        )}
+      </View>
 
       <View style={{ height: spacing.xxl }} />
     </ScrollView>

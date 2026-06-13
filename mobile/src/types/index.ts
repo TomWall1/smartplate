@@ -1,33 +1,54 @@
+// Raw store deal — GET /api/deals/store/:name (scraped catalogue items).
 export interface Deal {
-  ingredient: string;
-  dealName: string;
-  store: 'woolworths' | 'coles' | 'iga' | string;
+  name: string;
   price: number;
-  savings: number;
+  originalPrice?: number;
+  discountPercentage?: number;
+  store: string;
+  category?: string;
+  image?: string;
+  productImage?: string;
+}
+
+// A deal matched to a recipe ingredient — lives inside recipe.matchedDeals.
+// (Different shape from a raw Deal: has dealName + ingredient + saving.)
+export interface MatchedDeal {
+  dealName: string;
+  ingredient: string;
+  store: string;
+  price?: number;
+  originalPrice?: number;
+  discountPercentage?: number;
+  saving?: number;
+  productCategory?: string;
+  savings?: { mealSaving?: number; perServingSaving?: number };
 }
 
 export interface Ingredient {
   name: string;
-  quantity: string;
-  ingredientTags?: {
-    category?: string;
-  };
+  quantity?: string;
 }
 
+// Served recipe shape — recipeService._composeWeeklyRecipe (camelCase).
 export interface Recipe {
-  id: string;
+  id: number | string;
   title: string;
-  description: string;
-  image_url: string;
-  prep_time: number;
-  servings: number;
-  cuisine: string;
-  meal_type: string;
-  dietary_tags: string[];
-  ingredients: Ingredient[];
-  matchedDeals: Deal[];
-  steps: string[];
-  deal_count: number;
+  image?: string;
+  prepTime?: number;
+  cookTime?: number;
+  servings?: number;
+  tags?: string[];
+  matchedDeals?: MatchedDeal[];
+  dealIngredients?: string[];
+  dealHighlights?: string[];
+  estimatedSaving?: number;
+  totalEstimatedCost?: number;
+  totalMealSaving?: number;
+  totalPerServingSaving?: number;
+  allIngredients?: string[];
+  ingredients?: string[];
+  source?: string;
+  sourceUrl?: string;
 }
 
 export interface User {
@@ -48,7 +69,7 @@ export interface PantryMatchResult {
   coveragePercent: number;
   matchedCount: number;
   totalCount: number;
-  missingDeals: Deal[];
+  missingDeals: MatchedDeal[];
 }
 
 export interface AuthResponse {

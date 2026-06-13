@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Deal } from '../types';
+import { MatchedDeal } from '../types';
 
 interface Props {
-  deal: Deal;
+  deal: MatchedDeal;
 }
 
 const STORE_COLORS: Record<string, string> = {
@@ -24,9 +24,9 @@ export default function DealBadge({ deal }: Props) {
       <View style={[styles.storePill, { backgroundColor: storeColor }]}>
         <Text style={styles.storeText}>{capitalize(deal.store)}</Text>
       </View>
-      <Text style={styles.price}>${deal.price.toFixed(2)}</Text>
-      {deal.savings > 0 && (
-        <Text style={styles.savings}>· save ${deal.savings.toFixed(2)}</Text>
+      {deal.price != null && <Text style={styles.price}>${deal.price.toFixed(2)}</Text>}
+      {(deal.saving ?? 0) > 0 && (
+        <Text style={styles.savings}>· save ${(deal.saving as number).toFixed(2)}</Text>
       )}
     </View>
   );
