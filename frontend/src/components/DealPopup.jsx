@@ -7,12 +7,12 @@ const STORE_COLORS = {
   iga:        '#003da5',
 };
 
-function getStoreSearchUrl(ingredient, store) {
-  const q = encodeURIComponent(ingredient);
+function getStoreSearchUrl(query, store) {
+  const q = encodeURIComponent(query);
   if (store === 'woolworths') return `https://www.woolworths.com.au/shop/search/products?searchTerm=${q}&isSpecial=true`;
   if (store === 'coles') return `https://www.coles.com.au/search?q=${q}&filter=specialsOnly`;
   if (store === 'iga') return `https://www.iga.com.au/search/?q=${q}`;
-  return `https://www.google.com/search?q=${encodeURIComponent(ingredient + ' supermarket special')}`;
+  return `https://www.google.com/search?q=${encodeURIComponent(query + ' supermarket special')}`;
 }
 
 export default function DealPopup({ deal, anchorRef, onClose }) {
@@ -44,7 +44,11 @@ export default function DealPopup({ deal, anchorRef, onClose }) {
   const storeName = deal.store
     ? deal.store.charAt(0).toUpperCase() + deal.store.slice(1)
     : 'Store';
-  const searchUrl = getStoreSearchUrl(deal.name || deal.ingredient, deal.store);
+  // Search the weekly-catalogue product name ("Australian Pork Shoulder
+  // Boneless Roast"), not the recipe ingredient ("pork shoulder") — the
+  // catalogue name is what resolves to the actual on-special product on the
+  // store site. dealName is set on matched deals; fall back for safety.
+  const searchUrl = getStoreSearchUrl(deal.dealName || deal.name || deal.ingredient, deal.store);
 
   const hasWasNow = deal.originalPrice && deal.price && deal.originalPrice !== deal.price;
   const discountLabel = deal.discountPercentage
