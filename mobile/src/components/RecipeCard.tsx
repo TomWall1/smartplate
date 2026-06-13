@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Recipe } from '../types';
 import { colors, fonts, radius, spacing, shadow } from '../theme';
 
@@ -13,8 +14,12 @@ interface Props {
 const BLUR = 'L6Pj0^jE.AyE_3t7t7R**0o#DgR4'; // soft neutral placeholder
 
 export default function RecipeCard({ recipe, onPress }: Props) {
+  const handlePress = () => {
+    Haptics.selectionAsync().catch(() => {});
+    onPress();
+  };
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
+    <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.9}>
       <View style={styles.imageWrapper}>
         <Image
           source={recipe.image_url}
