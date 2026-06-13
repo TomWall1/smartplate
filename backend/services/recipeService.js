@@ -139,12 +139,12 @@ class RecipeService {
     // verification, then round-robin across hero groups for variety. Falls
     // back to the legacy diversity selector only if nothing qualifies, so we
     // never serve an empty set.
-    let selected = recipeMatcher.selectMenu(verified, 150);
+    let selected = this._buildStoreOrderedSelection(verified, 150);
     if (selected.length === 0) {
       console.warn('RecipeService: no hero-anchored recipes after verification — falling back to legacy diversity selection');
       selected = recipeMatcher._diversifyResults(verified, 150);
     }
-    console.log(`RecipeService: selected ${selected.length} hero-anchored recipes (of ${verified.length} verified candidates)`);
+    console.log(`RecipeService: selected ${selected.length} recipes across stores (of ${verified.length} verified candidates)`);
 
     // Step 1c: Attach per-serving savings to each selected recipe's deals.
     const matchedWithSavings = selected.map(r =>
@@ -234,6 +234,65 @@ class RecipeService {
   }
 
   /**
+   * Per-store hero-anchored selection (Approach A). Customers view ONE store,
+   * and _filterRecipesByStore strips cross-store deals — so the hero gate has
+   * to run per store, not on combined deals (otherwise a recipe picked because
+   * salmon is cheap at store A shows up at store B as an olive-oil recipe).
+   *
+   * Each store's menu is selected independently (selectStoreMenu) over the
+   * full verified pool, the results are unioned into one artifact, and every
+   * recipe is tagged with its rank within each store's menu (`storeOrder`). At
+   * serve time _filterRecipesByStore uses storeOrder to include + order per
+   * store — reproducing each store's hero-first, varied list without needing a
+   * separate stored artifact per store.
+   */
+  _buildStoreOrderedSelection(verified, limit = 150) {
+    const recipeMatcher = require('./recipeMatcher');
+
+    const stores = new Set();
+    for (const r of verified) {
+      for (const d of (r.matchedDeals || [])) {
+        if (d.store) stores.add(d.store.toLowerCase());
+      }
+    }
+
+    // No store metadata — fall back to a single combined menu, untagged.
+    if (stores.size === 0) {
+      const picked = recipeMatcher.selectMenu(verified, limit);
+      picked.forEach(r => { r.storeOrder = null; });
+      return picked;
+    }
+
+    const storeOrderByKey = new Map(); // recipeKey → { store: rank }
+    for (const store of stores) {
+      const views = [];
+      for (const r of verified) {
+        const sd = (r.matchedDeals || []).filter(d => (d.store || '').toLowerCase() === store);
+        if (sd.length) views.push({ ...r, matchedDeals: sd });
+      }
+      const ordered = recipeMatcher.selectStoreMenu(views, limit);
+      ordered.forEach((v, idx) => {
+        const key = recipeCostService.recipeKey(v);
+        if (!storeOrderByKey.has(key)) storeOrderByKey.set(key, {});
+        const so = storeOrderByKey.get(key);
+        if (so[store] === undefined) so[store] = idx;
+      });
+    }
+
+    const selected = [];
+    for (const r of verified) {
+      const so = storeOrderByKey.get(recipeCostService.recipeKey(r));
+      if (!so) continue;
+      r.storeOrder = so;
+      r.weightedScore = +recipeMatcher._calculateRecipeScore(r).toFixed(2);
+      selected.push(r);
+    }
+    // Combined (no-store) ordering; per-store order is re-derived at serve time.
+    selected.sort((a, b) => (b.weightedScore || 0) - (a.weightedScore || 0));
+    return selected;
+  }
+
+  /**
    * Compose the serving shape for one matched library recipe.
    *
    * CONTENT BOUNDARY (IP / lead-gen design): the card carries only OUR
@@ -300,6 +359,7 @@ class RecipeService {
       dealHighlights,
       matchedDeals:          libRecipe.matchedDeals         || [],
       weightedScore:         libRecipe.weightedScore         ?? null,
+      storeOrder:            libRecipe.storeOrder            ?? null,
       totalMealSaving:       libRecipe.totalMealSaving       ?? null,
       totalPerServingSaving: libRecipe.totalPerServingSaving ?? null,
       // Backwards compat fields for existing frontend
@@ -344,7 +404,7 @@ class RecipeService {
 
         await matchEdgeService.filterRecipesByEdges(candidates);
         const verified = candidates.filter(r => (r.matchedDeals || []).length > 0);
-        let selected = recipeMatcher.selectMenu(verified, 150);
+        let selected = this._buildStoreOrderedSelection(verified, 150);
         if (selected.length === 0) selected = recipeMatcher._diversifyResults(verified, 150);
         const withSavings = selected.map(r => enrichMatchedDealsWithSavings(r, r.matchedDeals));
 
@@ -566,6 +626,12 @@ class RecipeService {
     const s = store.toLowerCase();
     return recipes
       .map(r => {
+        // Per-store selection (storeOrder) decides which recipes a store gets
+        // and their order. If the recipe is tagged and this store isn't listed,
+        // it's not offered here (its heroes were at other stores). Untagged
+        // recipes (legacy artifacts) fall through to the deal-presence check.
+        if (r.storeOrder && r.storeOrder[s] === undefined) return null;
+
         const storeDeals = (r.matchedDeals || []).filter(
           d => (d.store || '').toLowerCase() === s
         );
@@ -591,7 +657,10 @@ class RecipeService {
         };
       })
       .filter(Boolean)
-      .sort((a, b) => b.matchedDeals.length - a.matchedDeals.length);
+      .sort((a, b) =>
+        (a.storeOrder?.[s] ?? 1e9) - (b.storeOrder?.[s] ?? 1e9)
+        || b.matchedDeals.length - a.matchedDeals.length
+      );
   }
 
   // ── State-aware recipe delivery ──────────────────────────────────────────────

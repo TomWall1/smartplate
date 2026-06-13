@@ -85,6 +85,22 @@ ok(topGroups.size === 4, `top 4 slots span 4 distinct hero groups (got ${topGrou
 const chickenCount = titles.filter(t => t.startsWith('Chicken dish')).length;
 ok(chickenCount <= 5, `chicken can't crowd out other heroes (got ${chickenCount}; cap = limit − other heroes = 5)`);
 
+// ── 4. selectStoreMenu: hero first, weak non-pantry backfilled, pantry excluded ─
+const storeCands = [
+  recipe('Roast salmon', 'salmon',
+    [deal({ dealName: 'Salmon Fillets 400g', ingredient: 'salmon', cat: 'seafood', orig: 14, price: 10, pct: 28 })]),       // hero (driver)
+  recipe('Oil-only pasta', null,
+    [deal({ dealName: 'Olive Oil 4L', ingredient: 'olive oil', cat: 'oils_fats', orig: 20, price: 15 })]),                   // pantry-only -> excluded
+  recipe('Weak chicken bake', 'chicken',
+    [deal({ dealName: 'Chicken Breast 1kg', ingredient: 'chicken breast', cat: 'meat', orig: 12, price: 11.6, pct: 3 })]),   // non-pantry, weak discount -> backfill
+];
+const storeMenu = matcher.selectStoreMenu(storeCands, 10).map(r => r.title);
+ok(storeMenu.includes('Roast salmon'), 'store menu: hero salmon included');
+ok(storeMenu.includes('Weak chicken bake'), 'store menu: weak non-pantry recipe backfilled (keeps premium list long)');
+ok(!storeMenu.includes('Oil-only pasta'), 'store menu: pure-pantry recipe excluded even from backfill');
+ok(storeMenu[0] === 'Roast salmon', 'store menu: hero ranked above backfill');
+
 console.log('\nMenu order:', titles.join(' | '));
+console.log('Store menu:', storeMenu.join(' | '));
 console.log(failures === 0 ? '\nALL PASSED' : `\n${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

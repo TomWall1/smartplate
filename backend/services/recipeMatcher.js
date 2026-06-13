@@ -82,6 +82,14 @@ const {
   STOP_WORDS,
 } = require('../config/matching');
 
+// Pantry / staple add-on categories — not meal centrepieces. Used to keep
+// pure-pantry-only recipes out of the per-store backfill, so the "extended"
+// premium list never degrades into oil/rice/condiment-anchored filler.
+const PANTRY_CATEGORIES = new Set([
+  'oils_fats', 'condiments', 'sauces', 'herbs_spices', 'grains',
+  'canned_preserved', 'snacks', 'beverages', 'baked_goods', 'nuts_seeds',
+]);
+
 class RecipeMatcher {
   constructor() {
     this.library = null;
@@ -904,6 +912,34 @@ class RecipeMatcher {
       if (!placed) break;
     }
     return result;
+  }
+
+  /**
+   * Per-store menu for ONE store's isolated deals. Customers view a single
+   * store, where cross-store deals are stripped — so the hero gate has to run
+   * per store, not on combined deals (otherwise a recipe picked because salmon
+   * is cheap at store A shows up at store B as an olive-oil recipe).
+   *
+   * Tiered so a sparse store still fills a useful (premium-length) list
+   * without ever showing pure-pantry filler:
+   *   Tier 1 — hero-anchored (driver deal), round-robin ordered (selectMenu)
+   *   Tier 2 — backfill: any recipe with a non-pantry deal on special here
+   *            (a protein/veg/dairy on a weak discount still beats oil), by score
+   *   excluded — recipes whose only deals at this store are pantry items
+   */
+  selectStoreMenu(candidates, limit = 150) {
+    const hero = this.selectMenu(candidates, limit);
+    if (hero.length >= limit) return hero;
+
+    const chosen = new Set(hero);
+    const backfill = candidates.filter(r =>
+      !chosen.has(r) &&
+      (r.matchedDeals || []).some(d => !PANTRY_CATEGORIES.has(d.productCategory))
+    );
+    for (const r of backfill) r.weightedScore = +this._calculateRecipeScore(r).toFixed(2);
+    backfill.sort((a, b) => (b.weightedScore || 0) - (a.weightedScore || 0));
+
+    return hero.concat(backfill).slice(0, limit);
   }
 }
 
