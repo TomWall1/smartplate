@@ -8,6 +8,7 @@ export interface Deal {
   category?: string;
   image?: string;
   productImage?: string;
+  productIntelligence?: { category?: string };
 }
 
 // A deal matched to a recipe ingredient — lives inside recipe.matchedDeals.

@@ -1,34 +1,20 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { useDeals, useRecipes } from '../api/hooks';
-import { Deal, FilterType } from '../types';
+import { FilterType } from '../types';
 import { FILTERS, applyFilter } from '../lib/recipeFilters';
 import RecipeCard from '../components/RecipeCard';
+import CategorizedDeals from '../components/CategorizedDeals';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
-import { colors, fonts, type, spacing, radius, shadow, storeColors } from '../theme';
+import { colors, fonts, type, spacing, radius, storeColors } from '../theme';
 
-function DealItem({ deal }: { deal: Deal }) {
-  const saving = deal.originalPrice && deal.price ? +(deal.originalPrice - deal.price).toFixed(2) : 0;
-  return (
-    <View style={styles.dealCard}>
-      <View style={styles.dealInfo}>
-        <Text style={styles.dealName} numberOfLines={2}>{deal.name}</Text>
-        {saving > 0 && (
-          <View style={styles.savingsBadge}>
-            <Text style={styles.savingsText}>Save ${saving.toFixed(2)}</Text>
-          </View>
-        )}
-      </View>
-      <Text style={styles.dealPrice}>${deal.price.toFixed(2)}</Text>
-    </View>
-  );
-}
+const RECIPES_PER_PAGE = 6;
 
 export default function StoreScreen() {
   const navigation = useNavigation<any>();
@@ -43,11 +29,17 @@ export default function StoreScreen() {
   const dealsQuery = useDeals(store);
   const recipesQuery = useRecipes(effectiveState, store);
   const [filter, setFilter] = useState<FilterType>('all');
+  const [displayCount, setDisplayCount] = useState(RECIPES_PER_PAGE);
 
   const onRefresh = useCallback(() => {
     dealsQuery.refetch();
     recipesQuery.refetch();
   }, [dealsQuery, recipesQuery]);
+
+  const pickFilter = (key: FilterType) => {
+    setFilter(key);
+    setDisplayCount(RECIPES_PER_PAGE); // reset paging when the filter changes
+  };
 
   if (dealsQuery.isLoading) return <LoadingState message={`Loading ${cfg.name} deals…`} />;
   if (dealsQuery.isError) {
@@ -56,7 +48,9 @@ export default function StoreScreen() {
 
   const deals = dealsQuery.data ?? [];
   const recipes = recipesQuery.data ?? [];
-  const shownRecipes = applyFilter(recipes, filter);
+  const filteredRecipes = applyFilter(recipes, filter);
+  const shownRecipes = filteredRecipes.slice(0, displayCount);
+  const remaining = filteredRecipes.length - shownRecipes.length;
 
   return (
     <ScrollView
@@ -82,13 +76,15 @@ export default function StoreScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Recipes first (matches the website) */}
+      {/* Recipes first (6 at a time, like the website) */}
       {effectiveState ? (
         <View style={styles.section}>
           <View style={styles.sectionTitleRow}>
             <Ionicons name="restaurant-outline" size={18} color={colors.ink} />
             <Text style={styles.sectionTitle}>Recipes using these deals</Text>
-            <Text style={styles.sectionCount}>{shownRecipes.length}</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('RecipesTab')}>
+              <Text style={styles.viewAll}>View all</Text>
+            </TouchableOpacity>
           </View>
 
           {recipes.length > 0 && (
@@ -97,7 +93,7 @@ export default function StoreScreen() {
                 <TouchableOpacity
                   key={f.key}
                   style={[styles.chip, filter === f.key && styles.chipActive]}
-                  onPress={() => setFilter(f.key)}
+                  onPress={() => pickFilter(f.key)}
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.chipText, filter === f.key && styles.chipTextActive]}>{f.label}</Text>
@@ -108,16 +104,27 @@ export default function StoreScreen() {
 
           {recipes.length === 0 ? (
             <View style={styles.emptyCard}><Text style={styles.emptyText}>No recipes found. Try refreshing.</Text></View>
-          ) : shownRecipes.length === 0 ? (
+          ) : filteredRecipes.length === 0 ? (
             <View style={styles.emptyCard}><Text style={styles.emptyText}>No recipes match this filter.</Text></View>
           ) : (
-            shownRecipes.map((recipe) => (
-              <RecipeCard
-                key={String(recipe.id)}
-                recipe={recipe}
-                onPress={() => navigation.navigate('StoreRecipeDetail', { id: String(recipe.id), title: recipe.title })}
-              />
-            ))
+            <>
+              {shownRecipes.map((recipe) => (
+                <RecipeCard
+                  key={String(recipe.id)}
+                  recipe={recipe}
+                  onPress={() => navigation.navigate('StoreRecipeDetail', { id: String(recipe.id), title: recipe.title })}
+                />
+              ))}
+              {remaining > 0 && (
+                <TouchableOpacity
+                  style={styles.showMoreBtn}
+                  activeOpacity={0.85}
+                  onPress={() => setDisplayCount((n) => n + RECIPES_PER_PAGE)}
+                >
+                  <Text style={styles.showMoreText}>Show more recipes ({remaining} more)</Text>
+                </TouchableOpacity>
+              )}
+            </>
           )}
         </View>
       ) : (
@@ -133,24 +140,14 @@ export default function StoreScreen() {
         </View>
       )}
 
-      {/* Deals below */}
+      {/* Deals below — grouped into collapsible category cards */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
           <Ionicons name="pricetags-outline" size={18} color={colors.ink} />
           <Text style={styles.sectionTitle}>Deals this week</Text>
           <Text style={styles.sectionCount}>{deals.length}</Text>
         </View>
-        {deals.length === 0 ? (
-          <View style={styles.emptyCard}><Text style={styles.emptyText}>No deals loaded yet. Pull to refresh.</Text></View>
-        ) : (
-          <FlatList
-            data={deals.slice(0, 30)}
-            keyExtractor={(item, index) => `${item.name}-${index}`}
-            renderItem={({ item }) => <DealItem deal={item} />}
-            scrollEnabled={false}
-            ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
-          />
-        )}
+        <CategorizedDeals deals={deals} />
       </View>
 
       <View style={{ height: spacing.xxl }} />
@@ -169,17 +166,14 @@ const styles = StyleSheet.create({
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
   sectionTitle: { ...type.heading, fontFamily: fonts.display, color: colors.ink, flex: 1 },
   sectionCount: { fontFamily: fonts.uiMedium, fontSize: 14, color: colors.inkFaint },
+  viewAll: { fontFamily: fonts.uiMedium, fontSize: 13, color: colors.brand, textDecorationLine: 'underline' },
   chipsContent: { gap: spacing.sm, paddingBottom: spacing.md },
   chip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, marginRight: spacing.sm },
   chipActive: { backgroundColor: colors.brand, borderColor: colors.brand },
   chipText: { fontFamily: fonts.uiMedium, fontSize: 13, color: colors.inkSecondary },
   chipTextActive: { color: colors.onBrand },
-  dealCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.card, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, gap: spacing.md, ...shadow.card },
-  dealInfo: { flex: 1, gap: spacing.xs },
-  dealName: { fontFamily: fonts.uiMedium, fontSize: 14, color: colors.ink, lineHeight: 20 },
-  savingsBadge: { alignSelf: 'flex-start', backgroundColor: colors.accentTint, paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill },
-  savingsText: { fontFamily: fonts.uiMedium, fontSize: 11, color: colors.accent },
-  dealPrice: { fontFamily: fonts.display, fontSize: 18, color: colors.ink },
+  showMoreBtn: { alignItems: 'center', paddingVertical: spacing.md, marginTop: spacing.xs },
+  showMoreText: { fontFamily: fonts.uiMedium, fontSize: 14, color: colors.brand },
   emptyCard: { backgroundColor: colors.surface, borderRadius: radius.card, padding: spacing.xl, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
   emptyText: { fontFamily: fonts.ui, fontSize: 14, color: colors.inkSecondary, textAlign: 'center' },
   setStateCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.sheet, padding: spacing.lg, borderWidth: 1, borderColor: colors.brandTint, gap: spacing.md },
