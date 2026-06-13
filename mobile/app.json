@@ -7,8 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FDFAF5"
+      "backgroundColor": "#F4EEE2"
     },
     "ios": {
       "supportsTablet": false,
@@ -16,7 +17,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#FDFAF5"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#36453B"
       },
       "package": "com.smartplate.dealstodish"
     },
@@ -26,10 +28,11 @@
     "scheme": "dealstodish",
     "plugins": [
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "extra": {
-      "apiBaseUrl": "https://smartplate-backend.onrender.com"
+      "apiBaseUrl": "https://deals-to-dish-api.onrender.com"
     }
   }
 }
