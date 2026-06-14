@@ -876,15 +876,62 @@ class RecipeMatcher {
    * beef chuck…) instead of broad protein buckets, where one sub-hero (salmon)
    * monopolised the whole bucket. Returns null if the recipe has no driver.
    */
-  _heroKey(recipe) {
+  _heroKeyFromDeals(deals) {
     let anchor = null, best = -1;
-    for (const d of (recipe.matchedDeals || [])) {
+    for (const d of (deals || [])) {
       if (!this._isDriverDeal(d)) continue;
       const score = this._getIngredientWeight(d) * 1000 + (d.saving || 0); // weight first, then saving
       if (score > best) { best = score; anchor = d; }
     }
     if (!anchor) return null;
     return normalizeName(anchor.dealName || '') || (anchor.ingredient || '').toLowerCase() || 'other';
+  }
+
+  _heroKey(recipe) {
+    return this._heroKeyFromDeals(recipe.matchedDeals || []);
+  }
+
+  /**
+   * Build the edge-verification pool so EVERY store's heroes are covered.
+   *
+   * The pool must be store-aware: a WW-chicken recipe that also matches a
+   * cheaper Coles-salmon deal has a cross-store hero of "salmon", so a single
+   * national per-hero pool attributes it to salmon and starves WW's chicken
+   * lane. Here we pool per store on that store's ISOLATED deals — guaranteeing
+   * each store's heroes get coverage — then union. Bounds the pool (and thus
+   * Claude verification) to ~perStore × #stores while keeping per-store variety.
+   */
+  poolForStores(candidates, perStore = 300) {
+    const stores = new Set();
+    for (const r of candidates) {
+      for (const d of (r.matchedDeals || [])) if (d.store) stores.add(d.store.toLowerCase());
+    }
+    if (stores.size === 0) return candidates;
+
+    const PER_HERO = 30;
+    const picked = new Set();
+    for (const store of stores) {
+      const storeRecipes = candidates.filter(r =>
+        (r.matchedDeals || []).some(d => (d.store || '').toLowerCase() === store)
+      ); // candidates are already score-sorted
+      const heroCount = new Map();
+      let taken = 0;
+      // Pass 1 — per-hero top-N on this store's isolated deals
+      for (const r of storeRecipes) {
+        if (taken >= perStore) break;
+        const sd = r.matchedDeals.filter(d => (d.store || '').toLowerCase() === store);
+        const hero = this._heroKeyFromDeals(sd);
+        if (!hero) continue;
+        const c = heroCount.get(hero) || 0;
+        if (c < PER_HERO) { picked.add(r); heroCount.set(hero, c + 1); taken++; }
+      }
+      // Pass 2 — fill the store's remaining slots by score (for backfill)
+      for (const r of storeRecipes) {
+        if (taken >= perStore) break;
+        if (!picked.has(r)) { picked.add(r); taken++; }
+      }
+    }
+    return candidates.filter(r => picked.has(r));
   }
 
   /**

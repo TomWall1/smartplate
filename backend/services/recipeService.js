@@ -106,8 +106,14 @@ class RecipeService {
     // verification — the old code selected the top 150 and applied the protein
     // guarantee here, then verification silently dropped the qualifying
     // protein, leaving 67% of served recipes anchored on pantry items.
-    const candidates = await recipeMatcher.scoreCandidates(enrichedDeals, 800);
-    console.log(`RecipeService: Scored ${candidates.length} candidate recipes`);
+    // Score the whole matchable library, then build the verification pool
+    // PER STORE (per-hero coverage on each store's isolated deals) so a store's
+    // heroes can't be starved by a cross-store anchor — e.g. a WW-chicken
+    // recipe that also matches a cheaper Coles-salmon deal must still keep its
+    // WW-chicken lane. poolForStores bounds Claude verification to ~300/store.
+    const scored = await recipeMatcher.scoreCandidates(enrichedDeals, 999999);
+    const candidates = recipeMatcher.poolForStores(scored, 300);
+    console.log(`RecipeService: Scored ${scored.length} matchable, pooled ${candidates.length} for verification`);
 
     // Hard rule: Claude NEVER invents recipes. Every recipe served must come
     // from the scraped library. Zero candidates means something is broken
@@ -396,7 +402,8 @@ class RecipeService {
           continue;
         }
 
-        const candidates = await recipeMatcher.scoreCandidates(deals, 800);
+        const scored = await recipeMatcher.scoreCandidates(deals, 999999);
+        const candidates = recipeMatcher.poolForStores(scored, 300);
         if (!candidates.length) {
           console.warn(`RecipeService: ${state.toUpperCase()} matched 0 recipes — skipping`);
           continue;
