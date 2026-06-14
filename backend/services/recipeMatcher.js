@@ -712,7 +712,7 @@ class RecipeMatcher {
    * pantry scrap survived (the "kebabs because of olive oil" failure). Scoring
    * a generous pool and deferring selection fixes that inversion.
    */
-  async scoreCandidates(deals, poolSize = 400) {
+  async scoreCandidates(deals, poolSize = 800) {
     const scored = (await this._scoreAllRecipes(deals)).filter(r => r.matchScore > 0);
     for (const r of scored) {
       r.weightedScore = +this._calculateRecipeScore(r).toFixed(2);
@@ -722,7 +722,32 @@ class RecipeMatcher {
       || b.matchScore - a.matchScore
       || b.totalSaving - a.totalSaving
     );
-    return scored.slice(0, poolSize);
+
+    // Per-hero guarantee: take each on-special hero's top PER_HERO recipes
+    // FIRST, so a big-saving hero (salmon) can't flood the pool and crowd
+    // smaller-saving heroes (whole chicken, lamb leg) out before selection
+    // even runs. Then fill the remainder by score (incl. non-driver recipes,
+    // which selectStoreMenu uses for backfill).
+    const PER_HERO = 30;
+    const heroCount = new Map();
+    const picked = new Set();
+    const pool = [];
+    for (const r of scored) {
+      const hero = this._heroKey(r);
+      if (!hero) continue;
+      const c = heroCount.get(hero) || 0;
+      if (c < PER_HERO) { pool.push(r); picked.add(r); heroCount.set(hero, c + 1); }
+    }
+    for (const r of scored) {
+      if (pool.length >= poolSize) break;
+      if (!picked.has(r)) { pool.push(r); picked.add(r); }
+    }
+    pool.sort((a, b) =>
+      b.weightedScore - a.weightedScore
+      || b.matchScore - a.matchScore
+      || b.totalSaving - a.totalSaving
+    );
+    return pool;
   }
 
   /**
@@ -845,6 +870,24 @@ class RecipeMatcher {
   }
 
   /**
+   * The specific on-special hero a recipe is anchored to — the normalised
+   * product name of its highest-weight driver deal. Used to spread the menu
+   * across DISTINCT heroes (salmon, prawn cutlets, whole chicken, lamb leg,
+   * beef chuck…) instead of broad protein buckets, where one sub-hero (salmon)
+   * monopolised the whole bucket. Returns null if the recipe has no driver.
+   */
+  _heroKey(recipe) {
+    let anchor = null, best = -1;
+    for (const d of (recipe.matchedDeals || [])) {
+      if (!this._isDriverDeal(d)) continue;
+      const score = this._getIngredientWeight(d) * 1000 + (d.saving || 0); // weight first, then saving
+      if (score > best) { best = score; anchor = d; }
+    }
+    if (!anchor) return null;
+    return normalizeName(anchor.dealName || '') || (anchor.ingredient || '').toLowerCase() || 'other';
+  }
+
+  /**
    * Post-verification menu selection. Replaces _diversifyResults for the
    * hero-anchored pipeline:
    *   1. recompute match counts / savings on the VERIFIED deals
@@ -860,23 +903,14 @@ class RecipeMatcher {
       r.matchScore   = r.matchedDeals.length;
       r.totalSaving  = +r.matchedDeals.reduce((s, d) => s + (d.saving || 0), 0).toFixed(2);
 
-      const drivers = r.matchedDeals.filter(d => this._isDriverDeal(d));
-      if (drivers.length === 0) continue;
+      // Group by the SPECIFIC on-special hero (the matched deal), not a broad
+      // protein bucket — so salmon, prawn, whole chicken, lamb leg, beef chuck
+      // each get their own lane instead of salmon monopolising "seafood".
+      const heroGroup = this._heroKey(r);
+      if (!heroGroup) continue; // no driver deal → not hero-eligible
 
-      let anchor = null, bestWeight = -1;
-      for (const d of drivers) {
-        const w = this._getIngredientWeight(d);
-        if (w > bestWeight) { bestWeight = w; anchor = d; }
-      }
-      const proteinBucket = this._getProteinBucket(r);
-      const heroGroup = proteinBucket !== 'other'
-        ? proteinBucket
-        : (this._cleanIngredientName(anchor?.ingredient || '') || 'other');
-
-      r.weightedScore    = +this._calculateRecipeScore(r).toFixed(2);
-      r.anchorIngredient = anchor ? anchor.ingredient : null;
-      r.proteinBucket    = proteinBucket;
-      r.heroGroup        = heroGroup;
+      r.weightedScore = +this._calculateRecipeScore(r).toFixed(2);
+      r.heroGroup     = heroGroup;
       qualified.push(r);
     }
 
@@ -887,24 +921,29 @@ class RecipeMatcher {
     );
 
     // Group by hero. Insertion order follows the score sort, so the strongest
-    // group leads — the top of the menu is "best chicken, best beef, best
-    // seafood, best lamb, …" rather than 40 chicken dishes.
+    // hero leads, but each hero is its own lane.
     const groups = new Map();
     for (const r of qualified) {
       if (!groups.has(r.heroGroup)) groups.set(r.heroGroup, []);
       groups.get(r.heroGroup).push(r);
     }
+    // Within each hero, interleave by cuisine so consecutive picks vary in
+    // style (D) rather than five near-identical salmon dishes.
+    for (const [g, list] of groups) groups.set(g, this._diversifyByCuisine(list));
 
-    // Round-robin: take the Nth-best of each group per round. A hero with 100
-    // matching dishes contributes only one per round, so the menu stays varied.
-    const order  = [...groups.keys()];
+    // Round-robin across heroes, with a per-hero cap (B) as a backstop so no
+    // single hero can dominate even if it has the most/highest-scored recipes.
+    const order = [...groups.keys()];
+    const maxPerHero = Math.max(8, Math.ceil(limit * 0.3));
+    const counts = new Map();
     const result = [];
     for (let round = 0; result.length < limit; round++) {
       let placed = false;
       for (const g of order) {
         const q = groups.get(g);
-        if (q.length > round) {
+        if (q.length > round && (counts.get(g) || 0) < maxPerHero) {
           result.push(q[round]);
+          counts.set(g, (counts.get(g) || 0) + 1);
           placed = true;
           if (result.length >= limit) break;
         }
@@ -912,6 +951,25 @@ class RecipeMatcher {
       if (!placed) break;
     }
     return result;
+  }
+
+  /**
+   * Reorder a score-sorted list so the same cuisine isn't repeated back-to-back
+   * (greedy): keeps the strongest recipe first, then prefers a different cuisine
+   * than the previous pick. Variety within a hero (D).
+   */
+  _diversifyByCuisine(list) {
+    if (list.length < 3) return list;
+    const cuisineOf = (r) => ((r.metadata?.cuisineType || [])[0] || r.cuisine || '').toLowerCase();
+    const pool = [...list];
+    const out = [pool.shift()];
+    while (pool.length) {
+      const prev = cuisineOf(out[out.length - 1]);
+      let idx = pool.findIndex((r) => cuisineOf(r) !== prev);
+      if (idx === -1) idx = 0; // all remaining share the cuisine
+      out.push(pool.splice(idx, 1)[0]);
+    }
+    return out;
   }
 
   /**

@@ -106,7 +106,7 @@ class RecipeService {
     // verification — the old code selected the top 150 and applied the protein
     // guarantee here, then verification silently dropped the qualifying
     // protein, leaving 67% of served recipes anchored on pantry items.
-    const candidates = await recipeMatcher.scoreCandidates(enrichedDeals, 400);
+    const candidates = await recipeMatcher.scoreCandidates(enrichedDeals, 800);
     console.log(`RecipeService: Scored ${candidates.length} candidate recipes`);
 
     // Hard rule: Claude NEVER invents recipes. Every recipe served must come
@@ -396,7 +396,7 @@ class RecipeService {
           continue;
         }
 
-        const candidates = await recipeMatcher.scoreCandidates(deals, 400);
+        const candidates = await recipeMatcher.scoreCandidates(deals, 800);
         if (!candidates.length) {
           console.warn(`RecipeService: ${state.toUpperCase()} matched 0 recipes — skipping`);
           continue;
