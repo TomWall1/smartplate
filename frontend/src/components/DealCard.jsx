@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingDown, ExternalLink } from 'lucide-react';
+import { TrendingDown, ExternalLink, ChefHat } from 'lucide-react';
 
 // Category → style guide colour mapping
 const CATEGORY_STYLE = {
@@ -13,7 +13,7 @@ const CATEGORY_STYLE = {
 
 const DEFAULT_CATEGORY_STYLE = { bg: 'var(--color-mist)', color: 'var(--color-text-green)' };
 
-const DealCard = ({ deal }) => {
+const DealCard = ({ deal, onSelect }) => {
   const discountPercentage = deal.originalPrice
     ? Math.round(((deal.originalPrice - deal.price) / deal.originalPrice) * 100)
     : deal.discountPercentage || 0;
@@ -21,6 +21,10 @@ const DealCard = ({ deal }) => {
   const catStyle = CATEGORY_STYLE[deal.category] ?? DEFAULT_CATEGORY_STYLE;
 
   const handleClick = () => {
+    if (onSelect) {
+      onSelect(deal);
+      return;
+    }
     if (deal.productUrl && deal.productUrl !== '#') {
       window.open(deal.productUrl, '_blank', 'noopener,noreferrer');
     } else {
@@ -61,7 +65,7 @@ const DealCard = ({ deal }) => {
       tabIndex={0}
       role="button"
       aria-label={`View ${deal.name} - $${deal.price.toFixed(2)} at ${deal.store}`}
-      title="Click to view product online"
+      title={onSelect ? 'See recipes using this deal' : 'Click to view product online'}
     >
       {/* Product image thumbnail */}
       {imgSrc && (
@@ -82,7 +86,9 @@ const DealCard = ({ deal }) => {
           >
             {deal.name}
           </h3>
-          <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" style={{ color: 'var(--color-text-muted)' }} />
+          {onSelect
+            ? <ChefHat className="w-3.5 h-3.5 opacity-0 group-hover:opacity-70 transition-opacity flex-shrink-0" style={{ color: 'var(--color-text-green)' }} />
+            : <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" style={{ color: 'var(--color-text-muted)' }} />}
         </div>
 
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">

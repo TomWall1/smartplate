@@ -14,7 +14,7 @@ const CATEGORY_ICONS = {
   'Other':          '🛒',
 };
 
-function CategorySection({ categoryName, deals, isExpanded, onToggle }) {
+function CategorySection({ categoryName, deals, isExpanded, onToggle, onDealClick }) {
   return (
     <div
       style={{
@@ -74,7 +74,7 @@ function CategorySection({ categoryName, deals, isExpanded, onToggle }) {
           style={{ borderTop: '1px solid var(--color-stone)' }}
         >
           {deals.map((deal, idx) => (
-            <DealCard key={deal.id ?? idx} deal={deal} />
+            <DealCard key={deal.id ?? idx} deal={deal} onSelect={onDealClick} />
           ))}
         </div>
       )}
@@ -82,7 +82,7 @@ function CategorySection({ categoryName, deals, isExpanded, onToggle }) {
   );
 }
 
-export default function CategorizedDeals({ deals }) {
+export default function CategorizedDeals({ deals, onDealClick }) {
   const groupedDeals  = useMemo(() => groupDealsByCategory(deals), [deals]);
   const categoryNames = Object.keys(groupedDeals);
 
@@ -141,6 +141,7 @@ export default function CategorizedDeals({ deals }) {
           deals={groupedDeals[cat]}
           isExpanded={expanded[cat] ?? false}
           onToggle={() => toggleCategory(cat)}
+          onDealClick={onDealClick}
         />
       ))}
     </div>

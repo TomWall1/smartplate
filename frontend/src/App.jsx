@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Navigation from './components/Navigation';
 import StorePicker from './pages/StorePicker';
 import StorePage from './pages/StorePage';
+import DealRecipes from './pages/DealRecipes';
 import Recipes from './pages/Recipes';
 import RecipeDetail from './pages/RecipeDetail';
 import Profile from './pages/Profile';
@@ -305,6 +306,7 @@ function AppInner() {
           <Routes>
             <Route path="/" element={<StorePicker />} />
             <Route path="/store/:store" element={<StorePage />} />
+            <Route path="/store/:store/deal/:dealName" element={<DealRecipes />} />
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/recipes/:id" element={<RecipeDetail />} />
             <Route path="/profile" element={<Profile />} />

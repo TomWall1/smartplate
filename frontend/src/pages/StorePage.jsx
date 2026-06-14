@@ -393,7 +393,10 @@ export default function StorePage() {
               <p className="text-sm">Check back later or try refreshing.</p>
             </div>
           ) : (
-            <CategorizedDeals deals={storeDeals} />
+            <CategorizedDeals
+              deals={storeDeals}
+              onDealClick={(deal) => navigate(`/store/${store}/deal/${encodeURIComponent(deal.name)}`)}
+            />
           )}
         </section>
       </div>
