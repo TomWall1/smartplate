@@ -9,10 +9,10 @@ const STORE_COLORS = {
 
 function getStoreSearchUrl(query, store) {
   const q = encodeURIComponent(query);
-  if (store === 'woolworths') return `https://www.woolworths.com.au/shop/search/products?searchTerm=${q}&isSpecial=true`;
-  if (store === 'coles') return `https://www.coles.com.au/search?q=${q}&filter=specialsOnly`;
+  if (store === 'woolworths') return `https://www.woolworths.com.au/shop/search/products?searchTerm=${q}`;
+  if (store === 'coles') return `https://www.coles.com.au/search?q=${q}`;
   if (store === 'iga') return `https://www.iga.com.au/search/?q=${q}`;
-  return `https://www.google.com/search?q=${encodeURIComponent(query + ' supermarket special')}`;
+  return `https://www.google.com/search?q=${encodeURIComponent(query + ' supermarket')}`;
 }
 
 export default function DealPopup({ deal, anchorRef, onClose }) {

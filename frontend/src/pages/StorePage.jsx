@@ -5,7 +5,6 @@ import { useApp } from '../App';
 import { dealsApi, recipesApi } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import CategorizedDeals from '../components/CategorizedDeals';
-import SavingsHero from '../components/SavingsHero';
 import { usePremium } from '../context/PremiumContext';
 import { TAG_FILTERS, PROTEIN_FILTERS, hasProteinDeal, applyPreferenceOrdering } from '../constants/filters';
 import { STORE_COLORS, STORE_LOGOS } from '../constants/colors';
@@ -170,17 +169,6 @@ export default function StorePage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-
-        {/* ── The weekly savings moment ─────────────────────────────────────── */}
-        {!recipesLoading && filteredRecipes.length > 0 && (
-          <SavingsHero
-            amount={filteredRecipes
-              .slice(0, 6)
-              .reduce((sum, r) => sum + (r.totalMealSaving ?? r.estimatedSaving ?? 0), 0)}
-            storeName={storeName}
-            recipeCount={Math.min(filteredRecipes.length, 6)}
-          />
-        )}
 
         {/* ── Section 1: Recipes ────────────────────────────────────────────── */}
         <section>
