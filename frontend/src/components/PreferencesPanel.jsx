@@ -176,6 +176,11 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
                 />
               ))}
             </div>
+            {(local.dietary ?? []).length > 0 && (
+              <p className="text-xs mt-2" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                Filtered from listed ingredients — always check packaging if you have an allergy or intolerance.
+              </p>
+            )}
           </div>
 
           {/* ── Meal types ───────────────────────────────────────────── */}

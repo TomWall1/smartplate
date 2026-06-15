@@ -135,8 +135,8 @@ router.post('/suggestions', async (req, res) => {
         ...preferences,
         pantryItems: pantryItems || [],
       };
-      console.log('Using personalised recipe path');
-      recipes = await recipeService.getPersonalisedRecipes(fullPreferences);
+      console.log(`Using personalised recipe path${store ? ` (store: ${store})` : ''} (state: ${userState.toUpperCase()})`);
+      recipes = await recipeService.getPersonalisedRecipes(fullPreferences, { state: userState, store: store || null });
     } else {
       // Default path — read from stored weekly recipes, state-filtered
       const storeLabel = store || null;

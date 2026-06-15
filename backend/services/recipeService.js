@@ -434,9 +434,13 @@ class RecipeService {
 
   // ── Personalised filtering (local, no API call) ────────────────────
 
-  async getPersonalisedRecipes(userPreferences) {
-    const weeklyRecipes = this.getWeeklyRecipes();
-    return this._filterLocally(weeklyRecipes, userPreferences);
+  async getPersonalisedRecipes(userPreferences, { state = 'nsw', store = null } = {}) {
+    // Start from the SAME per-store/per-state artifact the normal path serves,
+    // so personalised results stay valid for the store the user is viewing
+    // (previously this used the national set and could surface recipes whose
+    // deals aren't on special at that store).
+    const base = await this.getRecipesByState(state, store);
+    return this._filterLocally(Array.isArray(base) ? base : [], userPreferences);
   }
 
   // ── Read stored weekly recipes ────────────────────────────────────
@@ -546,29 +550,31 @@ class RecipeService {
   _filterLocally(recipes, preferences) {
     let filtered = [...recipes];
 
-    // 1. Dietary — hard filter
+    // 1. Dietary — hard filter. Recipes are kept if they carry the matching
+    //    tag OR pass an ingredient-based heuristic, since most library recipes
+    //    aren't tagged gluten-free/dairy-free/vegan (tag-only would empty the
+    //    list). Heuristics err toward EXCLUDING when unsure — the UI carries a
+    //    "based on listed ingredients, check packaging" disclaimer, as these
+    //    are not allergy-safe.
     if (preferences.dietary && preferences.dietary.length > 0) {
       const diets = preferences.dietary.map(d => d.toLowerCase());
+      const hasTag = (r, t) => (r.tags ?? []).some(x => x.toLowerCase() === t);
       if (diets.includes('vegetarian')) {
         filtered = filtered.filter(r =>
-          r.tags?.some(t => ['vegetarian', 'vegan'].includes(t.toLowerCase())) ||
-          !this._hasNonVegIngredient(r)
+          hasTag(r, 'vegetarian') || hasTag(r, 'vegan') || !this._hasNonVegIngredient(r)
         );
       }
       if (diets.includes('vegan')) {
         filtered = filtered.filter(r =>
-          r.tags?.some(t => t.toLowerCase() === 'vegan')
+          hasTag(r, 'vegan') ||
+          (!this._hasNonVegIngredient(r) && !this._hasDairy(r) && !this._hasEgg(r) && !this._hasNonVeganExtras(r))
         );
       }
       if (diets.includes('gluten-free')) {
-        filtered = filtered.filter(r =>
-          r.tags?.some(t => t.toLowerCase() === 'gluten-free')
-        );
+        filtered = filtered.filter(r => hasTag(r, 'gluten-free') || !this._hasGluten(r));
       }
       if (diets.includes('dairy-free')) {
-        filtered = filtered.filter(r =>
-          r.tags?.some(t => t.toLowerCase() === 'dairy-free')
-        );
+        filtered = filtered.filter(r => hasTag(r, 'dairy-free') || !this._hasDairy(r));
       }
     }
 
@@ -599,10 +605,44 @@ class RecipeService {
     return filtered.slice(0, 150);
   }
 
+  _ingredientText(recipe) {
+    return (recipe.allIngredients || recipe.ingredients || []).join(' ').toLowerCase();
+  }
+
   _hasNonVegIngredient(recipe) {
-    const meats = ['chicken', 'beef', 'pork', 'lamb', 'salmon', 'fish', 'prawn', 'bacon', 'mince', 'sausage'];
-    const all = (recipe.allIngredients || recipe.ingredients || []).join(' ').toLowerCase();
+    const meats = [
+      'chicken', 'beef', 'pork', 'lamb', 'veal', 'salmon', 'fish', 'tuna', 'prawn', 'shrimp',
+      'bacon', 'ham', 'mince', 'sausage', 'turkey', 'duck', 'anchovy', 'prosciutto', 'chorizo',
+      'pancetta', 'salami', 'squid', 'octopus', 'scallop', 'mussel', 'crab', 'lobster', 'oyster',
+    ];
+    const all = this._ingredientText(recipe);
     return meats.some(m => all.includes(m));
+  }
+
+  // Eggs as a standalone ingredient (word-boundary so "eggplant" doesn't count).
+  _hasEgg(recipe) {
+    return /\begg(s|whites?|yolks?)?\b/.test(this._ingredientText(recipe));
+  }
+
+  // Animal extras that disqualify vegan (honey, gelatine, fish/oyster sauce).
+  _hasNonVeganExtras(recipe) {
+    return /\b(honey|gelatine?|fish sauce|oyster sauce|worcestershire)\b/.test(this._ingredientText(recipe));
+  }
+
+  // Dairy — strip plant-milk / nut-butter phrases first so "coconut milk" and
+  // "peanut butter" don't read as dairy.
+  _hasDairy(recipe) {
+    let t = this._ingredientText(recipe);
+    t = t.replace(/(coconut|almond|soy|soya|oat|rice|cashew|peanut|hazelnut|macadamia|hemp|nutritional)\s*-?\s*(milk|cream|butter|yog[hu]rt|cheese|yeast)/g, ' ');
+    t = t.replace(/peanut butter|almond butter|cashew butter|nut butter|butternut/g, ' ');
+    return /\b(milk|cream|butter|cheese|yog[hu]rt|ghee|custard|parmesan|mozzarella|ricotta|mascarpone|buttermilk|creme fraiche|feta|haloumi|halloumi)\b/.test(t);
+  }
+
+  // Gluten — strip gluten-free flours/grains first to cut the worst false hits.
+  _hasGluten(recipe) {
+    let t = this._ingredientText(recipe);
+    t = t.replace(/gluten[- ]free|almond flour|coconut flour|rice flour|chickpea flour|corn ?flour|buckwheat|rice noodle|rice vermicelli|rice paper/g, ' ');
+    return /\b(flour|wheat|bread|breadcrumbs?|pasta|noodles?|barley|couscous|semolina|spelt|rye|farro|bulg[ou]r|cracker|pastry|filo|phyllo|tortilla|pita|pitta|naan|soy sauce|beer|malt|seitan)\b/.test(t);
   }
 
   // ── Legacy methods (kept for backwards compat) ────────────────────
