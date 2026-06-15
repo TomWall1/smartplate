@@ -21,18 +21,70 @@ function categorize(name) {
   return 'Other';
 }
 
+// Units / prep words stripped to reduce an ingredient line to its base name,
+// so "1 onion", "2 onions" and "1 brown onion, diced" all merge to "onion".
+const UNIT_PREP = new Set([
+  'fresh','dried','frozen','chopped','diced','sliced','minced','crushed','grated','ground','shredded',
+  'cooked','raw','large','small','medium','extra','finely','roughly','thinly','peeled','trimmed','halved',
+  'quartered','boneless','skinless','lean','ripe','baby','of','to','for','a','an','the','or','and',
+  'cup','cups','tbsp','tbs','tsp','teaspoon','tablespoon','g','kg','ml','l','oz','lb','clove','cloves',
+  'can','cans','tin','tins','piece','pieces','whole','packet','pack','jar','bunch','sprig','sprigs',
+  'stick','sticks','handful','pinch','about','approx','good','quality','plus','more','optional','taste',
+]);
+
+function singular(w) {
+  if (w.length <= 3) return w;
+  if (w.endsWith('ies')) return w.slice(0, -3) + 'y';
+  if (w.endsWith('ves')) return w.slice(0, -3) + 'f';
+  if (w.endsWith('oes')) return w.slice(0, -2);
+  if (/(ses|xes|zes|ches|shes)$/.test(w)) return w.slice(0, -2);
+  if (w.endsWith('es')) return w.slice(0, -1);
+  if (w.endsWith('ss')) return w;
+  if (w.endsWith('s')) return w.slice(0, -1);
+  return w;
+}
+
+function baseIngredientName(raw) {
+  let s = String(raw || '')
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, ' ')
+    .split(',')[0]
+    .replace(/\d+([./]\d+)?/g, ' ')
+    .replace(/[^a-z\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  let words = s.split(' ').filter(w => w && !UNIT_PREP.has(w)).map(singular);
+  words = words.filter((w, i) => i === 0 || w !== words[i - 1]);
+  return words.join(' ').trim();
+}
+
+// Combine recipe ingredients into a shopping list, merging duplicates by base
+// name and counting how many recipes need each (quantities are not summed —
+// recipes mix incompatible units, so a total would be confidently wrong).
 function combineIngredients(recipes) {
-  const seen = new Map();
+  const map = new Map();
   recipes.forEach(r => {
     const ingredients = r.allIngredients ?? r.ingredients ?? [];
+    const seenThisRecipe = new Set();
     ingredients.forEach(ing => {
-      const key = ing.toLowerCase().trim();
-      if (key && !seen.has(key)) {
-        seen.set(key, { name: ing.trim(), category: categorize(ing), checked: false });
+      const rawText = typeof ing === 'string' ? ing : (ing?.name || ing?.raw || '');
+      const base = baseIngredientName(rawText);
+      if (!base || seenThisRecipe.has(base)) return;
+      seenThisRecipe.add(base);
+      if (map.has(base)) {
+        map.get(base).count += 1;
+      } else {
+        map.set(base, {
+          name: base.charAt(0).toUpperCase() + base.slice(1),
+          base,
+          category: categorize(base),
+          checked: false,
+          count: 1,
+        });
       }
     });
   });
-  return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
+  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function groupByCategory(items) {
@@ -320,6 +372,14 @@ export default function ShoppingList() {
                                   }}
                                 >
                                   {item.name}
+                                  {item.count > 1 && (
+                                    <span
+                                      className="ml-2 text-xs"
+                                      style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}
+                                    >
+                                      · {item.count} recipes
+                                    </span>
+                                  )}
                                 </span>
                                 <button onClick={() => removeItem(idx)} style={{ color: 'var(--color-stone)' }}
                                   className="hover:text-[var(--color-berry)] transition-colors">
