@@ -280,8 +280,8 @@ export const pantryApi = {
     const response = await api.delete('/api/pantry');
     return response.data;
   },
-  matchPantry: async (ingredients, hasPantryStaples) => {
-    const response = await api.post('/api/pantry/match', { ingredients, has_pantry_staples: hasPantryStaples }, { timeout: 30000 });
+  matchPantry: async (ingredients, hasPantryStaples, state) => {
+    const response = await api.post('/api/pantry/match', { ingredients, has_pantry_staples: hasPantryStaples, state }, { timeout: 30000 });
     return response.data;
   },
 };

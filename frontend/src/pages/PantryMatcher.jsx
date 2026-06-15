@@ -5,6 +5,7 @@ import { usePremium } from '../context/PremiumContext';
 import { useAuth } from '../context/AuthContext';
 import { pantryApi } from '../services/api';
 import IngredientAutocomplete from '../components/IngredientAutocomplete';
+import { useApp } from '../App';
 
 // ── Common ingredients for quick-add ─────────────────────────────────────────
 const QUICK_ADD = [
@@ -278,6 +279,7 @@ function PantryRecipeCard({ result, userIngredients }) {
 export default function PantryMatcher() {
   const { isPremium, premiumLoading } = usePremium();
   const { user } = useAuth();
+  const { userState } = useApp();
 
   const [ingredients, setIngredients]       = useState([]);
   const [hasPantryStaples, setHasPantryStaples] = useState(true);
@@ -341,7 +343,7 @@ export default function PantryMatcher() {
     setError(null);
     setResults(null);
     try {
-      const data = await pantryApi.matchPantry(ingredients, hasPantryStaples);
+      const data = await pantryApi.matchPantry(ingredients, hasPantryStaples, userState);
       setResults(data.recipes || []);
       // Auto-save pantry after matching
       pantryApi.savePantry(ingredients, hasPantryStaples).catch(() => {});

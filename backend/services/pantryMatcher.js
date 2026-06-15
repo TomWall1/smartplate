@@ -145,14 +145,10 @@ function matchRecipe(recipe, userIngredients, hasPantryStaples) {
     ? allIngredients.filter(ing => !isStaple(ing))
     : allIngredients;
 
-  if (required.length === 0) {
-    // Everything is a staple — 100% covered
-    return {
-      coverage: 1,
-      matchedIngredients: [],
-      missingIngredients: [],
-    };
-  }
+  // Substance guard: a real cookable recipe has ≥3 non-staple ingredients.
+  // Drops roundup/listicle/how-to pages ("Rice recipes…") and garnish-only
+  // entries that otherwise hit 100% coverage off one ingredient.
+  if (required.length < 3) return null;
 
   const matched = [];
   const missing = [];
@@ -198,86 +194,86 @@ function findDealForIngredient(ingName, allDeals) {
 // ── Main export ───────────────────────────────────────────────────────────────
 
 /**
- * Match user pantry against the weekly deal-matched recipes.
- * These recipes already have matchedDeals attached, so clicking through
- * always leads to a valid recipe detail page with deal info.
+ * Match a user's pantry against the FULL recipe library — a true "what can I
+ * make right now" tool (not just this week's deal recipes). Missing ingredients
+ * are enriched with current deals, but only after ranking + slicing to the top
+ * results, so deal lookup stays cheap regardless of library size.
  *
  * @param {string[]} userIngredients - Array of ingredient name strings
  * @param {boolean}  hasPantryStaples - Whether user has common pantry staples
+ * @param {object}   [opts] - { state } for store-correct deal enrichment
  * @returns {Promise<Array>} Ranked list of matched recipes
  */
-async function matchPantry(userIngredients, hasPantryStaples = true) {
-  // Load weekly deal-matched recipes (same set shown on Recipes tab)
-  const recipeService = require('./recipeService');
-  const weeklyRecipes = recipeService.getWeeklyRecipes();
+async function matchPantry(userIngredients, hasPantryStaples = true, opts = {}) {
+  const recipeMatcher = require('./recipeMatcher');
+  const library = recipeMatcher.loadLibrary();
 
-  if (!weeklyRecipes || weeklyRecipes.length === 0) {
-    return [];
+  if (!library || library.length === 0) return [];
+
+  // 1. Match every library recipe (local, no AI). Library recipes already carry
+  //    structured ingredients with ingredientTags, so the form/category guard
+  //    in ingredientMatches actually runs here.
+  let results = [];
+  for (const recipe of library) {
+    const match = matchRecipe(recipe, userIngredients, hasPantryStaples);
+    if (!match || match.coverage < MIN_COVERAGE) continue;
+    results.push({ recipe, match });
   }
 
-  // Normalise weekly recipes to the shape matchRecipe expects.
-  // Weekly recipes store ingredients as string arrays (allIngredients),
-  // but matchRecipe expects objects with { name, ingredientTags }.
-  const recipes = weeklyRecipes.map(r => ({
-    ...r,
-    ingredients: (r.ingredients || r.allIngredients || []).map(ing =>
-      typeof ing === 'string' ? { name: ing, raw: ing } : ing
-    ),
-  }));
+  // 2. Rank, then slice to the top results BEFORE the expensive deal lookup.
+  results.sort((a, b) => {
+    if (b.match.coverage !== a.match.coverage) return b.match.coverage - a.match.coverage;
+    // prefer fewer missing items, then more total ingredients (more substantial)
+    if (a.match.missingIngredients.length !== b.match.missingIngredients.length) {
+      return a.match.missingIngredients.length - b.match.missingIngredients.length;
+    }
+    return (b.match.matchedIngredients.length) - (a.match.matchedIngredients.length);
+  });
+  results = results.slice(0, MAX_RESULTS);
 
-  // Use deals already attached to each recipe's matchedDeals for enrichment
+  // 3. Load current (state-correct) deals and enrich the top results only.
   let allDeals = [];
   try {
-    const cache = await dealService.getCurrentDeals();
+    const cache = await dealService.getDealsByState(opts.state || 'nsw');
     allDeals = Array.isArray(cache) ? cache : [];
   } catch {
     // Non-fatal — just won't show deals on missing ingredients
   }
 
-  // Match each recipe
-  const results = [];
-
-  for (const recipe of recipes) {
-    const match = matchRecipe(recipe, userIngredients, hasPantryStaples);
-    if (!match || match.coverage < MIN_COVERAGE) continue;
-
-    // Enrich missing ingredients with deal info
+  return results.map(({ recipe, match }) => {
     let totalCostToComplete = 0;
     let totalSavings = 0;
 
     const missingWithDeals = match.missingIngredients.map(ing => {
-      const ingName = ing.name || (ing.raw || '').replace(/^\d[\d\s\/]*[a-z]*\s*/i, '');
+      const ingName = ing.name || (ing.raw || '').replace(/^\d[\d\s/]*[a-z]*\s*/i, '');
       const deal = findDealForIngredient(ingName, allDeals);
       if (deal) {
-        const price   = parseFloat(deal.price)    || 0;
-        const wasPrice = parseFloat(deal.wasPrice) || 0;
+        const price    = parseFloat(deal.price) || 0;
+        const wasPrice = parseFloat(deal.originalPrice ?? deal.wasPrice) || 0;
         totalCostToComplete += price;
         if (wasPrice > price) totalSavings += wasPrice - price;
-        return { ...ing, deal };
+        // normalise field name for the frontend (it reads deal.wasPrice)
+        return { ...ing, deal: { ...deal, wasPrice: wasPrice || undefined } };
       }
       return ing;
     });
 
-    results.push({
-      recipe,
+    return {
+      recipe: {
+        id:        recipe.id,
+        source_id: recipe.source_id ?? recipe.id,
+        title:     recipe.title,
+        image:     recipe.image,
+        url:       recipe.url,
+        totalTime: recipe.totalTime,
+      },
       coverage:            match.coverage,
       matchedIngredients:  match.matchedIngredients,
       missingIngredients:  missingWithDeals,
       totalCostToComplete: Math.round(totalCostToComplete * 100) / 100,
       totalSavings:        Math.round(totalSavings * 100) / 100,
-    });
-  }
-
-  // Sort: coverage desc, deals on missing desc, cost asc
-  results.sort((a, b) => {
-    if (b.coverage !== a.coverage) return b.coverage - a.coverage;
-    const aDeals = a.missingIngredients.filter(i => i.deal).length;
-    const bDeals = b.missingIngredients.filter(i => i.deal).length;
-    if (bDeals !== aDeals) return bDeals - aDeals;
-    return a.totalCostToComplete - b.totalCostToComplete;
+    };
   });
-
-  return results.slice(0, MAX_RESULTS);
 }
 
 module.exports = { matchPantry };
