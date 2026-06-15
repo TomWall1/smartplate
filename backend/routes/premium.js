@@ -2,8 +2,38 @@ const express = require('express');
 const requireAuth   = require('../middleware/requireAuth');
 const requirePremium = require('../middleware/requirePremium');
 const { clientForToken } = require('../services/authService');
+const dealService = require('../services/dealService');
 
 const router = express.Router();
+
+// ── Price-alert status helper ───────────────────────────────────────────────
+// Find the cheapest current deal whose name covers the alert's product words
+// (≥60% overlap), optionally restricted to the alert's store. Used to show
+// in-app status ("on sale now" vs "watching") without a notification system.
+function alertWords(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+}
+function matchAlertToDeals(alert, deals) {
+  const words = alertWords(alert.product_name);
+  if (!words.length) return null;
+  const need = Math.ceil(words.length * 0.6);
+  const store = (alert.store || '').toLowerCase();
+  let best = null;
+  for (const d of deals) {
+    if (store && (d.store || '').toLowerCase() !== store) continue;
+    const dn = alertWords(d.name);
+    const hits = words.filter(w => dn.includes(w)).length;
+    if (hits < need) continue;
+    const price = parseFloat(d.price);
+    if (!isFinite(price)) continue;
+    if (!best || price < best.currentPrice) {
+      best = { currentPrice: Math.round(price * 100) / 100, store: d.store, productName: d.name };
+    }
+  }
+  if (!best) return null;
+  best.met = best.currentPrice <= Number(alert.target_price);
+  return best;
+}
 
 // All premium routes require authentication
 router.use(requireAuth);
@@ -226,7 +256,12 @@ router.get('/price-alerts', requirePremium, async (req, res) => {
     .order('created_at', { ascending: false });
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json({ alerts: data ?? [] });
+
+  // Enrich with live status from this week's deals (in-app; no notifications yet)
+  let deals = [];
+  try { deals = await dealService.getCurrentDeals(); } catch { /* status optional */ }
+  const alerts = (data ?? []).map(a => ({ ...a, status: matchAlertToDeals(a, deals) }));
+  res.json({ alerts });
 });
 
 // POST /api/premium/price-alerts

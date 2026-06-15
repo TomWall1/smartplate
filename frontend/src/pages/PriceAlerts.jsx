@@ -13,6 +13,8 @@ const STORE_OPTIONS = [
   { value: 'iga',        label: 'IGA' },
 ];
 
+const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
+
 function AlertCard({ alert, onDelete }) {
   const [deleting, setDeleting] = useState(false);
   const handleDelete = async () => {
@@ -45,6 +47,25 @@ function AlertCard({ alert, onDelete }) {
           Alert when under <strong style={{ color: 'var(--color-text-green)' }}>${Number(alert.target_price).toFixed(2)}</strong>
           {alert.store && <span> · {STORE_OPTIONS.find(s => s.value === alert.store)?.label ?? alert.store}</span>}
         </p>
+        {/* Live status from this week's deals */}
+        {alert.status ? (
+          <span
+            className="inline-flex items-center gap-1 mt-1.5 text-xs font-bold px-2 py-0.5 rounded-full"
+            style={{
+              background: alert.status.met ? '#DCE4D6' : 'var(--color-mist)',
+              color: alert.status.met ? '#3D7A3A' : 'var(--color-text-muted)',
+              fontFamily: 'var(--font-ui)',
+            }}
+          >
+            {alert.status.met
+              ? `On sale now — $${alert.status.currentPrice.toFixed(2)} at ${cap(alert.status.store)}`
+              : `Currently $${alert.status.currentPrice.toFixed(2)} at ${cap(alert.status.store)}`}
+          </span>
+        ) : (
+          <span className="inline-block mt-1.5 text-xs" style={{ fontFamily: 'var(--font-ui)', color: 'var(--color-text-muted)' }}>
+            No match in this week's deals
+          </span>
+        )}
       </div>
       <button
         onClick={handleDelete}
@@ -139,7 +160,7 @@ export default function PriceAlerts() {
               className="rounded-xl px-4 py-3 mb-5 text-sm border"
               style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border-strong)', fontFamily: 'var(--font-ui)', color: 'var(--color-bark)' }}
             >
-              <strong>Coming soon:</strong> Alerts will notify you when ingredients drop below your target price during the weekly deal refresh.
+              We check your alerts against this week's deals and flag any that are <strong>on sale now</strong>. Email notifications are coming later.
             </div>
 
             {/* Create form */}

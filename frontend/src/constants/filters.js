@@ -49,11 +49,16 @@ export function hasProteinDeal(recipe, proteinId) {
  * app: preferences are edited in one place and respected silently on every
  * page that shows recipes — no per-page "Apply" step.
  *
- * - excludeIngredients: tag matching recipes with excludedWarnings (badge on
- *   the card) and push them to the bottom. Never removes a recipe.
+ * - excludeIngredients: REMOVES recipes containing an excluded ingredient
+ *   (word-boundary match, so "egg" ≠ "eggplant"). "Avoid X" means no X.
  * - mealTypes: recipes matching a preferred meal type float to the top
  *   (skippable — the premium personalised view orders server-side).
  */
+function excludedTermRegex(term) {
+  const esc = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${esc}(es|s)?\\b`, 'i');
+}
+
 export function applyPreferenceOrdering(list, preferences = {}, { mealTypeSort = true } = {}) {
   let result = list;
 
@@ -67,24 +72,19 @@ export function applyPreferenceOrdering(list, preferences = {}, { mealTypeSort =
     }
   }
 
-  const excluded = (preferences.excludeIngredients ?? [])
-    .map((e) => e.toLowerCase().trim())
-    .filter(Boolean);
+  const terms = (preferences.excludeIngredients ?? [])
+    .map((e) => String(e).toLowerCase().trim())
+    .filter(Boolean)
+    .map(excludedTermRegex);
 
-  if (excluded.length > 0) {
-    result = result.map((r) => {
-      if (r.excludedWarnings !== undefined) return r; // already tagged server-side
+  if (terms.length > 0) {
+    result = result.filter((r) => {
       const allText = [
         ...(r.allIngredients ?? []),
         ...(r.ingredients ?? []),
-      ].join(' ').toLowerCase();
-      const warnings = excluded.filter((ex) => allText.includes(ex));
-      return { ...r, excludedWarnings: warnings };
+      ].join(' ');
+      return !terms.some((re) => re.test(allText));
     });
-    result = [
-      ...result.filter((r) => r.excludedWarnings.length === 0),
-      ...result.filter((r) => r.excludedWarnings.length > 0),
-    ];
   }
 
   return result;

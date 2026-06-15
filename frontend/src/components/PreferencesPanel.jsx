@@ -3,6 +3,7 @@ import { X, Plus } from 'lucide-react';
 import { useApp } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { usersApi } from '../services/api';
+import IngredientAutocomplete from './IngredientAutocomplete';
 
 const DIETARY_OPTIONS = [
   { id: 'vegetarian', label: 'Vegetarian' },
@@ -82,11 +83,14 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
     }));
   };
 
-  const addExclude = () => {
-    const val = excludeInput.trim();
+  const addExcludeValue = (raw) => {
+    const val = String(raw || '').trim().toLowerCase();
     if (!val) return;
-    setLocal((prev) => ({ ...prev, excludeIngredients: [...(prev.excludeIngredients ?? []), val] }));
-    setExcludeInput('');
+    setLocal((prev) => {
+      const list = prev.excludeIngredients ?? [];
+      if (list.some((e) => e.toLowerCase() === val)) return prev;
+      return { ...prev, excludeIngredients: [...list, val] };
+    });
   };
 
   const removeExclude = (idx) => {
@@ -211,25 +215,12 @@ export default function PreferencesPanel({ isOpen, onClose, onApply }) {
           {/* ── Ingredients to avoid ─────────────────────────────────── */}
           <div>
             <SectionLabel>Ingredients to avoid</SectionLabel>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={excludeInput}
-                onChange={(e) => setExcludeInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addExclude()}
-                placeholder="e.g. mushrooms, nuts..."
-                style={inputStyle}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
+            <div className="mb-2">
+              <IngredientAutocomplete
+                onAdd={addExcludeValue}
+                existing={local.excludeIngredients ?? []}
+                placeholder="e.g. mushroom, nuts…"
               />
-              <button
-                onClick={addExclude}
-                className="p-2 rounded-xl text-white transition-all hover:opacity-90 flex-shrink-0"
-                style={{ background: 'var(--color-leaf)' }}
-                aria-label="Add excluded ingredient"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {(local.excludeIngredients ?? []).map((item, i) => (

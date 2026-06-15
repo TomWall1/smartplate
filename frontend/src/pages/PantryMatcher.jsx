@@ -4,6 +4,7 @@ import { Crown, X, Plus, ChefHat, ShoppingCart, Check, Search, Trash2, Loader2, 
 import { usePremium } from '../context/PremiumContext';
 import { useAuth } from '../context/AuthContext';
 import { pantryApi } from '../services/api';
+import IngredientAutocomplete from '../components/IngredientAutocomplete';
 
 // ── Common ingredients for quick-add ─────────────────────────────────────────
 const QUICK_ADD = [
@@ -416,35 +417,12 @@ export default function PantryMatcher() {
           </div>
         )}
 
-        {/* Text input */}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--color-stone)', borderRadius: 10, padding: '8px 12px' }}>
-            <Search style={{ width: 15, height: 15, color: 'var(--color-text-muted)', flexShrink: 0 }} />
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onKeyDown={handleInputKeyDown}
-              placeholder="Type an ingredient and press Enter…"
-              style={{
-                border: 'none', outline: 'none', background: 'transparent',
-                fontSize: 14, color: 'var(--color-bark)', fontFamily: 'var(--font-ui)',
-                width: '100%',
-              }}
-            />
-          </div>
-          <button
-            onClick={() => { addIngredient(inputValue); setInputValue(''); }}
-            disabled={!inputValue.trim()}
-            style={{
-              background: 'var(--color-leaf)', color: 'white', border: 'none', borderRadius: 10,
-              padding: '8px 14px', cursor: 'pointer', opacity: inputValue.trim() ? 1 : 0.4,
-            }}
-          >
-            <Plus style={{ width: 16, height: 16 }} />
-          </button>
-        </div>
+        {/* Ingredient autocomplete (recipe-database vocabulary) */}
+        <IngredientAutocomplete
+          onAdd={addIngredient}
+          existing={ingredients}
+          placeholder="Start typing an ingredient…"
+        />
 
         {/* Quick-add */}
         <div style={{ marginTop: 12 }}>

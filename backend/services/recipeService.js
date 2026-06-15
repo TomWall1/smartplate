@@ -25,36 +25,34 @@ function decodeHtml(str) {
 }
 
 /**
- * Soft-filter recipes by excluded ingredients.
+ * Hard-filter recipes by excluded ingredients ("ingredients to avoid").
  *
- * - Tags each recipe with `excludedWarnings` (array of matched excluded terms).
- * - Recipes with NO excluded ingredients come first (preserving their original order).
- * - Recipes WITH excluded ingredients are pushed to the bottom.
- * - No recipe is ever fully removed — the frontend shows a warning badge instead.
- *   This prevents the edge case where all 20 recipes contain the excluded ingredient
- *   and the user would see an empty list.
+ * Recipes that contain ANY excluded ingredient are REMOVED, not just demoted —
+ * "avoid mushrooms" must mean no mushroom recipes appear. Matching is
+ * word-boundary (with optional plural) so "egg" excludes "egg"/"eggs" but not
+ * "eggplant", and "nut" doesn't catch "butternut"/"coconut".
  */
+function excludedTermRegex(term) {
+  const esc = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${esc}(es|s)?\\b`, 'i');
+}
+
 function applyExcludedIngredientFilter(recipes, excludeIngredients) {
   if (!excludeIngredients || excludeIngredients.length === 0) return recipes;
 
-  const excluded = excludeIngredients.map(e => e.toLowerCase().trim()).filter(Boolean);
-  if (excluded.length === 0) return recipes;
+  const terms = excludeIngredients
+    .map(e => String(e).toLowerCase().trim())
+    .filter(Boolean)
+    .map(excludedTermRegex);
+  if (terms.length === 0) return recipes;
 
-  const tagged = recipes.map(r => {
+  return recipes.filter(r => {
     const allText = [
       ...(r.allIngredients || []),
       ...(r.ingredients || []),
-    ].join(' ').toLowerCase();
-
-    const warnings = excluded.filter(ex => allText.includes(ex));
-    return { ...r, excludedWarnings: warnings };
+    ].join(' ');
+    return !terms.some(re => re.test(allText));
   });
-
-  // Stable sort: clean recipes first, flagged last
-  return [
-    ...tagged.filter(r => r.excludedWarnings.length === 0),
-    ...tagged.filter(r => r.excludedWarnings.length > 0),
-  ];
 }
 
 class RecipeService {
