@@ -16,6 +16,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PremiumStackParamList } from '../../navigation';
 import { matchPantry } from '../../api/pantry';
+import PremiumGate from '../../components/PremiumGate';
+import { usePremium } from '../../context/PremiumContext';
 
 type Props = NativeStackScreenProps<PremiumStackParamList, 'PantryInput'>;
 
@@ -25,6 +27,7 @@ const QUICK_ADD_ITEMS = [
 ];
 
 export default function PantryInputScreen({ navigation }: Props) {
+  const { isPremium } = usePremium();
   const [inputText, setInputText] = useState('');
   const [items, setItems] = useState<string[]>([]);
   const [includeStaples, setIncludeStaples] = useState(false);
@@ -69,6 +72,10 @@ export default function PantryInputScreen({ navigation }: Props) {
       setLoading(false);
     }
   }, [items, includeStaples, navigation]);
+
+  // Second line behind the premium hub — matching is a paid, Claude-backed
+  // call, so a free user must not reach the form at all.
+  if (!isPremium) return <PremiumGate feature="Pantry matching" />;
 
   return (
     <KeyboardAvoidingView

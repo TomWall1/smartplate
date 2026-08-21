@@ -108,13 +108,18 @@ export default function ProfileScreen() {
           <View style={styles.upgradeCard}>
             <View style={styles.upgradeIconRow}>
               <Ionicons name="star" size={24} color="#BE6A43" />
-              <Text style={styles.upgradeTitle}>Unlock Premium</Text>
+              <Text style={styles.upgradeTitle}>Go Premium</Text>
             </View>
             <Text style={styles.upgradeText}>
-              Get 150 recipes/week, pantry matching, favourites, and meal planning for $9.99/month.
+              Pantry matching, favourites, and personalised matching across 150
+              recipes instead of 50.
             </Text>
-            <TouchableOpacity style={styles.upgradeButton} activeOpacity={0.85}>
-              <Text style={styles.upgradeButtonText}>Upgrade to Premium</Text>
+            <TouchableOpacity
+              style={styles.upgradeButton}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('Paywall')}
+            >
+              <Text style={styles.upgradeButtonText}>See plans</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -192,13 +197,18 @@ export default function ProfileScreen() {
           <View style={styles.upgradeCard}>
             <View style={styles.upgradeIconRow}>
               <Ionicons name="star" size={24} color="#BE6A43" />
-              <Text style={styles.upgradeTitle}>Unlock Premium</Text>
+              <Text style={styles.upgradeTitle}>Go Premium</Text>
             </View>
             <Text style={styles.upgradeText}>
-              Get access to Pantry matching, unlimited Favourites, and personalised meal planning.
+              Pantry matching, favourites, and personalised matching across 150
+              recipes instead of 50.
             </Text>
-            <TouchableOpacity style={styles.upgradeButton} activeOpacity={0.85}>
-              <Text style={styles.upgradeButtonText}>Upgrade to Premium</Text>
+            <TouchableOpacity
+              style={styles.upgradeButton}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('Paywall')}
+            >
+              <Text style={styles.upgradeButtonText}>See plans</Text>
             </TouchableOpacity>
           </View>
         </View>

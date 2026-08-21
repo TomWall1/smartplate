@@ -1,20 +1,32 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePremium } from '../context/PremiumContext';
 
 interface Props {
   feature: string;
-  children: React.ReactNode;
+  /** Rendered only for subscribers. Omit to use this purely as a lock screen. */
+  children?: React.ReactNode;
+  /** Defaults to opening the paywall — override only for a different flow. */
   onUpgrade?: () => void;
 }
 
+/**
+ * In-context gate for a premium screen. The premium hub already hides these
+ * features from free users, so this is the second line: if a screen is reached
+ * any other way, the user gets an explanation and a way to subscribe instead of
+ * an API 403 rendered as an error.
+ */
 export default function PremiumGate({ feature, children, onUpgrade }: Props) {
   const { isPremium } = usePremium();
+  const navigation = useNavigation<any>();
 
   if (isPremium) {
     return <>{children}</>;
   }
+
+  const handleUpgrade = onUpgrade ?? (() => navigation.navigate('Paywall'));
 
   return (
     <View style={styles.container}>
@@ -23,15 +35,15 @@ export default function PremiumGate({ feature, children, onUpgrade }: Props) {
           <View style={styles.lockIcon}>
             <Ionicons name="lock-closed" size={32} color="#BE6A43" />
           </View>
-          <Text style={styles.title}>Premium Feature</Text>
-          <Text style={styles.subtitle}>{feature} is available on the Premium plan.</Text>
+          <Text style={styles.title}>Premium feature</Text>
+          <Text style={styles.subtitle}>{feature} is part of the Premium plan.</Text>
           <TouchableOpacity
             style={styles.upgradeButton}
-            onPress={onUpgrade}
+            onPress={handleUpgrade}
             activeOpacity={0.85}
           >
             <Ionicons name="star" size={16} color="#ffffff" />
-            <Text style={styles.upgradeText}>Upgrade to Premium</Text>
+            <Text style={styles.upgradeText}>See plans</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -90,7 +102,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginTop: 8,
-    backgroundColor: '#BE6A43',
+    backgroundColor: '#36453B',
     paddingHorizontal: 24,
     paddingVertical: 13,
     borderRadius: 12,

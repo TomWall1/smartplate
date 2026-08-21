@@ -14,14 +14,21 @@ import { useFavorites } from '../api/hooks';
 import RecipeCard from '../components/RecipeCard';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
+import PremiumGate from '../components/PremiumGate';
+import { usePremium } from '../context/PremiumContext';
 
 type Props = NativeStackScreenProps<PremiumStackParamList, 'Favourites'>;
 
 export default function FavouritesScreen({ navigation }: Props) {
+  const { isPremium } = usePremium();
   const { data: recipes = [], isLoading, isError, isFetching, refetch } = useFavorites();
 
   // Re-check favourites when the tab regains focus (they change elsewhere).
   useFocusEffect(useCallback(() => { refetch(); }, [refetch]));
+
+  // Reached any way other than the premium hub, a free user would otherwise
+  // see the server's 403 rendered as a generic error.
+  if (!isPremium) return <PremiumGate feature="Favourites" />;
 
   if (isLoading) return <LoadingState message="Loading your favourites…" />;
   if (isError) return <ErrorState message="Could not load your favourites." onRetry={() => refetch()} />;

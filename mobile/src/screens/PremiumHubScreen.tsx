@@ -11,7 +11,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePremium } from '../context/PremiumContext';
 import { useAuth } from '../context/AuthContext';
 
+// Shipped features only. Meal Planner, Shopping List and Price Alerts used to
+// sit here with `screen: null` and a "Soon" badge — placeholder content is an
+// App Review 2.1 rejection, and advertising it on a paid tier is a 2.3.1 one.
+// Each goes back in the release that implements it.
 const PREMIUM_FEATURES = [
+  {
+    key: 'pantry',
+    title: 'Pantry matching',
+    description: 'Cook from what you have',
+    icon: 'basket-outline' as const,
+    color: '#0891b2',
+    screen: 'PantryInput',
+  },
   {
     key: 'favourites',
     title: 'Favourites',
@@ -19,38 +31,6 @@ const PREMIUM_FEATURES = [
     icon: 'heart-outline' as const,
     color: '#D4667A',
     screen: 'Favourites',
-  },
-  {
-    key: 'mealplan',
-    title: 'Meal Planner',
-    description: 'Plan your week ahead',
-    icon: 'calendar-outline' as const,
-    color: '#36453B',
-    screen: null, // coming soon
-  },
-  {
-    key: 'shopping',
-    title: 'Shopping List',
-    description: 'Auto-build from recipes',
-    icon: 'bag-handle-outline' as const,
-    color: '#BE6A43',
-    screen: null,
-  },
-  {
-    key: 'pricealerts',
-    title: 'Price Alerts',
-    description: 'Get notified on deals',
-    icon: 'notifications-outline' as const,
-    color: '#6366f1',
-    screen: null,
-  },
-  {
-    key: 'pantry',
-    title: 'Pantry Matching',
-    description: 'Cook from what you have',
-    icon: 'basket-outline' as const,
-    color: '#0891b2',
-    screen: 'PantryInput',
   },
 ];
 
@@ -66,9 +46,9 @@ export default function PremiumHubScreen() {
           <View style={styles.crownCircle}>
             <Ionicons name="star" size={36} color="#BE6A43" />
           </View>
-          <Text style={styles.upgradeTitle}>Deal to Dish Premium</Text>
+          <Text style={styles.upgradeTitle}>Deals to Dish Premium</Text>
           <Text style={styles.upgradeSubtitle}>
-            Unlock powerful tools to save more money and cook smarter.
+            Cook from what is on special and what is already in your cupboard.
           </Text>
         </View>
 
@@ -90,24 +70,20 @@ export default function PremiumHubScreen() {
         <TouchableOpacity
           style={styles.upgradeButton}
           activeOpacity={0.85}
-          onPress={() => {
-            if (!user) navigation.navigate('Login');
-          }}
+          onPress={() => navigation.navigate(user ? 'Paywall' : 'Login')}
         >
           <Text style={styles.upgradeButtonText}>
-            {user ? 'Upgrade to Premium' : 'Sign in to upgrade'}
+            {user ? 'See plans' : 'Sign in to subscribe'}
           </Text>
         </TouchableOpacity>
-
-        <Text style={styles.upgradeNote}>Premium features coming soon — stay tuned!</Text>
       </ScrollView>
     );
   }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.hubContent}>
-      <Text style={styles.hubTitle}>Premium Features</Text>
-      <Text style={styles.hubSubtitle}>Everything you need to cook smart and save more</Text>
+      <Text style={styles.hubTitle}>Premium</Text>
+      <Text style={styles.hubSubtitle}>Cook smart and save more</Text>
 
       <View style={styles.grid}>
         {PREMIUM_FEATURES.map((f) => (
@@ -115,21 +91,13 @@ export default function PremiumHubScreen() {
             key={f.key}
             style={styles.featureCard}
             activeOpacity={0.8}
-            onPress={() => {
-              if (f.screen) navigation.navigate(f.screen);
-            }}
-            disabled={!f.screen}
+            onPress={() => navigation.navigate(f.screen)}
           >
             <View style={[styles.featureIcon, { backgroundColor: f.color + '18' }]}>
               <Ionicons name={f.icon} size={32} color={f.color} />
             </View>
             <Text style={styles.featureTitle}>{f.title}</Text>
             <Text style={styles.featureDesc} numberOfLines={2}>{f.description}</Text>
-            {!f.screen && (
-              <View style={styles.comingSoonBadge}>
-                <Text style={styles.comingSoonText}>Soon</Text>
-              </View>
-            )}
           </TouchableOpacity>
         ))}
       </View>
@@ -184,13 +152,12 @@ const styles = StyleSheet.create({
   featureRowTitle: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#2A241F' },
   featureRowDesc: { fontSize: 13, color: '#6B5F52', marginTop: 1 },
   upgradeButton: {
-    backgroundColor: '#BE6A43',
+    backgroundColor: '#36453B',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   upgradeButtonText: { color: '#ffffff', fontSize: 16, fontFamily: 'Inter_700Bold' },
-  upgradeNote: { fontSize: 13, color: '#6B5F52', textAlign: 'center' },
 
   // Premium hub view (for premium users)
   hubContent: {
@@ -229,12 +196,4 @@ const styles = StyleSheet.create({
   },
   featureTitle: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#2A241F' },
   featureDesc: { fontSize: 12, color: '#6B5F52', lineHeight: 18 },
-  comingSoonBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#f0ede8',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
-  },
-  comingSoonText: { fontSize: 10, fontFamily: 'Inter_700Bold', color: '#6B5F52' },
 });
