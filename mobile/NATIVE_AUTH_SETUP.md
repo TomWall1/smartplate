@@ -23,7 +23,7 @@ the Apple button), so testing in Expo Go is unaffected.
 - [x] Backend `POST /api/auth/oauth-native` (`backend/routes/auth.js`).
 - [x] Google client IDs filled in (`app.json` → `expo.extra`), web + iOS.
 - [x] Apple Team ID `M8SK624GS6` in `eas.json` → `submit.production.ios`.
-- [ ] Backend deployed to Render.
+- [x] Backend deployed to Render (`POST /api/auth/oauth-native` verified live).
 - [ ] Dev build produced.
 
 ## Android path (no paid developer account needed)
@@ -72,7 +72,14 @@ token's `aud` against it. No Android client ID needed on this screen.
 ### 6. Deploy the backend
 
 Render must have `/api/auth/oauth-native` live. Auto-deploy is unreliable — push
-and confirm the deploy manually.
+and confirm the deploy manually. Quick check (a 400 means the route is live; a
+404 means the deploy hasn't landed):
+
+```sh
+curl -s -X POST https://deals-to-dish-api.onrender.com/api/auth/oauth-native \
+  -H 'Content-Type: application/json' -d '{}'
+# → {"error":"provider and idToken are required"}
+```
 
 ### 7. Run against the dev build
 
@@ -86,10 +93,13 @@ The Google button now opens the on-device account picker instead of a browser.
 
 - [x] iOS OAuth client ID created and wired, with the reversed form as
       `iosUrlScheme` in the google-signin plugin config.
-- [ ] Supabase → Auth → Providers → **Apple** enabled, with
-      `com.smartplate.dealstodish` in the authorized client IDs. Native
-      sign-in validates the token's `aud` against that bundle ID — no Services
-      ID or signing key needed (those are for the web redirect flow only).
+- [x] Supabase → Auth → Providers → **Apple** enabled — confirmed via
+      `GET /auth/v1/settings` (`"apple": true`, `"google": true`). The bundle
+      ID `com.smartplate.dealstodish` must be listed under the provider's
+      authorized client IDs; that field isn't exposed by the settings endpoint,
+      so confirm it in the dashboard. Native sign-in validates the token's
+      `aud` against that bundle ID — no Services ID or signing key needed
+      (those are for the web redirect flow only).
 - [ ] Register the iPhone with EAS, then build:
 
 ```sh
