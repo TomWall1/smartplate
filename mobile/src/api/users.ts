@@ -9,3 +9,11 @@ export async function getProfile(): Promise<User> {
 export async function updateState(state: string): Promise<void> {
   await client.post('/api/users/state', { state });
 }
+
+/**
+ * Persist the user's store choice server-side so it survives a reinstall or a
+ * new device. Mirrors updateState; the backend writes users.selected_store.
+ */
+export async function updateSelectedStore(store: string): Promise<void> {
+  await client.put('/api/users/preferences', { selected_store: store });
+}

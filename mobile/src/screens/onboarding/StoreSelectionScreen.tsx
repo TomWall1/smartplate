@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { updateSelectedStore } from '../../api/users';
 import { useStore } from '../../context/StoreContext';
 import { colors, fonts, spacing, radius, shadow, storeColors } from '../../theme';
 
@@ -17,12 +18,24 @@ const STORES = [
 
 export default function StoreSelectionScreen() {
   const navigation = useNavigation<any>();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { setSelectedStore, selectedStore, selectedState } = useStore();
   const effectiveState = user?.state || selectedState;
 
   async function handleSelect(store: string) {
     await setSelectedStore(store);
+
+    // Persist for logged-in users so the choice survives a reinstall. Local
+    // storage already has it, so a failure here is not worth blocking on.
+    if (user) {
+      try {
+        await updateSelectedStore(store);
+        await refreshUser();
+      } catch {
+        // Offline or backend down — the local preference still applies.
+      }
+    }
+
     if (!effectiveState) {
       // First-run onboarding — continue to state selection.
       navigation.navigate('StateSelection');

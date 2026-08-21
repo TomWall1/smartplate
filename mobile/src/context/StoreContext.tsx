@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { useAuth } from './AuthContext';
 
 // Non-secret UI prefs belong in AsyncStorage; SecureStore is reserved for the
 // auth token. Old builds stored these in SecureStore — migrate once on read.
@@ -65,6 +66,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(STATE_KEY, state);
     setStateState(state);
   }, []);
+
+  // Adopt the server-side store preference when this device has none — a
+  // reinstall or a new phone would otherwise send a returning user back through
+  // store selection, and screens that default to 'woolworths' would show the
+  // wrong store in the meantime.
+  //
+  // Deliberately only fills a blank: overwriting a local value would race the
+  // refreshUser() that follows a store change, briefly reverting the new pick.
+  const { user } = useAuth();
+  useEffect(() => {
+    if (storeLoading || selectedStore || !user?.selected_store) return;
+    setSelectedStore(user.selected_store);
+  }, [storeLoading, selectedStore, user?.selected_store, setSelectedStore]);
 
   return (
     <StoreContext.Provider value={{ selectedStore, selectedState, storeLoading, setSelectedStore, setSelectedState }}>
