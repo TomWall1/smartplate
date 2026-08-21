@@ -17,3 +17,12 @@ export async function updateState(state: string): Promise<void> {
 export async function updateSelectedStore(store: string): Promise<void> {
   await client.put('/api/users/preferences', { selected_store: store });
 }
+
+/**
+ * Permanently delete the signed-in account. Required in-app by App Store
+ * Guideline 5.1.1(v). The server takes the id from the JWT, so there is
+ * nothing to pass.
+ */
+export async function deleteAccount(): Promise<void> {
+  await client.delete('/api/users/me');
+}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,11 +6,20 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
+import { usePremium } from '../context/PremiumContext';
+import { deleteAccount } from '../api/users';
+import { TERMS_URL, PRIVACY_URL } from './PaywallScreen';
+
+// Apple's subscription management page — the only place an App Store
+// subscription can actually be cancelled.
+const MANAGE_SUBSCRIPTION_URL = 'https://apps.apple.com/account/subscriptions';
 
 const AU_STATE_NAMES: Record<string, string> = {
   nsw: 'New South Wales',
@@ -63,6 +72,64 @@ export default function AccountScreen() {
   const navigation = useNavigation<any>();
   const { user, logout, guestMode } = useAuth();
   const { selectedStore, selectedState } = useStore();
+  const { isPremium, status } = usePremium();
+  const [deleting, setDeleting] = useState(false);
+
+  const planLabel = isPremium
+    ? (status?.lapsing && status.expiresAt
+        ? `Premium until ${new Date(status.expiresAt).toLocaleDateString()}`
+        : 'Premium')
+    : 'Free';
+
+  // Deleting the account does NOT cancel an App Store subscription — only the
+  // user can, through Apple. Saying so here is what stops someone deleting
+  // their account and continuing to be billed for it.
+  const hasStoreSubscription = isPremium && status?.source !== 'admin';
+
+  function handleDeleteAccount() {
+    const consequence =
+      'This permanently deletes your account, saved recipes and pantry. It cannot be undone.';
+    const subscriptionNote = hasStoreSubscription
+      ? '\n\nYour subscription is billed by Apple and is not cancelled by deleting your account. Cancel it in your App Store settings first, or you will keep being charged.'
+      : '';
+
+    Alert.alert('Delete account', consequence + subscriptionNote, [
+      { text: 'Cancel', style: 'cancel' },
+      ...(hasStoreSubscription
+        ? [{
+            text: 'Manage subscription',
+            onPress: () => WebBrowser.openBrowserAsync(MANAGE_SUBSCRIPTION_URL),
+          }]
+        : []),
+      {
+        text: 'Delete',
+        style: 'destructive' as const,
+        // Second explicit confirmation — a destructive, irreversible action
+        // should not be one stray tap away.
+        onPress: () => Alert.alert(
+          'Delete account?',
+          'Last chance — this cannot be undone.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Delete for ever', style: 'destructive', onPress: doDelete },
+          ],
+        ),
+      },
+    ]);
+  }
+
+  async function doDelete() {
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      // Clears tokens and drops back to the logged-out stack.
+      await logout();
+    } catch {
+      Alert.alert('Could not delete account', 'Something went wrong. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   const effectiveState = user?.state || selectedState;
   const stateName = effectiveState ? AU_STATE_NAMES[effectiveState] ?? effectiveState.toUpperCase() : null;
@@ -168,11 +235,48 @@ export default function AccountScreen() {
         </View>
       </View>
 
+      {/* Subscription */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Subscription</Text>
+        <View style={styles.card}>
+          <RowItem
+            icon="star-outline"
+            label="Plan"
+            value={planLabel}
+            onPress={isPremium ? undefined : () => navigation.navigate('Paywall')}
+          />
+          {isPremium && (
+            <>
+              <View style={styles.divider} />
+              {/* Only Apple can cancel an App Store subscription, so this hands
+                  the user off rather than pretending to manage it here. */}
+              <RowItem
+                icon="card-outline"
+                label="Manage subscription"
+                onPress={() => WebBrowser.openBrowserAsync(MANAGE_SUBSCRIPTION_URL)}
+              />
+            </>
+          )}
+        </View>
+      </View>
+
       {/* Account actions */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
         <View style={styles.card}>
           <RowItem icon="mail-outline" label="Email" value={user?.email} />
+          <View style={styles.divider} />
+          <RowItem
+            icon="document-text-outline"
+            label="Privacy policy"
+            onPress={() => WebBrowser.openBrowserAsync(PRIVACY_URL)}
+          />
+          <View style={styles.divider} />
+          <RowItem
+            icon="reader-outline"
+            label="Terms of use"
+            onPress={() => WebBrowser.openBrowserAsync(TERMS_URL)}
+          />
         </View>
       </View>
 
@@ -181,6 +285,21 @@ export default function AccountScreen() {
         <Ionicons name="log-out-outline" size={20} color="#D4667A" />
         <Text style={styles.signOutText}>Sign out</Text>
       </TouchableOpacity>
+
+      {/* Account deletion — required in-app by App Store Guideline 5.1.1(v). */}
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={handleDeleteAccount}
+        disabled={deleting}
+        activeOpacity={0.85}
+      >
+        {deleting
+          ? <ActivityIndicator color="#A23E2E" />
+          : <Text style={styles.deleteText}>Delete account</Text>}
+      </TouchableOpacity>
+      <Text style={styles.deleteCaption}>
+        This permanently removes your account and everything saved to it. It cannot be undone.
+      </Text>
     </ScrollView>
   );
 }
@@ -278,4 +397,22 @@ const styles = StyleSheet.create({
     borderColor: '#f9d5da',
   },
   signOutText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#D4667A' },
+
+  // Deliberately quieter than sign out — reachable in two taps as Apple
+  // requires, but not competing with it for attention.
+  deleteButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    marginTop: 8,
+  },
+  deleteText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: '#A23E2E' },
+  deleteCaption: {
+    fontSize: 12,
+    color: '#9A8E7E',
+    textAlign: 'center',
+    lineHeight: 16,
+    paddingHorizontal: 16,
+    marginTop: -4,
+  },
 });
