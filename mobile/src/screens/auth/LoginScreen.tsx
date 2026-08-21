@@ -16,6 +16,7 @@ import { Image } from 'expo-image';
 import { fonts } from '../../theme';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import { SUPABASE_URL } from '../../api/auth';
@@ -152,6 +153,26 @@ export default function LoginScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Sign in</Text>
 
+          {/* Sign in with Apple sits above Google: Guideline 4.8 wants it at
+              least as prominent as any other third-party option. This is the
+              real native button (Apple's own mark and typeface) rather than a
+              lookalike, which is what the HIG requires. */}
+          {appleAvailable && (
+            appleLoading ? (
+              <View style={styles.appleButtonPlaceholder}>
+                <ActivityIndicator color="#ffffff" />
+              </View>
+            ) : (
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                cornerRadius={12}
+                style={styles.appleButton}
+                onPress={handleApple}
+              />
+            )
+          )}
+
           {/* Google Sign In */}
           <TouchableOpacity
             style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
@@ -168,25 +189,6 @@ export default function LoginScreen() {
               </>
             )}
           </TouchableOpacity>
-
-          {/* Apple Sign In — only in a dev build on iOS (hidden in Expo Go) */}
-          {appleAvailable && (
-            <TouchableOpacity
-              style={[styles.appleButton, appleLoading && styles.buttonDisabled]}
-              onPress={handleApple}
-              disabled={googleLoading || appleLoading || loading}
-              activeOpacity={0.85}
-            >
-              {appleLoading ? (
-                <ActivityIndicator color="#ffffff" />
-              ) : (
-                <>
-                  <Ionicons name="logo-apple" size={18} color="#ffffff" />
-                  <Text style={styles.appleButtonText}>Continue with Apple</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
 
           {/* Divider */}
           <View style={styles.dividerRow}>
@@ -285,8 +287,9 @@ const styles = StyleSheet.create({
   cardTitle: { fontFamily: fonts.display, fontSize: 22, color: '#2A241F', marginBottom: 4 },
   googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1.5, borderColor: '#E2D8C6', borderRadius: 12, paddingVertical: 13, backgroundColor: '#ffffff' },
   googleButtonText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#2A241F' },
-  appleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12, paddingVertical: 13, backgroundColor: '#000000' },
-  appleButtonText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#ffffff' },
+  // The native Apple button draws its own label; it only needs a box to fill.
+  appleButton: { width: '100%', height: 46 },
+  appleButtonPlaceholder: { width: '100%', height: 46, borderRadius: 12, backgroundColor: '#000000', alignItems: 'center', justifyContent: 'center' },
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#E2D8C6' },
   dividerText: { fontSize: 12, color: '#6B5F52' },
