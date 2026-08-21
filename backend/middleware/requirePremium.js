@@ -1,7 +1,9 @@
 const { clientForToken } = require('../services/authService');
+const { PREMIUM_COLUMNS, isPremiumNow } = require('../services/premiumService');
 
 /**
- * Middleware that checks the authenticated user has is_premium = true.
+ * Middleware that checks the authenticated user holds a live premium
+ * entitlement — is_premium AND not lapsed. See services/premiumService.js.
  * Must be used after requireAuth (which sets req.user and req.token).
  * Returns 403 with upgrade message if user is not premium.
  */
@@ -16,11 +18,11 @@ async function requirePremium(req, res, next) {
 
     const { data: profile } = await supabase
       .from('users')
-      .select('is_premium')
+      .select(PREMIUM_COLUMNS)
       .eq('id', req.user.id)
       .single();
 
-    if (!profile?.is_premium) {
+    if (!isPremiumNow(profile)) {
       return res.status(403).json({
         error: 'Premium required',
         message: 'Upgrade to SmartPlate Premium to access this feature',

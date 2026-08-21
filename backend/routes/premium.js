@@ -2,6 +2,7 @@ const express = require('express');
 const requireAuth   = require('../middleware/requireAuth');
 const requirePremium = require('../middleware/requirePremium');
 const { clientForToken } = require('../services/authService');
+const { PREMIUM_COLUMNS, premiumStatus } = require('../services/premiumService');
 const dealService = require('../services/dealService');
 
 const router = express.Router();
@@ -45,14 +46,11 @@ router.get('/status', async (req, res) => {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('is_premium, premium_since')
+    .select(`premium_since, ${PREMIUM_COLUMNS}`)
     .eq('id', req.user.id)
     .single();
 
-  res.json({
-    isPremium:    profile?.is_premium    ?? false,
-    premiumSince: profile?.premium_since ?? null,
-  });
+  res.json(premiumStatus(profile));
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

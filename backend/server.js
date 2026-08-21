@@ -31,7 +31,11 @@ app.options('*', cors(corsOptions));
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
+  // Store webhooks all arrive from a handful of provider IPs, so a burst of
+  // renewals would trip the per-IP cap. A 429 makes RevenueCat retry, which
+  // just re-queues the same burst. The endpoint has its own shared-secret auth.
+  skip: (req) => req.path === '/api/subscriptions/webhook',
 });
 app.use(limiter);
 
@@ -61,6 +65,7 @@ const pantryRoutes      = require('./routes/pantry');
 const feedbackRoutes    = require('./routes/feedback');
 const authRoutes        = require('./routes/auth');
 const diagnosticsRoutes = require('./routes/diagnostics');
+const subscriptionRoutes = require('./routes/subscriptions');
 
 // Routes — diagnostics must stay registered before the admin router
 // (unauthenticated scraper checks; see commit 0579823 on route ordering).
@@ -73,6 +78,7 @@ app.use('/api/admin',    adminRoutes);
 app.use('/api/pantry',   pantryRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/auth',     authRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 
 // External cron trigger — used by GitHub Actions for the weekly refresh.
 // This is the ONLY writer of the deals/recipes artifacts (boot never computes).

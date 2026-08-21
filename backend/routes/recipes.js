@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const recipeService = require('../services/recipeService');
 const { supabase: authSupabase, clientForToken } = require('../services/authService');
+const { PREMIUM_COLUMNS, isPremiumNow } = require('../services/premiumService');
 
 // ── Manually trigger weekly recipe generation ───────────────────────
 // Returns 202 immediately; generation runs in background.
@@ -90,10 +91,10 @@ router.post('/suggestions', async (req, res) => {
           const userClient = clientForToken(token);
           const { data: profile } = await userClient
             .from('users')
-            .select('is_premium')
+            .select(PREMIUM_COLUMNS)
             .eq('id', authUser.id)
             .single();
-          isPremiumUser = profile?.is_premium ?? false;
+          isPremiumUser = isPremiumNow(profile);
         }
       } catch {
         // Non-fatal — default to free tier
