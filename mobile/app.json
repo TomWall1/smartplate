@@ -14,7 +14,10 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.smartplate.dealstodish",
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -43,6 +46,9 @@
       "apiBaseUrl": "https://deals-to-dish-api.onrender.com",
       "googleWebClientId": "640522418425-vtcdniju3q84hjjfbc7eilk9s9t7c762.apps.googleusercontent.com",
       "googleIosClientId": "139875213527-jqo3vdslr7r00dskvbngaghv9rpjq05p.apps.googleusercontent.com",
+      "revenueCatIosKey": "TODO_REVENUECAT_IOS_PUBLIC_KEY",
+      "revenueCatAndroidKey": "TODO_REVENUECAT_ANDROID_PUBLIC_KEY",
+      "revenueCatEntitlementId": "premium",
       "eas": {
         "projectId": "1dff3ebb-5978-4dd4-a7d2-f5068aa631b4"
       }

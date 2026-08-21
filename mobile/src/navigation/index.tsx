@@ -27,6 +27,7 @@ import PantryInputScreen from '../screens/pantry/PantryInputScreen';
 import PantryResultsScreen from '../screens/pantry/PantryResultsScreen';
 import AccountScreen from '../screens/AccountScreen';
 import DealRecipesScreen from '../screens/DealRecipesScreen';
+import PaywallScreen from '../screens/PaywallScreen';
 
 import { PantryMatchResult } from '../types';
 
@@ -50,6 +51,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   StoreSelection: undefined;
   StateSelection: undefined;
+  Paywall: undefined;
 };
 
 export type StoreStackParamList = {
@@ -302,6 +304,13 @@ function AppWithModalAuth() {
         name="StateSelection"
         component={StateSelectionScreen}
         options={{ presentation: 'modal', headerShown: true, title: 'Change State', ...headerOptions }}
+      />
+      {/* Paywall lives at the root so every upgrade CTA — premium hub, account,
+          and any in-context gate — opens the same screen. */}
+      <RootStack.Screen
+        name="Paywall"
+        component={PaywallScreen}
+        options={{ presentation: 'modal', headerShown: true, title: 'Premium', ...headerOptions }}
       />
     </RootStack.Navigator>
   );
