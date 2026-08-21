@@ -7,10 +7,10 @@
  * WebBrowser OAuth — importing this file is safe there.
  *
  * BEFORE THIS WORKS (see mobile/NATIVE_AUTH_SETUP.md):
- *   1. Fill the Google client IDs below + the iosUrlScheme in app.json.
+ *   1. Fill googleWebClientId / googleIosClientId in app.json → expo.extra.
  *   2. Enable Google + Apple providers in Supabase (Auth → Providers).
  *   3. Deploy the backend (POST /api/auth/oauth-native).
- *   4. Build a dev client:  eas build --profile development
+ *   4. Build a dev client:  eas build --profile development --platform android
  */
 import { Platform } from 'react-native';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
@@ -20,9 +20,22 @@ import client from './client';
 export const isNativeAuthAvailable =
   Constants.executionEnvironment !== ExecutionEnvironment.StoreClient;
 
-// TODO: from Google Cloud Console → Credentials → OAuth 2.0 client IDs.
-const GOOGLE_WEB_CLIENT_ID = 'TODO_WEB_CLIENT_ID.apps.googleusercontent.com';
-const GOOGLE_IOS_CLIENT_ID = 'TODO_IOS_CLIENT_ID.apps.googleusercontent.com';
+// Client IDs live in app.json → expo.extra (same pattern as apiBaseUrl in
+// client.ts) so filling them in never means touching this file.
+const extra = (Constants.expoConfig?.extra ?? {}) as {
+  googleWebClientId?: string;
+  googleIosClientId?: string;
+};
+
+const PLACEHOLDER = /^TODO_/;
+const configured = (v?: string) => (v && !PLACEHOLDER.test(v) ? v : undefined);
+
+const GOOGLE_WEB_CLIENT_ID = configured(extra.googleWebClientId);
+const GOOGLE_IOS_CLIENT_ID = configured(extra.googleIosClientId);
+
+/** True once the Google client IDs are filled in for this platform. */
+export const isGoogleNativeConfigured =
+  !!GOOGLE_WEB_CLIENT_ID && (Platform.OS !== 'ios' || !!GOOGLE_IOS_CLIENT_ID);
 
 interface NativeSession { token: string; refresh_token?: string }
 
@@ -34,12 +47,18 @@ async function exchange(provider: 'google' | 'apple', idToken: string): Promise<
 
 let googleConfigured = false;
 function getGoogleSignin(): any {
+  if (!GOOGLE_WEB_CLIENT_ID) {
+    throw new Error(
+      'Google sign-in is not configured — set expo.extra.googleWebClientId in app.json ' +
+        '(see mobile/NATIVE_AUTH_SETUP.md).',
+    );
+  }
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const mod = require('@react-native-google-signin/google-signin');
   if (!googleConfigured) {
     mod.GoogleSignin.configure({
       webClientId: GOOGLE_WEB_CLIENT_ID, // required to receive an idToken
-      iosClientId: GOOGLE_IOS_CLIENT_ID,
+      iosClientId: GOOGLE_IOS_CLIENT_ID, // undefined on Android — ignored
       offlineAccess: false,
     });
     googleConfigured = true;

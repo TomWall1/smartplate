@@ -21,6 +21,7 @@ import { useAuth } from '../../context/AuthContext';
 import { SUPABASE_URL } from '../../api/auth';
 import {
   isNativeAuthAvailable,
+  isGoogleNativeConfigured,
   signInWithGoogleNative,
   signInWithAppleNative,
   isAppleAvailable,
@@ -96,6 +97,11 @@ export default function LoginScreen() {
     }
   }
 
+  // Native Google needs BOTH a dev build (module present) and the client IDs
+  // filled in. Until then we fall back to the WebBrowser flow — which works
+  // properly in a dev build, since it registers the real `dealstodish` scheme.
+  const useNativeGoogle = isNativeAuthAvailable && isGoogleNativeConfigured;
+
   // Native Google (dev build only) — Expo Go uses handleGoogleSignIn instead.
   async function handleNativeGoogle() {
     setGoogleLoading(true);
@@ -149,7 +155,7 @@ export default function LoginScreen() {
           {/* Google Sign In */}
           <TouchableOpacity
             style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
-            onPress={isNativeAuthAvailable ? handleNativeGoogle : handleGoogleSignIn}
+            onPress={useNativeGoogle ? handleNativeGoogle : handleGoogleSignIn}
             disabled={googleLoading || appleLoading || loading}
             activeOpacity={0.85}
           >

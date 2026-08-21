@@ -35,12 +35,14 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.TODO_IOS_CLIENT_ID"
+          "iosUrlScheme": "com.googleusercontent.apps.139875213527-jqo3vdslr7r00dskvbngaghv9rpjq05p"
         }
       ]
     ],
     "extra": {
-      "apiBaseUrl": "https://deals-to-dish-api.onrender.com"
+      "apiBaseUrl": "https://deals-to-dish-api.onrender.com",
+      "googleWebClientId": "640522418425-vtcdniju3q84hjjfbc7eilk9s9t7c762.apps.googleusercontent.com",
+      "googleIosClientId": "139875213527-jqo3vdslr7r00dskvbngaghv9rpjq05p.apps.googleusercontent.com"
     }
   }
 }

@@ -49,3 +49,5 @@ backend/database/products.db-wal
 
 # Windows artefacts
 nul
+# Expo local dev artifacts
+.expo/
