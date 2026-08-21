@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -27,9 +27,20 @@ const AU_STATES = [
 export default function StateSelectionScreen() {
   const navigation = useNavigation<any>();
   const { user, refreshUser } = useAuth();
-  const { setSelectedState } = useStore();
-  const [selected, setSelected] = useState<string | null>(null);
+  const { setSelectedState, selectedState } = useStore();
+
+  // Null during first-run onboarding; set when this screen is reopened as the
+  // "Change state" modal, where the current state must come up preselected.
+  const currentState = (user?.state ?? selectedState)?.toLowerCase() ?? null;
+
+  const [selected, setSelected] = useState<string | null>(currentState);
   const [loading, setLoading] = useState(false);
+
+  // The contexts are already resolved when this screen mounts, but sync once
+  // more if they land late — only while untouched, so it never fights a tap.
+  useEffect(() => {
+    if (currentState) setSelected((prev) => prev ?? currentState);
+  }, [currentState]);
 
   async function handleSave() {
     if (!selected) {
