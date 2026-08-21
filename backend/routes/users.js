@@ -115,4 +115,80 @@ router.put('/preferences', requireAuth, async (req, res) => {
   res.json(data);
 });
 
+// ── DELETE /api/users/me ──────────────────────────────────────────────────────
+// Permanent account deletion. Required by App Store Guideline 5.1.1(v): an app
+// that creates accounts must let the user delete theirs from inside the app.
+//
+// The id always comes from the verified JWT — never from the request — so this
+// cannot be pointed at another account.
+//
+// The user-owned tables carry bare `user_id UUID` columns with no
+// REFERENCES users(id), so nothing cascades and each one is cleared explicitly.
+// Rows first, auth user last: if this fails midway the account still exists and
+// the user can retry, which is recoverable. The reverse leaves orphaned rows
+// with no owner and no way to reach them.
+const USER_OWNED_TABLES = [
+  'favorite_recipes',
+  'meal_plans',
+  'shopping_lists',
+  'price_alerts',
+  'user_pantries',
+];
+
+router.delete('/me', requireAuth, async (req, res) => {
+  const { adminSupabase } = require('../services/authService');
+  if (!adminSupabase) {
+    return res.status(503).json({ error: 'Account deletion is not configured' });
+  }
+
+  const userId = req.user.id;
+
+  try {
+    for (const table of USER_OWNED_TABLES) {
+      const { error } = await adminSupabase.from(table).delete().eq('user_id', userId);
+      // A table that does not exist yet in this environment is not a reason to
+      // strand the user with an undeletable account.
+      if (error && error.code !== '42P01') {
+        throw new Error(`${table}: ${error.message}`);
+      }
+    }
+
+    // Matcher training data: keep the signal, drop the person. Anonymised
+    // rather than deleted because it is aggregate feedback, not personal
+    // content, and the column is nullable by design.
+    const { error: fbError } = await adminSupabase
+      .from('match_feedback')
+      .update({ user_id: null })
+      .eq('user_id', userId);
+    if (fbError && fbError.code !== '42P01') {
+      console.error('[users/me] match_feedback anonymise failed:', fbError.message);
+    }
+
+    // Subscription history is kept — it is a financial record, and the store
+    // may still send events for this id. Detach it from the person instead.
+    await adminSupabase
+      .from('subscription_events')
+      .update({ user_id: null })
+      .eq('user_id', userId);
+
+    const { error: profileError } = await adminSupabase
+      .from('users')
+      .delete()
+      .eq('id', userId);
+    if (profileError) throw new Error(`users: ${profileError.message}`);
+
+    const { error: authError } = await adminSupabase.auth.admin.deleteUser(userId);
+    // Already gone (a retried delete) is success, not failure.
+    if (authError && !/not.?found/i.test(authError.message)) {
+      throw new Error(`auth: ${authError.message}`);
+    }
+
+    console.log(`[users/me] deleted account ${userId}`);
+    res.json({ deleted: true });
+  } catch (err) {
+    console.error('[users/me] deletion failed:', err.message);
+    res.status(500).json({ error: 'Could not delete your account. Please try again.' });
+  }
+});
+
 module.exports = router;
