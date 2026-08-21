@@ -14,6 +14,7 @@ import ShoppingList from './pages/ShoppingList';
 import PriceAlerts from './pages/PriceAlerts';
 import PantryMatcher from './pages/PantryMatcher';
 import Premium from './pages/Premium';
+import { PrivacyPolicy, Terms } from './pages/Legal';
 import Admin from './pages/Admin';
 import AdminRecipes from './pages/AdminRecipes';
 import AdminBlocklist from './pages/AdminBlocklist';
@@ -317,6 +318,8 @@ function AppInner() {
             <Route path="/price-alerts" element={<PriceAlerts />} />
             <Route path="/pantry" element={<PantryMatcher />} />
             <Route path="/premium" element={<Premium />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/recipes" element={<AdminRecipes />} />
             <Route path="/admin/blocklist" element={<AdminBlocklist />} />
