@@ -89,6 +89,28 @@ npm run start:dev         # expo start --dev-client
 
 The Google button now opens the on-device account picker instead of a browser.
 
+## iOS Google sign-in uses the WebBrowser flow, not the native SDK
+
+Native Google sign-in **cannot** work on iOS with this stack. The GoogleSignIn
+SDK embeds its own `nonce` claim in the ID token and never exposes the value it
+hashed; Supabase compares `sha256(nonce you pass)` against that claim, so
+`signInWithIdToken` fails with *"Nonces mismatch"*. Passing the nonce read back
+out of the token doesn't help — it's the pre-image that's needed, and
+`@react-native-google-signin/google-signin` has no nonce option (checked through
+16.1.4).
+
+So `isGoogleNativeConfigured` is false on iOS and `LoginScreen` falls back to the
+WebBrowser OAuth flow, which works in a dev build. This requires
+`dealstodish://auth-callback` in **Supabase → Authentication → URL
+Configuration → Redirect URLs**.
+
+Apple sign-in is unaffected and stays native. Android still uses the native SDK,
+but its nonce behaviour is untested — verify when the Android build happens.
+
+Revisit if the wrapper ever accepts a caller-supplied nonce, or switch to the
+`offlineAccess` / `serverAuthCode` flow (exchange the code server-side with the
+web client secret) to get the native picker back.
+
 ## iOS path (Apple Developer Program active)
 
 - [x] iOS OAuth client ID created and wired, with the reversed form as

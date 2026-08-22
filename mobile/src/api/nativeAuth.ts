@@ -33,9 +33,20 @@ const configured = (v?: string) => (v && !PLACEHOLDER.test(v) ? v : undefined);
 const GOOGLE_WEB_CLIENT_ID = configured(extra.googleWebClientId);
 const GOOGLE_IOS_CLIENT_ID = configured(extra.googleIosClientId);
 
-/** True once the Google client IDs are filled in for this platform. */
+/**
+ * True once the Google client IDs are filled in for this platform.
+ *
+ * iOS is excluded deliberately. The GoogleSignIn native SDK puts its own
+ * `nonce` claim in the ID token and never exposes the value it hashed, while
+ * Supabase compares sha256(the nonce you pass) against that claim — so
+ * signInWithIdToken always fails with "Nonces mismatch", and google-signin has
+ * no nonce option to bind one (still absent in 16.1.4). LoginScreen therefore
+ * falls back to the WebBrowser OAuth flow on iOS, which works in a dev build
+ * because it registers the real `dealstodish` scheme. Apple sign-in is native
+ * and unaffected. Revisit if the wrapper ever accepts a caller-supplied nonce.
+ */
 export const isGoogleNativeConfigured =
-  !!GOOGLE_WEB_CLIENT_ID && (Platform.OS !== 'ios' || !!GOOGLE_IOS_CLIENT_ID);
+  Platform.OS !== 'ios' && !!GOOGLE_WEB_CLIENT_ID;
 
 interface NativeSession { token: string; refresh_token?: string }
 
