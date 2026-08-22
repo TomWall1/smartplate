@@ -41,8 +41,18 @@ interface NativeSession { token: string; refresh_token?: string }
 
 // Exchange a provider ID token for a Supabase session via our backend.
 async function exchange(provider: 'google' | 'apple', idToken: string): Promise<NativeSession> {
-  const res = await client.post('/api/auth/oauth-native', { provider, idToken });
-  return res.data as NativeSession;
+  try {
+    const res = await client.post('/api/auth/oauth-native', { provider, idToken });
+    return res.data as NativeSession;
+  } catch (err: any) {
+    // The route returns Supabase's own reason in `error` (a 401 there means
+    // signInWithIdToken rejected the token — usually the client ID is missing
+    // from the provider's authorized list). Surface it instead of axios's
+    // "Request failed with status code 401", which says nothing actionable.
+    const reason = err?.response?.data?.error;
+    if (reason) throw new Error(reason);
+    throw err;
+  }
 }
 
 let googleConfigured = false;
