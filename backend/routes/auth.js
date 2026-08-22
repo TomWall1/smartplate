@@ -78,6 +78,24 @@ router.post('/refresh', async (req, res) => {
   });
 });
 
+// The GoogleSignIn iOS SDK embeds a nonce in the ID token that the JS wrapper
+// never exposes (no nonce option exists as of google-signin 16.1.4), and GoTrue
+// rejects the exchange with "Passed nonce and nonce in id_token should either
+// both exist or not" unless the same value is supplied alongside the token.
+// Read it back out of the token's payload. No verification happens here —
+// signInWithIdToken still checks the signature against the provider's JWKS,
+// along with aud and exp — so this only mirrors a claim Supabase re-derives.
+function readNonce(idToken) {
+  try {
+    const payload = String(idToken).split('.')[1];
+    if (!payload) return undefined;
+    const json = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    return typeof json.nonce === 'string' ? json.nonce : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // ── POST /api/auth/oauth-native ───────────────────────────────────────────────
 // Exchange a native provider ID token (Google / Apple, obtained on-device via
 // the native sign-in SDKs) for a Supabase session. Keeps the Supabase anon key
@@ -92,7 +110,12 @@ router.post('/oauth-native', async (req, res) => {
   if (!['google', 'apple'].includes(provider)) return res.status(400).json({ error: 'unsupported provider' });
   if (!supabase) return res.status(503).json({ error: 'Auth service not configured' });
 
-  const { data, error } = await supabase.auth.signInWithIdToken({ provider, token: idToken });
+  const nonce = readNonce(idToken);
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider,
+    token: idToken,
+    ...(nonce ? { nonce } : {}),
+  });
   if (error || !data?.session) {
     return res.status(401).json({ error: error?.message ?? 'Native sign-in failed' });
   }
