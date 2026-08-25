@@ -81,21 +81,49 @@ export default function LoginScreen() {
 
       const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
-      if (result.type === 'success' && result.url) {
-        // Supabase puts tokens in the URL hash fragment
-        const hash = result.url.split('#')[1] ?? '';
-        const params = new URLSearchParams(hash);
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token') ?? undefined;
+      if (result.type !== 'success' || !result.url) {
+        // Anything but `success` means the browser closed without ever hitting
+        // our redirect URI. The usual cause is redirectUri missing from the
+        // Supabase redirect allow-list: GoTrue silently falls back to SITE_URL,
+        // so the sheet lands on the website and the app is never called back.
+        // Staying silent here looks identical to a working sign-in that failed,
+        // so say what happened and show the URI that has to be allow-listed.
+        Alert.alert(
+          'Sign-in did not complete',
+          `The browser closed without returning to the app (${result.type}).
 
-        if (accessToken) {
-          await googleLogin(accessToken, refreshToken);
-          dismissIfModal();
-        } else {
-          Alert.alert('Sign-in failed', 'Could not retrieve access token. Please try again.');
-        }
+` +
+            `If you did finish signing in with Google, add this exact URL to ` +
+            `Supabase → Authentication → URL Configuration → Redirect URLs:
+
+${redirectUri}`,
+        );
+        return;
       }
-      // result.type === 'cancel' — user closed browser, do nothing
+
+      // Supabase returns tokens in the hash fragment on the implicit flow, but
+      // errors come back as query params — read both.
+      const [beforeHash, afterHash = ''] = result.url.split('#');
+      const params = new URLSearchParams(afterHash);
+      const query  = new URLSearchParams(beforeHash.split('?')[1] ?? '');
+
+      const providerError = params.get('error_description') ?? query.get('error_description')
+        ?? params.get('error') ?? query.get('error');
+      if (providerError) {
+        Alert.alert('Google sign-in failed', providerError);
+        return;
+      }
+
+      const accessToken  = params.get('access_token');
+      const refreshToken = params.get('refresh_token') ?? undefined;
+
+      if (!accessToken) {
+        Alert.alert('Sign-in failed', 'Google signed you in but no session came back. Please try again.');
+        return;
+      }
+
+      await googleLogin(accessToken, refreshToken);
+      dismissIfModal();
     } catch (err: any) {
       Alert.alert('Google sign-in failed', reasonFor(err, 'Something went wrong.'));
     } finally {

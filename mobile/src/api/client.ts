@@ -65,12 +65,31 @@ client.interceptors.response.use(
     // logout if the refresh itself fails (expired/revoked refresh token).
     if (error.response?.status === 401 && original && !original._retried) {
       original._retried = true;
+
+      // Never let a 401 from a PREVIOUS session tear down the current one.
+      // Signing out and straight back in leaves requests in flight that were
+      // sent with the old token (or with none at all, from the auth wall);
+      // their 401s can land after the new sign-in has already stored its
+      // tokens. Wiping then would delete a perfectly good session and bounce
+      // the user back to the login screen with no error shown.
+      const sentWith = (original.headers as Record<string, string> | undefined)?.Authorization;
+      const currentToken = await SecureStore.getItemAsync(TOKEN_KEY);
+      const isCurrentSession = !!sentWith && !!currentToken && sentWith === `Bearer ${currentToken}`;
+      if (!isCurrentSession) return Promise.reject(error);
+
       const newToken = await tryRefresh();
       if (newToken) {
         original.headers = original.headers ?? {};
         (original.headers as Record<string, string>).Authorization = `Bearer ${newToken}`;
         return client(original);
       }
+
+      // The refresh can take a moment; re-check that the session we are about
+      // to discard is still the one that failed, in case a sign-in landed
+      // while we were waiting.
+      const tokenNow = await SecureStore.getItemAsync(TOKEN_KEY);
+      if (tokenNow !== currentToken) return Promise.reject(error);
+
       await SecureStore.deleteItemAsync(TOKEN_KEY);
       await SecureStore.deleteItemAsync(REFRESH_KEY);
       if (onUnauthorized) onUnauthorized();

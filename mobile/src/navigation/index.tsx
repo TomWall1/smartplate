@@ -334,8 +334,17 @@ export default function RootNavigator() {
     );
   }
 
+  // Each branch below is a separate tree, but they share screen names (`Login`,
+  // `SignUp`, `ForgotPassword` all exist in both the auth wall and the signed-in
+  // tree, where they are modals). Without a key, NavigationContainer carries the
+  // current route across the swap and rehydrates the same-named route in the new
+  // tree — so signing in moved from the auth wall's Login straight onto the app's
+  // Login modal, looking exactly like a sign-in that did nothing. Keying by
+  // branch gives each tree a clean container.
+  const treeKey = !isAuthenticated ? 'auth' : !hasCompletedOnboarding ? 'onboarding' : 'app';
+
   return (
-    <NavigationContainer>
+    <NavigationContainer key={treeKey}>
       {!isAuthenticated ? (
         // Not logged in and not in guest mode — show auth wall
         <AuthNavigator />
