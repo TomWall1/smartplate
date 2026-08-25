@@ -15,6 +15,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 const { Pool } = require('pg');
+const { stamp } = require('../../database/schemaMigrations');
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
@@ -62,6 +63,8 @@ async function run() {
     await client.query(DDL);
     console.log('✓ users.premium_expires_at / premium_source / premium_product_id ready');
     console.log('✓ subscription_events table ready');
+    await stamp(client, 'addSubscriptionColumns');
+    console.log("  stamped 'addSubscriptionColumns' in schema_migrations");
   } finally {
     client.release();
     await pool.end();

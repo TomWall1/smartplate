@@ -42,3 +42,12 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- Record that this file has been applied, so the boot-time check in
+-- database/schemaMigrations.js stops listing it as outstanding.
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  name        TEXT        PRIMARY KEY,
+  applied_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+INSERT INTO schema_migrations (name) VALUES ('001_create_users_table')
+ON CONFLICT (name) DO NOTHING;

@@ -9,6 +9,7 @@
  */
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 const { Pool } = require('pg');
+const { stamp } = require('../../database/schemaMigrations');
 
 async function run() {
   if (!process.env.DATABASE_URL) {
@@ -38,6 +39,8 @@ async function run() {
     `);
 
     console.log('✓ match_feedback table ready');
+    await stamp(pool, 'addMatchFeedback');
+    console.log("  stamped 'addMatchFeedback' in schema_migrations");
   } finally {
     await pool.end();
   }

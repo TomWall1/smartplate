@@ -9,6 +9,7 @@
  */
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 const { Pool } = require('pg');
+const { stamp } = require('../../database/schemaMigrations');
 
 async function run() {
   if (!process.env.DATABASE_URL) {
@@ -32,6 +33,8 @@ async function run() {
     `);
 
     console.log('✓ ingredient_blocklist table ready');
+    await stamp(pool, 'addIngredientBlocklist');
+    console.log("  stamped 'addIngredientBlocklist' in schema_migrations");
   } finally {
     await pool.end();
   }

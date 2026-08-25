@@ -13,6 +13,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 const { Pool } = require('pg');
+const { stamp } = require('../../database/schemaMigrations');
 const fs   = require('fs');
 const path = require('path');
 
@@ -245,6 +246,8 @@ async function main() {
   } catch (err) {
     console.error('Migration failed:', err.message);
     process.exit(1);
+    await stamp(client, 'addRecipesTable');
+    console.log("  stamped 'addRecipesTable' in schema_migrations");
   } finally {
     client.release();
     await pool.end();

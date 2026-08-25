@@ -9,6 +9,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 const { Pool } = require('pg');
+const { stamp } = require('../../database/schemaMigrations');
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
@@ -37,6 +38,8 @@ async function run() {
     console.log('Running migration: addUserPantriesTable...');
     await client.query(DDL);
     console.log('✓ user_pantries table ready');
+    await stamp(client, 'addUserPantriesTable');
+    console.log("  stamped 'addUserPantriesTable' in schema_migrations");
   } finally {
     client.release();
     await pool.end();

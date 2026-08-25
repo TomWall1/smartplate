@@ -57,3 +57,12 @@ FROM auth.users au
 LEFT JOIN public.users pu ON pu.id = au.id
 WHERE pu.id IS NULL AND au.email IS NOT NULL
 ON CONFLICT (id) DO NOTHING;
+
+-- Record that this file has been applied, so the boot-time check in
+-- database/schemaMigrations.js stops listing it as outstanding.
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  name        TEXT        PRIMARY KEY,
+  applied_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+INSERT INTO schema_migrations (name) VALUES ('002_repair_users_rls')
+ON CONFLICT (name) DO NOTHING;

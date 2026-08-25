@@ -261,6 +261,14 @@ if (!process.env.VERCEL) {
     console.log(`SmartPlate API running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 
+    // Which migrations have actually been applied to THIS database. Advisory
+    // only — it logs and moves on. Three production bugs came from a migration
+    // that was written, committed, and never run; this makes that visible at
+    // boot instead of weeks later as a mystery symptom.
+    require('./database/schemaMigrations')
+      .reportOutstanding()
+      .catch((err) => console.warn(`[Migrations] check failed: ${err.message}`));
+
     // Non-blocking startup deals check — READ-ONLY.
     // Boot loads the freshest deals from the database (which survives deploys
     // and Render cold starts) and serves them, whatever their age. It never

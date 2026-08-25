@@ -12,6 +12,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 const { Pool } = require('pg');
+const { stamp } = require('../../database/schemaMigrations');
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
@@ -86,6 +87,8 @@ async function main() {
   } catch (err) {
     console.error('Migration failed:', err.message);
     process.exit(1);
+    await stamp(client, 'addRecipeControlFlags');
+    console.log("  stamped 'addRecipeControlFlags' in schema_migrations");
   } finally {
     client.release();
     await pool.end();

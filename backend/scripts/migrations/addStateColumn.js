@@ -6,6 +6,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 const { Pool } = require('pg');
+const { stamp } = require('../../database/schemaMigrations');
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
@@ -25,6 +26,8 @@ async function run() {
         ADD COLUMN IF NOT EXISTS excluded_ingredients  TEXT[];
     `);
     console.log('Migration complete: state column added to users table');
+    await stamp(client, 'addStateColumn');
+    console.log("  stamped 'addStateColumn' in schema_migrations");
   } finally {
     client.release();
     await pool.end();
