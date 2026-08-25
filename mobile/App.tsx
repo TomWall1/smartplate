@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
@@ -19,6 +19,7 @@ import { StoreProvider } from './src/context/StoreContext';
 import RootNavigator from './src/navigation';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { queryClient } from './src/lib/queryClient';
+import { markAppOpened, track } from './src/lib/analytics';
 import { colors } from './src/theme';
 
 // Required for OAuth redirect handling in Expo Go
@@ -28,7 +29,15 @@ WebBrowser.maybeCompleteAuthSession();
 // system-font text on first paint).
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
+// Start the time-to-value clock before anything renders, so the figure
+// reflects what the user actually waited through.
+markAppOpened();
+
 export default function App() {
+  useEffect(() => {
+    track('app_opened');
+  }, []);
+
   const [fontsLoaded, fontError] = useFonts({
     Fraunces_400Regular,
     Fraunces_500Medium,

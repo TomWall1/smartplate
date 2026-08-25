@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { usePremium } from '../context/PremiumContext';
 import { colors, fonts } from '../theme';
+import { setAnalyticsContext } from '../lib/analytics';
+import { decodeEntities } from '../lib/displayText';
 
 // Auth / onboarding screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -18,7 +20,7 @@ import StoreSelectionScreen from '../screens/onboarding/StoreSelectionScreen';
 import StateSelectionScreen from '../screens/auth/StateSelectionScreen';
 
 // Main screens
-import StoreScreen from '../screens/StoreScreen';
+import DealsScreen from '../screens/DealsScreen';
 import RecipeListScreen from '../screens/recipes/RecipeListScreen';
 import RecipeDetailScreen from '../screens/recipes/RecipeDetailScreen';
 import PremiumHubScreen from '../screens/PremiumHubScreen';
@@ -42,6 +44,8 @@ export type AuthStackParamList = {
 export type OnboardingStackParamList = {
   StoreSelection: undefined;
   StateSelection: undefined;
+  Login: undefined;
+  SignUp: undefined;
 };
 
 export type RootStackParamList = {
@@ -54,9 +58,9 @@ export type RootStackParamList = {
   Paywall: undefined;
 };
 
-export type StoreStackParamList = {
-  Store: undefined;
-  StoreRecipeDetail: { id: string; title: string };
+export type DealsStackParamList = {
+  Deals: undefined;
+  DealRecipeDetail: { id: string; title: string };
   DealRecipes: { dealName: string };
 };
 
@@ -79,7 +83,7 @@ export type AccountStackParamList = {
 };
 
 export type MainTabParamList = {
-  StoreTab: undefined;
+  DealsTab: undefined;
   RecipesTab: undefined;
   PremiumTab: undefined;
   AccountTab: undefined;
@@ -90,7 +94,7 @@ export type MainTabParamList = {
 const AuthStack      = createNativeStackNavigator<AuthStackParamList>();
 const OnboardStack   = createNativeStackNavigator<OnboardingStackParamList>();
 const RootStack      = createNativeStackNavigator<RootStackParamList>();
-const StoreStack     = createNativeStackNavigator<StoreStackParamList>();
+const DealsStack     = createNativeStackNavigator<DealsStackParamList>();
 const RecipesStack   = createNativeStackNavigator<RecipesStackParamList>();
 const PremiumStack   = createNativeStackNavigator<PremiumStackParamList>();
 const AccountStack   = createNativeStackNavigator<AccountStackParamList>();
@@ -106,21 +110,21 @@ const headerOptions = {
 
 // ─── Tab stack navigators ─────────────────────────────────────────────────────
 
-function StoreNavigator() {
+function DealsNavigator() {
   return (
-    <StoreStack.Navigator screenOptions={headerOptions}>
-      <StoreStack.Screen name="Store" component={StoreScreen} options={{ headerShown: false }} />
-      <StoreStack.Screen
-        name="StoreRecipeDetail"
-        component={RecipeDetailScreen as any}
-        options={({ route }) => ({ title: route.params.title })}
-      />
-      <StoreStack.Screen
+    <DealsStack.Navigator screenOptions={headerOptions}>
+      <DealsStack.Screen name="Deals" component={DealsScreen} options={{ headerShown: false }} />
+      <DealsStack.Screen
         name="DealRecipes"
         component={DealRecipesScreen}
-        options={{ title: 'Recipes with this deal' }}
+        options={{ title: 'Deal' }}
       />
-    </StoreStack.Navigator>
+      <DealsStack.Screen
+        name="DealRecipeDetail"
+        component={RecipeDetailScreen as any}
+        options={({ route }) => ({ title: decodeEntities(route.params.title) })}
+      />
+    </DealsStack.Navigator>
   );
 }
 
@@ -131,7 +135,7 @@ function RecipesNavigator() {
       <RecipesStack.Screen
         name="RecipeDetail"
         component={RecipeDetailScreen}
-        options={({ route }) => ({ title: route.params.title })}
+        options={({ route }) => ({ title: decodeEntities(route.params.title) })}
       />
     </RecipesStack.Navigator>
   );
@@ -174,6 +178,7 @@ function AccountNavigator() {
 
 function MainTabNavigator() {
   const { isPremium } = usePremium();
+  const { user } = useAuth();
 
   return (
     <MainTab.Navigator
@@ -191,20 +196,22 @@ function MainTabNavigator() {
         tabBarLabelStyle: { fontFamily: fonts.uiMedium, fontSize: 11 },
       }}
     >
-      <MainTab.Screen
-        name="StoreTab"
-        component={StoreNavigator}
-        options={{
-          tabBarLabel: 'Store',
-          tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" size={size} color={color} />,
-        }}
-      />
+      {/* Recipes lead: the question is what to cook. Deals are the second
+          tab — the same week's data entered from the ingredient side. */}
       <MainTab.Screen
         name="RecipesTab"
         component={RecipesNavigator}
         options={{
           tabBarLabel: 'Recipes',
           tabBarIcon: ({ color, size }) => <Ionicons name="restaurant-outline" size={size} color={color} />,
+        }}
+      />
+      <MainTab.Screen
+        name="DealsTab"
+        component={DealsNavigator}
+        options={{
+          tabBarLabel: 'Deals',
+          tabBarIcon: ({ color, size }) => <Ionicons name="pricetags-outline" size={size} color={color} />,
         }}
       />
       <MainTab.Screen
@@ -268,6 +275,15 @@ function OnboardingNavigator() {
         component={StateSelectionScreen}
         options={{ headerShown: true, title: 'Your Location' }}
       />
+      {/* Reachable from the "Already have an account?" link on the first
+          screen. A returning user who signs in here brings their saved store
+          and state with them, which completes onboarding on the spot. */}
+      <OnboardStack.Screen name="Login" component={LoginScreen} options={{ presentation: 'modal' }} />
+      <OnboardStack.Screen
+        name="SignUp"
+        component={SignUpScreen}
+        options={{ presentation: 'modal', headerShown: true, title: 'Create Account' }}
+      />
     </OnboardStack.Navigator>
   );
 }
@@ -326,6 +342,16 @@ export default function RootNavigator() {
   const isAuthenticated = !!(user || guestMode);
   const hasCompletedOnboarding = !!(selectedStore && effectiveState);
 
+  // This component is the one place that already knows all three, so it owns
+  // keeping them on every event. No account id here — that is set by identify.
+  useEffect(() => {
+    setAnalyticsContext({
+      is_guest: !user,
+      store: selectedStore ?? null,
+      state: effectiveState ?? null,
+    });
+  }, [user, selectedStore, effectiveState]);
+
   if (authLoading || storeLoading) {
     return (
       <View style={styles.splash}>
@@ -341,18 +367,23 @@ export default function RootNavigator() {
   // tree — so signing in moved from the auth wall's Login straight onto the app's
   // Login modal, looking exactly like a sign-in that did nothing. Keying by
   // branch gives each tree a clean container.
-  const treeKey = !isAuthenticated ? 'auth' : !hasCompletedOnboarding ? 'onboarding' : 'app';
+  // Onboarding comes FIRST, before any sign-in wall. A first-time user answers
+  // store + state, the picker puts them in guest mode, and they land on the
+  // recipes without an account. The wall is only for someone who has onboarded
+  // before and then signed out — they keep their store and state, so they fall
+  // through to here rather than being asked all over again.
+  const treeKey = !hasCompletedOnboarding ? 'onboarding' : !isAuthenticated ? 'auth' : 'app';
 
   return (
     <NavigationContainer key={treeKey}>
-      {!isAuthenticated ? (
-        // Not logged in and not in guest mode — show auth wall
-        <AuthNavigator />
-      ) : !hasCompletedOnboarding ? (
-        // Logged in / guest but hasn't chosen store + state yet
+      {!hasCompletedOnboarding ? (
+        // Brand new — pick a store and state, then straight into the app
         <OnboardingNavigator />
+      ) : !isAuthenticated ? (
+        // Onboarded previously but signed out — show the auth wall
+        <AuthNavigator />
       ) : (
-        // Fully onboarded — show main app
+        // Signed in or browsing as a guest — show main app
         <AppWithModalAuth />
       )}
     </NavigationContainer>

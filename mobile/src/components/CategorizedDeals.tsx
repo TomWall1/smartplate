@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Deal } from '../types';
 import { groupDealsByCategory } from '../lib/categoryMapper';
 import { colors, fonts, spacing, radius, shadow } from '../theme';
+import { decodeEntities } from '../lib/displayText';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -19,15 +20,33 @@ const ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
   Other: 'pricetags-outline',
 };
 
-function DealRow({ deal, onPress }: { deal: Deal; onPress?: () => void }) {
+function DealRow({
+  deal,
+  recipeCount,
+  onPress,
+}: {
+  deal: Deal;
+  recipeCount?: number;
+  onPress?: () => void;
+}) {
   const saving = deal.originalPrice && deal.price ? +(deal.originalPrice - deal.price).toFixed(2) : 0;
   return (
     <TouchableOpacity style={styles.dealRow} activeOpacity={0.7} onPress={onPress} disabled={!onPress}>
       <View style={{ flex: 1, gap: spacing.xs }}>
-        <Text style={styles.dealName} numberOfLines={2}>{deal.name}</Text>
-        {saving > 0 && (
-          <View style={styles.savingBadge}><Text style={styles.savingText}>Save ${saving.toFixed(2)}</Text></View>
-        )}
+        <Text style={styles.dealName} numberOfLines={2}>{decodeEntities(deal.name)}</Text>
+        <View style={styles.badgeRow}>
+          {saving > 0 && (
+            <View style={styles.savingBadge}><Text style={styles.savingText}>Save ${saving.toFixed(2)}</Text></View>
+          )}
+          {recipeCount ? (
+            <View style={styles.recipeBadge}>
+              <Ionicons name="restaurant-outline" size={10} color={colors.brand} />
+              <Text style={styles.recipeBadgeText}>
+                {recipeCount} recipe{recipeCount !== 1 ? 's' : ''}
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </View>
       <Text style={styles.dealPrice}>${deal.price.toFixed(2)}</Text>
       {onPress && <Ionicons name="chevron-forward" size={16} color={colors.inkFaint} />}
@@ -35,7 +54,17 @@ function DealRow({ deal, onPress }: { deal: Deal; onPress?: () => void }) {
   );
 }
 
-function CategoryCard({ name, deals, onDealPress }: { name: string; deals: Deal[]; onDealPress?: (deal: Deal) => void }) {
+function CategoryCard({
+  name,
+  deals,
+  recipeCounts,
+  onDealPress,
+}: {
+  name: string;
+  deals: Deal[];
+  recipeCounts?: Record<string, number>;
+  onDealPress?: (deal: Deal) => void;
+}) {
   const [open, setOpen] = useState(false); // all collapsed by default
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -54,7 +83,12 @@ function CategoryCard({ name, deals, onDealPress }: { name: string; deals: Deal[
       {open && (
         <View style={styles.body}>
           {deals.map((d, i) => (
-            <DealRow key={`${d.name}-${i}`} deal={d} onPress={onDealPress ? () => onDealPress(d) : undefined} />
+            <DealRow
+              key={`${d.name}-${i}`}
+              deal={d}
+              recipeCount={recipeCounts?.[d.name.toLowerCase()]}
+              onPress={onDealPress ? () => onDealPress(d) : undefined}
+            />
           ))}
         </View>
       )}
@@ -62,7 +96,16 @@ function CategoryCard({ name, deals, onDealPress }: { name: string; deals: Deal[
   );
 }
 
-export default function CategorizedDeals({ deals, onDealPress }: { deals: Deal[]; onDealPress?: (deal: Deal) => void }) {
+export default function CategorizedDeals({
+  deals,
+  recipeCounts,
+  onDealPress,
+}: {
+  deals: Deal[];
+  /** Lower-cased deal name → number of recipes using it. */
+  recipeCounts?: Record<string, number>;
+  onDealPress?: (deal: Deal) => void;
+}) {
   const groups = groupDealsByCategory(deals);
   if (groups.length === 0) {
     return (
@@ -71,7 +114,15 @@ export default function CategorizedDeals({ deals, onDealPress }: { deals: Deal[]
   }
   return (
     <View style={{ gap: spacing.md }}>
-      {groups.map((g) => <CategoryCard key={g.name} name={g.name} deals={g.deals} onDealPress={onDealPress} />)}
+      {groups.map((g) => (
+        <CategoryCard
+          key={g.name}
+          name={g.name}
+          deals={g.deals}
+          recipeCounts={recipeCounts}
+          onDealPress={onDealPress}
+        />
+      ))}
     </View>
   );
 }
@@ -85,6 +136,18 @@ const styles = StyleSheet.create({
   body: { borderTopWidth: 1, borderTopColor: colors.border, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
   dealRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.sm },
   dealName: { fontFamily: fonts.uiMedium, fontSize: 14, color: colors.ink, lineHeight: 20 },
+  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap' },
+  recipeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: colors.brandTint,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+    alignSelf: 'flex-start',
+  },
+  recipeBadgeText: { fontFamily: fonts.uiMedium, fontSize: 11, color: colors.brand },
   savingBadge: { alignSelf: 'flex-start', backgroundColor: colors.accentTint, paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill },
   savingText: { fontFamily: fonts.uiMedium, fontSize: 11, color: colors.accent },
   dealPrice: { fontFamily: fonts.display, fontSize: 17, color: colors.ink },

@@ -5,24 +5,33 @@
  * switches no longer refetch from scratch.
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getDealsByStore } from './deals';
+import { getDealsByStore, getDealsStatus } from './deals';
 import { getRecipeSuggestions, getRecipeById, getFavorites, toggleFavorite } from './recipes';
 import { getPantry, matchPantry } from './pantry';
 import { Recipe } from '../types';
 
 export const keys = {
-  deals: (store: string) => ['deals', store] as const,
+  deals: (store: string, state: string) => ['deals', store, state] as const,
+  dealsStatus: () => ['deals-status'] as const,
   recipes: (state: string, store: string) => ['recipes', state, store] as const,
   recipe: (id: string, store: string, state: string) => ['recipe', id, store, state] as const,
   favorites: () => ['favorites'] as const,
   pantry: () => ['pantry'] as const,
 };
 
-export function useDeals(store: string | null | undefined) {
+export function useDeals(store: string | null | undefined, state?: string | null) {
   return useQuery({
-    queryKey: keys.deals(store ?? ''),
-    queryFn: () => getDealsByStore(store as string),
+    queryKey: keys.deals(store ?? '', state ?? 'any'),
+    queryFn: () => getDealsByStore(store as string, state),
     enabled: !!store,
+  });
+}
+
+export function useDealsStatus() {
+  return useQuery({
+    queryKey: keys.dealsStatus(),
+    queryFn: getDealsStatus,
+    staleTime: 60 * 60 * 1000, // deals refresh weekly; no need to re-ask often
   });
 }
 

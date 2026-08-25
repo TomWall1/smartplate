@@ -15,6 +15,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
 import { useRecipe, useToggleFavorite } from '../../api/hooks';
 import { useAuth } from '../../context/AuthContext';
+import { track } from '../../lib/analytics';
+import { decodeEntities } from '../../lib/displayText';
 import { useStore } from '../../context/StoreContext';
 import DealBadge from '../../components/DealBadge';
 import LoadingState from '../../components/LoadingState';
@@ -37,7 +39,38 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
   const [favorited, setFavorited] = useState(false);
   const [dealsOpen, setDealsOpen] = useState(false);
 
+  // Deals here open the same screen as tapping a deal in the Deals tab: the
+  // nested navigate switches tab and pushes DealRecipes onto that stack, which
+  // is the only route to it from elsewhere in the app.
+  function openDeal(dealName?: string) {
+    if (!dealName) return;
+    (navigation as any).navigate('DealsTab', {
+      screen: 'DealRecipes',
+      params: { dealName },
+    });
+  }
+
   function handleToggleFavorite() {
+    // Reaching for the heart is the moment someone wants to keep something —
+    // a far better time to ask for an account than a banner they scrolled past.
+    if (!user) {
+      track('signup_prompt_shown', { source: 'favourite', recipe_id: String(id) });
+      Alert.alert(
+        'Save this recipe',
+        'A free account keeps your favourites and has next week’s recipes ready when the catalogue changes.',
+        [
+          { text: 'Not now', style: 'cancel' },
+          {
+            text: 'Create account',
+            onPress: () => {
+              track('signup_prompt_tapped', { source: 'favourite', recipe_id: String(id) });
+              (navigation as any).navigate('SignUp');
+            },
+          },
+        ],
+      );
+      return;
+    }
     toggleFav.mutate(String(id), {
       onSuccess: () => setFavorited((v) => !v),
       onError: () => Alert.alert('Error', 'Could not update favourite. Please try again.'),
@@ -79,7 +112,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
       <Image source={recipe.image} style={styles.heroImage} contentFit="cover" transition={200} />
 
       <View style={styles.body}>
-        <Text style={styles.title}>{recipe.title}</Text>
+        <Text style={styles.title}>{decodeEntities(recipe.title)}</Text>
 
         <View style={styles.chips}>
           {prep ? (
@@ -129,14 +162,20 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
             {dealsOpen && (
               <View style={styles.dealsList}>
                 {matchedDeals.map((d, i) => (
-                  <View key={i} style={styles.dealListRow}>
+                  <TouchableOpacity
+                    key={i}
+                    style={styles.dealListRow}
+                    activeOpacity={0.7}
+                    onPress={() => openDeal(d.dealName)}
+                  >
                     <View style={{ flex: 1 }}>
                       <Text style={styles.dealListIngredient} numberOfLines={1}>{d.ingredient}</Text>
-                      <Text style={styles.dealListName} numberOfLines={1}>{d.dealName}</Text>
+                      <Text style={styles.dealListName} numberOfLines={1}>{decodeEntities(d.dealName)}</Text>
                     </View>
                     {d.price != null && <Text style={styles.dealListPrice}>${d.price.toFixed(2)}</Text>}
                     {(d.saving ?? 0) > 0 && <Text style={styles.dealListSave}>save ${(d.saving as number).toFixed(2)}</Text>}
-                  </View>
+                    <Ionicons name="chevron-forward" size={14} color="#9A8E7E" />
+                  </TouchableOpacity>
                 ))}
               </View>
             )}
@@ -156,7 +195,11 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
                   <View style={styles.bulletDot} />
                   <Text style={styles.ingredientName}>{name}</Text>
                 </View>
-                {deal && <DealBadge deal={deal} />}
+                {deal && (
+                  <TouchableOpacity activeOpacity={0.7} onPress={() => openDeal(deal.dealName)}>
+                    <DealBadge deal={deal} />
+                  </TouchableOpacity>
+                )}
               </View>
             );
           })}

@@ -4,6 +4,7 @@ import { User } from '../types';
 import { login as apiLogin, signup as apiSignup } from '../api/auth';
 import { getProfile } from '../api/users';
 import { TOKEN_KEY, REFRESH_KEY, registerUnauthorizedHandler } from '../api/client';
+import { track, identifyUser, resetAnalytics } from '../lib/analytics';
 
 const GUEST_KEY = 'smartplate-guest-mode';
 
@@ -35,6 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setUser(null);
     setGuestMode(false);
+    // End the identity — the next session starts anonymous again.
+    resetAnalytics();
   }, []);
 
   useEffect(() => {
@@ -74,6 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(data.token);
     setUser(data.user);
     setGuestMode(false);
+    identifyUser(String(data.user.id));
+    track('signed_in', { method: 'email' });
   }, [persistTokens]);
 
   const signup = useCallback(async (email: string, password: string) => {
@@ -82,6 +87,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(data.token);
     setUser(data.user);
     setGuestMode(false);
+    // identify BEFORE the event, so the signup lands on the same person as the
+    // guest session that led to it.
+    identifyUser(String(data.user.id));
+    track('account_created', { method: 'email' });
   }, [persistTokens]);
 
   // Called after a successful Google OAuth flow — tokens come from the Supabase
@@ -93,6 +102,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const profile = await getProfile();
     setUser(profile);
     setGuestMode(false);
+    identifyUser(String(profile.id));
+    // OAuth gives no signal for new-vs-returning, so infer it: a profile row
+    // created moments ago belongs to someone who just signed up.
+    const createdAt = profile.created_at ? Date.parse(profile.created_at) : NaN;
+    const isNew = !Number.isNaN(createdAt) && Date.now() - createdAt < 2 * 60 * 1000;
+    track(isNew ? 'account_created' : 'signed_in', { method: 'oauth' });
   }, [persistTokens]);
 
   const enterGuestMode = useCallback(async () => {

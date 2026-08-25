@@ -7,7 +7,10 @@ export interface Deal {
   store: string;
   category?: string;
   image?: string;
+  imageUrl?: string;
   productImage?: string;
+  /** Set by the catalogue fetch to fetch-time + 7 days. */
+  validUntil?: string;
   productIntelligence?: { category?: string };
 }
 
@@ -58,6 +61,8 @@ export interface User {
   state: string | null;
   is_premium: boolean;
   selected_store: string | null;
+  /** Present on rows from /api/users/profile; absent on the trimmed fallback. */
+  created_at?: string;
 }
 
 export interface PantryItem {

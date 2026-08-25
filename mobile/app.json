@@ -57,10 +57,13 @@
             ]
           }
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "extra": {
       "apiBaseUrl": "https://deals-to-dish-api.onrender.com",
+      "posthogApiKey": "phc_s6xHNHWugUeEKYzfNrEBoAWoT8aSLG4ZiAycXrdBbBmZ",
+      "posthogHost": "https://us.i.posthog.com",
       "googleWebClientId": "640522418425-vtcdniju3q84hjjfbc7eilk9s9t7c762.apps.googleusercontent.com",
       "googleIosClientId": "640522418425-tfaproeomt5mbjp95r9feafn2keml9b2.apps.googleusercontent.com",
       "revenueCatIosKey": "TODO_REVENUECAT_IOS_PUBLIC_KEY",

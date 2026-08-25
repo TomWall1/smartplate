@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Recipe } from '../types';
 import { colors, fonts, radius, spacing, shadow } from '../theme';
+import { decodeEntities } from '../lib/displayText';
 
 interface Props {
   recipe: Recipe;
@@ -23,6 +24,8 @@ export default function RecipeCard({ recipe, onPress }: Props) {
   const prep = recipe.prepTime ?? recipe.cookTime;
   const saving = recipe.estimatedSaving ?? 0;
   const tags = recipe.tags ?? [];
+  // Where the recipe came from, so its provenance is visible without opening it.
+  const source = decodeEntities(recipe.source);
 
   return (
     <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.9}>
@@ -37,7 +40,14 @@ export default function RecipeCard({ recipe, onPress }: Props) {
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.title} numberOfLines={2}>{recipe.title}</Text>
+        <Text style={styles.title} numberOfLines={2}>{decodeEntities(recipe.title)}</Text>
+
+        {source ? (
+          <View style={styles.sourceChip}>
+            <Ionicons name="link-outline" size={11} color={colors.inkSecondary} />
+            <Text style={styles.sourceText} numberOfLines={1}>{source}</Text>
+          </View>
+        ) : null}
 
         <View style={styles.meta}>
           {prep ? (
@@ -104,6 +114,19 @@ const styles = StyleSheet.create({
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.md },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   metaText: { fontFamily: fonts.ui, fontSize: 13, color: colors.inkSecondary },
+  sourceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    backgroundColor: colors.sunken,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radius.pill,
+    marginTop: spacing.xs,
+    maxWidth: '100%',
+  },
+  sourceText: { fontFamily: fonts.ui, fontSize: 11, color: colors.inkSecondary, flexShrink: 1 },
   savingItem: { backgroundColor: colors.accentTint, paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill },
   savingText: { fontFamily: fonts.uiMedium, fontSize: 12, color: colors.accent },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },

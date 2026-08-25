@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { MatchedDeal } from '../types';
+import { decodeEntities } from '../lib/displayText';
 
 interface Props {
   deal: MatchedDeal;
@@ -15,7 +16,7 @@ export default function DealBadge({ deal }: Props) {
   return (
     <View style={styles.container}>
       <Ionicons name="pricetag" size={12} color="#BE6A43" />
-      {!!deal.dealName && <Text style={styles.name} numberOfLines={1}>{deal.dealName}</Text>}
+      {!!deal.dealName && <Text style={styles.name} numberOfLines={1}>{decodeEntities(deal.dealName)}</Text>}
       {deal.price != null && <Text style={styles.price}>${deal.price.toFixed(2)}</Text>}
       {saving > 0 && <Text style={styles.savings}>save ${saving.toFixed(2)}</Text>}
     </View>
