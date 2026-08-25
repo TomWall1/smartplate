@@ -226,9 +226,18 @@ function _parseSearchResult(data, keyword) {
     const imageUri = product.imageUris?.[0]?.uri ?? product.imageUrl ?? null;
     let imageUrl = null;
     if (imageUri) {
-      imageUrl = imageUri.startsWith('http')
-        ? imageUri
-        : `https://productimages.coles.com.au${imageUri}`;
+      if (imageUri.startsWith('http')) {
+        imageUrl = imageUri;
+      } else {
+        // Coles returns the path without its storage container, e.g.
+        // "/3/3989952.jpg". Serving that as-is gives Azure a one-character
+        // container name and it answers 400 OutOfRangeInput, so every Coles
+        // photo came back blank. The container segment is "productimages".
+        const path = imageUri.startsWith('/productimages/')
+          ? imageUri
+          : `/productimages${imageUri.startsWith('/') ? '' : '/'}${imageUri}`;
+        imageUrl = `https://productimages.coles.com.au${path}`;
+      }
     }
 
     // Product URL — use slug if present, otherwise construct it

@@ -49,10 +49,19 @@ router.post('/refresh', async (req, res) => {
 });
 
 // GET /api/deals/store/:storeName — deals for a single store from cache
+// Optional ?state=vic serves that state's catalogue. Without it this falls back
+// to the main (NSW) cache, which is only correct for NSW and ACT — a client
+// that omits the state shows a Victorian NSW prices, and the state-aware
+// recipes then reference specials that are absent from this list.
 router.get('/store/:storeName', async (req, res) => {
   try {
     const { storeName } = req.params;
-    const deals = await dealService.getDealsByStore(storeName);
+    const state = (req.query.state || '').toLowerCase();
+    const deals = state
+      ? (await dealService.getDealsByState(state)).filter(
+          (d) => (d.store || '').toLowerCase() === storeName.toLowerCase()
+        )
+      : await dealService.getDealsByStore(storeName);
     res.json(deals);
   } catch (error) {
     console.error('Error fetching store deals:', error.message);
