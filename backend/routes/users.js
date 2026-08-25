@@ -1,6 +1,6 @@
 const express     = require('express');
 const requireAuth = require('../middleware/requireAuth');
-const { clientForToken, supabase } = require('../services/authService');
+const { clientForToken, supabase, adminSupabase } = require('../services/authService');
 
 const router = express.Router();
 
@@ -47,12 +47,27 @@ router.get('/profile', requireAuth, async (req, res) => {
     .select()
     .single();
 
-  if (error) {
-    console.error('[users/profile] upsert error:', error.message);
-    return res.status(500).json({ error: 'Failed to create profile' });
+  if (!error) return res.json(data);
+
+  // The user-scoped insert can fail on RLS (see migrations/002) — most visibly
+  // on a first-ever OAuth sign-in, where there is no row yet and nothing to
+  // select. Fall back to the service-role client: req.user.id comes from a JWT
+  // this server already verified, so we are only creating that user's own row.
+  console.error('[users/profile] upsert error:', error.message);
+
+  if (adminSupabase) {
+    const { data: adminData, error: adminError } = await adminSupabase
+      .from('users')
+      .upsert({ id: req.user.id, email: req.user.email }, { onConflict: 'id' })
+      .select()
+      .single();
+
+    if (!adminError) return res.json(adminData);
+    console.error('[users/profile] service-role upsert error:', adminError.message);
+    return res.status(500).json({ error: `Failed to create profile: ${adminError.message}` });
   }
 
-  res.json(data);
+  res.status(500).json({ error: `Failed to create profile: ${error.message}` });
 });
 
 // ── POST /api/users/state ─────────────────────────────────────────────────────

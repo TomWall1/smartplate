@@ -30,6 +30,11 @@ import {
 
 WebBrowser.maybeCompleteAuthSession();
 
+// Our API returns its reason in `error`; axios's own message ("Request failed
+// with status code 500") says nothing actionable, so prefer the server's.
+const reasonFor = (err: any, fallback: string) =>
+  err?.response?.data?.error ?? err?.message ?? fallback;
+
 export default function LoginScreen() {
   const navigation = useNavigation<any>();
   const { login, googleLogin, enterGuestMode } = useAuth();
@@ -92,7 +97,7 @@ export default function LoginScreen() {
       }
       // result.type === 'cancel' — user closed browser, do nothing
     } catch (err: any) {
-      Alert.alert('Google sign-in failed', err?.message ?? 'Something went wrong.');
+      Alert.alert('Google sign-in failed', reasonFor(err, 'Something went wrong.'));
     } finally {
       setGoogleLoading(false);
     }
@@ -112,7 +117,7 @@ export default function LoginScreen() {
       dismissIfModal();
     } catch (err: any) {
       if (!/cancel/i.test(err?.message ?? '')) {
-        Alert.alert('Google sign-in failed', err?.message ?? 'Something went wrong.');
+        Alert.alert('Google sign-in failed', reasonFor(err, 'Something went wrong.'));
       }
     } finally {
       setGoogleLoading(false);
@@ -127,7 +132,7 @@ export default function LoginScreen() {
       dismissIfModal();
     } catch (err: any) {
       if (err?.code !== 'ERR_REQUEST_CANCELED' && !/cancel/i.test(err?.message ?? '')) {
-        Alert.alert('Apple sign-in failed', err?.message ?? 'Something went wrong.');
+        Alert.alert('Apple sign-in failed', reasonFor(err, 'Something went wrong.'));
       }
     } finally {
       setAppleLoading(false);
