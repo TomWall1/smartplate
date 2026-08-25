@@ -44,11 +44,34 @@ router.get('/status', async (req, res) => {
   const supabase = clientForToken(req.token);
   if (!supabase) return res.status(503).json({ error: 'Auth service not configured' });
 
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from('users')
     .select(`premium_since, ${PREMIUM_COLUMNS}`)
     .eq('id', req.user.id)
     .single();
+
+  if (error || !profile) {
+    // A failed read used to fall through as premiumStatus(null) — i.e. "free" —
+    // so anything wrong here quietly downgraded a paying customer. The
+    // subscription columns come from a manual migration script
+    // (scripts/migrations/addSubscriptionColumns.js); if that never ran against
+    // this project, selecting them errors and every premium user reads as free.
+    // Fall back to the base column, which predates that migration.
+    console.error('[premium/status] full read failed:', error?.message ?? 'no row');
+    const { data: basic, error: basicError } = await supabase
+      .from('users')
+      .select('is_premium')
+      .eq('id', req.user.id)
+      .single();
+
+    if (basicError) {
+      console.error('[premium/status] fallback read failed:', basicError.message);
+      return res.status(500).json({ error: `Could not read subscription: ${basicError.message}` });
+    }
+    // No expiry column available, so this grants access while the migration is
+    // outstanding rather than revoking it. Server-side gates still apply.
+    return res.json({ ...premiumStatus(basic), degraded: true });
+  }
 
   res.json(premiumStatus(profile));
 });

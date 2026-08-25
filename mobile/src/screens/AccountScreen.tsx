@@ -207,7 +207,10 @@ export default function AccountScreen() {
           <Ionicons name="person" size={36} color="#36453B" />
         </View>
         <Text style={styles.emailText}>{user?.email}</Text>
-        {user?.is_premium && (
+        {/* Same source as the plan row and the Premium tab. Reading the raw
+            is_premium column here let the badge say Premium while the rest of
+            the app said Free — the column has no expiry, the status does. */}
+        {isPremium && (
           <View style={styles.premiumBadge}>
             <Ionicons name="star" size={12} color="#BE6A43" />
             <Text style={styles.premiumBadgeText}>Premium</Text>
