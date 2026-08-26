@@ -1,0 +1,72 @@
+name: Weekly Catalogue Fetch
+
+# Per-state catalogue deals, collected with a headless browser.
+#
+# Runs here rather than on Render because Playwright needs a real Chromium —
+# far too heavy for the free API instance. Scheduled a few hours after the deal
+# refresh so the national cache and recipes are already in place.
+#
+# Requires the CRON_SECRET repo secret (same value as Render's env var).
+
+on:
+  schedule:
+    # Wed 20:00 UTC = Thu ~7am AEDT / 6am AEST — after the Tue 17:00 UTC refresh.
+    - cron: '0 20 * * 3'
+  workflow_dispatch:
+    inputs:
+      state:
+        description: 'Single state (nsw, vic, …). Leave blank for all.'
+        required: false
+      retailer:
+        description: 'Single retailer (woolworths, coles, iga). Leave blank for all.'
+        required: false
+
+env:
+  API_URL: https://deals-to-dish-api.onrender.com
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: catalogue-fetcher/package.json
+
+      - name: Install dependencies and Chromium
+        working-directory: catalogue-fetcher
+        run: npm install
+
+      - name: Wake the API (Render free tier sleeps)
+        run: |
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$API_URL/health") || true
+            echo "wake attempt $i: $code"
+            [ "$code" = "200" ] && break
+            sleep 15
+          done
+
+      - name: Fetch catalogues and post to the API
+        working-directory: catalogue-fetcher
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.state }}" ]; then ARGS="$ARGS --state ${{ github.event.inputs.state }}"; fi
+          if [ -n "${{ github.event.inputs.retailer }}" ]; then ARGS="$ARGS --retailer ${{ github.event.inputs.retailer }}"; fi
+          node fetch.js $ARGS --post "$API_URL/api/deals/ingest" --secret "$CRON_SECRET"
+
+      # Kept whether the run passed or failed — a failed fetch is exactly when
+      # you want to see what came back.
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalogue-deals
+          path: catalogue-fetcher/catalogue-deals.json
+          if-no-files-found: warn
+          retention-days: 14

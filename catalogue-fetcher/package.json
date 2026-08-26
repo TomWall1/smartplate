@@ -1,0 +1,16 @@
+{
+  "name": "catalogue-fetcher",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fetches per-state supermarket catalogue deals via a headless browser. Runs in GitHub Actions, not on Render — Playwright is far too heavy for the API instance.",
+  "type": "commonjs",
+  "main": "fetch.js",
+  "scripts": {
+    "fetch": "node fetch.js",
+    "postinstall": "playwright install --with-deps chromium"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "playwright": "^1.48.0"
+  }
+}
