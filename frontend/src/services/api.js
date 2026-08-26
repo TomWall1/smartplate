@@ -157,7 +157,9 @@ export const recipesApi = {
 
   generateWeekly: async () => {
     try {
-      const response = await api.post('/api/recipes/generate-weekly', {}, { timeout: 300000 });
+      // Admin-authenticated route. /api/recipes/generate-weekly now requires the
+      // cron secret, which a browser cannot hold without publishing it.
+      const response = await api.post('/api/admin/regenerate-recipes', {}, { timeout: 300000 });
       return response.data;
     } catch (error) {
       console.error('Error generating weekly recipes:', error);

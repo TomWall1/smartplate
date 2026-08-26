@@ -402,4 +402,35 @@ router.post('/feedback/process', requireAuth, requireAdmin, async (req, res) => 
   }
 });
 
+
+// POST /api/admin/regenerate-recipes ---------------------------------------
+// The signed-in admin equivalent of the cron-only
+// /api/recipes/generate-weekly. Two callers need to start the same work for
+// different reasons: the GitHub Actions cron, which proves itself with a
+// shared secret, and a person, who proves themselves by being signed in as
+// ADMIN_EMAIL. A browser cannot hold the cron secret — shipping it to the
+// front end would publish it — so the person gets their own door.
+router.post('/regenerate-recipes', requireAuth, requireAdmin, (req, res) => {
+  const dealService = require('../services/dealService');
+  if (!dealService.isReady()) {
+    return res.status(503).json({
+      status: 'loading',
+      message: "Deals are still loading — try again in 30 seconds.",
+    });
+  }
+
+  console.log(`Admin recipe regeneration triggered by ${req.user.email}`);
+  res.status(202).json({
+    success: true,
+    message: 'Recipe generation started in the background — allow a couple of minutes.',
+    startedAt: new Date().toISOString(),
+  });
+
+  const recipeService = require('../services/recipeService');
+  recipeService
+    .generateWeeklyRecipes()
+    .then((recipes) => console.log(`Admin regeneration complete: ${recipes.length} recipes`))
+    .catch((err) => console.error('Admin regeneration failed:', err.message));
+});
+
 module.exports = router;
