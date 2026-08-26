@@ -9,6 +9,8 @@ export interface Deal {
   image?: string;
   imageUrl?: string;
   productImage?: string;
+  /** 'kg', 'each', … or absent when the catalogue text did not say. */
+  unit?: string | null;
   /** Set by the catalogue fetch to fetch-time + 7 days. */
   validUntil?: string;
   productIntelligence?: { category?: string };

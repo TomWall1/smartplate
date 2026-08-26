@@ -13,6 +13,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
+import { MatchedDeal } from '../../types';
 import { useRecipe, useToggleFavorite } from '../../api/hooks';
 import { useAuth } from '../../context/AuthContext';
 import { track } from '../../lib/analytics';
@@ -27,6 +28,58 @@ type Props = NativeStackScreenProps<RecipesStackParamList, 'RecipeDetail'>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_HEIGHT = 260;
+
+/** Words worth matching on — drops units, quantities and filler. */
+const STOP = new Set([
+  'and', 'or', 'the', 'of', 'to', 'into', 'with', 'for', 'plus', 'extra',
+  'finely', 'coarsely', 'thinly', 'roughly', 'chopped', 'sliced', 'diced',
+  'crushed', 'grated', 'trimmed', 'picked', 'cut', 'pieces', 'piece',
+  'fresh', 'free', 'range', 'large', 'small', 'medium', 'cup', 'cups',
+  'tbsp', 'tsp', 'tablespoon', 'teaspoon', 'gram', 'grams', 'kg', 'ml',
+]);
+
+function words(value: string): string[] {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !STOP.has(w));
+}
+
+/**
+ * Find the deal the matcher attached to this recipe line, if any. Tries exact,
+ * then containment either way, then a shared-word overlap — deliberately in
+ * that order so a precise match always wins over a loose one.
+ */
+function findDealForIngredient(deals: MatchedDeal[], line: string): MatchedDeal | undefined {
+  const lower = line.toLowerCase().trim();
+  if (!lower) return undefined;
+
+  const exact = deals.find((d) => (d.ingredient ?? '').toLowerCase().trim() === lower);
+  if (exact) return exact;
+
+  const contained = deals.find((d) => {
+    const ing = (d.ingredient ?? '').toLowerCase().trim();
+    return !!ing && (lower.includes(ing) || ing.includes(lower));
+  });
+  if (contained) return contained;
+
+  const lineWords = words(line);
+  if (!lineWords.length) return undefined;
+
+  let best: { deal: MatchedDeal; score: number } | undefined;
+  for (const d of deals) {
+    const ingWords = words(d.ingredient ?? '');
+    if (!ingWords.length) continue;
+    const shared = ingWords.filter((w) => lineWords.includes(w)).length;
+    // Every word of the matcher's ingredient must appear in the recipe line.
+    // Looser than that starts badging "olive oil" onto unrelated lines.
+    if (shared === ingWords.length && (!best || shared > best.score)) {
+      best = { deal: d, score: shared };
+    }
+  }
+  return best?.deal;
+}
 
 export default function RecipeDetailScreen({ route, navigation }: Props) {
   const { id } = route.params;
@@ -47,6 +100,10 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
     (navigation as any).navigate('DealsTab', {
       screen: 'DealRecipes',
       params: { dealName },
+      // Without this the deals stack opens WITH DealRecipes as its initial
+      // route, so there is nothing beneath it and no back button. `initial:
+      // false` puts the Deals list underneath, which is what makes back work.
+      initial: false,
     });
   }
 
@@ -113,6 +170,26 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
 
       <View style={styles.body}>
         <Text style={styles.title}>{decodeEntities(recipe.title)}</Text>
+
+        {/* Attribution sits with the title, not only in the footer link: the
+            source publisher owns this recipe and should be named where the
+            recipe is read, not somewhere the reader may never scroll to. */}
+        {recipe.source ? (
+          <TouchableOpacity
+            style={styles.sourceChip}
+            activeOpacity={recipe.sourceUrl && recipe.sourceUrl !== '#' ? 0.7 : 1}
+            onPress={() => {
+              if (recipe.sourceUrl && recipe.sourceUrl !== '#') {
+                WebBrowser.openBrowserAsync(recipe.sourceUrl);
+              }
+            }}
+          >
+            <Ionicons name="link-outline" size={12} color="#6B5F52" />
+            <Text style={styles.sourceChipText}>
+              Recipe by {decodeEntities(recipe.source)}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
 
         <View style={styles.chips}>
           {prep ? (
@@ -186,9 +263,14 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
         <View style={styles.ingredientsList}>
           {ingredients.map((ing, idx) => {
             const name = typeof ing === 'string' ? ing : '';
-            const deal = matchedDeals.find(
-              (d) => (d.ingredient ?? '').toLowerCase() === name.toLowerCase()
-            );
+            // The matcher records the bare ingredient ("beef chuck steak")
+            // while the recipe line carries the whole instruction ("beef chuck
+            // steak, trimmed, cut into 4cm pieces"). Exact equality therefore
+            // linked only the lines that happened to be bare — the biryani
+            // showed three deals at the top and linked one. Match on
+            // containment, then on shared words, so a badge appears wherever
+            // the matcher actually found a deal.
+            const deal = findDealForIngredient(matchedDeals, name);
             return (
               <View key={idx} style={styles.ingredientItem}>
                 <View style={styles.ingredientRow}>
@@ -216,7 +298,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           </TouchableOpacity>
         )}
         {recipe.source ? (
-          <Text style={styles.attribution}>Recipe from {recipe.source}</Text>
+          <Text style={styles.attribution}>Recipe from {decodeEntities(recipe.source)}</Text>
         ) : null}
       </View>
     </ScrollView>
@@ -254,5 +336,18 @@ const styles = StyleSheet.create({
   ingredientName: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 22, flex: 1, textTransform: 'capitalize' },
   viewFullButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#36453B', paddingVertical: 14, borderRadius: 12, marginTop: 4 },
   viewFullText: { color: '#F4EEE2', fontSize: 15, fontFamily: 'Inter_600SemiBold' },
+  sourceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 5,
+    backgroundColor: '#E7DECB',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  sourceChipText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: '#6B5F52' },
   attribution: { fontSize: 12, fontFamily: 'Inter_400Regular', color: '#6B5F52', textAlign: 'center', textTransform: 'capitalize' },
 });

@@ -175,7 +175,11 @@ async function getItems(catalogueId, categoryIds, locationId, nameSelector) {
 
     // Extract unit from the price display text (e.g., "$3.50 each" → "each", "$9.50 kg" → "per kg")
     const unitMatch = salePriceText.match(/\d\s*(each|per\s+\w+|kg|g|ml|litre|L|pack|bundle)\b/i);
-    const unit = unitMatch ? unitMatch[1].trim() : 'each';
+    // null, not 'each': defaulting to 'each' made an unparsed price
+    // indistinguishable from one the catalogue really did list per item, and
+    // the app then implied a per-item total for things sold by weight (a whole
+    // chicken advertised at $4/kg read as a $4 chicken).
+    const unit = unitMatch ? unitMatch[1].trim() : null;
 
     if (name && salePrice > 0) {
       const discountPercent = regularPrice > salePrice
@@ -702,7 +706,11 @@ async function fetchFromMainSite(retailerSlug, store) {
 
         // Parse unit
         const unitMatch = priceText.match(/\d\s*(each|per\s+\w+|kg|g|ml|litre|L|pack|bundle)\b/i);
-        const unit = unitMatch ? unitMatch[1].trim() : 'each';
+        // null, not 'each': defaulting to 'each' made an unparsed price
+    // indistinguishable from one the catalogue really did list per item, and
+    // the app then implied a per-item total for things sold by weight (a whole
+    // chicken advertised at $4/kg read as a $4 chicken).
+    const unit = unitMatch ? unitMatch[1].trim() : null;
 
         if (salePrice > 0) {
           items.push({ name, salePrice, originalPrice, saveAmount, rawCategory, unit });

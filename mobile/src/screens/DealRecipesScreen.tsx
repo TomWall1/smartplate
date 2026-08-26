@@ -39,6 +39,10 @@ export default function DealRecipesScreen({ route, navigation }: Props) {
   const image = dealImageUrl(deal);
   const updated = formatShortDate(statusQuery.data?.lastUpdated);
   const validUntil = formatShortDate((deal as any)?.validUntil);
+  // Show the unit only when the catalogue actually stated a weight one.
+  // Anything else stays a bare price rather than implying a per-item total.
+  const rawUnit = (deal?.unit ?? '').toLowerCase().replace(/^per\s+/, '');
+  const weightUnit = ['kg', 'g', 'litre', 'l', 'ml'].includes(rawUnit) ? rawUnit : null;
   const wasPrice = deal?.originalPrice;
   const saving = wasPrice && deal ? wasPrice - deal.price : undefined;
 
@@ -65,7 +69,10 @@ export default function DealRecipesScreen({ route, navigation }: Props) {
 
             {deal ? (
               <View style={styles.priceRow}>
-                <Text style={styles.price}>${deal.price.toFixed(2)}</Text>
+                <Text style={styles.price}>
+                  ${deal.price.toFixed(2)}
+                  {weightUnit ? <Text style={styles.perUnit}> per {weightUnit}</Text> : null}
+                </Text>
                 {wasPrice ? <Text style={styles.wasPrice}>was ${wasPrice.toFixed(2)}</Text> : null}
                 {saving && saving > 0 ? (
                   <View style={styles.savingPill}>
@@ -146,6 +153,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
   },
   savingText: { fontFamily: fonts.uiMedium, fontSize: 12, color: colors.accent },
+  perUnit: { fontFamily: fonts.ui, fontSize: 14, color: colors.inkSecondary },
   category: { fontFamily: fonts.ui, fontSize: 13, color: colors.inkSecondary },
   freshness: { fontFamily: fonts.ui, fontSize: 12, color: colors.inkFaint },
   listHeading: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
