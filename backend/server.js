@@ -49,9 +49,15 @@ const aiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 30, // per-request Claude work (personalised suggestions, pantry match)
 });
-app.use('/api/recipes/generate-weekly', pipelineLimiter);
-app.use('/api/deals/refresh',           pipelineLimiter);
-app.use('/api/admin/refresh-deals',     pipelineLimiter);
+// Expensive endpoints: full scrapes and Claude generation. Rate limiting alone
+// left these open to anyone who knew the URL, so they now need the shared cron
+// secret as well. enrich-pi also calls Claude and had no limit at all.
+const requireCronSecret = require('./middleware/requireCronSecret');
+app.use('/api/recipes/generate-weekly', pipelineLimiter, requireCronSecret);
+app.use('/api/deals/refresh',           pipelineLimiter, requireCronSecret);
+app.use('/api/admin/refresh-deals',     pipelineLimiter, requireCronSecret);
+app.use('/api/deals/enrich-pi',         pipelineLimiter, requireCronSecret);
+app.use('/api/deals/clear-image-cache', pipelineLimiter, requireCronSecret);
 app.use('/api/recipes/suggestions',     aiLimiter);
 app.use('/api/pantry/match',            aiLimiter);
 
@@ -275,6 +281,13 @@ if (!process.env.VERCEL) {
     // only — it logs and moves on. Three production bugs came from a migration
     // that was written, committed, and never run; this makes that visible at
     // boot instead of weeks later as a mystery symptom.
+    if (!process.env.CRON_SECRET) {
+      console.warn(
+        '[CronAuth] CRON_SECRET is NOT set — the weekly refresh cannot run. ' +
+          'Set it in the Render dashboard and as a GitHub repo secret.'
+      );
+    }
+
     require('./database/schemaMigrations')
       .reportOutstanding()
       .catch((err) => console.warn(`[Migrations] check failed: ${err.message}`));

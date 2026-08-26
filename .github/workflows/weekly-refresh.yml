@@ -34,13 +34,26 @@ jobs:
           done
 
       - name: Trigger weekly deal refresh + recipe generation
+        env:
+          # Must match CRON_SECRET in the Render dashboard. Set it at
+          # GitHub -> Settings -> Secrets and variables -> Actions.
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           echo "Triggering SmartPlate weekly pipeline at $(date)"
           for attempt in 1 2 3; do
             response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 -X POST \
               -H "Content-Type: application/json" \
+              -H "X-Cron-Secret: $CRON_SECRET" \
               "$API_URL/api/admin/refresh-deals")
             echo "Attempt $attempt: status $response"
+            if [ "$response" = "401" ]; then
+              echo "Rejected: the CRON_SECRET repo secret does not match the server."
+              exit 1
+            fi
+            if [ "$response" = "503" ]; then
+              echo "Rejected: CRON_SECRET is not set on the server (Render dashboard)."
+              exit 1
+            fi
             if [ "$response" = "202" ]; then
               echo "Pipeline triggered — deals refresh + recipe generation running in background"
               exit 0

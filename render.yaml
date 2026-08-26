@@ -17,6 +17,9 @@ services:
         sync: false  # Set in Render dashboard: Supabase connection string
       - key: ANTHROPIC_API_KEY
         sync: false  # Set in Render dashboard
+      - key: CRON_SECRET
+        sync: false  # Render dashboard AND GitHub repo secret — guards the
+                     # pipeline triggers, which spend Claude tokens
       - key: SUPABASE_URL
         sync: false  # Set in Render dashboard
       - key: SUPABASE_ANON_KEY
