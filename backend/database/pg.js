@@ -26,6 +26,17 @@ pool.on('error', (err) => {
 // Cache readers/writers await this promise so a cold start can't race the DDL.
 const _autoMigrate = (async () => {
   try {
+    // Small durable key/value store. Render's filesystem is ephemeral — it
+    // reverts to the deployed repo on every restart, and the free tier
+    // restarts constantly — so anything discovered at runtime and written to
+    // disk is lost. state-catalogue-ids.json was exactly that.
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS app_state (
+        key        TEXT        PRIMARY KEY,
+        value      JSONB       NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS weekly_recipes_cache (
         id           SERIAL PRIMARY KEY,
@@ -503,6 +514,36 @@ async function saveStateDeals(state, data) {
   `, [state, JSON.stringify(data)]);
 }
 
+async function setAppState(key, value) {
+  await _autoMigrate;
+  await pool.query(`
+    INSERT INTO app_state (key, value)
+    VALUES ($1, $2)
+    ON CONFLICT (key) DO UPDATE
+      SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP
+  `, [key, JSON.stringify(value)]);
+}
+
+async function getAppState(key) {
+  await _autoMigrate;
+  const result = await pool.query('SELECT value FROM app_state WHERE key = $1', [key]);
+  if (!result.rows[0]) return null;
+  const v = result.rows[0].value;
+  return typeof v === 'string' ? JSON.parse(v) : v;
+}
+
+/**
+ * When each state's deal artifact was last built. Ten weeks of stale VIC
+ * deals went unnoticed because nothing reported this anywhere.
+ */
+async function getStateDealsFreshness() {
+  await _autoMigrate;
+  const result = await pool.query(
+    'SELECT state, fetched_at FROM state_deals_cache ORDER BY state'
+  );
+  return result.rows.map((r) => ({ state: r.state, fetchedAt: r.fetched_at }));
+}
+
 async function getStateDeals(state) {
   await _autoMigrate;
   const result = await pool.query(
@@ -587,6 +628,9 @@ module.exports = {
   saveRecipeCosts,
   saveStateDeals,
   getStateDeals,
+  getStateDealsFreshness,
+  setAppState,
+  getAppState,
   saveStateRecipes,
   getStateRecipes,
   recordOutboundClick,

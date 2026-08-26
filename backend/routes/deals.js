@@ -102,13 +102,32 @@ router.get('/health', (req, res) => {
 });
 
 // GET /api/deals/status — loading state + cache summary (for frontend loading screens)
-router.get('/status', (req, res) => {
+router.get('/status', async (req, res) => {
   const loading = dealService.isLoading();
   const info    = dealService.getCacheInfo();
+
+  // Per-state artifact ages. `lastUpdated` describes the main (NSW) cache
+  // only, so a state whose artifact stopped rebuilding looked perfectly
+  // healthy here — VIC and QLD served June catalogues into late August.
+  let states = [];
+  try {
+    const db = require('../database/db');
+    const rows = (await db?.getStateDealsFreshness?.()) ?? [];
+    states = rows.map(({ state, fetchedAt }) => ({
+      state,
+      fetchedAt,
+      ageDays: Math.floor((Date.now() - new Date(fetchedAt).getTime()) / 86400000),
+    }));
+  } catch {
+    states = []; // diagnostics must never break the endpoint
+  }
+
   res.json({
     loading,
     lastUpdated: info?.lastUpdated ?? null,
     counts: info?.counts ?? { woolworths: 0, coles: 0, iga: 0, total: 0 },
+    states,
+    staleStates: states.filter((s) => s.ageDays > 10).map((s) => s.state),
   });
 });
 

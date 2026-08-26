@@ -20,11 +20,41 @@ const path    = require('path');
 
 const STATE_IDS_PATH = path.join(__dirname, '..', 'data', 'state-catalogue-ids.json');
 
+const STATE_IDS_KEY = 'state-catalogue-ids';
+
 function loadStateIds() {
   try {
     return JSON.parse(fs.readFileSync(STATE_IDS_PATH, 'utf8'));
   } catch {
     return {};
+  }
+}
+
+/**
+ * Copy the database's catalogue IDs over the on-disk file.
+ *
+ * The file is only a local cache. Render's filesystem is ephemeral: it reverts
+ * to whatever was committed on every restart, and the free tier restarts
+ * constantly, so weekly discovery was silently thrown away and every run fell
+ * back to the June snapshot in the repo. Call this at boot and before the
+ * pipeline reads the IDs; every existing synchronous loadStateIds() caller
+ * then keeps working unchanged.
+ */
+async function hydrateStateIds() {
+  try {
+    const db = require('../database/db');
+    const stored = await db?.getAppState?.(STATE_IDS_KEY);
+    if (!stored || typeof stored !== 'object') return false;
+
+    const onDisk = loadStateIds();
+    if (JSON.stringify(onDisk) === JSON.stringify(stored)) return false;
+
+    fs.writeFileSync(STATE_IDS_PATH, JSON.stringify(stored, null, 2), 'utf8');
+    console.log('[CatalogueDiscovery] Restored catalogue IDs from the database');
+    return true;
+  } catch (err) {
+    console.warn(`[CatalogueDiscovery] Could not restore catalogue IDs: ${err.message}`);
+    return false;
   }
 }
 
@@ -627,6 +657,16 @@ async function discoverAndSaveStateCatalogues() {
   try {
     fs.writeFileSync(STATE_IDS_PATH, JSON.stringify(output, null, 2), 'utf8');
     console.log(`[CatalogueDiscovery] Saved to ${STATE_IDS_PATH} (changed: ${anyChanged})`);
+    // The file does not survive a restart on Render — the database copy is the
+    // one that matters. Failing to persist here is what stranded every state
+    // on June's catalogue IDs.
+    try {
+      const db = require('../database/db');
+      await db?.setAppState?.(STATE_IDS_KEY, output);
+      console.log('[CatalogueDiscovery] Persisted catalogue IDs to the database');
+    } catch (err) {
+      console.error('[CatalogueDiscovery] DB persist failed:', err.message);
+    }
   } catch (err) {
     console.error('[CatalogueDiscovery] Failed to save:', err.message);
     return false;
@@ -766,6 +806,7 @@ module.exports = {
   getCategories,
   getItems,
   loadStateIds,
+  hydrateStateIds,
   CATEGORY_MAP,
   EXCLUDED_CATEGORIES,
 };

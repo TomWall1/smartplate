@@ -144,6 +144,16 @@ app.post('/api/admin/refresh-deals', (req, res) => {
   }
 
   (async () => {
+    // Step 0: the on-disk catalogue IDs are whatever was committed to the repo
+    // if this instance has restarted since the last discovery. Restore the
+    // database copy first so a skipped discovery cannot fall back to a
+    // months-old snapshot.
+    try {
+      await require('./services/salefinder').hydrateStateIds();
+    } catch (err) {
+      console.warn(`External cron: catalogue ID restore failed: ${err.message}`);
+    }
+
     // Step 1: Catalogue discovery (unless skipped)
     if (!skipDiscovery) {
       try {
@@ -268,6 +278,34 @@ if (!process.env.VERCEL) {
     require('./database/schemaMigrations')
       .reportOutstanding()
       .catch((err) => console.warn(`[Migrations] check failed: ${err.message}`));
+
+    // Restore runtime state that the ephemeral filesystem loses on restart,
+    // then report how old each state's deal artifact is. VIC and QLD served
+    // June catalogues into late August because nothing ever said so out loud.
+    (async () => {
+      try {
+        await require('./services/salefinder').hydrateStateIds();
+      } catch (err) {
+        console.warn(`[Boot] catalogue ID restore failed: ${err.message}`);
+      }
+      try {
+        const db = require('./database/db');
+        const rows = (await db?.getStateDealsFreshness?.()) ?? [];
+        if (rows.length === 0) {
+          console.warn('[StateDeals] no per-state artifacts stored yet');
+          return;
+        }
+        const STALE_DAYS = 10; // catalogues turn over weekly
+        for (const { state, fetchedAt } of rows) {
+          const days = Math.floor((Date.now() - new Date(fetchedAt).getTime()) / 86400000);
+          const line = `[StateDeals] ${String(state).toUpperCase()} built ${days}d ago`;
+          if (days > STALE_DAYS) console.warn(`${line} — STALE, users there see old prices`);
+          else console.log(line);
+        }
+      } catch (err) {
+        console.warn(`[StateDeals] freshness check failed: ${err.message}`);
+      }
+    })();
 
     // Non-blocking startup deals check — READ-ONLY.
     // Boot loads the freshest deals from the database (which survives deploys
