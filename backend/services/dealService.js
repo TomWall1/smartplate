@@ -515,8 +515,15 @@ const getDealsByCategory = async (category) => {
 // ── Per-state deal artifacts (built by the weekly pipeline, served from DB) ───
 
 const STORES = ['woolworths', 'coles', 'iga'];
-// NSW is the main cache; ACT shares NSW's catalogues.
-const ARTIFACT_STATES = ['vic', 'qld', 'wa', 'sa', 'tas', 'nt'];
+// Every state gets its own artifact, NSW included. NSW used to be served
+// straight from the national cache, which left it the worst-served state in
+// the app once the others moved to the catalogue-list scraper: no unit
+// prices, HTML entities left in product names, an invented expiry date, and
+// health-and-beauty items ranked alongside groceries because the national
+// scrape walks catalogue pages indiscriminately. ACT genuinely does share
+// NSW's catalogues, so it reads NSW's artifact rather than building its own.
+const ARTIFACT_STATES = ['nsw', 'vic', 'qld', 'wa', 'sa', 'tas', 'nt'];
+const SHARED_ARTIFACT = { act: 'nsw' };
 
 const _stateDealCache = new Map(); // state → { deals, loadedAt } (process-local read cache)
 const STATE_DEAL_TTL  = 6 * 60 * 60 * 1000; // re-read DB row after 6h
@@ -563,9 +570,15 @@ async function refreshStateDeals() {
 
   // Enrichment map from the fully-enriched main cache, keyed by store+name
   const main = loadCache();
+  const { decodeEntities } = require('./catalogueList');
+  // Key on the decoded, lower-cased name: the catalogue-list scraper decodes
+  // HTML entities and the national cache does not, so an exact-string key
+  // missed every product with an apostrophe or accent in its name and those
+  // deals silently lost their images.
+  const enrichKey = (store, name) => `${store}||${decodeEntities(name).toLowerCase()}`;
   const enrichMap = new Map();
   for (const store of STORES) {
-    for (const d of main?.[store] ?? []) enrichMap.set(`${store}||${d.name}`, d);
+    for (const d of main?.[store] ?? []) enrichMap.set(enrichKey(store, d.name), d);
   }
 
   for (const state of ARTIFACT_STATES) {
@@ -576,7 +589,7 @@ async function refreshStateDeals() {
 
       for (const store of STORES) {
         for (const deal of byStore[store]) {
-          const base = enrichMap.get(`${store}||${deal.name}`);
+          const base = enrichMap.get(enrichKey(store, deal.name));
           if (base) {
             // Shared deal: reuse enrichment, keep this state's own pricing
             flat.push({
@@ -597,6 +610,28 @@ async function refreshStateDeals() {
       if (flat.length === 0) {
         console.warn(`[StateDeals] ${state}: nothing fetched — keeping previous artifact`);
         continue;
+      }
+
+      // Images for the deals that exist only in this state's catalogue. The
+      // enrichers are backed by imageCache, so once one state has resolved a
+      // product the rest are cache hits — the marginal cost across states is
+      // small even though the first is not.
+      if (stateUnique.length) {
+        const woolworthsEnrich = require('./woolworthsEnrich');
+        const colesEnrich      = require('./colesEnrich');
+        const byStoreUnique = { woolworths: [], coles: [], iga: [] };
+        for (const d of stateUnique) (byStoreUnique[d.store] ??= []).push(d);
+        try {
+          if (byStoreUnique.woolworths.length) {
+            await woolworthsEnrich.enrichDeals(byStoreUnique.woolworths);
+          }
+          if (byStoreUnique.coles.length) {
+            await colesEnrich.enrichDeals(byStoreUnique.coles);
+          }
+          imageCache.flush();
+        } catch (err) {
+          console.warn(`[StateDeals] ${state}: image enrichment failed: ${err.message}`);
+        }
       }
 
       if (stateUnique.length && productLookup) {
@@ -631,8 +666,9 @@ async function refreshStateDeals() {
  * to the national cache — loudly — only when no artifact exists yet.
  */
 const getDealsByState = async (state) => {
-  const s = (state || 'nsw').toLowerCase();
-  if (s === 'nsw' || s === 'act' || !ARTIFACT_STATES.includes(s)) return getCurrentDeals();
+  const requested = (state || 'nsw').toLowerCase();
+  const s = SHARED_ARTIFACT[requested] || requested;
+  if (!ARTIFACT_STATES.includes(s)) return getCurrentDeals();
 
   const cached = _stateDealCache.get(s);
   if (cached && Date.now() - cached.loadedAt < STATE_DEAL_TTL) return cached.deals;
