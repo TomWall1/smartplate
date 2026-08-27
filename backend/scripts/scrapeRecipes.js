@@ -112,11 +112,14 @@ function parseDuration(iso) {
 function parseIngredient(raw) {
   let text = raw.trim();
 
-  // Remove parenthetical notes (including nested parens)
-  text = text.replace(/\([^)]*\)/g, '').trim();
-
-  // Remove "/ alternative" patterns like "500g / 1 lb"
-  text = text.replace(/\s*\/\s*[^,]+/, '').trim();
+  // Remove parenthetical notes, innermost first so nested notes like
+  // "((2 large lemons))" don't leave a stray bracket behind
+  let previous;
+  do {
+    previous = text;
+    text = text.replace(/\([^()]*\)/g, ' ');
+  } while (text !== previous);
+  text = text.replace(/[()]/g, ' ').replace(/\s+/g, ' ').trim();
 
   // Extract leading quantity (handles fractions like 1/2, 1 1/2, unicode ½)
   let quantity = null;
@@ -142,6 +145,12 @@ function parseIngredient(raw) {
     unit = unitMatch[1].toLowerCase();
     text = text.slice(unitMatch[0].length).trim();
   }
+
+  // Drop the imperial/metric restatement that follows the primary measure,
+  // e.g. "280g / 9 oz pitted dates" → "pitted dates". This has to run AFTER
+  // the quantity is taken, or a leading fraction ("1/4 tsp salt") looks like
+  // an alternative measure and swallows the whole ingredient name.
+  text = text.replace(/^\/\s*\d[\d\s\/.]*\s*[a-zA-Z]+\.?\s+/, '').trim();
 
   // Clean up ingredient name
   let name = text
@@ -193,22 +202,51 @@ async function scrapeRecipe(url) {
 }
 
 /**
+ * Flatten JSON-LD recipeInstructions into a list of step strings.
+ *
+ * WordPress Recipe Maker sites group steps inside HowToSection blocks
+ * ("Cobbler topping:", "Butterscotch Sauce:"), so a flat pass over
+ * recipeInstructions silently drops every step in a grouped recipe. Section
+ * names are kept as their own heading line, mirroring how the source page
+ * presents them.
+ */
+function flattenInstructions(list) {
+  const steps = [];
+
+  for (const step of Array.isArray(list) ? list : []) {
+    if (typeof step === 'string') {
+      steps.push(step);
+      continue;
+    }
+    if (!step || typeof step !== 'object') continue;
+
+    if (step['@type'] === 'HowToSection' || Array.isArray(step.itemListElement)) {
+      const name = String(step.name || '').replace(/:\s*$/, '').trim();
+      // RecipeTinEats prefixes a one-line "ABBREVIATED RECIPE" summary that
+      // just restates the full method — skip it rather than duplicate.
+      if (/^abbreviated/i.test(name)) continue;
+
+      const inner = flattenInstructions(step.itemListElement);
+      if (inner.length === 0) continue;
+      if (name) steps.push(`${name}:`);
+      steps.push(...inner);
+      continue;
+    }
+
+    if (step.text) steps.push(step.text);
+  }
+
+  return steps;
+}
+
+/**
  * Transform raw JSON-LD recipe into our library format
  */
 function transformRecipe(jsonLd, url, id) {
   const rawIngredients = Array.isArray(jsonLd.recipeIngredient) ? jsonLd.recipeIngredient : [];
   const ingredients = rawIngredients.map(parseIngredient);
 
-  const steps = [];
-  if (Array.isArray(jsonLd.recipeInstructions)) {
-    for (const step of jsonLd.recipeInstructions) {
-      if (typeof step === 'string') {
-        steps.push(step);
-      } else if (step.text) {
-        steps.push(step.text);
-      }
-    }
-  }
+  const steps = flattenInstructions(jsonLd.recipeInstructions);
 
   const nutrition = {};
   if (jsonLd.nutrition) {
@@ -338,7 +376,13 @@ async function main() {
   console.log(`\nSaved to ${OUTPUT_PATH}`);
 }
 
-main().catch(err => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+// Exported so category-scoped scrapers (e.g. scrapeRecipeTinDesserts.js) can
+// reuse the same JSON-LD extraction and ingredient parsing.
+module.exports = { parseDuration, parseIngredient, scrapeRecipe, transformRecipe, sleep };
+
+if (require.main === module) {
+  main().catch(err => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
+}

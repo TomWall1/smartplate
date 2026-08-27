@@ -243,6 +243,15 @@ async function processLibrary(client, lib, globalStats) {
     enriched = { ...raw, recipes: raw.recipes.map(r => ({ ...r })) };
   }
 
+  // Pull in recipes added to the source file since the last enrichment run
+  // (e.g. by scrapeRecipeTinDesserts.js) so they get tagged too.
+  const enrichedIds = new Set(enriched.recipes.map(r => r.id));
+  const newcomers   = raw.recipes.filter(r => !enrichedIds.has(r.id));
+  if (newcomers.length > 0) {
+    enriched.recipes.push(...newcomers.map(r => ({ ...r })));
+    console.log(`  ${newcomers.length} new recipe(s) picked up from ${path.basename(lib.src)}`);
+  }
+
   // Stamp subheading / isActive / subheadingGroup flags on all ingredients (idempotent)
   enriched.recipes = enriched.recipes.map(r => ({
     ...r,
@@ -361,7 +370,19 @@ async function main() {
   console.log(`Model: ${MODEL}`);
   console.log(`Batch size: ${BATCH_SIZE} recipes per API call\n`);
 
-  for (const lib of LIBRARIES) {
+  // Optional --only=<source filename> to enrich a single library
+  const onlyArg = process.argv.find(a => a.startsWith('--only='));
+  const only    = onlyArg ? onlyArg.slice('--only='.length) : null;
+  const libraries = only
+    ? LIBRARIES.filter(l => path.basename(l.src) === only)
+    : LIBRARIES;
+
+  if (only && libraries.length === 0) {
+    console.error(`No library matches --only=${only}`);
+    process.exit(1);
+  }
+
+  for (const lib of libraries) {
     console.log(`\nProcessing: ${path.basename(lib.src)}`);
     try {
       await processLibrary(client, lib, globalStats);
@@ -372,7 +393,7 @@ async function main() {
 
   // ── Spot checks ─────────────────────────────────────────────────────────
   console.log('\n── Spot Checks ──────────────────────────────────────────────');
-  for (const lib of LIBRARIES) {
+  for (const lib of libraries) {
     spotCheck(lib);
   }
 

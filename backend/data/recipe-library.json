@@ -1,7 +1,7 @@
 {
-  "scrapedAt": "2026-03-04T07:19:57.650Z",
+  "scrapedAt": "2026-08-27T03:59:41.521Z",
   "source": "recipetineats.com",
-  "recipeCount": 1012,
+  "recipeCount": 1020,
   "recipes": [
     {
       "id": 1,
@@ -121319,6 +121319,970 @@
         "one tray dinner",
         "sheet pan dinner",
         "middle eastern"
+      ]
+    },
+    {
+      "id": 1013,
+      "title": "Lemon Delicious Pudding - extra saucy!",
+      "description": "Recipe video above. This self-saucing lemon pudding is made with one batter that magically separates into a light, soufflé-like sponge with plenty of silky lemon custard underneath! The custard is pourable when hot and thickens into a dolloping consistency as it cools.It's a winter dessert dream, warm and cosy but light and tangy, perfect after hearty meals. And it reheats brilliantly - a dinner party dessert dream! Bonus: everything goes in straight from the fridge - no need to soften the butter or bring the eggs and milk to room temperature.For next time - Try Chocolate and Butterscotch Self Saucing Puddings.",
+      "url": "https://www.recipetineats.com/lemon-delicious-pudding/",
+      "image": "https://www.recipetineats.com/tachyon/2026/07/Lemon-Delicious-Pudding-1.jpg",
+      "prepTime": null,
+      "cookTime": null,
+      "totalTime": null,
+      "servings": 5,
+      "category": [
+        "Dessert"
+      ],
+      "cuisine": [
+        "British",
+        "English",
+        "Western"
+      ],
+      "ingredients": [
+        {
+          "name": "unsalted butter",
+          "quantity": "60",
+          "unit": "g",
+          "raw": "60g / 4 tbsp  unsalted butter (, cut into ~1cm / 0.4&quot; cubes)"
+        },
+        {
+          "name": "caster sugar / superfine sugar",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup caster sugar / superfine sugar (, or regular / granulated sugar)"
+        },
+        {
+          "name": "lemon zest",
+          "quantity": "1",
+          "unit": "tbsp",
+          "raw": "1 tbsp lemon zest"
+        },
+        {
+          "name": "lemon juice",
+          "quantity": "1/2",
+          "unit": "cup",
+          "raw": "1/2 cup lemon juice ((2 large lemons))"
+        },
+        {
+          "name": "vanilla extract",
+          "quantity": "1/2",
+          "unit": "tsp",
+          "raw": "1/2 tsp vanilla extract (, optional)"
+        },
+        {
+          "name": "salt",
+          "quantity": null,
+          "unit": "pinch",
+          "raw": "Pinch of salt"
+        },
+        {
+          "name": "large eggs",
+          "quantity": "3",
+          "unit": null,
+          "raw": "3  large eggs (, separated (fridge cold is fine))"
+        },
+        {
+          "name": "milk",
+          "quantity": "1 1/2",
+          "unit": "cups",
+          "raw": "1 1/2 cups milk (, full fat is best but low fat ok (fridge cold is fine))"
+        },
+        {
+          "name": "plain flour / all-purpose flour",
+          "quantity": "1/3",
+          "unit": "cup",
+          "raw": "1/3 cup plain flour / all-purpose flour ((or gluten-free flour))"
+        },
+        {
+          "name": "whipped cream",
+          "quantity": null,
+          "unit": null,
+          "raw": "Whipped cream ((use 3/4 cup cream) or creme fraiche)"
+        },
+        {
+          "name": "decorate - icing sugar , small lemon slices, raspberries, mint sprigs",
+          "quantity": null,
+          "unit": null,
+          "raw": "Decorate - icing sugar (recommended), small lemon slices, raspberries, mint sprigs"
+        }
+      ],
+      "steps": [
+        "ABBREVIATED RECIPE:",
+        "Melt butter, whisk in sugar, vanilla and zest. Whisk in yolks and lemon juice. Whisk in flour, then milk. Beat whites to stiff peaks, fold into batter. Bake in 5- 6 cup dish in water bath at 180°C/350°F (160°C fan) for 35 min (ramekins 30 min).",
+        "FULL RECIPE:",
+        "Preheat oven to 180°C/350°F (160°C fan-forced).",
+        "Baking vessels (Note 1) - You will need a 5 to 6 cup ceramic or glass baking dish (1.25 - 1.5 litres / quarts), or 6 x 200 ml / 7oz ramekins. No need to grease it.",
+        "Barely melt butter - Put the butter cubes in a heatproof bowl and microwave in 20 second increments until almost melted. Then whisk by hand to finish melting using the residual heat - it will look milky rather than a yellow oil. (Note 2)",
+        "Make batter - Add the sugar, vanilla and lemon zest into the butter. Whisk to combine. Add lemon juice and egg yolks, whisk to combine. Add flour and whisk until lump free. Add milk and whisk. The batter will be very thin!",
+        "Beat whites - In a separate bowl, beat the egg whites until stiff using a handheld beater or stand mixer fitted with the whisk attachment. You want upright rather than floppy Santa hats!",
+        "Fold through a big scoop of the fluffed egg whites into the batter using a rubber spatula. Then add the remaining egg whites in and fold through, don&#39;t stir vigorously (Note 3 for what I mean by this). Little lumps of egg whites is fine.",
+        "Fill - Gently pour the batter into the baking dish and put it in a larger roasting pan. Ramekins: Use a ladle, and make sure to scoop from the bottom so every ramekin gets even amounts of foamy batter (which sits on the surface), this turns into the cake. Fill to 1 cm / 0.2&quot; from the rim. Transfer to a pan for water bath.",
+        "Bake in water bath - Fill pan with boiling water until it comes halfway up the side of the baking dish. Bake 35 minutes for a single dish or 30 minutes for ramekins, until the surface is golden (it will feel jiggly if you prod it because of the sauce underneath).",
+        "Rest for 5 minutes, then dusting with icing sugar. Scoop out to serve, ensuring everyone gets their share of the lemon custard sauce! Top with a dollop of whipped cream or creme fraiche, and decorate with little lemon slices, raspberry and mint sprig if desired."
+      ],
+      "nutrition": {
+        "calories": "350 kcal",
+        "protein": "7 g",
+        "carbs": "52 g",
+        "fat": "14 g"
+      },
+      "tags": [
+        "dessert",
+        "british",
+        "english",
+        "western",
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 1014,
+      "title": "Hot Chocolate Fudge Cake",
+      "description": "Recipe video above. Think of it as a sliceable version of Chocolate Self Saucing Pudding - with a LOT more chocolate fudge sauce! The perfect cosy dessert for cool winter days that's easy to make.",
+      "url": "https://www.recipetineats.com/hot-chocolate-fudge-cake/",
+      "image": "https://www.recipetineats.com/tachyon/2023/07/Hot-chocolate-fudge-cake_7-2.jpg",
+      "prepTime": 15,
+      "cookTime": 40,
+      "totalTime": null,
+      "servings": 10,
+      "category": [
+        "Cake",
+        "Dessert"
+      ],
+      "cuisine": [
+        "Western"
+      ],
+      "ingredients": [
+        {
+          "name": "plain/all-purpose flour",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup plain/all-purpose flour ((Note 2))"
+        },
+        {
+          "name": "cocoa powder",
+          "quantity": "1/3",
+          "unit": "cup",
+          "raw": "1/3 cup cocoa powder ((unsweetened), sifted (Note 1)30g)"
+        },
+        {
+          "name": "baking powder",
+          "quantity": "3/4",
+          "unit": "tsp",
+          "raw": "3/4 tsp baking powder ((Note 2))"
+        },
+        {
+          "name": "baking soda/bi-carb",
+          "quantity": "3/4",
+          "unit": "tsp",
+          "raw": "3/4 tsp baking soda/bi-carb ((sifted if lumpy)  (Note 2))"
+        },
+        {
+          "name": "caster/superfine sugar",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup caster/superfine sugar ((sub ordinary white sugar))"
+        },
+        {
+          "name": "salt",
+          "quantity": "1/4",
+          "unit": "tsp",
+          "raw": "1/4 tsp salt"
+        },
+        {
+          "name": "large egg",
+          "quantity": "1",
+          "unit": null,
+          "raw": "1  large egg"
+        },
+        {
+          "name": "milk",
+          "quantity": "1/2",
+          "unit": "cup",
+          "raw": "1/2 cup milk (, full fat, at room temperature)"
+        },
+        {
+          "name": "unsalted butter",
+          "quantity": "75",
+          "unit": "g",
+          "raw": "75g / 5 tbsp  unsalted butter (, melted and cooled slightly)"
+        },
+        {
+          "name": "oil",
+          "quantity": "1",
+          "unit": "tbsp",
+          "raw": "1 tbsp oil ((canola, veg or other neutral oil) - keeps cake moist for days)"
+        },
+        {
+          "name": "vanilla extract",
+          "quantity": "1",
+          "unit": "tsp",
+          "raw": "1 tsp vanilla extract"
+        },
+        {
+          "name": "boiling water",
+          "quantity": "1/2",
+          "unit": "cup",
+          "raw": "1/2 cup boiling water"
+        },
+        {
+          "name": "thickened / heavy cream, or pure cream",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup thickened / heavy cream, or pure cream ((not low fat, too thin))"
+        },
+        {
+          "name": "dark chocolate melts or chips",
+          "quantity": "1 1/4",
+          "unit": "cups",
+          "raw": "1 1/4 cups dark chocolate melts or chips ((US: semi-sweet chips) - or finely chopped 60 - 70% cocoa chocolate block (Note 3))"
+        },
+        {
+          "name": "vanilla ice cream",
+          "quantity": null,
+          "unit": null,
+          "raw": "Vanilla ice cream"
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C/350°F (160°C fan). Grease a 20cm/8&quot; cake pan with butter then line with paper.",
+        "Whisk Dry ingredients in a large bowl.",
+        "Add Wet - Then add all the Wet ingredients EXCEPT the boiling water. Whisk until combined. Then add the boiling water and whisk until smooth. The batter will be pretty thin.",
+        "Bake 40 min - Pour into the pan. Bake for 40 minutes or until a skewer inserted into the centre comes out mostly clean - a faint smear of batter isn&#39;t a bad thing, we&#39;re making a fudge cake here!",
+        "Cool in the pan for 10 minutes. Invert onto a plate, then onto a cooling rack or plate right side up. Cool for a further 10 minutes - the cake will still be warm for serving.",
+        "Serving - Cut slices of the warm cake. Top with a scoop of ice cream. Douse with fudge sauce - just shy of 1/4 cup per slice (10 slices). Eat and swoon!",
+        "Chocolate fudge sauce (makes 2 cups):",
+        "Heat cream until hot, just before boiling point, using your method of choice - saucepan or microwave.",
+        "Stand 5 min - Put chocolate in bowl. Pour over hot cream. Ensure all chocolate is submerged, then cover with a plate. Leave for 5 minutes.",
+        "Mix - Using a whisk or rubber spatula, mix vigorously until the cream and chocolate combine into a silky chocolate sauce.",
+        "Cool to thicken for 20 minutes. Give it a stir then pour into a jug for serving!"
+      ],
+      "nutrition": {
+        "calories": "421 kcal",
+        "protein": "5 g",
+        "carbs": "44 g",
+        "fat": "26 g"
+      },
+      "tags": [
+        "cake",
+        "dessert",
+        "western",
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 1015,
+      "title": "Apple and rhubarb crumble",
+      "description": "Recipe video above. The only thing I make when rhubarb season arrives - rhubarb crumble! I like to add apple into mine so the filling isn't just baby-food-mush. Adore the tangy filling - there is nothing else like it. Extra crumbly topping also works well.SERVING WITH ICE CREAM IS A MUST!",
+      "url": "https://www.recipetineats.com/rhubarb-crumble/",
+      "image": "https://www.recipetineats.com/tachyon/2023/07/Rhubarb-crumble-with-apple_5.jpg",
+      "prepTime": 15,
+      "cookTime": 35,
+      "totalTime": null,
+      "servings": 5,
+      "category": [
+        "Dessert"
+      ],
+      "cuisine": [
+        "British",
+        "Western"
+      ],
+      "ingredients": [
+        {
+          "name": "rhubarb stems",
+          "quantity": "500",
+          "unit": "g",
+          "raw": "500g/ 4 1/2 cups  rhubarb stems"
+        },
+        {
+          "name": "white sugar",
+          "quantity": "1/3",
+          "unit": "cup",
+          "raw": "1/3 cup white sugar"
+        },
+        {
+          "name": "granny smith apples",
+          "quantity": "3",
+          "unit": null,
+          "raw": "3  Granny Smith apples (~600g/1.2lb whole) (, peeled and cut 1.5cm / 3/5&quot; cubes, ~3 cups/450g once cut (Note 2))"
+        },
+        {
+          "name": "zest of 1 orange",
+          "quantity": null,
+          "unit": null,
+          "raw": "Zest of 1 orange (, optional but recommended)"
+        },
+        {
+          "name": "rolled oats",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup rolled oats ((not quick or steel cut))"
+        },
+        {
+          "name": "flour",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup flour (, plain/all purpose)"
+        },
+        {
+          "name": "brown sugar",
+          "quantity": "3/4",
+          "unit": "cup",
+          "raw": "3/4 cup (tightly packed) brown sugar"
+        },
+        {
+          "name": "baking powder",
+          "quantity": "1/2",
+          "unit": "tsp",
+          "raw": "1/2 tsp baking powder"
+        },
+        {
+          "name": "cinnamon powder",
+          "quantity": "1/2",
+          "unit": "tsp",
+          "raw": "1/2 tsp cinnamon powder"
+        },
+        {
+          "name": "unsalted butter",
+          "quantity": "90",
+          "unit": "g",
+          "raw": "90g/ 6 tbsp  unsalted butter (, melted)"
+        },
+        {
+          "name": "salt",
+          "quantity": null,
+          "unit": "pinch",
+          "raw": "Pinch of salt"
+        },
+        {
+          "name": "vanilla ice cream",
+          "quantity": null,
+          "unit": null,
+          "raw": "Vanilla ice cream (- or pouring custard)"
+        }
+      ],
+      "steps": [
+        "Preheat oven to 200°C/375°F (180°C fan).",
+        "Filling: Place rhubarb, apple, sugar and orange zest in a large mixing bowl and toss well. Spread evenly in a 30 x 20cm baking dish (12 x 8&quot;) (Note 3)",
+        "Crumble topping: Place topping ingredients in a bowl and mix with a wooden spoon until all the flour is incorporated (use cutting motion/ smearing up wall, as needed). It will be a sandy mixture.",
+        "Scrunch &amp; top: Grab handfuls of crumble and enclose your fist to press into lumps. Break into clumps and scatter over the filling. (Note 4 explains this unusual step!).",
+        "Bake for 35 minutes or until rhubarb is soft and the crumble is golden brown. (Bake time - Note 5)",
+        "Rest &amp; serve: Remove from the oven, rest for 5 minutes. Scoop into bowls and serve with vanilla ice cream or custard!"
+      ],
+      "nutrition": {
+        "calories": "432 kcal",
+        "protein": "5 g",
+        "carbs": "77 g",
+        "fat": "13 g"
+      },
+      "tags": [
+        "dessert",
+        "british",
+        "western",
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 1016,
+      "title": "Peach Cobbler",
+      "description": "Recipe video above. The ONLY pudding I make on warm summer days!There's peach cobblers with batter toppings, and the ones with the Amercian biscuit / Aussie scone type toppings. I way prefer the latter. Crumbly on the outside, fluffy and moist on the inside, wafting with the smell of cinnamon, covering juicy, warm peaches coated in syrup.You'll love how the syrup in this peach cobbler is made using the juices of the peach, rather than just a plain sugar syrup. Peach flavour to the max!Serving with ice cream is not optional. (Well, ok, cream will do if that's all you've got!)",
+      "url": "https://www.recipetineats.com/peach-cobbler/",
+      "image": "https://www.recipetineats.com/tachyon/2021/07/Peach-Cobbler_76-SQ.jpg",
+      "prepTime": 20,
+      "cookTime": 30,
+      "totalTime": null,
+      "servings": 5,
+      "category": [
+        "Sweet Baking"
+      ],
+      "cuisine": [
+        "American",
+        "Southern"
+      ],
+      "ingredients": [
+        {
+          "name": "yellow peaches",
+          "quantity": "1.5",
+          "unit": "kg",
+          "raw": "1.5kg / 3lb   (8) yellow peaches ((ripe and juicy!), peeled, stone removed, cut into eight wedges (Note 1))"
+        },
+        {
+          "name": "caster / superfine sugar",
+          "quantity": "1/4",
+          "unit": "cup",
+          "raw": "1/4 cup caster / superfine sugar"
+        },
+        {
+          "name": "cornflour / cornstarch",
+          "quantity": "1",
+          "unit": "tsp",
+          "raw": "1 tsp cornflour / cornstarch"
+        },
+        {
+          "name": "lemon juice",
+          "quantity": "1",
+          "unit": "tbsp",
+          "raw": "1 tbsp lemon juice ((plus more as desired))"
+        },
+        {
+          "name": "salt",
+          "quantity": "1/8",
+          "unit": "tsp",
+          "raw": "1/8 tsp salt"
+        },
+        {
+          "name": "flour",
+          "quantity": "1 1/4",
+          "unit": "cups",
+          "raw": "1 1/4 cups flour (, plain/all purpose)"
+        },
+        {
+          "name": "caster / superfine sugar",
+          "quantity": "1/3",
+          "unit": "cup",
+          "raw": "1/3 cup caster / superfine sugar"
+        },
+        {
+          "name": "baking powder",
+          "quantity": "1",
+          "unit": "tsp",
+          "raw": "1 tsp baking powder"
+        },
+        {
+          "name": "baking soda",
+          "quantity": "1/2",
+          "unit": "tsp",
+          "raw": "1/2 tsp baking soda (bi-carb) ((or extra 1 1/2 tsp baking powder))"
+        },
+        {
+          "name": "salt",
+          "quantity": "1/4",
+          "unit": "tsp",
+          "raw": "1/4 tsp salt"
+        },
+        {
+          "name": "unsalted butter",
+          "quantity": "85",
+          "unit": "g",
+          "raw": "85g / 6 tbsp  unsalted butter"
+        },
+        {
+          "name": "plain yoghurt",
+          "quantity": "1/2",
+          "unit": "cup",
+          "raw": "1/2 cup plain yoghurt ((or sour cream), full fat)"
+        },
+        {
+          "name": "demerara sugar",
+          "quantity": "1",
+          "unit": "tsp",
+          "raw": "1 tsp demerara sugar ((Note 3))"
+        },
+        {
+          "name": "cinnamon powder",
+          "quantity": "1/2",
+          "unit": "tsp",
+          "raw": "1/2 tsp cinnamon powder"
+        },
+        {
+          "name": "ice cream",
+          "quantity": null,
+          "unit": null,
+          "raw": "Ice cream (or whipped cream)"
+        }
+      ],
+      "steps": [
+        "Macerate peaches: Put peaches and sugar in a large bowl and toss together. Leave for 40 minutes to macerate, to let the peaches leach juice and sweat.",
+        "Preheat oven: Partway through the maceration, preheat oven to 210°C/410°F (200°C fan).",
+        "Drain peaches: Drain in a colander, saving the juices.",
+        "Syrup: Measure out 1/4 cup (65ml) juice and put in a large bowl. Add cornflour, salt and 1 tbsp of the lemon juice to the peach juice. Mix well.",
+        "Mix with peaches: Pour peaches into the syrup, toss to coat. Taste - it should be a bit tart, slightly sweet, but not overly sweet. Add more lemon or sugar to adjust to your taste (fresh peaches always vary in sweetness!).",
+        "Parbake peaches: Pour the peaches and juice into a medium glass or ceramic baking pan. Mine is a 28 x 18cm / 11 x 7&quot; oval dish (Note 2). Bake 12 minutes, then remove.",
+        "Cobbler topping:",
+        "Rub in butter: Meanwhile, whisk together flour, sugar, baking powder, baking soda, and salt to combine. Add butter and rub it in with your fingers until it resembles breadcrumbs (Alternatively, food processor via 10 x 1-sec pulses).",
+        "Gently fold through yogurt: Add yogurt and gently mix through with rubber spatula until a dough is formed. Stop mixing when yogurt is mostly mixed through with some streaks of flour still visible (they will disappear when topping).",
+        "Top peaches: Crumble lumps of the topping across the surface. Don&#39;t fully cover the surface, to let some heat through else the syrup won&#39;t reduce and thicken.",
+        "Sprinkle with demerara sugar and cinnamon.",
+        "Bake for 20 minutes, then remove from oven. The cobbler is done when an instant read thermometer measures the centre of the biscuit topping as 95°C/203°F and the top is a lovely golden.",
+        "Rest to thicken sauce: Rest for 20 minutes to allow syrup to thicken - it will still be perfectly warm for serving.",
+        "Serve with a dollop of ice cream or whipped cream!"
+      ],
+      "nutrition": {
+        "calories": "465 kcal",
+        "protein": "7 g",
+        "carbs": "79 g",
+        "fat": "16 g"
+      },
+      "tags": [
+        "sweet baking",
+        "american",
+        "southern",
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 1017,
+      "title": "Molten Chocolate Cakes",
+      "description": "Recipe video above. The one thing that sets these Lava Cakes apart from the rest? The molten centre isn't just raw cake batter, it's melted chocolate. No more stress about overcooking the molten centre - because chocolate will always ooze. And chocolate trumps raw cake batter in the texture and taste test, always!Shortcut tip: Use a Lindt ball in place of the ganache. I'd use the dark chocolate balls (blue wrappers). Readers have tried and LOVE this!",
+      "url": "https://www.recipetineats.com/molten-chocolate-cakes/",
+      "image": "https://www.recipetineats.com/tachyon/2021/02/Chocolate-Lava-Cake_7-SQ.jpg",
+      "prepTime": 10,
+      "cookTime": 20,
+      "totalTime": null,
+      "servings": 4,
+      "category": [
+        "Dessert",
+        "Sweet"
+      ],
+      "cuisine": [
+        "Western"
+      ],
+      "ingredients": [
+        {
+          "name": "dark chocolate chips or melts/ semi sweet chocolate chips",
+          "quantity": "1/2",
+          "unit": "cup",
+          "raw": "1/2 cup dark chocolate chips or melts/ semi sweet chocolate chips ((Note 1))"
+        },
+        {
+          "name": "cream",
+          "quantity": "4",
+          "unit": "tbsp",
+          "raw": "4 tbsp cream (, heavy/thickened)"
+        },
+        {
+          "name": "dark chocolate chips or melts/ semi sweet chocolate chips",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup dark chocolate chips or melts/ semi sweet chocolate chips ((Note 1))"
+        },
+        {
+          "name": "unsalted butter",
+          "quantity": "100",
+          "unit": "g",
+          "raw": "100g / 7 tbsp  unsalted butter (, cut into 1cm / ½&quot; cubes)"
+        },
+        {
+          "name": "eggs",
+          "quantity": "2",
+          "unit": null,
+          "raw": "2  eggs (, at room temperature)"
+        },
+        {
+          "name": "egg yolks",
+          "quantity": "2",
+          "unit": null,
+          "raw": "2  egg yolks (, at room temperature (Note 2))"
+        },
+        {
+          "name": "caster/superfine sugar",
+          "quantity": "1/2",
+          "unit": "cup",
+          "raw": "1/2 cup caster/superfine sugar ((sub ordinary white sugar))"
+        },
+        {
+          "name": "flour",
+          "quantity": "2",
+          "unit": "tbsp",
+          "raw": "2 tbsp flour (, plain / all purpose)"
+        },
+        {
+          "name": "ice-cream or cream",
+          "quantity": null,
+          "unit": null,
+          "raw": "Ice-cream or cream ((highly recommended!))"
+        },
+        {
+          "name": "cocoa or icing sugar / powdered sugar",
+          "quantity": null,
+          "unit": null,
+          "raw": "Cocoa or icing sugar / powdered sugar (, for dusting)"
+        },
+        {
+          "name": "strawberries",
+          "quantity": null,
+          "unit": null,
+          "raw": "Strawberries (, raspberries or edible flowers, optional decoration)"
+        }
+      ],
+      "steps": [
+        "Molten chocolate ganache:",
+        "Place chocolate and cream in a microwave-proof bowl. Microwave on high for three 20-second bursts, stirring in between, until chocolate is melted and smooth.",
+        "Let cool on the counter for 10 minutes, then refrigerate for 3 hours or until firm enough to scoop into balls. (Note 3)",
+        "Cake:",
+        "Preheat oven to 200°C / 390°F (180°C fan).",
+        "Grease &amp; dust moulds: Grease 4 x 170ml / 5.75oz dariole or pudding moulds with butter then dust insides with cocoa powder, tapping out excess. (Note 4)",
+        "Melt chocolate and butter: Place chocolate and butter in a bowl. Microwave in 30 second bursts, stirring in between. Stir well until smooth, then leave to cool for 5 minutes.",
+        "Whisk eggs and sugar: In a separate bowl, whisk together the eggs, egg yolks and sugar.",
+        "Combine with chocolate: Add the melted chocolate into the eggs, and mix until combined.",
+        "Fold through flour: Add flour and fold through until just combined. Do not over-mix.",
+        "Fill moulds: Pour or scoop the batter into prepared moulds until it reaches ⅓ of the way up.",
+        "Drop in ganache: Place one generously-heaped teaspoon of ganache into middle of batter. Top with more batter until it reaches 1.5cm / ⅗&quot; from the top rim. Repeat for remaining moulds.",
+        "Bake 20 minutes: Place the moulds on an oven tray and bake for 20 minutes, or until the pudding tops spring back when gently touched.",
+        "Turn out: Stand for 2 minutes, then turn onto plate. Tap base then gently remove each mould.",
+        "Serve with ice-cream or cream, dusted with cocoa powder. Decorate with strawberries!"
+      ],
+      "nutrition": {
+        "calories": "695 kcal",
+        "protein": "8 g",
+        "carbs": "58 g",
+        "fat": "48 g"
+      },
+      "tags": [
+        "dessert",
+        "sweet",
+        "western",
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 1018,
+      "title": "Sticky Date Pudding",
+      "description": "Recipe video above. You're my favourite pudding - and always will be.... My favourite part is poking holes in the pudding and pouring over the hot butterscotch sauce so it soaks in, making it so ultra moist... And then of course serving it with even more sauce! ",
+      "url": "https://www.recipetineats.com/sticky-toffee-pudding/",
+      "image": "https://www.recipetineats.com/tachyon/2018/07/Sticky-Date-Pudding_5.jpg",
+      "prepTime": 15,
+      "cookTime": 35,
+      "totalTime": 50,
+      "servings": 7,
+      "category": [
+        "Dessert"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "pitted dates",
+          "quantity": "280",
+          "unit": "g",
+          "raw": "280g / 9 oz  pitted dates (, roughly chopped (Note 1))"
+        },
+        {
+          "name": "baking soda / bi carb soda",
+          "quantity": "1",
+          "unit": "tsp",
+          "raw": "1 tsp baking soda / bi carb soda"
+        },
+        {
+          "name": "boiling water",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup boiling water"
+        },
+        {
+          "name": "brown sugar",
+          "quantity": "1/4",
+          "unit": "cup",
+          "raw": "1/4 cup brown sugar (, loosely packed)"
+        },
+        {
+          "name": "unsalted butter",
+          "quantity": "80",
+          "unit": "g",
+          "raw": "80g / 6 tbsp  unsalted butter (, softened)"
+        },
+        {
+          "name": "eggs",
+          "quantity": "2",
+          "unit": null,
+          "raw": "2  eggs (, at room temperature)"
+        },
+        {
+          "name": "plain flour",
+          "quantity": "1 1/4",
+          "unit": "cups",
+          "raw": "1 1/4 cups plain flour ((all purpose flour))"
+        },
+        {
+          "name": "baking powder",
+          "quantity": "1 1/2",
+          "unit": "tsp",
+          "raw": "1 1/2 tsp baking powder"
+        },
+        {
+          "name": "brown sugar",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup brown sugar (, tightly packed)"
+        },
+        {
+          "name": "thickened cream",
+          "quantity": "1 1/2",
+          "unit": "cups",
+          "raw": "1 1/2 cups thickened cream ((heavy cream))"
+        },
+        {
+          "name": "vanilla extract",
+          "quantity": "1/2",
+          "unit": "tsp",
+          "raw": "1/2 tsp vanilla extract"
+        },
+        {
+          "name": "unsalted butter",
+          "quantity": "70",
+          "unit": "g",
+          "raw": "70g / 5 tbsp  unsalted butter"
+        },
+        {
+          "name": "ice cream or dolloping cream",
+          "quantity": null,
+          "unit": null,
+          "raw": "Ice cream or dolloping cream"
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C/350°F (160°C fan-forced).",
+        "Grease 7 pudding moulds (Note 2) with butter or grease and line a 20 cm / 8\" square cake pan with overhang.",
+        "Mashed Dates:",
+        "Place dates in a bowl, sprinkle over baking soda. Pour over boiling water. Stand 10 minutes, then mash well with a potato masher (or fork) until it resembles sloppy porridge (see video for texture / thickness). (Note 3)",
+        "Batter:",
+        "Place butter and sugar in a bowl. Beat until combined and smooth.",
+        "Add eggs, beat until incorporated.",
+        "Add flour then sprinkle baking powder across the surface. Mix until flour is incorporated.",
+        "Add dates, mix quickly until dates are well incorporated into the batter. (Note 2) Follow directions to make one pudding or individual ones.",
+        "One Pudding:",
+        "Pour into cake pan, smooth surface. Bake 35 minutes or until skewer inserted into the centre comes out clean.",
+        "While still hot, poke about 40 holes all over the surface using a skewer. Pour over 1/2 cup Butterscotch Sauce, leave to soak for 10 minutes.",
+        "Use overhang to lift cake out. Cut, serve warm with remaining warm sauce and ice cream or cream.",
+        "Baking Individual Puddings:",
+        "Pour batter into pudding moulds, only fill 2/3 of the way up.",
+        "Bake for 25 minutes, or until skewer inserted into the centre comes out clean.",
+        "While still hot, poke about 10 holes on the surface of the pudding. Spoon over 1 tbsp of Butterscotch Sauce per Pudding. Leave to soak 10 minutes.",
+        "Turn pudding moulds upside down on serving plate. Serve warm with remaining warm sauce and ice cream or cream.",
+        "Butterscotch Sauce:",
+        "Place ingredients in a saucepan over medium heat. Once butter is melted, stir, then bring to simmer.",
+        "Simmer for 2 minutes, stirring once, then remove from heat. Serve warm."
+      ],
+      "nutrition": {},
+      "tags": [
+        "dessert",
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 1019,
+      "title": "Apple Crumble",
+      "description": "Recipe video above. A filling of tender, cinnamon laced apples topped with a nubbly crunchy, golden topping. You'll love how this Apple Crumble isn't overly sweet, and how the filling is syrupy and jammy, rather than watery or dry. The smell when this is cooking is everything! SWEETNESS - see Note 4.",
+      "url": "https://www.recipetineats.com/apple-crumble/",
+      "image": "https://www.recipetineats.com/tachyon/2016/05/Apple-Crumble_1a-1.jpg",
+      "prepTime": 15,
+      "cookTime": 40,
+      "totalTime": 55,
+      "servings": 6,
+      "category": [
+        "Dessert"
+      ],
+      "cuisine": [
+        "Western"
+      ],
+      "ingredients": [
+        {
+          "name": "granny smith apples",
+          "quantity": "2",
+          "unit": "lb",
+          "raw": "2 lb / 1kg  Granny Smith Apples( green apples) (, weight before peeling)"
+        },
+        {
+          "name": "flour",
+          "quantity": "1",
+          "unit": "tbsp",
+          "raw": "1 tbsp flour (, plain / all-purpose)"
+        },
+        {
+          "name": "white sugar",
+          "quantity": "1/2",
+          "unit": "cup",
+          "raw": "1/2 cup white sugar ((sub brown sugar))"
+        },
+        {
+          "name": "lemon juice",
+          "quantity": "2",
+          "unit": "tbsp",
+          "raw": "2 tbsp lemon juice ((or water))"
+        },
+        {
+          "name": "ground cinnamon",
+          "quantity": "1/2",
+          "unit": "tsp",
+          "raw": "1/2 tsp ground cinnamon"
+        },
+        {
+          "name": "rolled oats / oatmeal",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup rolled oats / oatmeal ((quick cooking is ok))"
+        },
+        {
+          "name": "flour",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup flour (, plain / all-purpose)"
+        },
+        {
+          "name": "brown sugar",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup (loosely packed) brown sugar ((sub white sugar))"
+        },
+        {
+          "name": "baking powder",
+          "quantity": "1/2",
+          "unit": "tsp",
+          "raw": "1/2 tsp baking powder"
+        },
+        {
+          "name": "cinnamon powder",
+          "quantity": "1",
+          "unit": "tsp",
+          "raw": "1 tsp cinnamon powder"
+        },
+        {
+          "name": "unsalted butter",
+          "quantity": "125",
+          "unit": "g",
+          "raw": "125g / 1/2 cup  unsalted butter (, melted)"
+        },
+        {
+          "name": "salt",
+          "quantity": null,
+          "unit": "pinch",
+          "raw": "Pinch of salt"
+        },
+        {
+          "name": "vanilla ice cream",
+          "quantity": null,
+          "unit": null,
+          "raw": "Vanilla ice cream"
+        }
+      ],
+      "steps": [
+        "Preheat oven to 180°C / 350°F (both fan and standard).",
+        "Apple - Peel apples, then cut into 1.5cm/ 1/2” cubes.",
+        "Apple filling - Place apples in a bowl. Sprinkle with flour, sugar and cinnamon, then pour over lemon juice. Toss, then spread out evenly in a 1.5 litre/1.5 quart baking dish. ",
+        "Crumble topping - Place Topping ingredients in a bowl. Mix until clumps form, like wet sand (see video). Spread over the apples, crumbling with fingers if required to get that crumbly topping.",
+        "Bake for 30 to 40 minutes or until golden brown. Remove, cover loosely with foil to keep warm and let stand for 10 minutes before serving (let&#39;s the apple syrup thicken slightly).",
+        "Serve warm with vanilla ice cream!"
+      ],
+      "nutrition": {
+        "calories": null,
+        "protein": null,
+        "carbs": null,
+        "fat": null
+      },
+      "tags": [
+        "dessert",
+        "western",
+        "vegetarian"
+      ]
+    },
+    {
+      "id": 1020,
+      "title": "Chocolate Self Saucing Pudding",
+      "description": "Recipe video above. A classic chocolate self saucing pudding! One batter magically transforms into a moist chocolate cake AND a chocolate sauce. The sauce has the consistency of maple syrup - never watery, never gluggy. This is easy and fast to make. Serve it up straight away otherwise the sauce gets absorbed into the cake!",
+      "url": "https://www.recipetineats.com/chocolate-self-saucing-pudding/",
+      "image": "https://www.recipetineats.com/tachyon/2016/11/Chocolate-Self-Saucing-Pudding-4-SQ.jpg",
+      "prepTime": 10,
+      "cookTime": 30,
+      "totalTime": 40,
+      "servings": 5,
+      "category": [
+        "Dessert"
+      ],
+      "cuisine": [],
+      "ingredients": [
+        {
+          "name": "brown sugar",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup (175g)  brown sugar (, loosely packed (Note 1))"
+        },
+        {
+          "name": "cocoa powder",
+          "quantity": "1/4",
+          "unit": "cup",
+          "raw": "1/4 cup (30g)  cocoa powder (, unsweetened (Note 2))"
+        },
+        {
+          "name": "boiling water",
+          "quantity": "1 1/4",
+          "unit": "cups",
+          "raw": "1 1/4 cups (315ml)  boiling water"
+        },
+        {
+          "name": "plain flour",
+          "quantity": "1",
+          "unit": "cup",
+          "raw": "1 cup (150g)  plain flour ((all purpose flour))"
+        },
+        {
+          "name": "baking powder",
+          "quantity": "2 1/2",
+          "unit": "tsp",
+          "raw": "2 1/2 tsp baking powder"
+        },
+        {
+          "name": "white sugar",
+          "quantity": "1/3",
+          "unit": "cup",
+          "raw": "1/3 cup (70g)  white sugar (, preferably caster/super fine but ordinary ok)"
+        },
+        {
+          "name": "cocoa powder",
+          "quantity": "1/4",
+          "unit": "cup",
+          "raw": "1/4 cup (30g)  cocoa powder (, unsweetened (Note 2))"
+        },
+        {
+          "name": "salt",
+          "quantity": null,
+          "unit": "pinch",
+          "raw": "Pinch of salt"
+        },
+        {
+          "name": "milk",
+          "quantity": "1/2",
+          "unit": "cup",
+          "raw": "1/2 cup (125ml)  milk"
+        },
+        {
+          "name": "butter",
+          "quantity": "50",
+          "unit": "g",
+          "raw": "50 g / 4 1/2 tbsp   butter (, melted)"
+        },
+        {
+          "name": "egg",
+          "quantity": "1",
+          "unit": null,
+          "raw": "1  egg"
+        },
+        {
+          "name": "vanilla extract",
+          "quantity": "1",
+          "unit": "tsp",
+          "raw": "1 tsp vanilla extract"
+        }
+      ],
+      "steps": [
+        "Preheat oven to 170C/335F (standard) / 150C/305F (fan forced / convection).",
+        "Grease a 5 - 6 cup baking dish with butter. (Note 3)",
+        "Topping: Whisk brown sugar and cocoa in a bowl, set aside.",
+        "Whisk flour, baking powder, caster sugar, cocoa powder and salt in a bowl.",
+        "In a separate bowl or jug, whisk together the butter and milk, then whisk in the egg and vanilla.",
+        "Pour the egg mixture into the flour mixture. Mix until combined - it will be a thick batter.",
+        "Spread into baking dish. Sprinkle with sugar / cocoa mixture. Shake gently to spread out thinly.",
+        "Carefully pour the hot water over the back of a dessert spoon all over the top of the pudding - see photo in post or video below recipe. (Note 4)",
+        "Transfer to oven and bake for 30 minutes, or until the top of the cake springs back when poked lightly. The top will be a bit crusty, like the top of brownies.",
+        "Remove from oven, stand for just a few minutes (no more!), then serve immediately. (Note 5)"
+      ],
+      "nutrition": {
+        "calories": "321 kcal",
+        "protein": "4.5 g",
+        "carbs": "59.7 g",
+        "fat": "8.6 g"
+      },
+      "tags": [
+        "dessert",
+        "vegetarian"
       ]
     }
   ]

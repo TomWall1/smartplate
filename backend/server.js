@@ -158,6 +158,8 @@ app.post('/api/admin/refresh-deals', (req, res) => {
     console.warn('External cron: RENDER_EXTERNAL_URL not set — no keep-alive; long pipeline may die if the instance idles');
   }
 
+  const pipelineStartedAt = Date.now();
+
   (async () => {
     // Step 0: the on-disk catalogue IDs are whatever was committed to the repo
     // if this instance has restarted since the last discovery. Restore the
@@ -217,9 +219,29 @@ app.post('/api/admin/refresh-deals', (req, res) => {
     }
   })()
     .catch((err) => console.error('External cron: pipeline error:', err.message))
-    .finally(() => {
+    .finally(async () => {
       _pipelineRunning = false;
       if (keepAlive) clearInterval(keepAlive);
+
+      // One unambiguous line to watch for. Until now the run simply stopped
+      // logging, so "is it finished or just slow?" could only be answered by
+      // polling /api/deals/status.
+      const minutes = ((Date.now() - pipelineStartedAt) / 60000).toFixed(1);
+      let summary = '';
+      try {
+        const db = require('./database/db');
+        const rows = (await db?.getStateDealsFreshness?.()) ?? [];
+        const stale = rows.filter(
+          (r) => Date.now() - new Date(r.fetchedAt).getTime() > 10 * 86400000
+        );
+        const info = require('./services/dealService').getCacheInfo();
+        summary =
+          ` — national ${info?.counts?.total ?? '?'} deals, ` +
+          `${rows.length} state artifacts, ${stale.length} stale`;
+      } catch {
+        // Diagnostics only; never let this mask the run finishing.
+      }
+      console.log(`External cron: PIPELINE FINISHED in ${minutes} min${summary}`);
     });
 });
 
