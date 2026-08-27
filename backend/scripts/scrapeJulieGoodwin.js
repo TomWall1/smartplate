@@ -22,6 +22,8 @@ const cheerio = require('cheerio');
 const fs      = require('fs');
 const path    = require('path');
 
+const { parseIngredient } = require('../lib/ingredientParser');
+
 const OUTPUT_PATH      = path.join(__dirname, '..', 'data', 'juliegoodwin-recipes.json');
 const BASE_URL         = 'https://juliegoodwin.com.au';
 const REQUEST_DELAY_MS = 1500;
@@ -32,8 +34,6 @@ const CATEGORIES = [
   { name: 'vegetables', url: `${BASE_URL}/category/vegetables/` },
   { name: 'meat',       url: `${BASE_URL}/category/meat/`       },
 ];
-
-const UNIT_PATTERN = /^(tbsp|tablespoons?|tsp|teaspoons?|cups?|g|kg|ml|l|litres?|liters?|oz|lb|lbs?|bunch|bunches|cloves?|pieces?|slices?|sprigs?|stalks?|heads?|cans?|tins?|packets?|pinch|handful|rashers?|fillets?|strips?)\b/i;
 
 const http = axios.create({
   headers: {
@@ -59,46 +59,6 @@ function decodeHtml(str) {
     .replace(/&nbsp;/g, ' ')
     .replace(/\u00a0/g, ' ')
     .trim();
-}
-
-// ── Ingredient parser ─────────────────────────────────────────────────────────
-
-function parseIngredient(raw) {
-  let text = raw.trim();
-  if (!text || text.length < 2) return null;
-
-  // Remove parenthetical notes
-  text = text.replace(/\([^)]*\)/g, '').trim();
-
-  // Handle unicode fractions
-  const unicodeFractions = { '½': '1/2', '⅓': '1/3', '⅔': '2/3', '¼': '1/4', '¾': '3/4', '⅛': '1/8' };
-  for (const [uf, rep] of Object.entries(unicodeFractions)) {
-    text = text.replace(uf, rep);
-  }
-
-  let quantity = null;
-  const qtyMatch = text.match(/^([\d]+\s+[\d]+\/[\d]+|[\d]+\/[\d]+|[\d]+\.?\d*)\s*/);
-  if (qtyMatch) {
-    quantity = qtyMatch[1].trim();
-    text = text.slice(qtyMatch[0].length).trim();
-  }
-
-  let unit = null;
-  const unitMatch = text.match(UNIT_PATTERN);
-  if (unitMatch) {
-    unit = unitMatch[0].trim();
-    text = text.slice(unitMatch[0].length).trim();
-  }
-
-  // Strip leading "of" connector
-  text = text.replace(/^of\s+/, '').trim();
-
-  // Clean trailing commas, dashes
-  text = text.replace(/[,\-–]+$/, '').trim();
-
-  const name = text.toLowerCase().trim();
-
-  return name ? { name, quantity, unit, original: raw.trim() } : null;
 }
 
 // ── Duration parser ───────────────────────────────────────────────────────────
@@ -239,7 +199,14 @@ function scrapeRecipePage($, url, categoryName) {
   if (rawIngredientLines.length < 2) return null;
 
   const ingredients = rawIngredientLines
-    .map(parseIngredient)
+    .map(line => {
+      // The shared parser always returns an object and names the source string
+      // `raw`; this library skips lines it can't name and stores it as `original`.
+      const parsed = parseIngredient(line);
+      if (!parsed.name) return null;
+      const { raw, ...rest } = parsed;
+      return { ...rest, original: raw.trim() };
+    })
     .filter(Boolean);
 
   if (ingredients.length < 2) return null;
@@ -386,7 +353,11 @@ async function main() {
   console.log(`\nSaved to ${OUTPUT_PATH}`);
 }
 
-main().catch(err => {
-  console.error('Fatal:', err.message);
-  process.exit(1);
-});
+// Guard the entry point so requiring this module (for its parser or
+// helpers) doesn't kick off a live scrape.
+if (require.main === module) {
+  main().catch(err => {
+    console.error('Fatal:', err.message);
+    process.exit(1);
+  });
+}

@@ -25,7 +25,7 @@
 const fs   = require('fs');
 const path = require('path');
 
-const { parseIngredient } = require('./scrapeRecipes');
+const { parseIngredient } = require('../lib/ingredientParser');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const DRY_RUN  = process.argv.includes('--dry-run');

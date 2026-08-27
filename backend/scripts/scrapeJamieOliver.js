@@ -15,6 +15,8 @@ const cheerio = require('cheerio');
 const fs     = require('fs');
 const path   = require('path');
 
+const { parseDuration, parseIngredient } = require('../lib/ingredientParser');
+
 const OUTPUT_PATH     = path.join(__dirname, '..', 'data', 'jamie-oliver-recipes.json');
 const BASE_URL        = 'https://www.jamieoliver.com';
 const REQUEST_DELAY_MS = 1500;
@@ -47,8 +49,6 @@ const CATEGORY_PAGES = [
   '/recipes/eggs/',
 ];
 
-// Same unit pattern as scrapeRecipes.js
-const UNIT_PATTERN = /^(tbsp|tablespoons?|tsp|teaspoons?|cups?|g|kg|ml|l|litres?|liters?|oz|lb|lbs?|bunch|bunches|cloves?|pieces?|slices?|sprigs?|stalks?|heads?|cans?|tins?|packets?|pinch|handful|rashers?|fillets?|strips?)\b/i;
 
 // HTTP client shared for all requests
 const http = axios.create({
@@ -65,63 +65,7 @@ function sleep(ms) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function parseDuration(iso) {
-  if (!iso) return null;
-  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  if (!m) return null;
-  return parseInt(m[1] || 0) * 60 + parseInt(m[2] || 0);
-}
 
-/**
- * Parse a raw ingredient string → {name, quantity, unit, raw}
- * (Identical logic to scrapeRecipes.js)
- */
-function parseIngredient(raw) {
-  let text = raw.trim();
-
-  // Remove parenthetical notes
-  text = text.replace(/\([^)]*\)/g, '').trim();
-
-  // Remove "/ alternative" patterns
-  text = text.replace(/\s*\/\s*[^,]+/, '').trim();
-
-  // Extract leading numeric quantity (handles "1 1/2", "1/2", decimals)
-  let quantity = null;
-  const qtyMatch = text.match(/^([\d]+\s+[\d]+\/[\d]+|[\d]+\/[\d]+|[\d]+\.?\d*)\s*/);
-  if (qtyMatch) {
-    quantity = qtyMatch[1].trim();
-    text = text.slice(qtyMatch[0].length).trim();
-  }
-
-  // Handle unicode fractions
-  const unicodeFractions = { '½': '1/2', '⅓': '1/3', '⅔': '2/3', '¼': '1/4', '¾': '3/4' };
-  for (const [uf, rep] of Object.entries(unicodeFractions)) {
-    if (text.startsWith(uf)) {
-      quantity = quantity ? `${quantity} ${rep}` : rep;
-      text = text.slice(1).trim();
-    }
-  }
-
-  // Extract unit
-  let unit = null;
-  const unitMatch = text.match(UNIT_PATTERN);
-  if (unitMatch) {
-    unit = unitMatch[1].toLowerCase();
-    text = text.slice(unitMatch[0].length).trim();
-  }
-
-  // Clean ingredient name
-  let name = text
-    .replace(/^[,\s\-–]+/, '')
-    .replace(/[,\s\-–]+$/, '')
-    .replace(/\s+/g, ' ')
-    .toLowerCase()
-    .trim();
-
-  name = name.replace(/^of\s+/, '');
-
-  return { name, quantity, unit, raw };
-}
 
 /**
  * Parse Jamie Oliver's non-standard recipeInstructions.
@@ -476,7 +420,11 @@ async function main() {
   console.log(`\nSaved to ${OUTPUT_PATH}`);
 }
 
-main().catch(err => {
-  console.error('Fatal error:', err.message);
-  process.exit(1);
-});
+// Guard the entry point so requiring this module (for its parser or
+// helpers) doesn't kick off a live scrape.
+if (require.main === module) {
+  main().catch(err => {
+    console.error('Fatal error:', err.message);
+    process.exit(1);
+  });
+}
