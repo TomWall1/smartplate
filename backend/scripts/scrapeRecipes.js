@@ -138,6 +138,11 @@ function parseIngredient(raw) {
     }
   }
 
+  // Quantity ranges and multipliers left over after the leading number:
+  //   "3 - 3.5 lb whole chicken", "1 to 2 tsp salt", "2 x 10oz sirloin"
+  text = text.replace(/^(?:[-–—]|to)\s*\d[\d.\/]*\s*/, '').trim();
+  text = text.replace(/^x\s*\d[\d.\/]*\s*/i, '').trim();
+
   // Extract unit
   let unit = null;
   const unitMatch = text.match(UNIT_PATTERN);
@@ -150,7 +155,7 @@ function parseIngredient(raw) {
   // e.g. "280g / 9 oz pitted dates" → "pitted dates". This has to run AFTER
   // the quantity is taken, or a leading fraction ("1/4 tsp salt") looks like
   // an alternative measure and swallows the whole ingredient name.
-  text = text.replace(/^\/\s*\d[\d\s\/.]*\s*[a-zA-Z]+\.?\s+/, '').trim();
+  text = text.replace(/^\/\s*\d[\d\s\/.–—-]*\s*[a-zA-Z]+\.?\s+/, '').trim();
 
   // Clean up ingredient name
   let name = text

@@ -52,7 +52,7 @@ const LIBRARIES = [
 
 const BATCH_SIZE  = 8;
 const DELAY_MS    = 500;
-const SAVE_EVERY  = 100;
+const SAVE_EVERY  = 24;   // checkpoint every 3 batches so an interrupted run loses little
 const MODEL       = 'claude-haiku-4-5-20251001';
 
 // ── Subheading detection ──────────────────────────────────────────────────────
@@ -160,7 +160,7 @@ async function tagBatch(client, recipes) {
 
   const response = await client.messages.create({
     model:      MODEL,
-    max_tokens: 8192,
+    max_tokens: 16000,   // measured ~6.3k output per batch of 8; 8192 truncated long batches mid-JSON
     system:     SYSTEM_PROMPT,
     messages: [{
       role:    'user',
