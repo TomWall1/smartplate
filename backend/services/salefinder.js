@@ -809,4 +809,8 @@ module.exports = {
   hydrateStateIds,
   CATEGORY_MAP,
   EXCLUDED_CATEGORIES,
+  // Shared with catalogueList.js, which reads the same catalogues from the
+  // list view now that the embed API is gone.
+  isLikelyFood,
+  mapCategory,
 };

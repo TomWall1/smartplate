@@ -527,28 +527,22 @@ const STATE_DEAL_TTL  = 6 * 60 * 60 * 1000; // re-read DB row after 6h
  * which is the exact bug per-state artifacts exist to fix). Retailers with
  * no catalogue for the state this week are reported in `missing`.
  */
-async function _fetchStateRaw(state, stateIds) {
-  const { fetchCatalogueDeals } = require('./salefinder');
-  const services = { woolworths: woolworthsService, coles: colesService, iga: igaService };
-  const byStore  = { woolworths: [], coles: [], iga: [] };
-  const missing  = [];
-
-  for (const store of STORES) {
-    const id = stateIds[store]?.[state];
-    if (!id) { missing.push(store); continue; }
-    try {
-      const cfg = services[store].config;
-      // locationId 0: region-mismatched locations blank the catalogue
-      byStore[store] = await fetchCatalogueDeals(
-        { id, name: `${store} ${state}` },
-        { retailerId: cfg.retailerId, locationId: 0, nameSelector: cfg.nameSelector, store: cfg.store }
-      );
-      if (byStore[store].length === 0) missing.push(store);
-    } catch (err) {
-      console.warn(`[StateDeals] ${state}/${store} fetch failed: ${err.message}`);
-      missing.push(store);
-    }
-  }
+/**
+ * One state's raw deals, per retailer.
+ *
+ * Was: embed.salefinder.com.au/productlist/category/{id} with ids from
+ * state-catalogue-ids.json. That endpoint now answers "catalogue not found"
+ * for every id — the reason all six state artifacts froze on 11 June 2026
+ * while the national cache kept updating through a separate fallback.
+ *
+ * Now: the server-rendered catalogue list, scoped by location cookie. No
+ * stored ids, no token, no browser — and it carries the advertised unit price
+ * and the retailer's real offer dates, neither of which the old feed had.
+ */
+async function _fetchStateRaw(state) {
+  const { fetchStateCatalogues } = require('./catalogueList');
+  const { byStore, missing, location } = await fetchStateCatalogues(state, STORES);
+  console.log(`[StateDeals] ${state}: fetched from the catalogue list (${location})`);
   return { byStore, missing };
 }
 
@@ -564,8 +558,8 @@ async function refreshStateDeals() {
     console.warn('[StateDeals] DB unavailable — skipping state artifacts');
     return;
   }
-  const { loadStateIds } = require('./salefinder');
-  const stateIds = loadStateIds();
+  // Catalogue ids are discovered live from the location cookie now, so
+  // state-catalogue-ids.json is no longer consulted here.
 
   // Enrichment map from the fully-enriched main cache, keyed by store+name
   const main = loadCache();
@@ -576,7 +570,7 @@ async function refreshStateDeals() {
 
   for (const state of ARTIFACT_STATES) {
     try {
-      const { byStore, missing } = await _fetchStateRaw(state, stateIds);
+      const { byStore, missing } = await _fetchStateRaw(state);
       const flat = [];
       const stateUnique = [];
 

@@ -2,7 +2,6 @@ const express     = require('express');
 const router      = express.Router();
 const dealService = require('../services/dealService');
 const imageCache  = require('../services/imageCache');
-const requireCronSecret = require('../middleware/requireCronSecret');
 
 // GET /api/deals/current — serve from cache (instant)
 // Optional ?state=vic serves that state's deal artifact (nsw|vic|qld|wa|sa|tas|nt|act)
@@ -218,55 +217,5 @@ router.post('/clear-image-cache', (req, res) => {
   });
 });
 
-
-// POST /api/deals/ingest ------------------------------------------------
-// Receives one state's deals from the headless catalogue fetcher, which runs
-// in GitHub Actions because Playwright cannot live on this instance.
-//
-// Guarded by the cron secret: this writes the artifact every user in that
-// state reads, so it is exactly as sensitive as the pipeline triggers.
-router.post('/ingest', requireCronSecret, async (req, res) => {
-  const state = String(req.body?.state || '').toLowerCase();
-  const deals = req.body?.deals;
-
-  const VALID = ['nsw', 'vic', 'qld', 'wa', 'sa', 'tas', 'act', 'nt'];
-  if (!VALID.includes(state)) return res.status(400).json({ error: `unknown state: ${state}` });
-  if (!Array.isArray(deals) || deals.length === 0) {
-    return res.status(400).json({ error: 'deals must be a non-empty array' });
-  }
-
-  // A refresh that loses most of the previous deals is far more likely to be
-  // a broken fetch than a genuinely empty week. Today's incident replaced 145
-  // Woolworths deals with 4 and saved it without hesitation. Refuse, unless
-  // explicitly forced.
-  const force = req.query.force === 'true';
-  try {
-    const db = require('../database/db');
-    const existing = await db?.getStateDeals?.(state);
-    const previous = existing?.data?.deals?.length ?? 0;
-    if (!force && previous > 0 && deals.length < previous * 0.5) {
-      console.warn(`[deals/ingest] ${state}: refusing ${deals.length} deals, previous was ${previous}`);
-      return res.status(409).json({
-        error: 'implausible drop in deal count',
-        received: deals.length,
-        previous,
-        hint: 're-send with ?force=true if this is genuine',
-      });
-    }
-
-    await db.saveStateDeals(state, {
-      state,
-      deals,
-      fetchedAt: new Date().toISOString(),
-      source: 'catalogue-fetcher',
-    });
-    dealService.clearStateDealCaches();
-    console.log(`[deals/ingest] ${state}: stored ${deals.length} deals (previous ${previous})`);
-    res.json({ ok: true, state, stored: deals.length, previous });
-  } catch (err) {
-    console.error(`[deals/ingest] ${state} failed:`, err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
 
 module.exports = router;
