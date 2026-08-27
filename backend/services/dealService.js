@@ -707,6 +707,8 @@ module.exports = {
   getDealsByStore,
   getDealsByCategory,
   getDealsByState,
+  ARTIFACT_STATES,
+  SHARED_ARTIFACT,
   refreshStateDeals,
   waitForEnrichment,
   clearStateDealCaches,

@@ -389,7 +389,11 @@ class RecipeService {
     const recipeMatcher    = require('./recipeMatcher');
     const matchEdgeService = require('./matchEdgeService');
     const db = require('../database/db');
-    const STATES = ['vic', 'qld', 'wa', 'sa', 'tas', 'nt'];
+    // Take the list from dealService rather than keeping a second copy. These
+    // two drifted the moment NSW gained a deal artifact: NSW had fresh deals
+    // but no recipe artifact, so it silently fell back to the national recipe
+    // set built against the older national cache.
+    const { ARTIFACT_STATES: STATES } = require('./dealService');
 
     for (const state of STATES) {
       try {
@@ -726,8 +730,13 @@ class RecipeService {
    * state.
    */
   async getRecipesByState(state, store = null) {
-    const s = (state || 'nsw').toLowerCase();
-    if (s === 'nsw' || s === 'act') return this.getWeeklyRecipes(store);
+    const { ARTIFACT_STATES, SHARED_ARTIFACT } = require('./dealService');
+    const requested = (state || 'nsw').toLowerCase();
+    // ACT genuinely shares NSW's catalogues, so it reads NSW's artifact.
+    // NSW itself now has one: it used to fall through to the national set,
+    // which is matched against the older national deal cache.
+    const s = SHARED_ARTIFACT[requested] || requested;
+    if (!ARTIFACT_STATES.includes(s)) return this.getWeeklyRecipes(store);
 
     const cached = this._stateRecipeCache.get(s);
     if (cached && Date.now() - cached.builtAt < RecipeService.STATE_RECIPE_TTL) {
