@@ -4,6 +4,15 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
+
+// Render terminates TLS at its proxy and forwards the caller's address in
+// X-Forwarded-For. Without this, Express reports the proxy's IP for every
+// request, so express-rate-limit keyed every caller to the same bucket — the
+// AI limiter (30 per 15 min) was throttling all users collectively rather than
+// per person, and it logged ERR_ERL_UNEXPECTED_X_FORWARDED_FOR on each hit.
+// `1` trusts exactly one hop: `true` would trust a client-supplied header and
+// let anyone spoof their way around the limits.
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3001;
 
 // CORS configuration - Allow requests from Vercel frontend

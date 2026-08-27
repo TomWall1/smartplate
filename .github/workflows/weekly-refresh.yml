@@ -7,6 +7,11 @@ on:
     # Tue 17:00 UTC = Wed 4:00am AEDT (summer) / Wed 3:00am AEST (winter).
     - cron: '0 17 * * 2'
   workflow_dispatch:       # Allow manual trigger from GitHub Actions UI
+    inputs:
+      force:
+        description: 'Refresh even if deals are under 12h old'
+        type: boolean
+        default: false
 
 env:
   API_URL: https://deals-to-dish-api.onrender.com
@@ -38,13 +43,16 @@ jobs:
           # Must match CRON_SECRET in the Render dashboard. Set it at
           # GitHub -> Settings -> Secrets and variables -> Actions.
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          # ?force=true skips the 12h freshness guard — set when re-running
+          # the same day, e.g. after a deploy that changed the pipeline.
+          FORCE: ${{ github.event.inputs.force == 'true' && '?force=true' || '' }}
         run: |
           echo "Triggering SmartPlate weekly pipeline at $(date)"
           for attempt in 1 2 3; do
             response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 -X POST \
               -H "Content-Type: application/json" \
               -H "X-Cron-Secret: $CRON_SECRET" \
-              "$API_URL/api/admin/refresh-deals")
+              "$API_URL/api/admin/refresh-deals$FORCE")
             echo "Attempt $attempt: status $response"
             if [ "$response" = "401" ]; then
               echo "Rejected: the CRON_SECRET repo secret does not match the server."
