@@ -68,6 +68,7 @@ const {
   DIVERSITY_DECAY,
   MIN_PER_BUCKET,
   PROTEIN_BUCKETS,
+  HERO_FAMILIES,
   LIBRARIES,
   FOOD_KEYWORDS,
   NON_FOOD_INDICATORS,
@@ -892,6 +893,21 @@ class RecipeMatcher {
   }
 
   /**
+   * The protein family a hero belongs to — pork, beef, lamb, chicken, seafood.
+   *
+   * Hero lanes are per-PRODUCT, which is right for stopping one salmon deal
+   * monopolising seafood, but it let a single protein hold several lanes: with
+   * bacon, pork fillet, ham and pork loin all on special, pork took four of
+   * eight lanes and 41 of 50 served recipes while chicken got 2 and lamb none.
+   * Families are the outer loop of the draft; heroes stay the inner one.
+   */
+  _heroFamily(heroKey) {
+    const s = (heroKey || '').toLowerCase();
+    for (const [family, re] of HERO_FAMILIES) if (re.test(s)) return family;
+    return 'other';
+  }
+
+  /**
    * Build the edge-verification pool so EVERY store's heroes are covered.
    *
    * The pool must be store-aware: a WW-chicken recipe that also matches a
@@ -978,25 +994,67 @@ class RecipeMatcher {
     // style (D) rather than five near-identical salmon dishes.
     for (const [g, list] of groups) groups.set(g, this._diversifyByCuisine(list));
 
-    // Round-robin across heroes, with a per-hero cap (B) as a backstop so no
-    // single hero can dominate even if it has the most/highest-scored recipes.
-    const order = [...groups.keys()];
-    const maxPerHero = Math.max(8, Math.ceil(limit * 0.3));
-    const counts = new Map();
-    const result = [];
-    for (let round = 0; result.length < limit; round++) {
-      let placed = false;
-      for (const g of order) {
-        const q = groups.get(g);
-        if (q.length > round && (counts.get(g) || 0) < maxPerHero) {
-          result.push(q[round]);
-          counts.set(g, (counts.get(g) || 0) + 1);
-          placed = true;
-          if (result.length >= limit) break;
+    // Two-level draft: families outer, heroes inner.
+    //
+    // One pick per FAMILY per round, drawn from that family's next hero in
+    // rotation. Because the outer loop is the family, any prefix of the result
+    // is balanced across proteins — which matters because callers slice the
+    // top 50 (or 150) off this list, so ordering does most of the work and the
+    // caps are only a backstop.
+    const order = [...groups.keys()]; // hero keys, strongest first
+    const families = new Map();
+    for (const hero of order) {
+      const fam = this._heroFamily(hero);
+      if (!families.has(fam)) families.set(fam, { heroes: [], cursor: 0 });
+      families.get(fam).heroes.push(hero);
+    }
+
+    const famOrder     = [...families.keys()];
+    const perFamilyCap = Math.max(4, Math.ceil(limit * 0.25));
+    const perHeroCap   = Math.max(2, Math.ceil(limit * 0.15));
+    const heroTaken = new Map();
+    const famTaken  = new Map();
+    const heroIdx   = new Map();
+    const result    = [];
+
+    let progress = true;
+    while (result.length < limit && progress) {
+      progress = false;
+      for (const fam of famOrder) {
+        if (result.length >= limit) break;
+        if ((famTaken.get(fam) || 0) >= perFamilyCap) continue;
+
+        const f = families.get(fam);
+        // Try this family's heroes starting at its cursor, so successive picks
+        // rotate through bacon → pork fillet → ham rather than draining one.
+        for (let k = 0; k < f.heroes.length; k++) {
+          const hero = f.heroes[(f.cursor + k) % f.heroes.length];
+          const list = groups.get(hero);
+          const idx  = heroIdx.get(hero) || 0;
+          if (idx >= list.length) continue;
+          if ((heroTaken.get(hero) || 0) >= perHeroCap) continue;
+
+          result.push(list[idx]);
+          heroIdx.set(hero, idx + 1);
+          heroTaken.set(hero, (heroTaken.get(hero) || 0) + 1);
+          famTaken.set(fam, (famTaken.get(fam) || 0) + 1);
+          f.cursor = (f.cursor + k + 1) % f.heroes.length;
+          progress = true;
+          break;
         }
       }
-      if (!placed) break;
     }
+
+    // Backfill by score if the caps left the list short — a balanced menu that
+    // is half the requested size would be a worse answer than a full one.
+    if (result.length < limit) {
+      const used = new Set(result);
+      for (const r of qualified) {
+        if (result.length >= limit) break;
+        if (!used.has(r)) result.push(r);
+      }
+    }
+
     return result;
   }
 

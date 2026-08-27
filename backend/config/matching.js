@@ -56,6 +56,21 @@ const PROTEIN_BUCKETS = {
   seafood: 'seafood',
 };
 
+// Species-level families for spreading the menu across proteins.
+//
+// Deliberately finer than PROTEIN_BUCKETS, which lumps beef, lamb and pork
+// together as 'red-meat'. The menu selector needs the opposite grain: four
+// pork products on special (bacon, fillet, ham, loin) should share ONE lane
+// rather than taking four, while beef and lamb keep lanes of their own.
+// Order matters — 'pork mince' must land in pork, not beef.
+const HERO_FAMILIES = [
+  ['pork',    /\b(pork|bacon|ham|prosciutto|chorizo|salami|speck|pancetta)\b/],
+  ['lamb',    /\blamb\b/],
+  ['beef',    /\b(beef|steak|brisket|veal|mince)\b/],
+  ['chicken', /\b(chicken|turkey|duck|poultry)\b/],
+  ['seafood', /\b(fish|salmon|tuna|prawn|shrimp|barramundi|basa|snapper|squid|mussel|crab|scallop)\b/],
+];
+
 // Each entry: prefer enriched file, fall back to original
 const LIBRARIES = [
   { src: path.join(__dirname, '..', 'data', 'recipe-library.json'),        enriched: path.join(__dirname, '..', 'data', 'recipe-library-enriched.json'),        source: 'recipetineats' },
@@ -309,6 +324,7 @@ module.exports = {
   DIVERSITY_DECAY,
   MIN_PER_BUCKET,
   PROTEIN_BUCKETS,
+  HERO_FAMILIES,
   LIBRARIES,
   FOOD_KEYWORDS,
   NON_FOOD_INDICATORS,
