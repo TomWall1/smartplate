@@ -591,13 +591,21 @@ async function refreshStateDeals() {
         for (const deal of byStore[store]) {
           const base = enrichMap.get(enrichKey(store, deal.name));
           if (base) {
-            // Shared deal: reuse enrichment, keep this state's own pricing
+            // Shared deal: reuse the national cache's enrichment (image,
+            // product intelligence) but take everything the catalogue scraper
+            // knows better. `name` matters as much as price — spreading `base`
+            // alone put the national cache's HTML-encoded name back on the
+            // deal, so "Arnott&rsquo;s" reappeared on 82 products per state
+            // despite decoding at the source. `unitPrice` exists only on
+            // scraped deals, so without it shared deals silently lost the
+            // per-kg figure the whole catalogue rewrite was for.
             flat.push({
               ...base,
+              name:               deal.name,
               price:              deal.price,
               originalPrice:      deal.originalPrice,
               discountPercentage: deal.discountPercentage,
-              unit:               deal.unit,
+              unitPrice:          deal.unitPrice,
               validUntil:         deal.validUntil,
             });
           } else {
