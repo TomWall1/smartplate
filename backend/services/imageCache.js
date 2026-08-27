@@ -47,8 +47,24 @@ function _load() {
  * Look up a cached entry by normalised keyword.
  * Returns the entry object, or undefined if not cached.
  */
+// A cached "no image" is only trustworthy for so long. Failures poison the
+// cache permanently otherwise: one run with expired Woolworths session cookies
+// recorded every product it touched as image-less, and nothing ever retried.
+// Symptom was a 94% cache hit rate alongside 38% image coverage.
+const NEGATIVE_TTL_DAYS = 7; // one weekly pipeline run
+
 function get(keyword) {
-  return _load()[keyword];
+  const entry = _load()[keyword];
+  if (!entry) return undefined;
+  if (entry.imageUrl) return entry; // a hit is a hit, however old
+  // Underscore keys are internal bookkeeping (colesEnrich stores its rotating
+  // BUILD_ID here), not image lookups — the negative rule does not apply.
+  if (String(keyword).startsWith('_')) return entry;
+
+  const seen = Date.parse(entry.lastSeen);
+  if (Number.isNaN(seen)) return undefined; // pre-dates lastSeen — retry it
+  const days = (Date.now() - seen) / 86400000;
+  return days > NEGATIVE_TTL_DAYS ? undefined : entry;
 }
 
 /**

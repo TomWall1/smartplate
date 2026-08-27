@@ -307,12 +307,14 @@ async function enrichDeals(deals) {
     // ── Cache miss — call Coles API ────────────────────────────────────────
     misses++;
     let result = null;
+    let failed = false; // an exception, as distinct from a clean "no match"
 
     try {
       const data = await _searchColesProduct(keyword, buildId);
       result = _parseSearchResult(data, keyword);
     } catch (err) {
       errors++;
+      failed = true;
       const status = err.response?.status;
 
       if (status === 404) {
@@ -325,6 +327,7 @@ async function enrichDeals(deals) {
           const data = await _searchColesProduct(keyword, buildId);
           result = _parseSearchResult(data, keyword);
           errors--;
+          failed = false;
           console.log(`[ColesEnrich] BUILD_ID refreshed to: ${buildId}`);
         } catch (retryErr) {
           console.warn(`[ColesEnrich] BUILD_ID refresh failed: ${retryErr.message}`);
@@ -334,7 +337,11 @@ async function enrichDeals(deals) {
       }
     }
 
-    imageCache.set(cacheKey, result ?? { imageUrl: null, productUrl: null, stockcode: null });
+    // Only cache a negative when the search actually ran and found nothing —
+    // caching after an exception records a transient failure as permanent.
+    if (result || !failed) {
+      imageCache.set(cacheKey, result ?? { imageUrl: null, productUrl: null, stockcode: null });
+    }
 
     const enrichedDeal = {
       ...deal,

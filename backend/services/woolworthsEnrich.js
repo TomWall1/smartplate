@@ -194,12 +194,14 @@ async function enrichDeals(deals) {
     // ── Cache miss — call Woolworths API ───────────────────────────────────
     misses++;
     let result = null;
+    let failed = false; // an exception, as distinct from a clean "no match"
 
     try {
       const data = await _searchWoolworthsProduct(keyword, cookies);
       result = _parseSearchResult(data);
     } catch (err) {
       errors++;
+      failed = true;
       // If session expired (403/401), try refreshing cookies once
       if (err.response?.status === 403 || err.response?.status === 401) {
         try {
@@ -208,6 +210,7 @@ async function enrichDeals(deals) {
           const data = await _searchWoolworthsProduct(keyword, cookies);
           result = _parseSearchResult(data);
           errors--; // recovered
+          failed = false;
         } catch (retryErr) {
           console.warn(`[WoolworthsEnrich] Retry failed for "${keyword}": ${retryErr.message}`);
         }
@@ -216,8 +219,12 @@ async function enrichDeals(deals) {
       }
     }
 
-    // Store in cache regardless of outcome (null = don't retry next week)
-    imageCache.set(keyword, result ?? { imageUrl: null, productUrl: null, stockcode: null });
+    // Only cache a negative when the search actually ran and found nothing.
+    // Caching after an exception records a transient failure — an expired
+    // session, a 403, a timeout — as a permanent "this product has no image".
+    if (result || !failed) {
+      imageCache.set(keyword, result ?? { imageUrl: null, productUrl: null, stockcode: null });
+    }
 
     enriched.push({
       ...deal,
