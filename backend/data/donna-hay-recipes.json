@@ -132,7 +132,7 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 20cm flour tortillas",
+          "name": "cm flour tortillas",
           "quantity": "8",
           "unit": null,
           "raw": "8 x 20cm (8 inch) flour tortillas"
@@ -156,9 +156,9 @@
           "raw": "½ red onion, finely sliced"
         },
         {
-          "name": "x 400g cans black beans, rinsed and drained",
+          "name": "cans black beans, rinsed and drained",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g cans black beans, rinsed and drained"
         },
         {
@@ -364,7 +364,7 @@
           "raw": "1 bunch sage leaves (about 6 sprigs)"
         },
         {
-          "name": "x 6–7kg ham leg+",
+          "name": "–7kg ham leg+",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 6–7kg ham leg+"
@@ -734,9 +734,9 @@
           "raw": "1.25 litres good quality chicken stock"
         },
         {
-          "name": "x 160g chicken breast, trimmed",
+          "name": "chicken breast, trimmed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 160g chicken breast, trimmed"
         },
         {
@@ -1037,9 +1037,9 @@
           "raw": "1 tablespoon lemon juice"
         },
         {
-          "name": "x 1.3kg easy-carve lamb leg",
+          "name": "easy-carve lamb leg",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.3kg easy-carve lamb leg"
         },
         {
@@ -1683,9 +1683,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 125g chicken thigh fillets, skin on",
+          "name": "chicken thigh fillets, skin on",
           "quantity": "8",
-          "unit": null,
+          "unit": "g",
           "raw": "8 x 125g chicken thigh fillets, skin on"
         },
         {
@@ -1695,9 +1695,9 @@
           "raw": "⅓ cup (100g) store-bought Thai red curry paste"
         },
         {
-          "name": "x 400ml can coconut milk",
+          "name": "can coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "ml",
           "raw": "1 x 400ml can coconut milk"
         },
         {
@@ -1807,9 +1807,9 @@
           "raw": "2 cups (500ml) good-quality chicken stock"
         },
         {
-          "name": "x 400ml can coconut milk",
+          "name": "can coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "ml",
           "raw": "1 x 400ml can coconut milk"
         },
         {
@@ -1891,9 +1891,9 @@
           "raw": "sea salt and cracked black pepper"
         },
         {
-          "name": "x 200g pieces smooth feta",
+          "name": "pieces smooth feta",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 200g pieces smooth feta"
         },
         {
@@ -2088,9 +2088,9 @@
           "raw": "1½ cups (375ml) balsamic vinegar"
         },
         {
-          "name": "x 400g can chopped tomatoes",
+          "name": "can chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g can chopped tomatoes"
         },
         {
@@ -2159,9 +2159,9 @@
           "raw": "6 cloves garlic, halved"
         },
         {
-          "name": "x 1.6kg whole chicken",
+          "name": "whole chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.6kg whole chicken"
         },
         {
@@ -2247,9 +2247,9 @@
           "raw": "600g (1 lb 5 oz) cherry tomatoes"
         },
         {
-          "name": "x 180g chicken breast fillets, trimmed",
+          "name": "chicken breast fillets, trimmed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 180g (6½ oz) chicken breast fillets, trimmed"
         },
         {
@@ -2259,9 +2259,9 @@
           "raw": "¾ cup (60g/2 oz) finely grated parmesan"
         },
         {
-          "name": "x 125g fresh mozzarella, well drained and sliced into 8 pieces",
+          "name": "fresh mozzarella, well drained and sliced into 8 pieces",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 125g (4½ oz) fresh mozzarella, well drained and sliced into 8 pieces"
         },
         {
@@ -2395,9 +2395,9 @@
           "raw": "1 tablespoon lightly crushed sichuan peppercorns"
         },
         {
-          "name": "x 180g chicken breast fillets, trimmed",
+          "name": "chicken breast fillets, trimmed",
           "quantity": "3",
-          "unit": null,
+          "unit": "g",
           "raw": "3 x 180g (6½ oz) chicken breast fillets, trimmed"
         },
         {
@@ -2437,7 +2437,7 @@
           "raw": "1 cup (16g/½ oz) coriander (cilantro) leaves"
         },
         {
-          "name": "2 long red chillies, seeds removed and finely sliced lengthways",
+          "name": "long red chillies, seeds removed and finely sliced lengthways",
           "quantity": "1",
           "unit": null,
           "raw": "1–2 long red chillies, seeds removed and finely sliced lengthways"
@@ -2698,9 +2698,9 @@
           "raw": "1kg minced beef"
         },
         {
-          "name": "x 400g cans tomato puree",
+          "name": "cans tomato puree",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g cans tomato puree"
         },
         {
@@ -2762,9 +2762,9 @@
           "raw": "1 tablespoon fennel seeds, crushed"
         },
         {
-          "name": "x 125g chicken thigh fillets, trimmed",
+          "name": "chicken thigh fillets, trimmed",
           "quantity": "8",
-          "unit": null,
+          "unit": "g",
           "raw": "8 x 125g chicken thigh fillets, trimmed"
         },
         {
@@ -3009,9 +3009,9 @@
           "raw": "145g butter"
         },
         {
-          "name": "3 tablespoons iced water",
+          "name": "iced water",
           "quantity": "2",
-          "unit": null,
+          "unit": "tablespoons",
           "raw": "2–3 tablespoons iced water"
         }
       ],
@@ -3434,9 +3434,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 800g beef rump steak, trimmed",
+          "name": "beef rump steak, trimmed",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 800g beef rump steak, trimmed"
         },
         {
@@ -3843,9 +3843,9 @@
           "raw": "1 tablespoon peanut oil"
         },
         {
-          "name": "x 1.5kg piece beef brisket, halved",
+          "name": "piece beef brisket, halved",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.5kg piece beef brisket, halved"
         },
         {
@@ -3855,9 +3855,9 @@
           "raw": "sea salt flakes"
         },
         {
-          "name": "x 400ml cans coconut milk",
+          "name": "cans coconut milk",
           "quantity": "2",
-          "unit": null,
+          "unit": "ml",
           "raw": "2 x 400ml cans coconut milk"
         },
         {
@@ -4093,9 +4093,9 @@
           "raw": "¾ cup (180ml) dry white wine"
         },
         {
-          "name": "x 400g cans chopped tomatoes",
+          "name": "cans chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g cans chopped tomatoes"
         },
         {
@@ -4246,9 +4246,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 800g side sashimi-grade salmon, skin on",
+          "name": "side sashimi-grade salmon, skin on",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 800g side sashimi-grade salmon, skin on"
         },
         {
@@ -4659,9 +4659,9 @@
           "raw": "1 cup (220g) caster sugar"
         },
         {
-          "name": "x 400g piece sashimi-grade ocean trout, skin removed and pin-boned",
+          "name": "piece sashimi-grade ocean trout, skin removed and pin-boned",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g piece sashimi-grade ocean trout, skin removed and pin-boned"
         },
         {
@@ -4829,9 +4829,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 3kg boneless pork loin with the belly attached, trimmed",
+          "name": "boneless pork loin with the belly attached, trimmed",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 3kg boneless pork loin with the belly attached, trimmed"
         },
         {
@@ -5032,9 +5032,9 @@
           "raw": "2 tablespoons brown sugar"
         },
         {
-          "name": "x 600g pork fillet, trimmed and butterflied",
+          "name": "pork fillet, trimmed and butterflied",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 600g pork fillet, trimmed and butterflied"
         },
         {
@@ -5132,7 +5132,7 @@
           "raw": "¼ cup (60ml) bourbon"
         },
         {
-          "name": "x 6–7kg ham leg+",
+          "name": "–7kg ham leg+",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 6–7kg ham leg+"
@@ -5180,9 +5180,9 @@
           "raw": "1 tablespoon extra virgin olive oil"
         },
         {
-          "name": "x 150g beef cheeks, trimmed",
+          "name": "beef cheeks, trimmed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 150g beef cheeks, trimmed"
         },
         {
@@ -5240,9 +5240,9 @@
           "raw": "1 cup curly parsley leaves, chopped"
         },
         {
-          "name": "x 375g sheets frozen puff pastry, thawed",
+          "name": "sheets frozen puff pastry, thawed",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 375g sheets frozen puff pastry, thawed"
         },
         {
@@ -5292,9 +5292,9 @@
           "raw": "2 tablespoons extra virgin olive oil"
         },
         {
-          "name": "x 320g beef cheeks, trimmed",
+          "name": "beef cheeks, trimmed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 320g beef cheeks, trimmed"
         },
         {
@@ -5395,9 +5395,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 1.6kg chicken",
+          "name": "chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.6kg chicken"
         },
         {
@@ -5483,9 +5483,9 @@
           "raw": "1 litre beef stock"
         },
         {
-          "name": "x 400g can chopped tomatoes",
+          "name": "can chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g can chopped tomatoes"
         },
         {
@@ -6102,9 +6102,9 @@
           "raw": "¼ cup (60ml) lime juice"
         },
         {
-          "name": "x 220g duck breasts fillets, trimmed and scored",
+          "name": "duck breasts fillets, trimmed and scored",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 220g duck breasts fillets, trimmed and scored"
         },
         {
@@ -6202,7 +6202,7 @@
           "raw": "sea salt and cracked black pepper"
         },
         {
-          "name": "x 15cm flour tortillas, warmed",
+          "name": "cm flour tortillas, warmed",
           "quantity": "8",
           "unit": null,
           "raw": "8 x 15cm (6 inch) flour tortillas, warmed"
@@ -6282,7 +6282,7 @@
           "raw": "3 cups (750ml) port"
         },
         {
-          "name": "x 6–7kg ham leg, skin removed and trimmed+",
+          "name": "–7kg ham leg, skin removed and trimmed+",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 6–7kg ham leg, skin removed and trimmed+"
@@ -6354,9 +6354,9 @@
           "raw": "4 cloves garlic, crushed"
         },
         {
-          "name": "x 400g cans chopped tomatoes",
+          "name": "cans chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g cans chopped tomatoes"
         },
         {
@@ -7219,15 +7219,15 @@
           "raw": "2 stalks lemongrass, crushed"
         },
         {
-          "name": "x 200g chicken breast fillets, sliced",
+          "name": "chicken breast fillets, sliced",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 200g chicken breast fillets, sliced"
         },
         {
-          "name": "x 200g chicken thigh fillets, sliced",
+          "name": "chicken thigh fillets, sliced",
           "quantity": "6",
-          "unit": null,
+          "unit": "g",
           "raw": "6 x 200g chicken thigh fillets, sliced"
         },
         {
@@ -7277,9 +7277,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 120g boneless and skinless chicken thigh fillets, trimmed",
+          "name": "boneless and skinless chicken thigh fillets, trimmed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 120g boneless and skinless chicken thigh fillets, trimmed"
         },
         {
@@ -7509,9 +7509,9 @@
           "raw": "500g lean chicken mince"
         },
         {
-          "name": "x 400g can black beans, rinsed and drained",
+          "name": "can black beans, rinsed and drained",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g can black beans, rinsed and drained"
         },
         {
@@ -7769,9 +7769,9 @@
           "raw": "1 tablespoon olive oil"
         },
         {
-          "name": "x 150g chicken thigh fillets, chopped",
+          "name": "chicken thigh fillets, chopped",
           "quantity": "6",
-          "unit": null,
+          "unit": "g",
           "raw": "6 x 150g chicken thigh fillets, chopped"
         },
         {
@@ -7895,9 +7895,9 @@
           "raw": "1 cup (150g) plain flour"
         },
         {
-          "name": "x 150g chicken thigh fillets, trimmed and chopped into 2cm pieces",
+          "name": "chicken thigh fillets, trimmed and chopped into 2cm pieces",
           "quantity": "6",
-          "unit": null,
+          "unit": "g",
           "raw": "6 x 150g chicken thigh fillets, trimmed and chopped into 2cm pieces"
         },
         {
@@ -8233,9 +8233,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 1.5kg chicken, rinsed and drained",
+          "name": "chicken, rinsed and drained",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.5kg chicken, rinsed and drained"
         },
         {
@@ -8539,9 +8539,9 @@
           "raw": "1 cup (250ml) dry white wine"
         },
         {
-          "name": "x 400g cans chopped tomatoes",
+          "name": "cans chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g cans chopped tomatoes"
         },
         {
@@ -8620,9 +8620,9 @@
           "raw": "6 cloves garlic, skin on"
         },
         {
-          "name": "x 180g chicken breast fillets, trimmed",
+          "name": "chicken breast fillets, trimmed",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 180g (6¼ oz) chicken breast fillets, trimmed"
         },
         {
@@ -8702,9 +8702,9 @@
           "raw": "1 baby cos lettuce, quartered, rinsed and dried"
         },
         {
-          "name": "x 180g cooked chicken breast fillet, cooled and sliced",
+          "name": "cooked chicken breast fillet, cooled and sliced",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 180g cooked chicken breast fillet, cooled and sliced"
         },
         {
@@ -9063,9 +9063,9 @@
           "raw": "400g thinly sliced flat pancetta (see tip)"
         },
         {
-          "name": "x 1.6kg chicken",
+          "name": "chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.6kg chicken"
         },
         {
@@ -9099,9 +9099,9 @@
           "raw": "2 tablespoons tomato paste"
         },
         {
-          "name": "x 400g can cherry tomatoes",
+          "name": "can cherry tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g can cherry tomatoes"
         },
         {
@@ -9271,9 +9271,9 @@
           "raw": "1 brown onion, cut into thin wedges"
         },
         {
-          "name": "x 180g chicken breast fillets, trimmed and sliced",
+          "name": "chicken breast fillets, trimmed and sliced",
           "quantity": "3",
-          "unit": null,
+          "unit": "g",
           "raw": "3 x 180g (6½ oz) chicken breast fillets, trimmed and sliced"
         },
         {
@@ -9339,9 +9339,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 180g chicken breast fillets, trimmed and halved lengthways",
+          "name": "chicken breast fillets, trimmed and halved lengthways",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 180g chicken breast fillets, trimmed and halved lengthways"
         },
         {
@@ -9470,9 +9470,9 @@
           "raw": "¼ cup (60ml) milk"
         },
         {
-          "name": "x 200g chicken breast fillets, halved horizontally",
+          "name": "chicken breast fillets, halved horizontally",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 200g chicken breast fillets, halved horizontally"
         },
         {
@@ -10053,9 +10053,9 @@
           "raw": "¼ cup tarragon leaves"
         },
         {
-          "name": "x 375g sheet frozen puff pastry, thawed+",
+          "name": "sheet frozen puff pastry, thawed+",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 375g sheet frozen puff pastry, thawed+"
         }
       ],
@@ -10110,9 +10110,9 @@
           "raw": "sea salt and cracked black pepper"
         },
         {
-          "name": "x 125g chicken thigh fillets, trimmed and halved",
+          "name": "chicken thigh fillets, trimmed and halved",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 125g chicken thigh fillets, trimmed and halved"
         },
         {
@@ -10515,9 +10515,9 @@
           "raw": "1½ cups (190g) shredded cooked chicken"
         },
         {
-          "name": "x 120g zucchini , grated",
+          "name": "zucchini , grated",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 120g zucchini (courgette), grated"
         },
         {
@@ -10768,15 +10768,15 @@
           "raw": "200g dried chorizo, cases removed, chopped"
         },
         {
-          "name": "x 400g can crushed tomatoes",
+          "name": "can crushed tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g can crushed tomatoes"
         },
         {
-          "name": "x 400g can chickpeas , rinsed and drained",
+          "name": "can chickpeas , rinsed and drained",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g can chickpeas (garbanzos), rinsed and drained"
         },
         {
@@ -10804,9 +10804,9 @@
           "raw": "2 tablespoons red wine vinegar"
         },
         {
-          "name": "finely chopped",
-          "quantity": "1",
-          "unit": null,
+          "name": "oregano leaves, finely chopped",
+          "quantity": "1/3",
+          "unit": "cup",
           "raw": "1/3 cup oregano leaves, finely chopped"
         },
         {
@@ -11009,9 +11009,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 400ml can coconut milk",
+          "name": "can coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "ml",
           "raw": "1 x 400ml can coconut milk"
         },
         {
@@ -11348,9 +11348,9 @@
           "raw": "1 cup (250ml) beef stock"
         },
         {
-          "name": "x 400g cans chopped tomatoes",
+          "name": "cans chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g cans chopped tomatoes"
         },
         {
@@ -11682,9 +11682,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 200g chicken breast fillets, chopped into 3cm pieces",
+          "name": "chicken breast fillets, chopped into 3cm pieces",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 200g chicken breast fillets, chopped into 3cm pieces"
         },
         {
@@ -12019,9 +12019,9 @@
           "raw": "1 tablespoon lemon zest"
         },
         {
-          "name": "x 185g cans chilli tuna in oil, drained",
+          "name": "cans chilli tuna in oil, drained",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 185g cans chilli tuna in oil, drained"
         },
         {
@@ -12185,7 +12185,7 @@
           "raw": "400g cherry tomatoes"
         },
         {
-          "name": "x 15cm flour tortillas, warmed",
+          "name": "cm flour tortillas, warmed",
           "quantity": "8",
           "unit": null,
           "raw": "8 x 15cm (6 inch) flour tortillas, warmed"
@@ -12562,9 +12562,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 215g can chipotle chillies in adobo sauce, chillies finely chopped and sauce reserved",
+          "name": "can chipotle chillies in adobo sauce, chillies finely chopped and sauce reserved",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 215g (7½ oz) can chipotle chillies in adobo sauce, chillies finely chopped and sauce reserved"
         },
         {
@@ -12951,9 +12951,9 @@
           "raw": "cracked black pepper"
         },
         {
-          "name": "x 400g can crushed tomatoes",
+          "name": "can crushed tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g (14 oz) can crushed tomatoes"
         },
         {
@@ -13163,9 +13163,9 @@
           "raw": "2 tablespoons sea salt flakes"
         },
         {
-          "name": "x 1.5kg piece boneless pork belly, skin scored at 1cm intervals",
+          "name": "piece boneless pork belly, skin scored at 1cm intervals",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.5kg piece boneless pork belly, skin scored at 1cm intervals"
         },
         {
@@ -13258,9 +13258,9 @@
           "raw": "2 tablespoons sea salt flakes"
         },
         {
-          "name": "x 2kg piece boneless pork belly, rind scored at 1cm intervals",
+          "name": "piece boneless pork belly, rind scored at 1cm intervals",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2kg piece boneless pork belly, rind scored at 1cm intervals"
         },
         {
@@ -13309,9 +13309,9 @@
           "raw": "2 tablespoons sea salt flakes"
         },
         {
-          "name": "x 2kg piece boneless pork belly, rind scored at 1cm intervals",
+          "name": "piece boneless pork belly, rind scored at 1cm intervals",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2kg piece boneless pork belly, rind scored at 1cm intervals"
         }
       ],
@@ -14058,9 +14058,9 @@
           "raw": "1 tablespoon finely grated lemon rind"
         },
         {
-          "name": "x 180g salmon fillets, skin on",
+          "name": "salmon fillets, skin on",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 180g salmon fillets, skin on"
         },
         {
@@ -14126,9 +14126,9 @@
           "raw": "1 teaspoon dried mint"
         },
         {
-          "name": "x 180g pieces salmon fillet, skin on",
+          "name": "pieces salmon fillet, skin on",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 180g pieces salmon fillet, skin on"
         },
         {
@@ -14298,9 +14298,9 @@
           "raw": "2 eggwhites, lightly beaten"
         },
         {
-          "name": "x 120g firm white fish fillets, skin removed, chopped",
+          "name": "firm white fish fillets, skin removed, chopped",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 120g firm white fish fillets, skin removed, chopped"
         },
         {
@@ -14425,9 +14425,9 @@
           "raw": "¼ cup (60ml) soy sauce"
         },
         {
-          "name": "x 200g salmon fillets, skin on and halved lengthways",
+          "name": "salmon fillets, skin on and halved lengthways",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 200g salmon fillets, skin on and halved lengthways"
         },
         {
@@ -14615,9 +14615,9 @@
           "raw": "cracked black pepper"
         },
         {
-          "name": "x 350g duck marylands",
+          "name": "duck marylands",
           "quantity": "6",
-          "unit": null,
+          "unit": "g",
           "raw": "6 x 350g duck marylands"
         },
         {
@@ -15029,9 +15029,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 200g chicken breast fillets, skin on and trimmed",
+          "name": "chicken breast fillets, skin on and trimmed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 200g chicken breast fillets, skin on and trimmed"
         },
         {
@@ -15212,9 +15212,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 2kg piece boneless pork belly, rind removed",
+          "name": "piece boneless pork belly, rind removed",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2kg piece boneless pork belly, rind removed"
         },
         {
@@ -15436,9 +15436,9 @@
           "raw": "40g unsalted butter, melted"
         },
         {
-          "name": "x 200g salmon fillets, skin removed",
+          "name": "salmon fillets, skin removed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 200g salmon fillets, skin removed"
         },
         {
@@ -15854,9 +15854,9 @@
           "raw": "2 cups (500ml) boiling water"
         },
         {
-          "name": "x 200g duck marylands",
+          "name": "duck marylands",
           "quantity": "6",
-          "unit": null,
+          "unit": "g",
           "raw": "6 x 200g duck marylands"
         },
         {
@@ -16006,9 +16006,9 @@
           "raw": "½ cup (35g) panko (Japanese) breadcrumbs"
         },
         {
-          "name": "x 180g chicken breast fillets, halved horizontally",
+          "name": "chicken breast fillets, halved horizontally",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 180g chicken breast fillets, halved horizontally"
         },
         {
@@ -16117,9 +16117,9 @@
           "raw": "1 teaspoon sea salt flakes"
         },
         {
-          "name": "x 200g salmon fillets, skin removed",
+          "name": "salmon fillets, skin removed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 200g salmon fillets, skin removed"
         },
         {
@@ -16246,9 +16246,9 @@
           "raw": "sea salt and cracked black pepper, to taste"
         },
         {
-          "name": "12 slices prosciutto, torn",
+          "name": "prosciutto, torn",
           "quantity": "10",
-          "unit": null,
+          "unit": "slices",
           "raw": "10-12 slices prosciutto, torn"
         }
       ],
@@ -16312,9 +16312,9 @@
           "raw": "800g beef mince"
         },
         {
-          "name": "x 400g tinned diced tomatoes",
+          "name": "tinned diced tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tinned diced tomatoes"
         },
         {
@@ -17069,9 +17069,9 @@
           "raw": "1 onion, finely chopped"
         },
         {
-          "name": "x 400g cans lentils, rinsed and drained",
+          "name": "cans lentils, rinsed and drained",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g cans lentils, rinsed and drained"
         },
         {
@@ -17232,9 +17232,9 @@
           "raw": "½ cup (35g) panko (Japanese) breadcrumbs"
         },
         {
-          "name": "x 1kg side of salmon, skin on, trimmed and pin-boned+",
+          "name": "side of salmon, skin on, trimmed and pin-boned+",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1kg side of salmon, skin on, trimmed and pin-boned+"
         },
         {
@@ -17365,9 +17365,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 4.5kg pork leg, rind scored at 2cm intervals",
+          "name": "pork leg, rind scored at 2cm intervals",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 4.5kg pork leg, rind scored at 2cm intervals"
         },
         {
@@ -17395,15 +17395,15 @@
           "raw": "⅓ cup (40g) sea salt flakes"
         },
         {
-          "name": "x 400g jars marinated baby figs in syrup+",
+          "name": "jars marinated baby figs in syrup+",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g jars marinated baby figs in syrup+"
         },
         {
-          "name": "x 440g jars pickled onions, drained",
+          "name": "jars pickled onions, drained",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 440g jars pickled onions, drained"
         },
         {
@@ -17454,9 +17454,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 5kg pork shoulder, bone-in, skin on",
+          "name": "pork shoulder, bone-in, skin on",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 5kg pork shoulder, bone-in, skin on"
         },
         {
@@ -17700,9 +17700,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 200g sheets store-bought shortcrust pastry, thawed",
+          "name": "sheets store-bought shortcrust pastry, thawed",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 200g sheets store-bought shortcrust pastry, thawed"
         },
         {
@@ -17784,9 +17784,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 375g sheet frozen puff pastry, thawed+",
+          "name": "sheet frozen puff pastry, thawed+",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 375g sheet frozen puff pastry, thawed+"
         },
         {
@@ -17897,9 +17897,9 @@
           "raw": "sea salt and cracked black pepper"
         },
         {
-          "name": "x 125g salmon fillets, skin off",
+          "name": "salmon fillets, skin off",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 125g salmon fillets, skin off"
         },
         {
@@ -18073,9 +18073,9 @@
           "raw": "1 x quantity Thai green curry paste (see recipe link under method)"
         },
         {
-          "name": "x 400ml can coconut milk",
+          "name": "can coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "ml",
           "raw": "1 x 400ml can coconut milk"
         },
         {
@@ -18085,9 +18085,9 @@
           "raw": "1 cup (250ml) chicken stock"
         },
         {
-          "name": "x 125g chicken thigh fillets, trimmed and quartered",
+          "name": "chicken thigh fillets, trimmed and quartered",
           "quantity": "8",
-          "unit": null,
+          "unit": "g",
           "raw": "8 x 125g chicken thigh fillets, trimmed and quartered"
         },
         {
@@ -18591,9 +18591,9 @@
           "raw": "2 tablespoons vegetable oil"
         },
         {
-          "name": "x 400ml cans coconut milk",
+          "name": "cans coconut milk",
           "quantity": "2",
-          "unit": null,
+          "unit": "ml",
           "raw": "2 x 400ml cans coconut milk"
         },
         {
@@ -19517,7 +19517,7 @@
           "raw": "1 cup (250ml) water"
         },
         {
-          "name": "x 4cm piece fresh ginger, peeled and thinly sliced",
+          "name": "cm piece fresh ginger, peeled and thinly sliced",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 4cm piece fresh ginger, peeled and thinly sliced"
@@ -19529,9 +19529,9 @@
           "raw": "1 long red chilli, halved lengthways"
         },
         {
-          "name": "x 1.8kg whole chicken",
+          "name": "whole chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.8kg whole chicken"
         },
         {
@@ -19739,9 +19739,9 @@
           "raw": "1 tablespoon sea salt flakes"
         },
         {
-          "name": "x 180g salmon fillets, skin removed",
+          "name": "salmon fillets, skin removed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 180g salmon fillets, skin removed"
         },
         {
@@ -19827,9 +19827,9 @@
           "raw": "¼ cup (60ml) mirin (Japanese rice wine)"
         },
         {
-          "name": "x 200g salmon fillets, skin on, halved",
+          "name": "salmon fillets, skin on, halved",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 200g salmon fillets, skin on, halved"
         },
         {
@@ -19941,7 +19941,7 @@
           "raw": "1 cup (250ml) vincotto"
         },
         {
-          "name": "x 6–7kg ham leg+",
+          "name": "–7kg ham leg+",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 6–7kg ham leg+"
@@ -20082,9 +20082,9 @@
           "raw": "2 anchovy fillets (optional)"
         },
         {
-          "name": "",
-          "quantity": "1",
-          "unit": null,
+          "name": "blanched almonds",
+          "quantity": "1/2",
+          "unit": "cup",
           "raw": "1/2 cup (55g) blanched almonds"
         },
         {
@@ -20156,9 +20156,9 @@
           "raw": "1 clove garlic, crushed"
         },
         {
-          "name": "x 400g can chickpeas , rinsed, drained",
+          "name": "can chickpeas , rinsed, drained",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g (1 lb) can chickpeas (garbanzo beans), rinsed, drained"
         },
         {
@@ -20403,9 +20403,9 @@
           "raw": "8 cups (280g) firmly packed finely shredded kale leaves"
         },
         {
-          "name": "x 400g can white beans, rinsed, drained and roughly mashed",
+          "name": "can white beans, rinsed, drained and roughly mashed",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g can white (cannellini) beans, rinsed, drained and roughly mashed"
         },
         {
@@ -20691,9 +20691,9 @@
           "raw": "300g silken tofu, plus extra, cut into cubes, to serve"
         },
         {
-          "name": "x 400g can cannellini beans, drained and rinsed",
+          "name": "can cannellini beans, drained and rinsed",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g can cannellini beans, drained and rinsed"
         },
         {
@@ -20936,7 +20936,7 @@
           "raw": "200g chicken breast fillets, thinly sliced"
         },
         {
-          "name": "x 4cm piece ginger, peeled and grated",
+          "name": "cm piece ginger, peeled and grated",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 4cm piece ginger, peeled and grated"
@@ -21893,9 +21893,9 @@
           "raw": "1 tablespoon olive oil"
         },
         {
-          "name": "x 250g lamb shanks",
+          "name": "lamb shanks",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 250g lamb shanks"
         },
         {
@@ -21969,9 +21969,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 375g sheet frozen puff pastry, thawed +",
+          "name": "sheet frozen puff pastry, thawed +",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 375g sheet frozen puff pastry, thawed +"
         },
         {
@@ -22785,9 +22785,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 250g chicken breast fillets, trimmed",
+          "name": "chicken breast fillets, trimmed",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 250g chicken breast fillets, trimmed"
         },
         {
@@ -22889,7 +22889,7 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 5–6kg turkey",
+          "name": "–6kg turkey",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 5–6kg turkey"
@@ -23070,15 +23070,15 @@
           "raw": "sea salt and cracked black pepper"
         },
         {
-          "name": "x 150g chicken breast fillets , trimmed",
+          "name": "chicken breast fillets , trimmed",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 150g (5¼ oz) chicken breast fillets (4 small), trimmed"
         },
         {
-          "name": "x 400g can butter beans , drained, rinsed",
+          "name": "can butter beans , drained, rinsed",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g (14 oz) can butter beans (lima beans), drained, rinsed"
         },
         {
@@ -23610,9 +23610,9 @@
           "raw": "1 tablespoon vegetable oil"
         },
         {
-          "name": "x 160g chicken breast fillets, each cut into 3 pieces",
+          "name": "chicken breast fillets, each cut into 3 pieces",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 160g chicken breast fillets, each cut into 3 pieces"
         },
         {
@@ -24161,7 +24161,7 @@
           "raw": "5 cloves garlic, chopped"
         },
         {
-          "name": "x 6cm piece ginger, peeled and chopped",
+          "name": "cm piece ginger, peeled and chopped",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 6cm piece ginger, peeled and chopped"
@@ -24197,9 +24197,9 @@
           "raw": "2 tablespoons rice wine vinegar"
         },
         {
-          "name": "x 750g blocks firm tofu",
+          "name": "blocks firm tofu",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 750g blocks firm tofu"
         },
         {
@@ -24568,9 +24568,9 @@
           "raw": "2 cloves garlic, crushed"
         },
         {
-          "name": "chopped",
-          "quantity": "1",
-          "unit": null,
+          "name": "flat-leaf parsley, chopped",
+          "quantity": "1/3",
+          "unit": "tablespoon",
           "raw": "1/3 tablespoon flat-leaf parsley, chopped"
         },
         {
@@ -24592,9 +24592,9 @@
           "raw": "sea salt and cracked black pepper"
         },
         {
-          "name": "x 340g fresh lobster, meat removed and sliced into 12 rounds+",
+          "name": "fresh lobster, meat removed and sliced into 12 rounds+",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 340g fresh lobster, meat removed and sliced into 12 rounds+"
         },
         {
@@ -24694,9 +24694,9 @@
           "raw": "2 tablespoons soy sauce"
         },
         {
-          "name": "x 125g small chicken thigh fillets, trimmed",
+          "name": "small chicken thigh fillets, trimmed",
           "quantity": "8",
-          "unit": null,
+          "unit": "g",
           "raw": "8 x 125g small chicken thigh fillets, trimmed"
         },
         {
@@ -24868,9 +24868,9 @@
           "raw": "4 bay leaves"
         },
         {
-          "name": "x 2.5kg piece boneless pork belly",
+          "name": "piece boneless pork belly",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2.5kg piece boneless pork belly"
         },
         {
@@ -24907,9 +24907,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 2kg or 2 x 1kg butternut pumpkin , halved",
+          "name": "or 2 x 1kg butternut pumpkin , halved",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2kg (4 lb 4 oz) or 2 x 1kg (2 lb 3 oz) butternut pumpkin (squash), halved"
         },
         {
@@ -25033,9 +25033,9 @@
           "raw": "1 litre water, extra"
         },
         {
-          "name": "x 1.8kg turkey breast fillets, skin on",
+          "name": "turkey breast fillets, skin on",
           "quantity": "2",
-          "unit": null,
+          "unit": "kg",
           "raw": "2 x 1.8kg turkey breast fillets, skin on"
         },
         {
@@ -25532,9 +25532,9 @@
           "raw": "1 tablespoon extra virgin olive oil"
         },
         {
-          "name": "x 1.6kg chicken, tied",
+          "name": "chicken, tied",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.6kg chicken, tied"
         },
         {
@@ -25667,9 +25667,9 @@
           "raw": "2 teaspoons ground coriander"
         },
         {
-          "name": "x 400g mini lamb rump roasts",
+          "name": "mini lamb rump roasts",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g mini lamb rump roasts"
         },
         {
@@ -25730,9 +25730,9 @@
           "raw": "sea salt and cracked black pepper"
         },
         {
-          "name": "x 500g lamb loin roasts, rolled and tied",
+          "name": "lamb loin roasts, rolled and tied",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 500g lamb loin roasts, rolled and tied"
         },
         {

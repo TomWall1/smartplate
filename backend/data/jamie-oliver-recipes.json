@@ -40,7 +40,7 @@
           "raw": "2 garlic cloves, crushed"
         },
         {
-          "name": "3 birdseye chillies, finely chopped",
+          "name": "birdseye chillies, finely chopped",
           "quantity": "2",
           "unit": null,
           "raw": "2–3 birdseye chillies, finely chopped"
@@ -176,7 +176,7 @@
           "raw": "optional: 1 teaspoon sugar"
         },
         {
-          "name": "3 birdseye chillies, finely chopped",
+          "name": "birdseye chillies, finely chopped",
           "quantity": "2",
           "unit": null,
           "raw": "2–3 birdseye chillies, finely chopped (or to taste)"
@@ -392,9 +392,9 @@
           "raw": "1 x tin of new potatoes (400g-500g)"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -555,15 +555,15 @@
           "raw": "red wine vinegar"
         },
         {
-          "name": "x 400g tin of butter beans",
+          "name": "tin of butter beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of butter beans"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
@@ -705,15 +705,15 @@
           "raw": "1 tablespoon instant coffee"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
@@ -723,9 +723,9 @@
           "raw": "red wine vinegar"
         },
         {
-          "name": "x 400g tin of kidney beans",
+          "name": "tin of kidney beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of kidney beans"
         },
         {
@@ -814,9 +814,9 @@
           "raw": "BROTH & SARDINES"
         },
         {
-          "name": "x 100g tins of sardines in sunflower oil",
+          "name": "tins of sardines in sunflower oil",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 100g tins of sardines in sunflower oil"
         },
         {
@@ -1032,9 +1032,9 @@
           "raw": "2 tablespoons tomato purée"
         },
         {
-          "name": "x 400g tins of haricot beans",
+          "name": "tins of haricot beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of haricot beans"
         },
         {
@@ -1224,15 +1224,15 @@
           "raw": "2 carrots"
         },
         {
-          "name": "x 400g tin of borlotti beans",
+          "name": "tin of borlotti beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of borlotti beans"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of plum tomatoes"
         },
         {
@@ -1242,9 +1242,9 @@
           "raw": "300g stale crusty bread"
         },
         {
-          "name": "x 125g ball of mozzarella cheese",
+          "name": "ball of mozzarella cheese",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 125g ball of mozzarella cheese"
         },
         {
@@ -1335,9 +1335,9 @@
           "raw": "1 fresh red chilli"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -2175,9 +2175,9 @@
           "raw": "100g quality dark chocolate (75%)"
         },
         {
-          "name": "x 400g tin of black pitted cherries in syrup",
+          "name": "tin of black pitted cherries in syrup",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of black pitted cherries in syrup"
         },
         {
@@ -2282,15 +2282,15 @@
           "raw": "½ a bunch of fresh flat-leaf parsley (15g)"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of plum tomatoes"
         },
         {
-          "name": "x 120g tins of sardines in sunflower oil",
+          "name": "tins of sardines in sunflower oil",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 120g tins of sardines in sunflower oil"
         }
       ],
@@ -2541,9 +2541,9 @@
           "raw": "6 spring onions"
         },
         {
-          "name": "x 400ml tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "ml",
           "raw": "1 x 400ml tin of light coconut milk"
         },
         {
@@ -2654,9 +2654,9 @@
           "raw": "1 teaspoon ground cumin"
         },
         {
-          "name": "x 400g tin chickpeas, drained and rinsed",
+          "name": "tin chickpeas, drained and rinsed",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin chickpeas, drained and rinsed"
         },
         {
@@ -2753,9 +2753,9 @@
           "raw": "1 onion, finely chopped"
         },
         {
-          "name": "x 400g tins of chopped tomatoes",
+          "name": "tins of chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chopped tomatoes"
         },
         {
@@ -2826,9 +2826,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 410g tins of peach slices in juice",
+          "name": "tins of peach slices in juice",
           "quantity": "3",
-          "unit": null,
+          "unit": "g",
           "raw": "3 x 410g tins of peach slices in juice"
         },
         {
@@ -2991,9 +2991,9 @@
           "raw": "250g minced pork"
         },
         {
-          "name": "x 400g tin of borlotti beans",
+          "name": "tin of borlotti beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of borlotti beans"
         },
         {
@@ -3466,9 +3466,9 @@
           "raw": "3 heaped tablespoons tikka masala curry paste"
         },
         {
-          "name": "x 400g tin of plum tomatoes",
+          "name": "tin of plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of plum tomatoes"
         },
         {
@@ -3484,9 +3484,9 @@
           "raw": "150g frozen green beans"
         },
         {
-          "name": "x 400g tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of light coconut milk"
         },
         {
@@ -3760,9 +3760,9 @@
           "raw": "4 corn on the cob with husks"
         },
         {
-          "name": "x 150g free-range chicken breasts",
+          "name": "free-range chicken breasts",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 150g free-range chicken breasts"
         },
         {
@@ -4057,9 +4057,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 80g fillets of mackerel, from sustainable sources",
+          "name": "fillets of mackerel, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 80g fillets of mackerel, from sustainable sources"
         },
         {
@@ -4123,7 +4123,7 @@
           "raw": "1 handful of Weber applewood chips"
         },
         {
-          "name": "weber steaming",
+          "name": "weber steaming/smoking reservoir",
           "quantity": null,
           "unit": null,
           "raw": "Weber steaming/smoking reservoir"
@@ -4167,9 +4167,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 150g higher-welfare sirloin steaks",
+          "name": "higher-welfare sirloin steaks",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g higher-welfare sirloin steaks"
         },
         {
@@ -4387,9 +4387,9 @@
           "raw": "2 tablespoons English mustard"
         },
         {
-          "name": "x 540g jars of white beans",
+          "name": "jars of white beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 540g jars of white beans"
         },
         {
@@ -4504,15 +4504,15 @@
           "raw": "150g self-raising flour"
         },
         {
-          "name": "x 400g tin of black beans",
+          "name": "tin of black beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of black beans"
         },
         {
-          "name": "x 225g tin of sliced",
+          "name": "tin of sliced",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 225g tin of sliced"
         },
         {
@@ -4673,9 +4673,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 150g skinless free-range chicken breasts",
+          "name": "skinless free-range chicken breasts",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g skinless free-range chicken breasts"
         },
         {
@@ -4709,15 +4709,15 @@
           "raw": "160g blueberries"
         },
         {
-          "name": "x 250g packet of cooked mixed grains",
+          "name": "packet of cooked mixed grains",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked mixed grains"
         },
         {
-          "name": "x 400g tin of lentils",
+          "name": "tin of lentils",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of lentils"
         },
         {
@@ -4826,15 +4826,15 @@
           "raw": "250g ripe cherry tomatoes"
         },
         {
-          "name": "x 50g sachet of creamed coconut",
+          "name": "sachet of creamed coconut",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 50g sachet of creamed coconut"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -4868,9 +4868,9 @@
           "raw": "165g raw peeled king prawns, from sustainable sources"
         },
         {
-          "name": "x 250g packet of cooked wholegrain basmati rice",
+          "name": "packet of cooked wholegrain basmati rice",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked wholegrain basmati rice"
         },
         {
@@ -4923,9 +4923,9 @@
           "raw": "1 teaspoon fine sea salt"
         },
         {
-          "name": "x 7g sachets of dried yeast",
+          "name": "sachets of dried yeast",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 7g sachets of dried yeast"
         },
         {
@@ -5232,15 +5232,15 @@
           "raw": "2 fresh mixed-colour chillies"
         },
         {
-          "name": "x 400g tins of beans, such as kidney, chickpea, pinto, cannellini",
+          "name": "tins of beans, such as kidney, chickpea, pinto, cannellini",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of beans, such as kidney, chickpea, pinto, cannellini"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         },
         {
@@ -5344,9 +5344,9 @@
           "raw": "a few sprigs of fresh thyme"
         },
         {
-          "name": "x 400g tin of quality plum tomatoes",
+          "name": "tin of quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of quality plum tomatoes"
         },
         {
@@ -5409,9 +5409,9 @@
           "raw": "40g Parmesan cheese, plus extra to serve"
         },
         {
-          "name": "x 150g piece of higher-welfare pancetta",
+          "name": "piece of higher-welfare pancetta",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 150g piece of higher-welfare pancetta"
         },
         {
@@ -5845,9 +5845,9 @@
           "raw": "juice of 1 lime"
         },
         {
-          "name": "2 tbsp water",
+          "name": "water",
           "quantity": "1",
-          "unit": null,
+          "unit": "tbsp",
           "raw": "1–2 tbsp water"
         }
       ],
@@ -5914,9 +5914,9 @@
           "raw": "red wine vinegar"
         },
         {
-          "name": "x 2kg free-range whole chicken",
+          "name": "free-range whole chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2kg free-range whole chicken"
         },
         {
@@ -6200,9 +6200,9 @@
           "raw": "160g tenderstem broccoli"
         },
         {
-          "name": "x 150g free-range skinless chicken breasts",
+          "name": "free-range skinless chicken breasts",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g free-range skinless chicken breasts"
         },
         {
@@ -6212,9 +6212,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 460g jar of roasted red peppers",
+          "name": "jar of roasted red peppers",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 460g jar of roasted red peppers"
         },
         {
@@ -6248,15 +6248,15 @@
           "raw": "2 tablespoons tahini"
         },
         {
-          "name": "x 250g packet of cooked mixed grains",
+          "name": "packet of cooked mixed grains",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked mixed grains"
         },
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         }
       ],
@@ -6318,9 +6318,9 @@
           "raw": "320g chestnut mushrooms"
         },
         {
-          "name": "x 295g tin of condensed mushroom soup",
+          "name": "tin of condensed mushroom soup",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 295g tin of condensed mushroom soup"
         },
         {
@@ -6336,15 +6336,15 @@
           "raw": "320g frozen sweetcorn"
         },
         {
-          "name": "x 570g jar of cannellini beans",
+          "name": "jar of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 570g jar of cannellini beans"
         },
         {
-          "name": "x 400g bags of potato gnocchi",
+          "name": "bags of potato gnocchi",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g bags of potato gnocchi"
         },
         {
@@ -6394,15 +6394,15 @@
           "raw": "4 cloves of garlic"
         },
         {
-          "name": "x 150g skinless free-range chicken breasts",
+          "name": "skinless free-range chicken breasts",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g skinless free-range chicken breasts"
         },
         {
-          "name": "x 250g packet of cooked wholegrain rice",
+          "name": "packet of cooked wholegrain rice",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked wholegrain rice"
         },
         {
@@ -6436,9 +6436,9 @@
           "raw": "1.5 litres organic chicken stock"
         },
         {
-          "name": "x 320g packets of mixed stir-fry veg",
+          "name": "packets of mixed stir-fry veg",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 320g packets of mixed stir-fry veg"
         }
       ],
@@ -6526,9 +6526,9 @@
           "raw": "optional: 50ml gin"
         },
         {
-          "name": "x 680g jar of passata",
+          "name": "jar of passata",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 680g jar of passata"
         },
         {
@@ -6661,9 +6661,9 @@
           "raw": "2 baby gem lettuce"
         },
         {
-          "name": "x 120g free-range chicken breasts",
+          "name": "free-range chicken breasts",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 120g free-range chicken breasts"
         },
         {
@@ -6771,9 +6771,9 @@
           "raw": "1 lemon"
         },
         {
-          "name": "x 50g tin of anchovies, from sustainable sources",
+          "name": "tin of anchovies, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 50g tin of anchovies, from sustainable sources"
         },
         {
@@ -6783,9 +6783,9 @@
           "raw": "1 head of romaine lettuce"
         },
         {
-          "name": "x 150g squares of focaccia",
+          "name": "squares of focaccia",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g squares of focaccia"
         }
       ],
@@ -6840,9 +6840,9 @@
           "raw": "2 cloves of garlic"
         },
         {
-          "name": "x 150g free-range skinless chicken breasts",
+          "name": "free-range skinless chicken breasts",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g free-range skinless chicken breasts"
         },
         {
@@ -6929,9 +6929,9 @@
           "raw": "2 tablespoons plain flour"
         },
         {
-          "name": "x 1.5kg free-range whole chicken",
+          "name": "free-range whole chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.5kg free-range whole chicken"
         },
         {
@@ -7064,9 +7064,9 @@
           "raw": "200ml organic chicken stock"
         },
         {
-          "name": "x 400g tins of chickpeas",
+          "name": "tins of chickpeas",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chickpeas"
         },
         {
@@ -7298,9 +7298,9 @@
           "raw": "2 tablespoons ras el hanout"
         },
         {
-          "name": "x 1.6kg free-range chicken",
+          "name": "free-range chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.6kg free-range chicken"
         },
         {
@@ -7310,9 +7310,9 @@
           "raw": "1 tablespoon rose harissa"
         },
         {
-          "name": "x 700g jar chickpeas",
+          "name": "jar chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 700g jar chickpeas"
         },
         {
@@ -7724,9 +7724,9 @@
           "raw": "2 mixed-colour peppers (160g)"
         },
         {
-          "name": "x 227g tin pineapple slices in juice",
+          "name": "tin pineapple slices in juice",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 227g tin pineapple slices in juice"
         },
         {
@@ -7813,9 +7813,9 @@
           "raw": "2 bunches of asparagus (500g)"
         },
         {
-          "name": "x 1.5kg whole free-range chicken",
+          "name": "whole free-range chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.5kg whole free-range chicken"
         },
         {
@@ -8030,15 +8030,15 @@
           "raw": "1 bunch of coriander (30g)"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
-          "name": "x 400g tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of light coconut milk"
         },
         {
@@ -8054,9 +8054,9 @@
           "raw": "4 whole cloves"
         },
         {
-          "name": "x 400g tins of chickpeas",
+          "name": "tins of chickpeas",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chickpeas"
         },
         {
@@ -8135,9 +8135,9 @@
           "raw": "1 bulb of garlic"
         },
         {
-          "name": "x 1.6kg whole free-range chicken",
+          "name": "whole free-range chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.6kg whole free-range chicken"
         },
         {
@@ -8317,7 +8317,7 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "",
+          "name": "10oz chicken thighs and drumsticks",
           "quantity": "750",
           "unit": "g",
           "raw": "750g/1lb 10oz chicken thighs and drumsticks"
@@ -8377,7 +8377,7 @@
           "raw": "4 sage leaves"
         },
         {
-          "name": "",
+          "name": "oz/½ cup dry white wine",
           "quantity": "125",
           "unit": "ml",
           "raw": "125ml/4fl oz/½ cup dry white wine"
@@ -8389,7 +8389,7 @@
           "raw": "1½ tbsp tomato puree (paste), dissolved in 3 tbsp lukewarm water"
         },
         {
-          "name": "halved",
+          "name": "cherry tomatoes, halved",
           "quantity": "175",
           "unit": "g",
           "raw": "175g/6oz cherry tomatoes, halved"
@@ -8678,15 +8678,15 @@
           "raw": "400g mixed mushrooms"
         },
         {
-          "name": "x 295g tin of campbell’s condensed mushroom soup",
+          "name": "tin of campbell’s condensed mushroom soup",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 295g tin of Campbell’s condensed mushroom soup"
         },
         {
-          "name": "x 400g tin of butter beans",
+          "name": "tin of butter beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of butter beans"
         },
         {
@@ -8766,7 +8766,7 @@
           "raw": "1 bunch of fresh coriander (30g)"
         },
         {
-          "name": "2 fresh red chillies",
+          "name": "fresh red chillies",
           "quantity": "1",
           "unit": null,
           "raw": "1–2 fresh red chillies"
@@ -8796,9 +8796,9 @@
           "raw": "450g leftover cooked brisket"
         },
         {
-          "name": "x 400g tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of light coconut milk"
         },
         {
@@ -8901,21 +8901,21 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         },
         {
-          "name": "x 500g bag of frozen soffrito mix",
+          "name": "bag of frozen soffrito mix",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 500g bag of frozen soffrito mix"
         },
         {
-          "name": "x 400g tins of black beans",
+          "name": "tins of black beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of black beans"
         },
         {
@@ -9055,9 +9055,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -9215,7 +9215,7 @@
           "raw": "olive oil"
         },
         {
-          "name": "12 sage leaves",
+          "name": "sage leaves",
           "quantity": "10",
           "unit": null,
           "raw": "10-12 sage leaves"
@@ -9281,9 +9281,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 400g tin of black beans",
+          "name": "tin of black beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of black beans"
         },
         {
@@ -9358,9 +9358,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 840g jar large whole pickled gherkins",
+          "name": "jar large whole pickled gherkins",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 840g jar large whole pickled gherkins"
         },
         {
@@ -9601,9 +9601,9 @@
           "raw": "1 bunch of mixed woody herbs, such as thyme, rosemary, bay (30g)"
         },
         {
-          "name": "x 690g jar of passata",
+          "name": "jar of passata",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 690g jar of passata"
         },
         {
@@ -9711,15 +9711,15 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 180g jar of your favourite curry paste",
+          "name": "jar of your favourite curry paste",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 180g jar of your favourite curry paste"
         },
         {
-          "name": "x 400g tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 400g tin of light coconut milk"
         }
       ],
@@ -9932,9 +9932,9 @@
           "raw": "1 handful of fresh basil leaves"
         },
         {
-          "name": "x 150g ball of buffalo mozzarella",
+          "name": "ball of buffalo mozzarella",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 150g ball of buffalo mozzarella"
         },
         {
@@ -10045,9 +10045,9 @@
           "raw": "extra virgin olive oil"
         },
         {
-          "name": "x 400g tin of green lentils",
+          "name": "tin of green lentils",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of green lentils"
         },
         {
@@ -10075,7 +10075,7 @@
           "raw": "4 small burger buns"
         },
         {
-          "name": "optional: tomato ketchup and",
+          "name": "optional: tomato ketchup and/or mayo",
           "quantity": null,
           "unit": null,
           "raw": "optional: tomato ketchup and/or mayo"
@@ -10166,9 +10166,9 @@
           "raw": "200g cranberry sauce"
         },
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         },
         {
@@ -10178,9 +10178,9 @@
           "raw": "100g Cheddar cheese"
         },
         {
-          "name": "x 180g packet of cooked whole chestnuts",
+          "name": "packet of cooked whole chestnuts",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 180g packet of cooked whole chestnuts"
         },
         {
@@ -10260,9 +10260,9 @@
           "raw": "500g red-skinned potatoes"
         },
         {
-          "name": "x 300g sirloin steak",
+          "name": "sirloin steak",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 300g sirloin steak"
         },
         {
@@ -10486,9 +10486,9 @@
           "raw": "500g lean beef mince"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of plum tomatoes"
         },
         {
@@ -10580,7 +10580,7 @@
           "raw": "2 sticks of celery"
         },
         {
-          "name": "2 mixed chillies",
+          "name": "mixed chillies",
           "quantity": "1",
           "unit": null,
           "raw": "1-2 mixed chillies"
@@ -10604,15 +10604,15 @@
           "raw": "2 tablespoons tomato purée"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
-          "name": "x 400g tin of kidney beans",
+          "name": "tin of kidney beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of kidney beans"
         },
         {
@@ -10653,9 +10653,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 120g higher-welfare sirloin steak",
+          "name": "higher-welfare sirloin steak",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 120g higher-welfare sirloin steak"
         },
         {
@@ -10677,9 +10677,9 @@
           "raw": "½ a Chinese cabbage"
         },
         {
-          "name": "x 150g packs of straight-to-wok",
+          "name": "packs of straight-to-wok",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g packs of straight-to-wok"
         },
         {
@@ -10838,9 +10838,9 @@
           "raw": "3cm piece of ginger"
         },
         {
-          "name": "x 250g higher-welfare lean sirloin steak",
+          "name": "higher-welfare lean sirloin steak",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g higher-welfare lean sirloin steak"
         },
         {
@@ -10856,15 +10856,15 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 320g pack of mixed stir-fry veg",
+          "name": "pack of mixed stir-fry veg",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 320g pack of mixed stir-fry veg"
         },
         {
-          "name": "x 150g packs of straight-to-wok medium noodles",
+          "name": "packs of straight-to-wok medium noodles",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g packs of straight-to-wok medium noodles"
         },
         {
@@ -10908,9 +10908,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 150g higher-welfare sirloin steaks",
+          "name": "higher-welfare sirloin steaks",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g higher-welfare sirloin steaks"
         },
         {
@@ -10950,9 +10950,9 @@
           "raw": "2 anchovy fillets in oil, from sustainable sources"
         },
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         },
         {
@@ -11012,9 +11012,9 @@
           "raw": "50g shelled unsalted walnut halves"
         },
         {
-          "name": "x 345g jar of onion marmalade",
+          "name": "jar of onion marmalade",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 345g jar of onion marmalade"
         },
         {
@@ -11109,15 +11109,15 @@
           "raw": "5 tablespoons balsamic vinegar"
         },
         {
-          "name": "x 400g tins of lentils",
+          "name": "tins of lentils",
           "quantity": "3",
-          "unit": null,
+          "unit": "g",
           "raw": "3 x 400g tins of lentils"
         },
         {
-          "name": "x 400g tins of chopped or plum tomatoes",
+          "name": "tins of chopped or plum tomatoes",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 400g tins of chopped or plum tomatoes"
         }
       ],
@@ -11215,13 +11215,13 @@
           "raw": "1 red bell pepper, stemmed, seeded, and cut into thin strips"
         },
         {
-          "name": "cooked rice, hot sauce (such as somali cilantro and green chile",
+          "name": "cooked rice, hot sauce such as somali cilantro and green chile",
           "quantity": null,
           "unit": null,
           "raw": "Cooked rice, hot sauce (such as Somali Cilantro and Green Chile"
         },
         {
-          "name": "pepper sauce, page 80), cilantro leaves, lime wedges, and fresh",
+          "name": "pepper sauce, page 80 , cilantro leaves, lime wedges, and fresh",
           "quantity": null,
           "unit": null,
           "raw": "Pepper Sauce, page 80), cilantro leaves, lime wedges, and fresh"
@@ -11269,9 +11269,9 @@
           "raw": "400g beef mince"
         },
         {
-          "name": "x 250g packet of cooked lentils",
+          "name": "packet of cooked lentils",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked lentils"
         },
         {
@@ -11514,9 +11514,9 @@
           "raw": "500g minced beef"
         },
         {
-          "name": "x 250g sachet of cooked grains or lentils",
+          "name": "sachet of cooked grains or lentils",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g sachet of cooked grains or lentils"
         },
         {
@@ -11667,9 +11667,9 @@
           "raw": "1.2kg higher-welfare pork belly, deboned, skin on and scored"
         },
         {
-          "name": "x 1.5kg free-range whole chicken",
+          "name": "free-range whole chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.5kg free-range whole chicken"
         },
         {
@@ -11941,7 +11941,7 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 3cm-thick sirloin steak",
+          "name": "cm-thick sirloin steak",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 3cm-thick sirloin steak (600g)"
@@ -12103,9 +12103,9 @@
           "raw": "1 large free-range egg"
         },
         {
-          "name": "x 600g jar of passata",
+          "name": "jar of passata",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 600g jar of passata"
         }
       ],
@@ -12152,9 +12152,9 @@
           "raw": "250g mixed mushrooms"
         },
         {
-          "name": "x 230g higher-welfare fillet steak",
+          "name": "higher-welfare fillet steak",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 230g higher-welfare fillet steak"
         },
         {
@@ -12188,9 +12188,9 @@
           "raw": "100g baby spinach"
         },
         {
-          "name": "x 320g sheet of all-butter puff pastry",
+          "name": "sheet of all-butter puff pastry",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 320g sheet of all-butter puff pastry"
         }
       ],
@@ -12296,9 +12296,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 2.8kg higher-welfare leg of lamb, butterflied",
+          "name": "higher-welfare leg of lamb, butterflied",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2.8kg higher-welfare leg of lamb, butterflied (ask your butcher to do this for you)"
         },
         {
@@ -12356,9 +12356,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 2.5kg higher-welfare leg of lamb or hogget, aitch bone removed",
+          "name": "higher-welfare leg of lamb or hogget, aitch bone removed",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2.5kg higher-welfare leg of lamb or hogget, aitch bone removed"
         },
         {
@@ -12404,9 +12404,9 @@
           "raw": "½ a lemon"
         },
         {
-          "name": "x 50g tin of anchovy fillets in oil, from sustainable sources",
+          "name": "tin of anchovy fillets in oil, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 50g tin of anchovy fillets in oil, from sustainable sources"
         },
         {
@@ -12631,9 +12631,9 @@
           "raw": "extra virgin olive oil"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -12679,15 +12679,15 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 2kg higher-welfare lamb shoulder, bone in",
+          "name": "higher-welfare lamb shoulder, bone in",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2kg higher-welfare lamb shoulder, bone in"
         },
         {
-          "name": "x 180g jar of jamie's majestic madras curry paste",
+          "name": "jar of jamie's majestic madras curry paste",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 180g jar of Jamie's Majestic Madras curry paste"
         },
         {
@@ -12781,7 +12781,7 @@
           "raw": "LAMB"
         },
         {
-          "name": "x 8-bone higher-welfare rack of lamb, french trimmed",
+          "name": "bone higher-welfare rack of lamb, french trimmed",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 8-bone higher-welfare rack of lamb, French trimmed"
@@ -13043,7 +13043,7 @@
           "raw": "150g basmati rice"
         },
         {
-          "name": "x 2-inch piece of cassia bark",
+          "name": "inch piece of cassia bark",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 2-inch piece of cassia bark"
@@ -13201,9 +13201,9 @@
           "raw": "2 bunches of fresh mint (60g)"
         },
         {
-          "name": "x 270g pack of filo pastry",
+          "name": "pack of filo pastry",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 270g pack of filo pastry"
         },
         {
@@ -13506,9 +13506,9 @@
           "raw": "1 lemon"
         },
         {
-          "name": "x 200g tub of tzatziki",
+          "name": "tub of tzatziki",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 200g tub of tzatziki"
         },
         {
@@ -13518,9 +13518,9 @@
           "raw": "1 bunch of mint (30g)"
         },
         {
-          "name": "x 460g jar of roasted red peppers",
+          "name": "jar of roasted red peppers",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 460g jar of roasted red peppers"
         },
         {
@@ -13567,13 +13567,13 @@
           "raw": "4 tablespoons oil"
         },
         {
-          "name": "2 bay leaves",
+          "name": "bay leaves",
           "quantity": "1",
           "unit": null,
           "raw": "1–2 bay leaves"
         },
         {
-          "name": "2 cinnamon sticks",
+          "name": "cinnamon sticks",
           "quantity": "1",
           "unit": null,
           "raw": "1–2 cinnamon sticks"
@@ -13693,7 +13693,7 @@
           "raw": "WHOLE SPICES"
         },
         {
-          "name": "4 dried chillies",
+          "name": "dried chillies",
           "quantity": "3",
           "unit": null,
           "raw": "3–4 dried chillies"
@@ -13717,13 +13717,13 @@
           "raw": "1 teaspoon nigella seeds"
         },
         {
-          "name": "4 cloves",
+          "name": "",
           "quantity": "3",
-          "unit": null,
+          "unit": "cloves",
           "raw": "3–4 cloves"
         },
         {
-          "name": "6 black peppercorns",
+          "name": "black peppercorns",
           "quantity": "5",
           "unit": null,
           "raw": "5–6 black peppercorns"
@@ -13792,9 +13792,9 @@
           "raw": "4 higher-welfare lamb chops (400g total)"
         },
         {
-          "name": "x 700g jar or 1 x 400g tin of chickpeas",
+          "name": "jar or 1 x 400g tin of chickpeas",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 700g jar or 1 x 400g tin of chickpeas"
         },
         {
@@ -13835,9 +13835,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 280g jar of artichoke hearts in oil",
+          "name": "jar of artichoke hearts in oil",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 280g jar of artichoke hearts in oil"
         },
         {
@@ -13902,9 +13902,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 700g jar or 2 x 400g tins of chickpeas",
+          "name": "jar or 2 x 400g tins of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 700g jar or 2 x 400g tins of chickpeas"
         },
         {
@@ -14068,9 +14068,9 @@
       ],
       "ingredients": [
         {
-          "name": "x 400g tin of lentils",
+          "name": "tin of lentils",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of lentils"
         },
         {
@@ -14146,9 +14146,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 2kg higher-welfare leg of lamb, bone in",
+          "name": "higher-welfare leg of lamb, bone in",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2kg higher-welfare leg of lamb, bone in"
         },
         {
@@ -14188,9 +14188,9 @@
           "raw": "100g barrel-aged feta cheese"
         },
         {
-          "name": "x 300g jar of pickled green chillies",
+          "name": "jar of pickled green chillies",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 300g jar of pickled green chillies"
         },
         {
@@ -14269,9 +14269,9 @@
           "raw": "1 lime"
         },
         {
-          "name": "x 500g tub of greek yoghurt",
+          "name": "tub of greek yoghurt",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 500g tub of Greek yoghurt"
         },
         {
@@ -14305,9 +14305,9 @@
           "raw": "1 onion"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         },
         {
@@ -14579,7 +14579,7 @@
           "raw": "2 racks of lamb, divided into 12–14 single chops"
         },
         {
-          "name": "",
+          "name": "/ 3½ oz baby red chard",
           "quantity": "100",
           "unit": "g",
           "raw": "100g / 3½ oz baby red chard (or lamb’s lettuce)"
@@ -14597,7 +14597,7 @@
           "raw": "For the tahini BBQ sauce"
         },
         {
-          "name": "",
+          "name": "/ 5¼ oz tahini paste",
           "quantity": "150",
           "unit": "g",
           "raw": "150g / 5¼ oz tahini paste"
@@ -14627,7 +14627,7 @@
           "raw": "2 tbsp pomegranate molasses"
         },
         {
-          "name": "plus more if needed",
+          "name": "/ 3½ fl oz water, plus more if needed",
           "quantity": "100",
           "unit": "ml",
           "raw": "100ml / 3½ fl oz water, plus more if needed"
@@ -14651,7 +14651,7 @@
           "raw": "6 plums, cut into eighths and stones removed"
         },
         {
-          "name": "",
+          "name": "/ 1¾ oz sugar",
           "quantity": "50",
           "unit": "g",
           "raw": "50g / 1¾ oz sugar"
@@ -14925,7 +14925,7 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 8-bone higher-welfare rack of lamb, french trimmed",
+          "name": "bone higher-welfare rack of lamb, french trimmed",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 8-bone higher-welfare rack of lamb, French trimmed"
@@ -15080,9 +15080,9 @@
           "raw": "250g natural yoghurt"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 400g tin of chickpeas"
         },
         {
@@ -15259,9 +15259,9 @@
           "raw": "500ml red wine"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
@@ -15586,7 +15586,7 @@
           "raw": "250g natural yoghurt"
         },
         {
-          "name": "2 limes",
+          "name": "limes",
           "quantity": "1",
           "unit": null,
           "raw": "1–2 limes"
@@ -15756,7 +15756,7 @@
           "raw": "250g okra"
         },
         {
-          "name": "3 fresh red chillies, deseeded and chopped",
+          "name": "fresh red chillies, deseeded and chopped",
           "quantity": "2",
           "unit": null,
           "raw": "2–3 fresh red chillies, deseeded and chopped"
@@ -15847,7 +15847,7 @@
           "raw": "6 sticks of celery, quartered and finely sliced"
         },
         {
-          "name": "medium, quartered and finely chopped",
+          "name": "medium/large onions, quartered and finely chopped",
           "quantity": "2",
           "unit": null,
           "raw": "2 medium/large onions, quartered and finely chopped"
@@ -16123,9 +16123,9 @@
       ],
       "ingredients": [
         {
-          "name": "x 2kg butterflied leg of lamb or hogget, bone out",
+          "name": "butterflied leg of lamb or hogget, bone out",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 2kg butterflied leg of lamb or hogget, bone out (ask your butcher to do this)"
         },
         {
@@ -16135,7 +16135,7 @@
           "raw": "olive oil"
         },
         {
-          "name": "2 fresh mixed-colour chillies",
+          "name": "fresh mixed-colour chillies",
           "quantity": "1",
           "unit": null,
           "raw": "1–2 fresh mixed-colour chillies"
@@ -16398,9 +16398,9 @@
           "raw": "250g leftover cooked lamb"
         },
         {
-          "name": "x 400g tin of lentils",
+          "name": "tin of lentils",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of lentils"
         },
         {
@@ -17023,9 +17023,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 400g higher-welfare double pork chop , bone in, rind removed",
+          "name": "higher-welfare double pork chop , bone in, rind removed",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g higher-welfare double pork chop (approximately 2.5cm thick), bone in, rind removed"
         },
         {
@@ -17102,9 +17102,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 250g higher-welfare pork chops",
+          "name": "higher-welfare pork chops",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 250g higher-welfare pork chops"
         },
         {
@@ -17585,9 +17585,9 @@
           "raw": "red wine vinegar"
         },
         {
-          "name": "x 400g tin of black beans",
+          "name": "tin of black beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of black beans"
         },
         {
@@ -17964,9 +17964,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 5kg higher-welfare boneless pork loin, with belly attached and fat trimmed to ½cm-thick, skin removed and reserved",
+          "name": "higher-welfare boneless pork loin, with belly attached and fat trimmed to ½cm-thick, skin removed and reserved",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 5kg higher-welfare boneless pork loin, with belly attached and fat trimmed to ½cm-thick, skin removed and reserved (ask your butcher)"
         },
         {
@@ -18036,9 +18036,9 @@
           "raw": "4 red onions"
         },
         {
-          "name": "5 slices of higher-welfare smoked pancetta",
+          "name": "higher-welfare smoked pancetta",
           "quantity": "4",
-          "unit": null,
+          "unit": "slices",
           "raw": "4-5 slices of higher-welfare smoked pancetta"
         },
         {
@@ -18428,7 +18428,7 @@
           "raw": "PORK"
         },
         {
-          "name": "x 6-rib loin of higher-welfare pork , french-trimmed, ask your butcher",
+          "name": "rib loin of higher-welfare pork , french-trimmed, ask your butcher",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 6-rib loin of higher-welfare pork (2.25kg), French-trimmed, ask your butcher"
@@ -18458,7 +18458,7 @@
           "raw": "1 bunch of fresh sage (20g)"
         },
         {
-          "name": "3 bulbs of fennel, with herby tops",
+          "name": "bulbs of fennel, with herby tops",
           "quantity": "2",
           "unit": null,
           "raw": "2-3 bulbs of fennel, with herby tops (depending on their size)"
@@ -18482,7 +18482,7 @@
           "raw": "GRATIN"
         },
         {
-          "name": "2 bulbs of fennel, with herby tops",
+          "name": "bulbs of fennel, with herby tops",
           "quantity": "1",
           "unit": null,
           "raw": "1-2 bulbs of fennel, with herby tops (depending on their size)"
@@ -18512,21 +18512,21 @@
           "raw": "optional: 3 anchovy fillets in oil, from sustainable sources"
         },
         {
-          "name": "x 600g jar of chickpeas",
+          "name": "jar of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 600g jar of chickpeas"
         },
         {
-          "name": "x 600g jar of cannellini beans",
+          "name": "jar of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 600g jar of cannellini beans"
         },
         {
-          "name": "x 600g jar of butter beans",
+          "name": "jar of butter beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 600g jar of butter beans"
         },
         {
@@ -19364,9 +19364,9 @@
           "raw": "4 mixed-colour peppers (make sure you have 1 red pepper)"
         },
         {
-          "name": "x 280g jar of artichoke hearts in oil",
+          "name": "jar of artichoke hearts in oil",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 280g jar of artichoke hearts in oil"
         },
         {
@@ -19376,15 +19376,15 @@
           "raw": "3 cloves of garlic"
         },
         {
-          "name": "x 400g higher-welfare thick pork chops, bone in, skin removed and reserved",
+          "name": "higher-welfare thick pork chops, bone in, skin removed and reserved",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g higher-welfare thick pork chops, bone in, skin removed and reserved (ask your butcher)"
         },
         {
-          "name": "x 700g jar of chickpeas",
+          "name": "jar of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 700g jar of chickpeas"
         }
       ],
@@ -19445,9 +19445,9 @@
           "raw": "40g higher-welfare Pata Negra or quality Spanish ham"
         },
         {
-          "name": "x 700g jar of white beans",
+          "name": "jar of white beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 700g jar of white beans"
         }
       ],
@@ -19622,9 +19622,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 400g tin of green lentils",
+          "name": "tin of green lentils",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of green lentils"
         },
         {
@@ -19744,9 +19744,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 400g tins of black-eyed beans",
+          "name": "tins of black-eyed beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of black-eyed beans"
         },
         {
@@ -19816,9 +19816,9 @@
           "raw": "100g self-raising flour"
         },
         {
-          "name": "x 320g pack of mixed stir-fry veg",
+          "name": "pack of mixed stir-fry veg",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 320g pack of mixed stir-fry veg"
         },
         {
@@ -19914,9 +19914,9 @@
           "raw": "¼ of a white cabbage (250g)"
         },
         {
-          "name": "x 250g packet of cooked rice",
+          "name": "packet of cooked rice",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked rice"
         }
       ],
@@ -19994,9 +19994,9 @@
           "raw": "160g purple sprouting broccoli"
         },
         {
-          "name": "x 250g packet of cooked lentils",
+          "name": "packet of cooked lentils",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked lentils"
         }
       ],
@@ -20050,9 +20050,9 @@
           "raw": "60g ricotta cheese"
         },
         {
-          "name": "x 400g tins of borlotti beans",
+          "name": "tins of borlotti beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of borlotti beans"
         },
         {
@@ -20068,9 +20068,9 @@
           "raw": "½ a bunch of rosemary (10g)"
         },
         {
-          "name": "x 690g jar of passata",
+          "name": "jar of passata",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 690g jar of passata"
         },
         {
@@ -20254,9 +20254,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -20424,15 +20424,15 @@
           "raw": "1 teaspoon fennel seeds"
         },
         {
-          "name": "1 teaspoon dried chilli flakes",
+          "name": "dried chilli flakes",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "teaspoon",
           "raw": "½–1 teaspoon dried chilli flakes"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
@@ -20494,9 +20494,9 @@
           "raw": "150g dried orzo"
         },
         {
-          "name": "x 400g tin of plum tomatoes",
+          "name": "tin of plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of plum tomatoes"
         },
         {
@@ -20536,9 +20536,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 130g chunky white fish fillets, skin on, scaled, pin-boned, from sustainable sources",
+          "name": "chunky white fish fillets, skin on, scaled, pin-boned, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 130g chunky white fish fillets, skin on, scaled, pin-boned, from sustainable sources"
         },
         {
@@ -20612,9 +20612,9 @@
           "raw": "extra virgin olive oil"
         },
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         },
         {
@@ -20642,9 +20642,9 @@
           "raw": "2 slices of wholemeal sourdough bread"
         },
         {
-          "name": "x 105g tin of sardines in spring water, from sustainable sources",
+          "name": "tin of sardines in spring water, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 105g tin of sardines in spring water, from sustainable sources"
         }
       ],
@@ -20702,9 +20702,9 @@
           "raw": "4 sheets of filo pastry"
         },
         {
-          "name": "x 130g trout or salmon fillets, skin off, pin-boned, from sustainable sources",
+          "name": "trout or salmon fillets, skin off, pin-boned, from sustainable sources",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 130g trout or salmon fillets, skin off, pin-boned, from sustainable sources"
         },
         {
@@ -20720,9 +20720,9 @@
           "raw": "500g ripe cherry tomatoes"
         },
         {
-          "name": "x 400g tins of cannellini beans",
+          "name": "tins of cannellini beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of cannellini beans"
         },
         {
@@ -20796,9 +20796,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 250g packet of cooked wholegrain rice",
+          "name": "packet of cooked wholegrain rice",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked wholegrain rice"
         },
         {
@@ -20814,9 +20814,9 @@
           "raw": "160g frozen broad beans or peas"
         },
         {
-          "name": "x 150g super-fresh tuna steaks, ideally 1½cm thick, from sustainable sources",
+          "name": "super-fresh tuna steaks, ideally 1½cm thick, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g super-fresh tuna steaks, ideally 1½cm thick, from sustainable sources"
         },
         {
@@ -20964,9 +20964,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 1kg side of salmon, skin on, scaled, pin-boned, from sustainable sources",
+          "name": "side of salmon, skin on, scaled, pin-boned, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1kg side of salmon, skin on, scaled, pin-boned, from sustainable sources"
         },
         {
@@ -20982,9 +20982,9 @@
           "raw": "1 bunch of basil (30g)"
         },
         {
-          "name": "x 50g tin of anchovy fillets in oil, from sustainable sources",
+          "name": "tin of anchovy fillets in oil, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 50g tin of anchovy fillets in oil, from sustainable sources"
         },
         {
@@ -21012,9 +21012,9 @@
           "raw": "300g wholewheat couscous"
         },
         {
-          "name": "x 700g jar of queen chickpeas",
+          "name": "jar of queen chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 700g jar of queen chickpeas"
         },
         {
@@ -21088,15 +21088,15 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 227g tin of quality chopped tomatoes",
+          "name": "tin of quality chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 227g tin of quality chopped tomatoes"
         },
         {
-          "name": "x 500g pack pre-cooked garlic mussels, from sustainable sources",
+          "name": "pack pre-cooked garlic mussels, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 500g pack pre-cooked garlic mussels, from sustainable sources"
         },
         {
@@ -21200,9 +21200,9 @@
           "raw": "4 raw shell-on king prawns, from sustainable sources"
         },
         {
-          "name": "x 80g sardines, scaled, gutted, gills removed , from sustainable sources",
+          "name": "sardines, scaled, gutted, gills removed , from sustainable sources",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 80g sardines, scaled, gutted, gills removed (ask your fishmonger), from sustainable sources"
         },
         {
@@ -21460,15 +21460,15 @@
           "raw": "1 medium free-range egg"
         },
         {
-          "name": "x 300g tin of peeled new potatoes",
+          "name": "tin of peeled new potatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 300g tin of peeled new potatoes"
         },
         {
-          "name": "x 145g tin of tuna in spring water, from sustainable sources",
+          "name": "tin of tuna in spring water, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 145g tin of tuna in spring water, from sustainable sources"
         },
         {
@@ -21530,15 +21530,15 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 250g pack vac-packed beetroot",
+          "name": "pack vac-packed beetroot",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g pack vac-packed beetroot"
         },
         {
-          "name": "x 200g tub of houmous",
+          "name": "tub of houmous",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 200g tub of houmous"
         },
         {
@@ -21554,15 +21554,15 @@
           "raw": "160g Tenderstem broccoli"
         },
         {
-          "name": "x 250g pouch of jamie oliver super grains",
+          "name": "pouch of jamie oliver super grains",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g pouch of Jamie Oliver Super Grains"
         },
         {
-          "name": "x 80g smoked mackerel fillets, from sustainable sources",
+          "name": "smoked mackerel fillets, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 80g smoked mackerel fillets, from sustainable sources"
         },
         {
@@ -21651,15 +21651,15 @@
           "raw": "1 lemon"
         },
         {
-          "name": "x 250g pouch of jamie oliver mega med grains",
+          "name": "pouch of jamie oliver mega med grains",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g pouch of Jamie Oliver Mega Med Grains"
         },
         {
-          "name": "x 220g jar of tuna fillets in oil, from sustainable sources",
+          "name": "jar of tuna fillets in oil, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 220g jar of tuna fillets in oil, from sustainable sources"
         },
         {
@@ -21759,9 +21759,9 @@
           "raw": "100g feta cheese"
         },
         {
-          "name": "x 750g sides of chalkstream trout, skin on, scaled and pin-boned, from sustainable sources",
+          "name": "sides of chalkstream trout, skin on, scaled and pin-boned, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 750g sides of ChalkStream trout, skin on, scaled and pin-boned, from sustainable sources"
         },
         {
@@ -21961,9 +21961,9 @@
           "raw": "50g creamed coconut (use the solid block type, or 50ml coconut milk would work too)"
         },
         {
-          "name": "3 tbsp fish sauce",
+          "name": "fish sauce",
           "quantity": "2",
-          "unit": null,
+          "unit": "tbsp",
           "raw": "2–3 tbsp fish sauce"
         },
         {
@@ -22004,9 +22004,9 @@
       ],
       "ingredients": [
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         },
         {
@@ -22022,9 +22022,9 @@
           "raw": "1 lemon"
         },
         {
-          "name": "x 125g tins of mackerel in sunflower oil",
+          "name": "tins of mackerel in sunflower oil",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 125g tins of mackerel in sunflower oil"
         },
         {
@@ -22046,9 +22046,9 @@
           "raw": "2 cloves of garlic"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of plum tomatoes"
         },
         {
@@ -22107,21 +22107,21 @@
           "raw": "2 tablespoons mango chutney"
         },
         {
-          "name": "x 400g tin of quality plum tomatoes",
+          "name": "tin of quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of quality plum tomatoes"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
-          "name": "x 140g fillets white fish, skin off, such as pollock, haddock, hake or cod, from sustainable sources",
+          "name": "fillets white fish, skin off, such as pollock, haddock, hake or cod, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 140g fillets white fish, skin off, such as pollock, haddock, hake or cod, from sustainable sources"
         },
         {
@@ -22225,9 +22225,9 @@
           "raw": "320g frozen peas"
         },
         {
-          "name": "x 340g pack of fish pie mix, from sustainable sources",
+          "name": "pack of fish pie mix, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 340g pack of fish pie mix, from sustainable sources"
         }
       ],
@@ -22272,9 +22272,9 @@
           "raw": "200g raw shell-on king prawns, from sustainable sources"
         },
         {
-          "name": "x 180g jar of jamie oliver aromatic kerala curry paste",
+          "name": "jar of jamie oliver aromatic kerala curry paste",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 180g jar of Jamie Oliver Aromatic Kerala Curry Paste"
         },
         {
@@ -22296,9 +22296,9 @@
           "raw": "200g ripe cherry tomatoes (or ½ x 400g tin of quality plum tomatoes)"
         },
         {
-          "name": "x 400g tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of light coconut milk"
         },
         {
@@ -22753,9 +22753,9 @@
       ],
       "ingredients": [
         {
-          "name": "x 567g tin of peeled new potatoes",
+          "name": "tin of peeled new potatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 567g tin of peeled new potatoes"
         },
         {
@@ -22789,9 +22789,9 @@
           "raw": "½ a bunch of coriander (15g)"
         },
         {
-          "name": "x 140g fillets of boneless smoked haddock, from sustainable sources",
+          "name": "fillets of boneless smoked haddock, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 140g fillets of boneless smoked haddock, from sustainable sources"
         },
         {
@@ -22974,9 +22974,9 @@
           "raw": "1 lemon"
         },
         {
-          "name": "x 130g chunky white fish fillets, skin off, pin-boned, from sustainable sources",
+          "name": "chunky white fish fillets, skin off, pin-boned, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 130g chunky white fish fillets, skin off, pin-boned, from sustainable sources"
         },
         {
@@ -23086,9 +23086,9 @@
           "raw": "1 heaped teaspoon paprika, plus extra to serve "
         },
         {
-          "name": "x 125g frozen pollock fillets, from sustainable sources",
+          "name": "frozen pollock fillets, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 125g frozen pollock fillets, from sustainable sources"
         }
       ],
@@ -23479,7 +23479,7 @@
           "raw": "1 large free-range egg"
         },
         {
-          "name": "2 thick slices of wholemeal bread",
+          "name": "thick slices of wholemeal bread",
           "quantity": "1",
           "unit": null,
           "raw": "1–2 thick slices of wholemeal bread (roughly 80g)"
@@ -23491,9 +23491,9 @@
           "raw": "optional: 15g Cheddar or Parmesan cheese"
         },
         {
-          "name": "x 120g white fish or salmon fillets, skin off, pin-boned, from sustainable sources",
+          "name": "white fish or salmon fillets, skin off, pin-boned, from sustainable sources",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 120g white fish or salmon fillets, skin off, pin-boned, from sustainable sources"
         },
         {
@@ -23689,9 +23689,9 @@
           "raw": "2kg Jersey Royal new potatoes"
         },
         {
-          "name": "x 1.2kg sides of salmon, scaled and pin-boned, from sustainable sources",
+          "name": "sides of salmon, scaled and pin-boned, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "kg",
           "raw": "2 x 1.2kg sides of salmon, scaled and pin-boned, from sustainable sources"
         },
         {
@@ -23834,7 +23834,7 @@
           "raw": "extra virgin olive oil"
         },
         {
-          "name": "2 fresh red chillies",
+          "name": "fresh red chillies",
           "quantity": "1",
           "unit": null,
           "raw": "1-2 fresh red chillies"
@@ -23998,9 +23998,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 250g pouch of cooked rice",
+          "name": "pouch of cooked rice",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 250g pouch of cooked rice"
         },
         {
@@ -24034,15 +24034,15 @@
           "raw": "2 teaspoons Thai green curry paste"
         },
         {
-          "name": "x 400ml tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "ml",
           "raw": "½ x 400ml tin of light coconut milk"
         },
         {
-          "name": "x 150g white fish fillet, skin off, pin-boned, from sustainable sources",
+          "name": "white fish fillet, skin off, pin-boned, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 150g white fish fillet, skin off, pin-boned, from sustainable sources"
         },
         {
@@ -24107,9 +24107,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 567g tin of peeled new potatoes",
+          "name": "tin of peeled new potatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 567g tin of peeled new potatoes"
         },
         {
@@ -24143,9 +24143,9 @@
           "raw": "200g tenderstem broccoli"
         },
         {
-          "name": "x 130g salmon fillets, skin on, scaled, pin-boned, from sustainable sources",
+          "name": "salmon fillets, skin on, scaled, pin-boned, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 130g salmon fillets, skin on, scaled, pin-boned, from sustainable sources"
         },
         {
@@ -24245,9 +24245,9 @@
           "raw": "20g Parmesan cheese"
         },
         {
-          "name": "x 130g white fish fillets, skin off, pin-boned, from sustainable sources",
+          "name": "white fish fillets, skin off, pin-boned, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 130g white fish fillets, skin off, pin-boned, from sustainable sources"
         },
         {
@@ -24263,9 +24263,9 @@
           "raw": "½ a lemon"
         },
         {
-          "name": "x 400g tin of white beans",
+          "name": "tin of white beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of white beans"
         },
         {
@@ -24348,9 +24348,9 @@
           "raw": "40g (1½ oz) capers"
         },
         {
-          "name": "x 400g cans chopped tomatoes",
+          "name": "cans chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g (14oz) cans chopped tomatoes"
         },
         {
@@ -24450,9 +24450,9 @@
           "raw": "1 tablespoon tomato purée"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of plum tomatoes"
         },
         {
@@ -24544,9 +24544,9 @@
           "raw": "6 cloves of garlic"
         },
         {
-          "name": "x 700g jar or 1 x 400g tin of cannellini beans",
+          "name": "jar or 1 x 400g tin of cannellini beans",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 700g jar or 1 x 400g tin of cannellini beans"
         },
         {
@@ -24604,9 +24604,9 @@
           "raw": "1 bunch of fresh thyme (20g)"
         },
         {
-          "name": "x 150g salmon fillets, skin on, scaled, pin-boned, from sustainable sources",
+          "name": "salmon fillets, skin on, scaled, pin-boned, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g salmon fillets, skin on, scaled, pin-boned, from sustainable sources"
         },
         {
@@ -24651,9 +24651,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 150g cod fillets, skin on, scaled, pin-boned, from sustainable sources",
+          "name": "cod fillets, skin on, scaled, pin-boned, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g cod fillets, skin on, scaled, pin-boned, from sustainable sources"
         },
         {
@@ -24799,9 +24799,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 150g white fish fillets, skin off, pin-boned, from sustainable sources",
+          "name": "white fish fillets, skin off, pin-boned, from sustainable sources",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 150g white fish fillets, skin off, pin-boned, from sustainable sources"
         },
         {
@@ -25120,15 +25120,15 @@
           "raw": "flour, for dusting"
         },
         {
-          "name": "x 320g sheet of all-butter puff pastry",
+          "name": "sheet of all-butter puff pastry",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 320g sheet of all-butter puff pastry"
         },
         {
-          "name": "x 1kg side of salmon, skin off, pin-boned , from sustainable sources",
+          "name": "side of salmon, skin off, pin-boned , from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1kg side of salmon, skin off, pin-boned (ask your fishmonger for a fillet from the top end of the fish), from sustainable sources"
         },
         {
@@ -25224,7 +25224,7 @@
           "raw": "1 large brown onion, peeled and diced"
         },
         {
-          "name": "3 green and red chillies, stemmed and diced",
+          "name": "green and red chillies, stemmed and diced",
           "quantity": "2",
           "unit": null,
           "raw": "2–3 green and red chillies, stemmed and diced"
@@ -25272,9 +25272,9 @@
           "raw": "1 × 400ml can coconut milk"
         },
         {
-          "name": "3 tsp tamarind paste",
+          "name": "tamarind paste",
           "quantity": "2",
-          "unit": null,
+          "unit": "tsp",
           "raw": "2–3 tsp tamarind paste"
         },
         {
@@ -25410,9 +25410,9 @@
           "raw": "520g frozen white fish fillets"
         },
         {
-          "name": "x 400g tins of baked beans",
+          "name": "tins of baked beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of baked beans"
         }
       ],
@@ -25493,9 +25493,9 @@
           "raw": "½ teaspoon dried chilli flakes"
         },
         {
-          "name": "x 125g tin of mackerel in tomato sauce",
+          "name": "tin of mackerel in tomato sauce",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 125g tin of mackerel in tomato sauce"
         },
         {
@@ -25546,9 +25546,9 @@
           "raw": "1 potato (250g)"
         },
         {
-          "name": "x 145g tin of tuna in spring water",
+          "name": "tin of tuna in spring water",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 145g tin of tuna in spring water"
         },
         {
@@ -25636,9 +25636,9 @@
           "raw": "1 red chilli"
         },
         {
-          "name": "x 240g pack of kipper fillets",
+          "name": "pack of kipper fillets",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 240g pack of kipper fillets"
         },
         {
@@ -25654,9 +25654,9 @@
           "raw": "2 tablespoons hot curry powder"
         },
         {
-          "name": "x 250g packets of cooked basmati rice",
+          "name": "packets of cooked basmati rice",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 250g packets of cooked basmati rice"
         },
         {
@@ -25751,9 +25751,9 @@
           "raw": "50g fresh or jarred grated horseradish"
         },
         {
-          "name": "x 1kg side of salmon, skin on, scaled, pin-boned",
+          "name": "side of salmon, skin on, scaled, pin-boned",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1kg side of salmon, skin on, scaled, pin-boned"
         },
         {
@@ -25845,15 +25845,15 @@
           "raw": "100ml light rosé wine"
         },
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         },
         {
-          "name": "x 400g tin of plum tomatoes",
+          "name": "tin of plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of plum tomatoes"
         },
         {
@@ -25943,9 +25943,9 @@
           "raw": "1 pinch of dried red chilli flakes"
         },
         {
-          "name": "x 400g tin of white beans",
+          "name": "tin of white beans",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 400g tin of white beans"
         },
         {
@@ -25982,9 +25982,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 130g salmon fillets, skin on, scaled, pin-boned",
+          "name": "salmon fillets, skin on, scaled, pin-boned",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 130g salmon fillets, skin on, scaled, pin-boned"
         },
         {
@@ -26018,9 +26018,9 @@
           "raw": "red wine vinegar"
         },
         {
-          "name": "x 250g packet of cooked mixed grains",
+          "name": "packet of cooked mixed grains",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked mixed grains"
         },
         {
@@ -26152,9 +26152,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 50g nests of folded rice noodles",
+          "name": "nests of folded rice noodles",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 50g nests of folded rice noodles"
         },
         {
@@ -26194,9 +26194,9 @@
           "raw": "2 tablespoons laksa paste"
         },
         {
-          "name": "x 400ml tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "ml",
           "raw": "1 x 400ml tin of light coconut milk"
         }
       ],
@@ -26266,9 +26266,9 @@
           "raw": "2 cloves of garlic"
         },
         {
-          "name": "x 400g tins of chopped tomatoes",
+          "name": "tins of chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chopped tomatoes"
         },
         {
@@ -26337,9 +26337,9 @@
           "raw": "1 tablespoon red wine vinegar"
         },
         {
-          "name": "x 400g tins of chopped tomatoes",
+          "name": "tins of chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chopped tomatoes"
         },
         {
@@ -26408,9 +26408,9 @@
           "raw": "1 pinch of dried chilli flakes"
         },
         {
-          "name": "x 400g tins of chopped tomatoes",
+          "name": "tins of chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chopped tomatoes"
         },
         {
@@ -26562,9 +26562,9 @@
           "raw": "200g passata"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 400g tin of chickpeas"
         },
         {
@@ -26972,9 +26972,9 @@
           "raw": "100g tinned tuna in spring water, drained"
         },
         {
-          "name": "400g spaghetti",
+          "name": "spaghetti",
           "quantity": "300",
-          "unit": null,
+          "unit": "g",
           "raw": "300-400g spaghetti"
         },
         {
@@ -27143,15 +27143,15 @@
           "raw": "320g fresh or frozen chopped mixed onion, carrot & celery"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         },
         {
@@ -27256,9 +27256,9 @@
           "raw": "1 organic veg stock cube"
         },
         {
-          "name": "x 150g ball of mozzarella",
+          "name": "ball of mozzarella",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 150g ball of mozzarella"
         }
       ],
@@ -27312,15 +27312,15 @@
           "raw": "50g higher-welfare smoked pancetta"
         },
         {
-          "name": "x 180g jar of jamie’s brilliant bolognese paste",
+          "name": "jar of jamie’s brilliant bolognese paste",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 180g jar of Jamie’s Brilliant Bolognese Paste"
         },
         {
-          "name": "x 400g tin of quality plum tomatoes",
+          "name": "tin of quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of quality plum tomatoes"
         },
         {
@@ -27575,9 +27575,9 @@
           "raw": "1 lemon"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -27686,9 +27686,9 @@
           "raw": "1 x small bottle of red wine (187ml), or 1 medium glass (175ml)"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         },
         {
@@ -27876,9 +27876,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 400g tins of cannellini beans",
+          "name": "tins of cannellini beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of cannellini beans"
         },
         {
@@ -27900,9 +27900,9 @@
           "raw": "150g mixed pasta shapes"
         },
         {
-          "name": "x 285g jar sundried tomatoes in oil",
+          "name": "jar sundried tomatoes in oil",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 285g jar sundried tomatoes in oil"
         }
       ],
@@ -28223,9 +28223,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 120g tins of sardine fillets in sunflower oil",
+          "name": "tins of sardine fillets in sunflower oil",
           "quantity": "3",
-          "unit": null,
+          "unit": "g",
           "raw": "3 x 120g tins of sardine fillets in sunflower oil"
         },
         {
@@ -28241,9 +28241,9 @@
           "raw": "½ teaspoon chilli flakes"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of plum tomatoes"
         },
         {
@@ -28337,7 +28337,7 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "",
+          "name": "/10oz/scant 1½ cups dried brown or green lentils",
           "quantity": "280",
           "unit": "g",
           "raw": "280g/10oz/scant 1½ cups dried brown or green lentils"
@@ -28367,7 +28367,7 @@
           "raw": "1 small carrot, finely chopped"
         },
         {
-          "name": "finely chopped",
+          "name": "/3 ½ oz/scant ½ cup pumpkin flesh, finely chopped",
           "quantity": "100",
           "unit": "g",
           "raw": "100g/3 ½ oz/scant ½ cup pumpkin flesh, finely chopped"
@@ -28379,7 +28379,7 @@
           "raw": "2 garlic cloves, whole, peeled and crushed"
         },
         {
-          "name": "thinly sliced",
+          "name": "/7oz/scant ¼ cup chestnut button mushrooms, thinly sliced",
           "quantity": "200",
           "unit": "g",
           "raw": "200g/7oz/scant ¼ cup chestnut button mushrooms, thinly sliced"
@@ -28391,19 +28391,19 @@
           "raw": "2 bay leaves"
         },
         {
-          "name": "",
+          "name": "oz/1 ¾ cups tomato passata",
           "quantity": "400",
           "unit": "ml",
           "raw": "400ml/14fl oz/1 ¾ cups tomato passata (strained tomatoes)"
         },
         {
-          "name": "",
+          "name": "oz/3½ cups hot vegetable stock",
           "quantity": "900",
           "unit": "ml",
           "raw": "900ml/31fl oz/3½ cups hot vegetable stock (or use a stock cube)"
         },
         {
-          "name": "",
+          "name": "2oz/scant 4 cups dried egg-free pappardelle pasta",
           "quantity": "500",
           "unit": "g",
           "raw": "500g/1lb 2oz/scant 4 cups dried egg-free pappardelle pasta"
@@ -28761,9 +28761,9 @@
           "raw": "1kg higher-welfare lean minced beef"
         },
         {
-          "name": "x 400g tins of beans, such as cannellini, aduki, pinto",
+          "name": "tins of beans, such as cannellini, aduki, pinto",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of beans, such as cannellini, aduki, pinto"
         },
         {
@@ -28803,9 +28803,9 @@
           "raw": "1 celery heart"
         },
         {
-          "name": "x 280g jar of sun-dried tomatoes in oil",
+          "name": "jar of sun-dried tomatoes in oil",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 280g jar of sun-dried tomatoes in oil"
         },
         {
@@ -28815,9 +28815,9 @@
           "raw": "2 tablespoons balsamic vinegar"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         }
       ],
@@ -28962,9 +28962,9 @@
           "raw": "2 heaped tablespoons tomato purée"
         },
         {
-          "name": "x 400g tins plum tomatoes",
+          "name": "tins plum tomatoes",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 400g tins plum tomatoes"
         },
         {
@@ -29166,9 +29166,9 @@
           "raw": "1 pinch of dried chilli flakes"
         },
         {
-          "name": "x 400g tins quality plum tomatoes",
+          "name": "tins quality plum tomatoes",
           "quantity": "3",
-          "unit": null,
+          "unit": "g",
           "raw": "3 x 400g tins quality plum tomatoes"
         },
         {
@@ -29241,15 +29241,15 @@
           "raw": "1 bulb of fennel"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of plum tomatoes"
         },
         {
-          "name": "x 160g tins of tuna steak in spring water, from sustainable sources",
+          "name": "tins of tuna steak in spring water, from sustainable sources",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 160g tins of tuna steak in spring water, from sustainable sources"
         },
         {
@@ -29540,9 +29540,9 @@
           "raw": "2 medium eggs"
         },
         {
-          "name": "x 250g packets of frozen udon noodles",
+          "name": "packets of frozen udon noodles",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 250g packets of frozen (or fresh) udon noodles"
         },
         {
@@ -29934,9 +29934,9 @@
           "raw": "1 vegetable stock cube"
         },
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         },
         {
@@ -30041,9 +30041,9 @@
           "raw": "1 teaspoon ground cinnamon"
         },
         {
-          "name": "1 teaspoon dried chilli flakes",
+          "name": "dried chilli flakes",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "teaspoon",
           "raw": "½–1 teaspoon dried chilli flakes"
         },
         {
@@ -30053,15 +30053,15 @@
           "raw": "50g mixed olives, stone in"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -30196,9 +30196,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 400g tins of condensed milk",
+          "name": "tins of condensed milk",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of condensed milk"
         },
         {
@@ -30866,9 +30866,9 @@
           "raw": "50g blanched almonds"
         },
         {
-          "name": "x 460g jar of roasted red peppers",
+          "name": "jar of roasted red peppers",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 460g jar of roasted red peppers"
         }
       ],
@@ -30968,9 +30968,9 @@
       ],
       "ingredients": [
         {
-          "name": "x 170g loaf of garlic bread",
+          "name": "loaf of garlic bread",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 170g loaf of garlic bread"
         },
         {
@@ -31004,9 +31004,9 @@
           "raw": "2 teaspoons dried oregano"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "3",
-          "unit": null,
+          "unit": "g",
           "raw": "3 x 400g tins of plum tomatoes"
         },
         {
@@ -31275,21 +31275,21 @@
           "raw": "250g dried red lentils"
         },
         {
-          "name": "x 400g tins of red kidney beans",
+          "name": "tins of red kidney beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of red kidney beans"
         },
         {
-          "name": "x 400g tins of black beans",
+          "name": "tins of black beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of black beans"
         },
         {
-          "name": "x 400g tins of chopped tomatoes",
+          "name": "tins of chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chopped tomatoes"
         },
         {
@@ -31355,9 +31355,9 @@
           "raw": "4 sprigs of fresh basil"
         },
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         },
         {
@@ -31893,9 +31893,9 @@
           "raw": "3 tablespoons massaman curry paste"
         },
         {
-          "name": "x 400g tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of light coconut milk"
         },
         {
@@ -31966,15 +31966,15 @@
           "raw": "4 tablespoons Jamie's tikka masala curry paste"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
-          "name": "x 400g tin quality plum tomatoes",
+          "name": "tin quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin quality plum tomatoes"
         },
         {
@@ -32061,15 +32061,15 @@
           "raw": "2 heaped tablespoons tikka masala paste, or your favourite curry paste"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         },
         {
-          "name": "x 400g tins of chickpeas",
+          "name": "tins of chickpeas",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chickpeas"
         },
         {
@@ -32079,9 +32079,9 @@
           "raw": "2 heaped tablespoons mango chutney"
         },
         {
-          "name": "x 400g tins of light coconut milk",
+          "name": "tins of light coconut milk",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of light coconut milk"
         }
       ],
@@ -32267,9 +32267,9 @@
           "raw": "350g higher-welfare leftover Christmas turkey"
         },
         {
-          "name": "x 400g tins of light coconut milk",
+          "name": "tins of light coconut milk",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of light coconut milk"
         },
         {
@@ -32547,7 +32547,7 @@
           "raw": "30ml (1 fl oz/2 tbsp) double (heavy) cream"
         },
         {
-          "name": "8 green cardamom seeds, crushed",
+          "name": "green cardamom seeds, crushed",
           "quantity": "6",
           "unit": null,
           "raw": "6–8 green cardamom seeds, crushed"
@@ -32688,9 +32688,9 @@
           "raw": "2 tablespoons desiccated coconut"
         },
         {
-          "name": "x 400g tin light coconut milk",
+          "name": "tin light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin light coconut milk"
         },
         {
@@ -32772,9 +32772,9 @@
           "raw": "vegetable oil"
         },
         {
-          "name": "x 400ml tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "ml",
           "raw": "1 x 400ml tin of light coconut milk"
         },
         {
@@ -32940,9 +32940,9 @@
       ],
       "ingredients": [
         {
-          "name": "x 1.5kg whole free-range chicken",
+          "name": "whole free-range chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.5kg whole free-range chicken"
         },
         {
@@ -32970,9 +32970,9 @@
           "raw": "red wine vinegar"
         },
         {
-          "name": "x 700g jar of chickpeas",
+          "name": "jar of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 700g jar of chickpeas"
         },
         {
@@ -33030,9 +33030,9 @@
           "raw": "300g ripe cherry tomatoes"
         },
         {
-          "name": "x 400g tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of light coconut milk"
         },
         {
@@ -33136,9 +33136,9 @@
           "raw": "8 onions, roughly chopped"
         },
         {
-          "name": "x 400g tins of chopped tomatoes",
+          "name": "tins of chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chopped tomatoes"
         },
         {
@@ -33289,7 +33289,7 @@
           "raw": "1 small red onion, finely sliced (approx 100g)"
         },
         {
-          "name": "12 curry leaves , finely chopped",
+          "name": "curry leaves , finely chopped",
           "quantity": "10",
           "unit": null,
           "raw": "10-12 curry leaves (1 stalk), finely chopped (1g)"
@@ -33301,9 +33301,9 @@
           "raw": "100ml coconut milk"
         },
         {
-          "name": "30ml warm water, or more or less as required",
+          "name": "warm water, or more or less as required",
           "quantity": "20",
-          "unit": null,
+          "unit": "ml",
           "raw": "20-30ml warm water, or more or less as required"
         }
       ],
@@ -33405,9 +33405,9 @@
           "raw": "1 small sweet potato (200g)"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -33500,9 +33500,9 @@
           "raw": "500ml organic chicken stock"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -33588,15 +33588,15 @@
           "raw": "2 heaped tablespoons madras curry paste"
         },
         {
-          "name": "x 400g tins of green lentils",
+          "name": "tins of green lentils",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of green lentils"
         },
         {
-          "name": "x 400g tin of blackeye beans",
+          "name": "tin of blackeye beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of blackeye beans"
         },
         {
@@ -33801,15 +33801,15 @@
           "raw": "2 tinned pineapple rings in juice"
         },
         {
-          "name": "x 400ml tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "ml",
           "raw": "1 x 400ml tin of light coconut milk"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -33912,9 +33912,9 @@
           "raw": "red wine vinegar"
         },
         {
-          "name": "x 400g tin of black beans",
+          "name": "tin of black beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of black beans"
         },
         {
@@ -34059,21 +34059,21 @@
           "raw": "50g whole blanched almonds"
         },
         {
-          "name": "x 400g tin of quality plum tomatoes",
+          "name": "tin of quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of quality plum tomatoes"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
-          "name": "x 400g tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of light coconut milk"
         },
         {
@@ -34278,7 +34278,7 @@
       ],
       "ingredients": [
         {
-          "name": "3 fresh mixed-colour chillies",
+          "name": "fresh mixed-colour chillies",
           "quantity": "2",
           "unit": null,
           "raw": "2–3 fresh mixed-colour chillies"
@@ -34314,9 +34314,9 @@
           "raw": "4 heaped tablespoons natural yoghurt"
         },
         {
-          "name": "x 150g free-range skinless chicken breasts",
+          "name": "free-range skinless chicken breasts",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 150g free-range skinless chicken breasts"
         },
         {
@@ -34430,15 +34430,15 @@
           "raw": "2 tablespoons good mango chutney"
         },
         {
-          "name": "x 400g tin of quality plum tomatoes",
+          "name": "tin of quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of quality plum tomatoes"
         },
         {
-          "name": "x 400g tin of light coconut milk",
+          "name": "tin of light coconut milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of light coconut milk"
         },
         {
@@ -34582,9 +34582,9 @@
           "raw": "350ml white base sauce"
         },
         {
-          "name": "x 400g tins chickpeas",
+          "name": "tins chickpeas",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins chickpeas"
         },
         {
@@ -34687,9 +34687,9 @@
           "raw": "500ml tomato base sauce"
         },
         {
-          "name": "x 400g tinned chickpeas",
+          "name": "tinned chickpeas",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tinned chickpeas"
         },
         {
@@ -34845,15 +34845,15 @@
           "raw": "4 leeks"
         },
         {
-          "name": "x 400g tins of cannellini beans",
+          "name": "tins of cannellini beans",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 400g tins of cannellini beans"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         }
       ],
@@ -34994,9 +34994,9 @@
           "raw": "1 cucumber"
         },
         {
-          "name": "x 320g sheet of ready-rolled puff pastry",
+          "name": "sheet of ready-rolled puff pastry",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 320g sheet of ready-rolled puff pastry"
         },
         {
@@ -35085,9 +35085,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         },
         {
@@ -35103,15 +35103,15 @@
           "raw": "1 teaspoon dried oregano"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of plum tomatoes"
         },
         {
-          "name": "x 460g jar of roasted red peppers",
+          "name": "jar of roasted red peppers",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 460g jar of roasted red peppers"
         },
         {
@@ -35206,9 +35206,9 @@
           "raw": "75g Cheddar cheese"
         },
         {
-          "name": "x 400g tin of black beans",
+          "name": "tin of black beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of black beans"
         },
         {
@@ -35365,9 +35365,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 200g skinless free-range chicken breasts",
+          "name": "skinless free-range chicken breasts",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 200g skinless free-range chicken breasts"
         },
         {
@@ -35383,9 +35383,9 @@
           "raw": "1 large red onion"
         },
         {
-          "name": "x 180g jar of jamie oliver smoky fajita paste",
+          "name": "jar of jamie oliver smoky fajita paste",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 180g jar of Jamie Oliver Smoky Fajita Paste"
         },
         {
@@ -35480,9 +35480,9 @@
           "raw": "300g long grain rice"
         },
         {
-          "name": "x 400g tins of kidney beans",
+          "name": "tins of kidney beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of kidney beans"
         },
         {
@@ -35724,9 +35724,9 @@
       ],
       "ingredients": [
         {
-          "name": "x 410g tins of peach slices in juice",
+          "name": "tins of peach slices in juice",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 410g tins of peach slices in juice"
         },
         {
@@ -36005,9 +36005,9 @@
           "raw": "200g pearl barley"
         },
         {
-          "name": "x 400g tins of quality peeled plum tomatoes",
+          "name": "tins of quality peeled plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality peeled plum tomatoes"
         },
         {
@@ -36288,9 +36288,9 @@
           "raw": "300g broccoli"
         },
         {
-          "name": "x 250g pack of ready-rolled filo pastry",
+          "name": "pack of ready-rolled filo pastry",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g pack of ready-rolled filo pastry"
         }
       ],
@@ -36330,9 +36330,9 @@
           "raw": "6 wholemeal pittas"
         },
         {
-          "name": "x 120g free-range skinless chicken breasts",
+          "name": "free-range skinless chicken breasts",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 120g free-range skinless chicken breasts"
         },
         {
@@ -36457,15 +36457,15 @@
           "raw": "1 clove of garlic"
         },
         {
-          "name": "x 400g tin of quality plum tomatoes",
+          "name": "tin of quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of quality plum tomatoes"
         },
         {
-          "name": "x 80g tin of tuna in spring water, from sustainable sources",
+          "name": "tin of tuna in spring water, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 80g tin of tuna in spring water, from sustainable sources"
         },
         {
@@ -36541,9 +36541,9 @@
           "raw": "1 teaspoon cumin seeds"
         },
         {
-          "name": "x 95g jar of chipotle chilli paste",
+          "name": "jar of chipotle chilli paste",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 95g jar of chipotle chilli paste"
         },
         {
@@ -36559,15 +36559,15 @@
           "raw": "½ a bunch of coriander (15g)"
         },
         {
-          "name": "x 400g tins of black beans",
+          "name": "tins of black beans",
           "quantity": "3",
-          "unit": null,
+          "unit": "g",
           "raw": "3 x 400g tins of black beans"
         },
         {
-          "name": "x 400g tins of plum tomatoes",
+          "name": "tins of plum tomatoes",
           "quantity": "3",
-          "unit": null,
+          "unit": "g",
           "raw": "3 x 400g tins of plum tomatoes"
         },
         {
@@ -37435,15 +37435,15 @@
       ],
       "ingredients": [
         {
-          "name": "x 125g salmon fillets, skin on, from sustainable sources",
+          "name": "salmon fillets, skin on, from sustainable sources",
           "quantity": "4",
-          "unit": null,
+          "unit": "g",
           "raw": "4 x 125g salmon fillets, skin on, from sustainable sources"
         },
         {
-          "name": "3 teaspoons five spice powder",
+          "name": "five spice powder",
           "quantity": "2",
-          "unit": null,
+          "unit": "teaspoons",
           "raw": "2-3 teaspoons five spice powder"
         },
         {
@@ -38185,9 +38185,9 @@
       ],
       "ingredients": [
         {
-          "name": "x 320g sheet of all-butter puff pastry",
+          "name": "sheet of all-butter puff pastry",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 320g sheet of all-butter puff pastry"
         },
         {
@@ -38263,9 +38263,9 @@
           "raw": "½ a bunch of fresh basil (15g)"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         },
         {
@@ -38336,9 +38336,9 @@
           "raw": "200g rosemary focaccia"
         },
         {
-          "name": "x 660g jar of white beans",
+          "name": "jar of white beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 660g jar of white beans"
         },
         {
@@ -38453,9 +38453,9 @@
           "raw": "2 teaspoons dried oregano"
         },
         {
-          "name": "x 400g tins of quality plum tomatoes",
+          "name": "tins of quality plum tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of quality plum tomatoes"
         }
       ],
@@ -38633,9 +38633,9 @@
           "raw": "optional: 1 organic vegetable stock cube"
         },
         {
-          "name": "x 410g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 410g tin of cannellini beans"
         },
         {
@@ -38732,9 +38732,9 @@
           "raw": "optional: 50ml red wine"
         },
         {
-          "name": "x 400g tin of plum tomatoes",
+          "name": "tin of plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of plum tomatoes"
         },
         {
@@ -38854,7 +38854,7 @@
           "raw": "a few sprigs of parsley"
         },
         {
-          "name": "½ lemon",
+          "name": "–½ lemon",
           "quantity": "1/4",
           "unit": null,
           "raw": "¼–½ lemon"
@@ -38942,9 +38942,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 120g skinless chicken breasts",
+          "name": "skinless chicken breasts",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 120g skinless chicken breasts"
         },
         {
@@ -39134,9 +39134,9 @@
           "raw": "100g red seedless grapes"
         },
         {
-          "name": "x 125g ball of mozzarella cheese",
+          "name": "ball of mozzarella cheese",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 125g ball of mozzarella cheese"
         },
         {
@@ -39187,13 +39187,13 @@
           "raw": "2 medium onions"
         },
         {
-          "name": "x 400g tin chickpeas",
+          "name": "tin chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin chickpeas"
         },
         {
-          "name": "2 fresh green chillies",
+          "name": "fresh green chillies",
           "quantity": "1",
           "unit": null,
           "raw": "1-2 fresh green chillies"
@@ -39217,9 +39217,9 @@
           "raw": "½ teaspoon asafoetida"
         },
         {
-          "name": "x 400g tin of tomatoes",
+          "name": "tin of tomatoes",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 400g tin of tomatoes"
         },
         {
@@ -39446,15 +39446,15 @@
           "raw": "6 medium sweet potatoes"
         },
         {
-          "name": "x 700ml jar of passata",
+          "name": "jar of passata",
           "quantity": "1",
-          "unit": null,
+          "unit": "ml",
           "raw": "1 x 700ml jar of passata"
         },
         {
-          "name": "x 400g tins of mixed beans",
+          "name": "tins of mixed beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of mixed beans"
         },
         {
@@ -40149,9 +40149,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 400g tin of plum tomatoes",
+          "name": "tin of plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of plum tomatoes"
         },
         {
@@ -40360,7 +40360,7 @@
           "raw": "1 organic chicken stock cube"
         },
         {
-          "name": "2 fresh red chillies",
+          "name": "fresh red chillies",
           "quantity": "1",
           "unit": null,
           "raw": "1-2 fresh red chillies"
@@ -40402,9 +40402,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
@@ -41572,15 +41572,15 @@
           "raw": "optional: 1 teaspoon bouillon powder"
         },
         {
-          "name": "x 400g tin of chickpeas",
+          "name": "tin of chickpeas",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chickpeas"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
@@ -41663,9 +41663,9 @@
           "raw": "½ tablespoon olive oil"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
@@ -41822,15 +41822,15 @@
           "raw": "1½ tablespoons olive oil"
         },
         {
-          "name": "x 400g tins of chopped tomatoes",
+          "name": "tins of chopped tomatoes",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of chopped tomatoes"
         },
         {
-          "name": "x 400g tin of cannellini beans",
+          "name": "tin of cannellini beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of cannellini beans"
         },
         {
@@ -42329,9 +42329,9 @@
           "raw": "½ a red pepper"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1/2",
-          "unit": null,
+          "unit": "g",
           "raw": "½ x 400g tin of chopped tomatoes"
         },
         {
@@ -42572,9 +42572,9 @@
           "raw": "vegetable oil"
         },
         {
-          "name": "2 tablespoons low-salt soy sauce",
+          "name": "low-salt soy sauce",
           "quantity": "1",
-          "unit": null,
+          "unit": "tablespoons",
           "raw": "1-2 tablespoons low-salt soy sauce"
         },
         {
@@ -42621,9 +42621,9 @@
           "raw": "6 spring onions"
         },
         {
-          "name": "x 250g sachet of cooked brown basmati rice",
+          "name": "sachet of cooked brown basmati rice",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g sachet of cooked brown basmati rice"
         },
         {
@@ -42691,9 +42691,9 @@
           "raw": "1 red pepper"
         },
         {
-          "name": "x 150g skinless free-range chicken breast",
+          "name": "skinless free-range chicken breast",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 150g skinless free-range chicken breast"
         },
         {
@@ -42861,9 +42861,9 @@
           "raw": "1 teaspoon smoked paprika"
         },
         {
-          "name": "x 400g tin of black beans",
+          "name": "tin of black beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of black beans"
         },
         {
@@ -42873,9 +42873,9 @@
           "raw": "4 large tortilla wraps"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
@@ -42963,9 +42963,9 @@
           "raw": "4 cloves of garlic"
         },
         {
-          "name": "x 400g tin of quality plum tomatoes",
+          "name": "tin of quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of quality plum tomatoes"
         }
       ],
@@ -43441,9 +43441,9 @@
           "raw": "200ml runny honey"
         },
         {
-          "name": "x 425g tins of pineapple rings in juice",
+          "name": "tins of pineapple rings in juice",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 425g tins of pineapple rings in juice"
         },
         {
@@ -44427,9 +44427,9 @@
           "raw": "2 tablespoons whole milk"
         },
         {
-          "name": "x 340g jar of quality seedless raspberry jam",
+          "name": "jar of quality seedless raspberry jam",
           "quantity": "3/4",
-          "unit": null,
+          "unit": "g",
           "raw": "¾ x 340g jar of quality seedless raspberry jam"
         },
         {
@@ -44995,9 +44995,9 @@
           "raw": "300g desiccated coconut"
         },
         {
-          "name": "x 340g jar of quality raspberry jam",
+          "name": "jar of quality raspberry jam",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 340g jar of quality raspberry jam"
         }
       ],
@@ -45135,7 +45135,7 @@
           "raw": "1 teaspoon caster sugar"
         },
         {
-          "name": "4 medium free-range eggs",
+          "name": "medium free-range eggs",
           "quantity": "3",
           "unit": null,
           "raw": "3-4 medium free-range eggs"
@@ -45206,9 +45206,9 @@
           "raw": "100g dark chocolate (70%), plus extra to serve"
         },
         {
-          "name": "x 400g tins of custard",
+          "name": "tins of custard",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of custard"
         },
         {
@@ -45838,9 +45838,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 7g sachet of dried yeast",
+          "name": "sachet of dried yeast",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 7g sachet of dried yeast"
         },
         {
@@ -45894,9 +45894,9 @@
           "raw": "500g strong bread flour, plus extra for dusting"
         },
         {
-          "name": "x 7g sachet of dried yeast",
+          "name": "sachet of dried yeast",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 7g sachet of dried yeast"
         },
         {
@@ -45994,9 +45994,9 @@
           "raw": "250g plain flour, plus extra for dusting"
         },
         {
-          "name": "x 7g sachet of dried yeast",
+          "name": "sachet of dried yeast",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 7g sachet of dried yeast"
         },
         {
@@ -46268,9 +46268,9 @@
           "raw": "300ml milk, plus extra"
         },
         {
-          "name": "x 7g sachet of dried yeast",
+          "name": "sachet of dried yeast",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 7g sachet of dried yeast"
         },
         {
@@ -46356,15 +46356,15 @@
           "raw": "15g sea salt flakes"
         },
         {
-          "name": "2 tbsp rice flour",
+          "name": "rice flour",
           "quantity": "1",
-          "unit": null,
+          "unit": "tbsp",
           "raw": "1–2 tbsp rice flour"
         },
         {
-          "name": "2 tbsp semolina or fine polenta",
+          "name": "semolina or fine polenta",
           "quantity": "1",
-          "unit": null,
+          "unit": "tbsp",
           "raw": "1–2 tbsp semolina or fine polenta"
         },
         {
@@ -46805,9 +46805,9 @@
           "raw": "200g quality dark chocolate (70%)"
         },
         {
-          "name": "x 396g tin of condensed milk",
+          "name": "tin of condensed milk",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 396g tin of condensed milk"
         },
         {
@@ -47287,9 +47287,9 @@
           "raw": "4 large free-range eggs"
         },
         {
-          "name": "x 275g pack filo pastry",
+          "name": "pack filo pastry",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 275g pack filo pastry"
         },
         {
@@ -47618,9 +47618,9 @@
           "raw": "2 large free-range eggs"
         },
         {
-          "name": "x 410g tin of pear quarters in juice",
+          "name": "tin of pear quarters in juice",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 410g tin of pear quarters in juice"
         },
         {
@@ -48063,9 +48063,9 @@
           "raw": "½ head of cauliflower, broken into very small florets"
         },
         {
-          "name": "x 400g tin chickpeas, drained",
+          "name": "tin chickpeas, drained",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin chickpeas, drained"
         },
         {
@@ -49264,9 +49264,9 @@
           "raw": "FILLING"
         },
         {
-          "name": "x 397g tins of condensed milk or 2 jars of merchant gourmet dulce de leche toffee",
+          "name": "tins of condensed milk or 2 jars of merchant gourmet dulce de leche toffee",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 397g tins of condensed milk or 2 jars of Merchant Gourmet Dulce de Leche toffee"
         },
         {
@@ -49336,9 +49336,9 @@
           "raw": "600g large ripe strawberries"
         },
         {
-          "name": "x 320g pack of ready-rolled all-butter puff pastry",
+          "name": "pack of ready-rolled all-butter puff pastry",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 320g pack of ready-rolled all-butter puff pastry"
         },
         {
@@ -50446,9 +50446,9 @@
           "raw": "550g plain flour"
         },
         {
-          "name": "x 5g sachets of dried yeast",
+          "name": "sachets of dried yeast",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 5g sachets of dried yeast"
         },
         {
@@ -52506,7 +52506,7 @@
           "raw": "2 tablespoons brandy or dark rum"
         },
         {
-          "name": "4 cardamom pods",
+          "name": "cardamom pods",
           "quantity": "3",
           "unit": null,
           "raw": "3-4 cardamom pods"
@@ -53598,9 +53598,9 @@
           "raw": "1 onion"
         },
         {
-          "name": "x 250g pouch of cooked wholegrain rice",
+          "name": "pouch of cooked wholegrain rice",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g pouch of cooked wholegrain rice"
         },
         {
@@ -53774,9 +53774,9 @@
           "raw": "160g kale, cabbage or mixed seasonal greens"
         },
         {
-          "name": "x 400g tin of mixed beans",
+          "name": "tin of mixed beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of mixed beans"
         },
         {
@@ -53894,15 +53894,15 @@
           "raw": "150g brown rice"
         },
         {
-          "name": "x 400g tin of mixed beans",
+          "name": "tin of mixed beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of mixed beans"
         },
         {
-          "name": "x 400g tin of quality plum tomatoes",
+          "name": "tin of quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of quality plum tomatoes"
         },
         {
@@ -54110,9 +54110,9 @@
           "raw": "1 vegetable stock cube (gluten-free if needed)"
         },
         {
-          "name": "x 400g tin of chopped tomatoes",
+          "name": "tin of chopped tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of chopped tomatoes"
         },
         {
@@ -54128,9 +54128,9 @@
           "raw": "3 tablespoons peanut butter"
         },
         {
-          "name": "x 400g tin of black beans",
+          "name": "tin of black beans",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of black beans"
         },
         {
@@ -54330,9 +54330,9 @@
           "raw": "sesame oil"
         },
         {
-          "name": "x 320g packet of mixed stir-fry veg",
+          "name": "packet of mixed stir-fry veg",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 320g packet of mixed stir-fry veg"
         },
         {
@@ -54354,9 +54354,9 @@
           "raw": "2 tablespoons low-salt soy sauce"
         },
         {
-          "name": "x 250g packet of cooked brown rice",
+          "name": "packet of cooked brown rice",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g packet of cooked brown rice"
         },
         {
@@ -54841,9 +54841,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 400g tin of rice pudding",
+          "name": "tin of rice pudding",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of rice pudding"
         },
         {
@@ -54903,15 +54903,15 @@
       ],
       "ingredients": [
         {
-          "name": "x 1.5kg whole free-range chicken",
+          "name": "whole free-range chicken",
           "quantity": "1",
-          "unit": null,
+          "unit": "kg",
           "raw": "1 x 1.5kg whole free-range chicken"
         },
         {
-          "name": "x 200g tubs of tzatziki",
+          "name": "tubs of tzatziki",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 200g tubs of tzatziki"
         },
         {
@@ -55533,9 +55533,9 @@
           "raw": "6 rashers of higher-welfare smoked streaky bacon"
         },
         {
-          "name": "x 225g block of halloumi cheese",
+          "name": "block of halloumi cheese",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 225g block of halloumi cheese"
         },
         {
@@ -55794,7 +55794,7 @@
           "raw": "6 cloves of garlic"
         },
         {
-          "name": "x 6cm piece of ginger",
+          "name": "cm piece of ginger",
           "quantity": "1",
           "unit": null,
           "raw": "1 x 6cm piece of ginger"
@@ -55891,9 +55891,9 @@
           "raw": "8 sheets of filo pastry"
         },
         {
-          "name": "x 400g tins of haricot beans",
+          "name": "tins of haricot beans",
           "quantity": "2",
-          "unit": null,
+          "unit": "g",
           "raw": "2 x 400g tins of haricot beans"
         },
         {
@@ -56245,9 +56245,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 250g pouch of jamie oliver aubergine shakshuka",
+          "name": "pouch of jamie oliver aubergine shakshuka",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 250g pouch of Jamie Oliver Aubergine Shakshuka"
         },
         {
@@ -56796,9 +56796,9 @@
           "raw": "500g sweet potatoes"
         },
         {
-          "name": "x 200g tin of sweetcorn in water",
+          "name": "tin of sweetcorn in water",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 200g tin of sweetcorn in water"
         },
         {
@@ -56826,9 +56826,9 @@
           "raw": "olive oil"
         },
         {
-          "name": "x 220g jar of pickled jalapeños",
+          "name": "jar of pickled jalapeños",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 220g jar of pickled jalapeños"
         },
         {
@@ -56918,9 +56918,9 @@
           "raw": "red wine vinegar"
         },
         {
-          "name": "x 145g tin of tuna in spring water, from sustainable sources",
+          "name": "tin of tuna in spring water, from sustainable sources",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 145g tin of tuna in spring water, from sustainable sources"
         },
         {
@@ -57180,9 +57180,9 @@
           "raw": "1 onion"
         },
         {
-          "name": "x 400g tin of quality plum tomatoes",
+          "name": "tin of quality plum tomatoes",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 400g tin of quality plum tomatoes"
         },
         {
@@ -58181,7 +58181,7 @@
           "raw": "30g Cheddar cheese"
         },
         {
-          "name": "tomato ketchup and, to serve",
+          "name": "tomato ketchup and/or brown sauce, to serve",
           "quantity": null,
           "unit": null,
           "raw": "tomato ketchup and/or brown sauce, to serve (optional)"
@@ -58343,9 +58343,9 @@
       "cuisine": [],
       "ingredients": [
         {
-          "name": "x 220g jar of pickled jalapeños",
+          "name": "jar of pickled jalapeños",
           "quantity": "1",
-          "unit": null,
+          "unit": "g",
           "raw": "1 x 220g jar of pickled jalapeños"
         },
         {
@@ -58542,7 +58542,7 @@
           "raw": "120g quality chorizo"
         },
         {
-          "name": "3 cooked potatoes",
+          "name": "cooked potatoes",
           "quantity": "2",
           "unit": null,
           "raw": "2-3 cooked potatoes"
