@@ -130,6 +130,22 @@ class RecipeService {
     // Step 1b-AI: validate every ingredient↔deal pairing against the persisted
     // edge store (match_edges) BEFORE selection. Verdicts already stored are
     // free; only never-seen pairs go to Claude, once, and persist forever.
+    // Protein mix before and after verification. Traced 2026-08-28: the scored
+    // pool for Woolworths was chicken 432 / pork 241 / beef 172 / seafood 147,
+    // and the served menu came out 41 pork of 50. Selection was not the cause —
+    // running the draft on the unverified pool gives an even 10/10/10/10/10 —
+    // so the collapse happens here, and nothing reported it.
+    const familyMix = (list) => {
+      const out = {};
+      for (const r of list) {
+        const hero = recipeMatcher._heroKeyFromDeals(r.matchedDeals || []);
+        const fam = hero ? recipeMatcher._heroFamily(hero) : 'no-hero';
+        out[fam] = (out[fam] || 0) + 1;
+      }
+      return out;
+    };
+    const beforeMix = familyMix(candidates);
+
     try {
       const matchEdgeService = require('./matchEdgeService');
       await matchEdgeService.filterRecipesByEdges(candidates);
@@ -137,6 +153,20 @@ class RecipeService {
       console.warn('RecipeService: edge filtering unavailable — keeping text-matched deals:', edgeErr.message);
     }
     const verified = candidates.filter(r => (r.matchedDeals || []).length > 0);
+
+    const afterMix = familyMix(verified);
+    console.log(`RecipeService: protein mix before verification ${JSON.stringify(beforeMix)}`);
+    console.log(`RecipeService: protein mix after  verification ${JSON.stringify(afterMix)}`);
+    for (const [fam, n] of Object.entries(beforeMix)) {
+      if (fam === 'no-hero' || n < 20) continue;
+      const kept = afterMix[fam] || 0;
+      if (kept < n * 0.1) {
+        console.warn(
+          `RecipeService: verification wiped out ${fam} — ${n} candidates in, ${kept} out. ` +
+          'Either the deal forms genuinely do not fit those recipes, or the edge store holds bad verdicts.'
+        );
+      }
+    }
 
     // Step 1b-select: hero-anchored menu. Keep only recipes that still hold a
     // driver deal (a protein/centrepiece special in a household pack) after
