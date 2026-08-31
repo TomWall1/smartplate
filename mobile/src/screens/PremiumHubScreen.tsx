@@ -11,10 +11,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePremium } from '../context/PremiumContext';
 import { useAuth } from '../context/AuthContext';
 
-// Shipped features only. Meal Planner, Shopping List and Price Alerts used to
-// sit here with `screen: null` and a "Soon" badge — placeholder content is an
-// App Review 2.1 rejection, and advertising it on a paid tier is a 2.3.1 one.
-// Each goes back in the release that implements it.
+// Shipped features only. Anything listed here works the moment someone pays —
+// placeholder content is an App Review 2.1 rejection, and advertising it on a
+// paid tier is a 2.3.1 one. Favourites used to be on this list; it is free now,
+// and lives with the recipes where people actually save things.
 const PREMIUM_FEATURES = [
   {
     key: 'pantry',
@@ -25,12 +25,30 @@ const PREMIUM_FEATURES = [
     screen: 'PantryInput',
   },
   {
-    key: 'favourites',
-    title: 'Favourites',
-    description: 'Save recipes you love',
-    icon: 'heart-outline' as const,
-    color: '#D4667A',
-    screen: 'Favourites',
+    key: 'alerts',
+    title: 'Price alerts',
+    description: 'Know when it goes on special',
+    icon: 'notifications-outline' as const,
+    color: '#BE6A43',
+    screen: 'PriceAlerts',
+  },
+  {
+    key: 'list',
+    title: 'Shopping list',
+    description: 'Built from the recipes you pick',
+    icon: 'cart-outline' as const,
+    color: '#36453B',
+    screen: 'ShoppingList',
+  },
+  {
+    key: 'costing',
+    title: 'Cost per serve',
+    description: 'Scaled to your household',
+    icon: 'wallet-outline' as const,
+    color: '#7C6A9C',
+    // Shown on every recipe rather than being its own screen, so this tile
+    // takes you to the recipes to see it in place.
+    screen: 'RecipesTab',
   },
 ];
 
@@ -91,7 +109,7 @@ export default function PremiumHubScreen() {
             key={f.key}
             style={styles.featureCard}
             activeOpacity={0.8}
-            onPress={() => navigation.navigate(f.screen)}
+            onPress={() => navigation.navigate(f.screen as never)}
           >
             <View style={[styles.featureIcon, { backgroundColor: f.color + '18' }]}>
               <Ionicons name={f.icon} size={32} color={f.color} />

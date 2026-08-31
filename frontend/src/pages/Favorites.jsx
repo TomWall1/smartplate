@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Trash2, Clock, Users, Loader } from 'lucide-react';
-import PremiumGate from '../components/PremiumGate';
-import { usePremium } from '../context/PremiumContext';
 import { useAuth } from '../context/AuthContext';
 import { premiumApi } from '../services/api';
 
@@ -103,20 +101,44 @@ function FavoriteCard({ fav, onRemove }) {
   );
 }
 
+function SignInPrompt() {
+  const navigate = useNavigate();
+  return (
+    <div
+      className="rounded-[12px] border p-8 text-center"
+      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-stone)' }}
+    >
+      <Heart className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--color-berry)' }} />
+      <h2 className="text-lg mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-bark)' }}>
+        Sign in to see your saved recipes
+      </h2>
+      <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)' }}>
+        Saving recipes is free — an account just gives them somewhere to live.
+      </p>
+      <button
+        onClick={() => navigate('/auth')}
+        className="px-5 py-2.5 rounded-[8px] text-sm"
+        style={{ background: 'var(--color-leaf)', color: '#ffffff', fontFamily: 'var(--font-ui)' }}
+      >
+        Sign in
+      </button>
+    </div>
+  );
+}
+
 export default function Favorites() {
-  const { isPremium, premiumLoading } = usePremium();
   const { user } = useAuth();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!user || !isPremium) { setLoading(false); return; }
+    if (!user) { setLoading(false); return; }
     premiumApi.getFavorites()
       .then(data => setFavorites(data.favorites ?? []))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
-  }, [user, isPremium]);
+  }, [user]);
 
   const handleRemove = useCallback((recipeId) => {
     setFavorites(prev => prev.filter(f => f.recipe_id !== recipeId));
@@ -140,8 +162,8 @@ export default function Favorites() {
           </h1>
         </div>
 
-        {premiumLoading ? null : !isPremium ? (
-          <PremiumGate feature="Saved recipes" />
+        {!user ? (
+          <SignInPrompt />
         ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {Array.from({ length: 4 }).map((_, i) => (

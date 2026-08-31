@@ -14,7 +14,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { usePremium } from '../context/PremiumContext';
-import { deleteAccount } from '../api/users';
+import { deleteAccount, updateHouseholdSize } from '../api/users';
 import { TERMS_URL, PRIVACY_URL } from './PaywallScreen';
 
 // Apple's subscription management page — the only place an App Store
@@ -68,12 +68,33 @@ function RowItem({
   );
 }
 
+// How many people are cooked for. Capped at 8 because past that the number
+// stops changing how a recipe is scaled and starts being a catering question.
+const HOUSEHOLD_SIZES = [1, 2, 3, 4, 5, 6, 7, 8];
+
 export default function AccountScreen() {
   const navigation = useNavigation<any>();
-  const { user, logout, guestMode } = useAuth();
+  const { user, logout, guestMode, refreshUser } = useAuth();
   const { selectedStore, selectedState } = useStore();
   const { isPremium, status } = usePremium();
   const [deleting, setDeleting] = useState(false);
+  const [showHousehold, setShowHousehold] = useState(false);
+  const [savingHousehold, setSavingHousehold] = useState<number | null>(null);
+
+  async function handleHouseholdChange(size: number) {
+    setSavingHousehold(size);
+    try {
+      await updateHouseholdSize(size);
+      // Per-serve figures read household_size off the user object, so the
+      // profile has to come back before the change is visible on a recipe.
+      await refreshUser();
+      setShowHousehold(false);
+    } catch {
+      Alert.alert('Could not save', 'Please try again.');
+    } finally {
+      setSavingHousehold(null);
+    }
+  }
 
   const planLabel = isPremium
     ? (status?.lapsing && status.expiresAt
@@ -235,6 +256,43 @@ export default function AccountScreen() {
             value={stateName ?? 'Not set'}
             onPress={() => navigation.navigate('StateSelection')}
           />
+          <View style={styles.divider} />
+          <RowItem
+            icon="people-outline"
+            label="Cooking for"
+            value={user?.household_size ? `${user.household_size} people` : 'Not set'}
+            onPress={() => setShowHousehold((v) => !v)}
+          />
+          {showHousehold && (
+            <View style={styles.householdPicker}>
+              <Text style={styles.householdHint}>
+                Used to work out what a meal costs you per serve.
+              </Text>
+              <View style={styles.householdRow}>
+                {HOUSEHOLD_SIZES.map((size) => {
+                  const active = user?.household_size === size;
+                  const busy = savingHousehold === size;
+                  return (
+                    <TouchableOpacity
+                      key={size}
+                      style={[styles.householdChip, active && styles.householdChipActive]}
+                      onPress={() => handleHouseholdChange(size)}
+                      disabled={savingHousehold !== null}
+                      activeOpacity={0.8}
+                    >
+                      {busy ? (
+                        <ActivityIndicator size="small" color="#36453B" />
+                      ) : (
+                        <Text style={[styles.householdChipText, active && styles.householdChipTextActive]}>
+                          {size}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          )}
         </View>
       </View>
 
@@ -386,6 +444,25 @@ const styles = StyleSheet.create({
   rowLabel: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#2A241F' },
   rowValue: { fontSize: 13, color: '#6B5F52', marginTop: 1 },
   divider: { height: 1, backgroundColor: '#f0ede8', marginLeft: 60 },
+
+  // Household size picker
+  householdPicker: { paddingHorizontal: 16, paddingBottom: 16, gap: 10 },
+  householdHint: { fontSize: 12, color: '#6B5F52', lineHeight: 17 },
+  householdRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  householdChip: {
+    minWidth: 44,
+    height: 40,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2D8C6',
+    backgroundColor: '#F4EEE2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  householdChipActive: { backgroundColor: '#DCE4D6', borderColor: '#36453B' },
+  householdChipText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: '#6B5F52' },
+  householdChipTextActive: { color: '#36453B' },
 
   // Sign out
   signOutButton: {

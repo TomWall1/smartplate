@@ -81,9 +81,12 @@ export default function RecipeListScreen({ navigation }: Props) {
   const effectiveState = user?.state || selectedState;
   // Pass the store as well as the state: recipes are anchored on a specific
   // store's specials, and the whole first run is built around that choice.
+  // isPremium is part of the cache key: the server returns 150 recipes to a
+  // subscriber and 50 to everyone else, so the two must not share an entry.
   const { data: recipes = [], isLoading, isError, isFetching, refetch } = useRecipes(
     effectiveState,
     selectedStore,
+    isPremium,
   );
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [activeProtein, setActiveProtein] = useState<string | null>(null);
@@ -165,8 +168,10 @@ export default function RecipeListScreen({ navigation }: Props) {
       </View>
       )}
 
-      {/* Protein filter chips (premium only) */}
-      {isPremium && (
+      {/* Protein filter chips. These were premium-only, but they only filter a
+          list the device has already downloaded — there is nothing behind the
+          gate to pay for, and no paywall ever mentioned them. */}
+      {!isGuest && (
         <View style={styles.proteinSection}>
           <View style={styles.proteinHeader}>
             <Text style={styles.proteinLabel}>Filter by protein on special</Text>

@@ -19,6 +19,15 @@ export async function updateSelectedStore(store: string): Promise<void> {
 }
 
 /**
+ * How many people this account usually cooks for. Drives per-serve costing and
+ * the scaled shopping figures on a recipe, so it is a durable fact worth
+ * storing server-side rather than a device setting.
+ */
+export async function updateHouseholdSize(size: number): Promise<void> {
+  await client.put('/api/users/preferences', { household_size: size });
+}
+
+/**
  * Permanently delete the signed-in account. Required in-app by App Store
  * Guideline 5.1.1(v). The server takes the id from the JWT, so there is
  * nothing to pass.

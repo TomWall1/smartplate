@@ -63,21 +63,94 @@ export interface User {
   state: string | null;
   is_premium: boolean;
   selected_store: string | null;
+  /** How many people are usually cooked for. Drives per-serve costing. */
+  household_size?: number | null;
   /** Present on rows from /api/users/profile; absent on the trimmed fallback. */
   created_at?: string;
 }
 
-export interface PantryItem {
-  id?: string;
-  name: string;
+/** A row of the saved pantry — GET /api/pantry returns one row per user. */
+export interface Pantry {
+  ingredients: string[];
+  has_pantry_staples: boolean;
+  updated_at?: string;
 }
 
+/**
+ * One structured ingredient line as the matcher returns it. `deal` is attached
+ * by the server to missing ingredients that are on special this week.
+ */
+export interface PantryIngredient {
+  name?: string;
+  raw?: string;
+  quantity?: string;
+  deal?: {
+    name: string;
+    price?: number;
+    wasPrice?: number;
+    store?: string;
+  };
+}
+
+/**
+ * POST /api/pantry/match result — mirrors pantryMatcher.js exactly. The old
+ * shape here (coveragePercent / matchedCount / missingDeals) was invented and
+ * matched no endpoint, so every field read as undefined.
+ */
 export interface PantryMatchResult {
   recipe: Recipe;
-  coveragePercent: number;
-  matchedCount: number;
-  totalCount: number;
-  missingDeals: MatchedDeal[];
+  /** 0–1, not a percentage. */
+  coverage: number;
+  matchedIngredients: PantryIngredient[];
+  missingIngredients: PantryIngredient[];
+  /** How many ingredients still have to be bought. */
+  missingCount: number;
+  /** Of those, how many carry no current catalogue price. */
+  unpricedCount: number;
+  /**
+   * Null when nothing could be priced. A number here is a FLOOR unless
+   * `costIsComplete` — never render it as a total without checking that flag.
+   */
+  totalCostToComplete: number | null;
+  /** Only ever set when every missing item has a real price. */
+  costToCompletePerServe: number | null;
+  costIsComplete: boolean;
+  costConfidence: 'complete' | 'measured' | 'partial' | 'unpriced';
+  totalSavings: number;
+}
+
+/** GET /api/premium/price-alerts */
+export interface PriceAlert {
+  id: string;
+  product_name: string;
+  target_price: number;
+  store: string | null;
+  created_at?: string;
+  /** Live status against this week's deals; null when nothing matches. */
+  status: {
+    currentPrice: number;
+    store: string;
+    productName: string;
+    met: boolean;
+  } | null;
+}
+
+/** One line on a shopping list. Stored as JSON in shopping_lists.items. */
+export interface ShoppingListItem {
+  name: string;
+  checked: boolean;
+  /** Which recipe put it on the list, for grouping and de-duplication. */
+  recipeTitle?: string;
+  recipeId?: string;
+}
+
+/** GET /api/premium/shopping-lists */
+export interface ShoppingList {
+  id: string;
+  name: string;
+  items: ShoppingListItem[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AuthResponse {

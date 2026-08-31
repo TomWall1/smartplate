@@ -13,12 +13,14 @@ import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '../context/AuthContext';
 import { usePremium } from '../context/PremiumContext';
+import { track } from '../lib/analytics';
 import {
   getOffers,
   purchase,
   restore,
   canPurchase,
   isPurchasesAvailable,
+  isPurchasesConfigured,
   isUserCancelled,
   SubscriptionOffer,
 } from '../api/purchases';
@@ -29,6 +31,11 @@ export const PRIVACY_URL = 'https://www.dealtodish.com/privacy';
 
 // Only features that actually ship. Anything listed here is something the
 // subscriber can use the moment they pay — see mobile/APP_STORE_READINESS.md B4.
+//
+// Two entries were removed rather than reworded. "Favourites" is free now, so
+// selling it would be selling nothing. "Personalised matching" described a
+// server path this app never calls — it sends no preferences, so a subscriber
+// got the same list, only longer. Claiming it was a 2.3.1 risk.
 const INCLUDED = [
   {
     icon: 'basket-outline' as const,
@@ -36,14 +43,24 @@ const INCLUDED = [
     description: 'Tell us what you already have and we find recipes that use it.',
   },
   {
-    icon: 'heart-outline' as const,
-    title: 'Favourites',
-    description: 'Save recipes you love and come back to them any time.',
+    icon: 'notifications-outline' as const,
+    title: 'Price alerts',
+    description: 'Name what you buy often and see the week it goes on special.',
+  },
+  {
+    icon: 'cart-outline' as const,
+    title: 'Shopping list',
+    description: 'Build it from the recipes you pick, ticked off as you shop.',
+  },
+  {
+    icon: 'wallet-outline' as const,
+    title: 'Cost per serve',
+    description: 'What a meal actually costs, scaled to the size of your household.',
   },
   {
     icon: 'sparkles-outline' as const,
-    title: 'Three times the matches',
-    description: 'Personalised matching across 150 recipes instead of 50.',
+    title: 'Three times the recipes',
+    description: 'Every week we match 150 recipes to the specials instead of 50.',
   },
 ];
 
@@ -68,6 +85,12 @@ export default function PaywallScreen() {
   const [failed, setFailed]   = useState(false);
 
   useEffect(() => {
+    track('paywall_viewed', { signed_in: !!user, purchasable: canPurchase });
+    // Once per mount — the paywall is a modal, so a re-open is a new view.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     (async () => {
       if (!canPurchase) { setLoading(false); return; }
@@ -90,17 +113,22 @@ export default function PaywallScreen() {
 
   const handlePurchase = useCallback(async (offer: SubscriptionOffer) => {
     if (!user) { navigation.navigate('Login'); return; }
+    track('purchase_started', { package: offer.identifier });
     setBusy(true);
     try {
       const ok = await purchase(offer);
       if (ok) {
+        track('purchase_completed', { package: offer.identifier });
         // Reconcile the server before leaving, so the premium endpoints stop
         // 403-ing rather than making the user wait on the webhook.
         await refreshPremium();
         navigation.goBack();
       }
     } catch (err: any) {
-      if (!isUserCancelled(err)) {
+      if (isUserCancelled(err)) {
+        track('purchase_cancelled', { package: offer.identifier });
+      } else {
+        track('purchase_failed', { package: offer.identifier });
         Alert.alert('Purchase failed', err?.message ?? 'Something went wrong. You have not been charged.');
       }
     } finally {
@@ -115,6 +143,7 @@ export default function PaywallScreen() {
     setBusy(true);
     try {
       const found = await restore();
+      track('purchases_restored', { found });
       await refreshPremium();
       if (found) {
         Alert.alert('Purchases restored', 'Your premium access is active again.');
@@ -163,6 +192,10 @@ export default function PaywallScreen() {
       ) : !isPurchasesAvailable ? (
         <Text style={styles.unavailable}>
           Subscriptions are not available in Expo Go. Run a development build to test purchasing.
+        </Text>
+      ) : !isPurchasesConfigured ? (
+        <Text style={styles.unavailable}>
+          Subscriptions are not set up in this build yet.
         </Text>
       ) : failed || !offer ? (
         <Text style={styles.unavailable}>

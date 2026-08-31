@@ -125,7 +125,7 @@ router.post('/suggestions', async (req, res) => {
       if (!isPremiumUser) {
         return res.status(403).json({
           error: 'Premium required',
-          message: 'Upgrade to SmartPlate Premium to get personalised recipe recommendations',
+          message: 'Upgrade to Deals to Dish Premium to get personalised recipe recommendations',
           upgradeUrl: '/premium',
         });
       }

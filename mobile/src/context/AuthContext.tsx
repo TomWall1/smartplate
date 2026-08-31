@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { useQueryClient } from '@tanstack/react-query';
 import { User } from '../types';
 import { login as apiLogin, signup as apiSignup } from '../api/auth';
 import { getProfile } from '../api/users';
@@ -29,6 +30,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading]     = useState(true);
   const [guestMode, setGuestMode] = useState(false);
 
+  const queryClient = useQueryClient();
+
   const logout = useCallback(async () => {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     await SecureStore.deleteItemAsync(REFRESH_KEY);
@@ -36,9 +39,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setUser(null);
     setGuestMode(false);
+    // Everything cached was fetched as THIS user: their favourites, their
+    // pantry, their alerts, and a recipe list whose length depends on their
+    // plan. React Query keeps it for an hour, so without this the next account
+    // to sign in on the device inherits the previous one's data.
+    queryClient.clear();
     // End the identity — the next session starts anonymous again.
     resetAnalytics();
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     registerUnauthorizedHandler(logout);

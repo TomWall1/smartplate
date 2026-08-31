@@ -23,32 +23,79 @@ function timingSafeEqual(a, b) {
 }
 
 /**
- * Write an entitlement decision for one user. `expiresAt` is the authoritative
- * value from the store: past means lapsed, null means a non-expiring grant.
+ * Write an entitlement decision for one user.
  *
- * Deliberately never *upgrades* a manual grant into a subscription-managed one
- * without an expiry — a comped account (premium_source 'admin', expiry NULL)
- * that also subscribes becomes subscription-managed, which is correct, but a
- * subscription event can never clear the comp by accident because we only
- * touch rows we are given an explicit expiry for.
+ * `expiresAt` is the authoritative value from the store: past means lapsed.
+ * `nonExpiring` says a null expiry means "granted forever" (a lifetime or
+ * non-renewing product) rather than "no entitlement" — without it, any product
+ * the store reports without an expiration date is silently written as lapsed.
+ *
+ * A manual comp (premium_source 'admin', expiry NULL) is never touched by a
+ * store event. The old code claimed this but did not do it: it wrote
+ * is_premium and premium_source unconditionally, so one EXPIRATION for a
+ * comped user who had also once subscribed revoked the comp. The row is read
+ * first and admin-sourced rows are left alone.
  */
-async function applyEntitlement({ userId, expiresAt, productId, store }) {
-  const active = expiresAt ? new Date(expiresAt).getTime() > Date.now() : false;
+async function applyEntitlement({ userId, expiresAt, productId, store, nonExpiring = false }) {
+  const active = expiresAt
+    ? new Date(expiresAt).getTime() > Date.now()
+    : nonExpiring;
+
+  const { data: current } = await adminSupabase
+    .from('users')
+    .select('premium_since, premium_source, premium_expires_at, is_premium')
+    .eq('id', userId)
+    .single();
+
+  // A comp is an admin decision; only an admin revokes it.
+  if (current?.premium_source === 'admin' && !current?.premium_expires_at) {
+    console.log(`[subscriptions] ${userId} holds an admin comp — store event ignored`);
+    return !!current.is_premium;
+  }
+
+  const update = {
+    is_premium:         active,
+    premium_expires_at: expiresAt,
+    premium_source:     store === 'PLAY_STORE' ? 'play' : 'app_store',
+    premium_product_id: productId ?? null,
+  };
+
+  // premium_since is a FIRST-purchase marker. It used to be rewritten to now()
+  // on every active event, so each monthly renewal reset it and tenure was
+  // always "joined this month". Set it only when there is nothing there.
+  if (active && !current?.premium_since) {
+    update.premium_since = new Date().toISOString();
+  }
 
   const { error } = await adminSupabase
     .from('users')
-    .update({
-      is_premium:         active,
-      premium_expires_at: expiresAt,
-      premium_source:     store === 'PLAY_STORE' ? 'play' : 'app_store',
-      premium_product_id: productId ?? null,
-      // premium_since is a first-purchase marker; only set it, never clear it.
-      ...(active ? { premium_since: new Date().toISOString() } : {}),
-    })
+    .update(update)
     .eq('id', userId);
 
   if (error) throw new Error(`entitlement update failed: ${error.message}`);
   return active;
+}
+
+/**
+ * TRANSFER moves a store subscription from one app user to another (the same
+ * receipt signing in on a second account). RevenueCat reports who lost it and
+ * who gained it; without handling this the losing account keeps premium for
+ * ever off a subscription it no longer holds.
+ */
+async function applyTransfer(event) {
+  const ids = (list) => (Array.isArray(list) ? list : []).filter(id => UUID_RE.test(id));
+
+  for (const userId of ids(event.transferred_from)) {
+    await adminSupabase
+      .from('users')
+      .update({ is_premium: false, premium_expires_at: new Date().toISOString() })
+      .eq('id', userId)
+      .neq('premium_source', 'admin');
+  }
+
+  // The gaining side has no expiry on the transfer event itself; /refresh (or
+  // the next renewal event) fills it in. Grant nothing here rather than guess.
+  return ids(event.transferred_to).length > 0;
 }
 
 // ── POST /api/subscriptions/webhook ──────────────────────────────────────────
@@ -106,14 +153,22 @@ router.post('/webhook', async (req, res) => {
     return res.status(500).json({ error: 'Could not record event' });
   }
 
-  if (!userId) {
-    // Anonymous purchase — nothing to grant until the user logs in and
-    // RevenueCat aliases the id. Recorded above, so it is not lost.
-    console.warn('[subscriptions] event for non-UUID app_user_id:', appUserId);
-    return res.json({ ok: true, unmapped: true });
-  }
-
   try {
+    // TRANSFER carries the affected users in transferred_from/to rather than
+    // in app_user_id, so it is handled before the app_user_id check below.
+    if (event.type === 'TRANSFER') {
+      const moved = await applyTransfer(event);
+      console.log(`[subscriptions] TRANSFER handled (moved=${moved})`);
+      return res.json({ ok: true, transferred: moved });
+    }
+
+    if (!userId) {
+      // Anonymous purchase — nothing to grant until the user logs in and
+      // RevenueCat aliases the id. Recorded above, so it is not lost.
+      console.warn('[subscriptions] event for non-UUID app_user_id:', appUserId);
+      return res.json({ ok: true, unmapped: true });
+    }
+
     // Entitlement is derived from expiration_at_ms rather than from the event
     // type, which handles every lifecycle case with one rule:
     //   purchase/renewal  → future expiry  → active
@@ -132,11 +187,18 @@ router.post('/webhook', async (req, res) => {
       ? new Date(event.expiration_at_ms).toISOString()
       : null;
 
+    // A non-subscription purchase (lifetime unlock, non-renewing pass) carries
+    // no expiration. Treating a missing expiry as "lapsed" would revoke it the
+    // moment it was bought, so the grant is explicit for those product types.
+    const NON_EXPIRING = new Set(['NON_RENEWING_PURCHASE', 'NON_SUBSCRIPTION_PURCHASE']);
+    const revoking = event.type === 'EXPIRATION' || event.type === 'REFUND';
+
     const active = await applyEntitlement({
       userId,
-      expiresAt: event.type === 'EXPIRATION' ? new Date().toISOString() : expiresAt,
+      expiresAt: revoking ? new Date().toISOString() : expiresAt,
       productId: event.product_id,
       store:     event.store,
+      nonExpiring: !revoking && NON_EXPIRING.has(event.type),
     });
 
     console.log(`[subscriptions] ${event.type} ${userId} → premium=${active} until=${expiresAt}`);
@@ -192,6 +254,9 @@ router.post('/refresh', requireAuth, async (req, res) => {
       expiresAt: ent.expires_date ?? null,
       productId: ent.product_identifier,
       store:     body?.subscriber?.subscriptions?.[ent.product_identifier]?.store,
+      // RevenueCat reports a lifetime entitlement as present with no
+      // expires_date. It is granted, not lapsed.
+      nonExpiring: !ent.expires_date,
     });
 
     const { data: profile } = await adminSupabase

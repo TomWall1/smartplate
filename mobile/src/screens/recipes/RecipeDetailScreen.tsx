@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useCallback, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -14,14 +14,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
 import { MatchedDeal } from '../../types';
-import { useRecipe, useToggleFavorite } from '../../api/hooks';
+import { useRecipe, useToggleFavorite, useFavoriteIds } from '../../api/hooks';
 import { useAuth } from '../../context/AuthContext';
+import { usePremium } from '../../context/PremiumContext';
+import { addItemsToList, getOrCreateDefaultList } from '../../api/premium';
 import { track } from '../../lib/analytics';
 import { decodeEntities } from '../../lib/displayText';
 import { useStore } from '../../context/StoreContext';
 import DealBadge from '../../components/DealBadge';
 import LoadingState from '../../components/LoadingState';
 import ErrorState from '../../components/ErrorState';
+import CostPerServeCard from '../../components/CostPerServeCard';
 import { fonts } from '../../theme';
 
 type Props = NativeStackScreenProps<RecipesStackParamList, 'RecipeDetail'>;
@@ -87,10 +90,17 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
   const { selectedStore, selectedState } = useStore();
   const store = selectedStore;
   const state = user?.state || selectedState;
+  const { isPremium } = usePremium();
   const { data: recipe, isLoading, isError, refetch } = useRecipe(String(id), store, state);
   const toggleFav = useToggleFavorite();
-  const [favorited, setFavorited] = useState(false);
+  // Whether this recipe is saved comes from the server, not from local state.
+  // The screen used to keep its own boolean that started false on every open
+  // and flipped on tap regardless of what the server did, so an already-saved
+  // recipe always showed an empty heart and tapping it removed the favourite.
+  const { data: favoriteIds = [] } = useFavoriteIds(!!user);
+  const favorited = favoriteIds.includes(String(id));
   const [dealsOpen, setDealsOpen] = useState(false);
+  const [addingToList, setAddingToList] = useState(false);
 
   // Deals here open the same screen as tapping a deal in the Deals tab: the
   // nested navigate switches tab and pushes DealRecipes onto that stack, which
@@ -128,11 +138,45 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
       );
       return;
     }
-    toggleFav.mutate(String(id), {
-      onSuccess: () => setFavorited((v) => !v),
-      onError: () => Alert.alert('Error', 'Could not update favourite. Please try again.'),
-    });
+    toggleFav.mutate(
+      { id: String(id), recipe, isFavorite: favorited },
+      { onError: () => Alert.alert('Error', 'Could not update favourite. Please try again.') }
+    );
   }
+
+  /**
+   * Put this recipe's ingredients on the shopping list. Everything already
+   * there is skipped, so tapping twice does not double the list.
+   */
+  const handleAddToList = useCallback(async () => {
+    if (!recipe) return;
+    const names = (recipe.allIngredients ?? recipe.ingredients ?? [])
+      .filter((i): i is string => typeof i === 'string');
+    if (names.length === 0) {
+      Alert.alert('Nothing to add', 'This recipe has no ingredient list to copy.');
+      return;
+    }
+
+    setAddingToList(true);
+    try {
+      const list = await getOrCreateDefaultList();
+      const { added } = await addItemsToList(list, names, {
+        id: String(id),
+        title: recipe.title,
+      });
+      track('shopping_list_added', { recipe_id: String(id), items: added });
+      Alert.alert(
+        added > 0 ? 'Added to your list' : 'Already on your list',
+        added > 0
+          ? `${added} item${added === 1 ? '' : 's'} added.`
+          : 'Everything from this recipe is already there.'
+      );
+    } catch {
+      Alert.alert('Could not add', 'Please try again.');
+    } finally {
+      setAddingToList(false);
+    }
+  }, [recipe, id]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -151,7 +195,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, favorited, toggleFav.isPending]);
+  }, [navigation, favorited, toggleFav.isPending, recipe]);
 
   if (isLoading) return <LoadingState message="Loading recipe…" />;
   if (isError || !recipe) {
@@ -222,6 +266,8 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
+        <CostPerServeCard recipe={recipe} />
+
         {matchedDeals.length > 0 && (
           <View style={styles.savingsCard}>
             <TouchableOpacity style={styles.savingsRow} activeOpacity={0.8} onPress={() => setDealsOpen((v) => !v)}>
@@ -259,7 +305,30 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        <Text style={styles.sectionTitle}>Ingredients</Text>
+        <View style={styles.ingredientsHeader}>
+          <Text style={styles.sectionTitle}>Ingredients</Text>
+          {/* Premium: the free tier gets the gate on the list screen itself,
+              so this stays visible and explains what it is for. */}
+          <TouchableOpacity
+            style={styles.addToListButton}
+            activeOpacity={0.8}
+            disabled={addingToList}
+            onPress={() => {
+              if (!user) { navigation.navigate('Login' as never); return; }
+              if (!isPremium) { navigation.navigate('Paywall' as never); return; }
+              handleAddToList();
+            }}
+          >
+            <Ionicons
+              name={isPremium ? 'cart-outline' : 'lock-closed'}
+              size={15}
+              color="#36453B"
+            />
+            <Text style={styles.addToListText}>
+              {addingToList ? 'Adding…' : 'Add to list'}
+            </Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.ingredientsList}>
           {ingredients.map((ing, idx) => {
             const name = typeof ing === 'string' ? ing : '';
@@ -329,6 +398,26 @@ const styles = StyleSheet.create({
   dealListPrice: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#2A241F' },
   dealListSave: { fontFamily: 'Inter_500Medium', fontSize: 12, color: '#BE6A43' },
   sectionTitle: { fontSize: 18, fontFamily: fonts.display, color: '#2A241F', marginTop: 4, marginBottom: -4 },
+  ingredientsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  addToListButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#DCE4D6',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+  },
+  addToListText: {
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    color: '#36453B',
+  },
   ingredientsList: { gap: 12 },
   ingredientItem: { gap: 4 },
   ingredientRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },

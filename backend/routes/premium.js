@@ -77,55 +77,10 @@ router.get('/status', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FAVORITES
+// FAVORITES — moved to routes/favorites.js (auth-only, no longer premium).
+// server.js mounts that router at /api/premium/favorites as well, so the
+// web app's existing calls keep working against the same handlers.
 // ═══════════════════════════════════════════════════════════════════════════
-
-// GET /api/premium/favorites
-router.get('/favorites', requirePremium, async (req, res) => {
-  const supabase = clientForToken(req.token);
-  const { data, error } = await supabase
-    .from('favorite_recipes')
-    .select('*')
-    .eq('user_id', req.user.id)
-    .order('saved_at', { ascending: false });
-
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ favorites: data ?? [] });
-});
-
-// POST /api/premium/favorites/:recipeId
-router.post('/favorites/:recipeId', requirePremium, async (req, res) => {
-  const supabase = clientForToken(req.token);
-  const { recipeId } = req.params;
-  const { recipe_data } = req.body; // Optional snapshot: { title, image, tags, prepTime }
-
-  const { data, error } = await supabase
-    .from('favorite_recipes')
-    .upsert(
-      { user_id: req.user.id, recipe_id: recipeId, recipe_data: recipe_data ?? null },
-      { onConflict: 'user_id,recipe_id' }
-    )
-    .select()
-    .single();
-
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ favorite: data });
-});
-
-// DELETE /api/premium/favorites/:recipeId
-router.delete('/favorites/:recipeId', requirePremium, async (req, res) => {
-  const supabase = clientForToken(req.token);
-  const { recipeId } = req.params;
-
-  const { error } = await supabase
-    .from('favorite_recipes')
-    .delete()
-    .eq('user_id', req.user.id)
-    .eq('recipe_id', recipeId);
-
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true });
-});
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MEAL PLAN

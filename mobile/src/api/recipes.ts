@@ -19,11 +19,6 @@ export async function getRecipeById(id: string, store?: string | null, state?: s
   return response.data;
 }
 
-export async function toggleFavorite(id: string): Promise<void> {
-  await client.post(`/api/recipes/${id}/favorite`);
-}
-
-export async function getFavorites(): Promise<Recipe[]> {
-  const response = await client.get<{ recipes: Recipe[] }>('/api/recipes/favorites');
-  return response.data.recipes ?? [];
-}
+// Favourites live in api/favorites.ts. They used to be here, pointing at
+// /api/recipes/favorites and POST /api/recipes/:id/favorite — routes the
+// backend has never defined.

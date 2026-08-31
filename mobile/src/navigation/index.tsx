@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
@@ -30,6 +30,8 @@ import PantryResultsScreen from '../screens/pantry/PantryResultsScreen';
 import AccountScreen from '../screens/AccountScreen';
 import DealRecipesScreen from '../screens/DealRecipesScreen';
 import PaywallScreen from '../screens/PaywallScreen';
+import PriceAlertsScreen from '../screens/PriceAlertsScreen';
+import ShoppingListScreen from '../screens/ShoppingListScreen';
 
 import { PantryMatchResult } from '../types';
 
@@ -67,15 +69,18 @@ export type DealsStackParamList = {
 export type RecipesStackParamList = {
   RecipeList: undefined;
   RecipeDetail: { id: string; title: string };
+  // Favourites is free, so it belongs with the recipes rather than behind the
+  // premium tab where it used to live.
+  Favourites: undefined;
 };
 
 export type PremiumStackParamList = {
   PremiumHub: undefined;
-  Favourites: undefined;
-  FavouriteDetail: { id: string; title: string };
   PantryInput: undefined;
   PantryResults: { results: PantryMatchResult[] };
   PantryRecipeDetail: { id: string; title: string };
+  PriceAlerts: undefined;
+  ShoppingList: undefined;
 };
 
 export type AccountStackParamList = {
@@ -131,11 +136,31 @@ function DealsNavigator() {
 function RecipesNavigator() {
   return (
     <RecipesStack.Navigator screenOptions={headerOptions}>
-      <RecipesStack.Screen name="RecipeList" component={RecipeListScreen} options={{ title: 'Recipes' }} />
+      <RecipesStack.Screen
+        name="RecipeList"
+        component={RecipeListScreen}
+        options={({ navigation }) => ({
+          title: 'Recipes',
+          // Saved recipes are one tap from the list they were saved out of.
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Favourites')}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons name="heart-outline" size={22} color={colors.ink} />
+            </TouchableOpacity>
+          ),
+        })}
+      />
       <RecipesStack.Screen
         name="RecipeDetail"
         component={RecipeDetailScreen}
         options={({ route }) => ({ title: decodeEntities(route.params.title) })}
+      />
+      <RecipesStack.Screen
+        name="Favourites"
+        component={FavouritesScreen as any}
+        options={{ title: 'Saved recipes' }}
       />
     </RecipesStack.Navigator>
   );
@@ -145,12 +170,6 @@ function PremiumNavigator() {
   return (
     <PremiumStack.Navigator screenOptions={headerOptions}>
       <PremiumStack.Screen name="PremiumHub" component={PremiumHubScreen} options={{ title: 'Premium' }} />
-      <PremiumStack.Screen name="Favourites" component={FavouritesScreen} options={{ title: 'My Favourites' }} />
-      <PremiumStack.Screen
-        name="FavouriteDetail"
-        component={RecipeDetailScreen as any}
-        options={({ route }) => ({ title: (route.params as { title: string }).title })}
-      />
       <PremiumStack.Screen name="PantryInput" component={PantryInputScreen} options={{ title: 'My Pantry' }} />
       <PremiumStack.Screen
         name="PantryResults"
@@ -161,6 +180,16 @@ function PremiumNavigator() {
         name="PantryRecipeDetail"
         component={RecipeDetailScreen as any}
         options={({ route }) => ({ title: (route.params as { title: string }).title })}
+      />
+      <PremiumStack.Screen
+        name="PriceAlerts"
+        component={PriceAlertsScreen}
+        options={{ title: 'Price alerts' }}
+      />
+      <PremiumStack.Screen
+        name="ShoppingList"
+        component={ShoppingListScreen}
+        options={{ title: 'Shopping list' }}
       />
     </PremiumStack.Navigator>
   );

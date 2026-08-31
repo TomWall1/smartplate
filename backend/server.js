@@ -81,6 +81,7 @@ const feedbackRoutes    = require('./routes/feedback');
 const authRoutes        = require('./routes/auth');
 const diagnosticsRoutes = require('./routes/diagnostics');
 const subscriptionRoutes = require('./routes/subscriptions');
+const favoritesRoutes   = require('./routes/favorites');
 
 // Routes — diagnostics must stay registered before the admin router
 // (unauthenticated scraper checks; see commit 0579823 on route ordering).
@@ -88,6 +89,11 @@ app.use('/api/admin',    diagnosticsRoutes);
 app.use('/api/deals',    dealsRoutes);
 app.use('/api/recipes',  recipesRoutes);
 app.use('/api/users',    usersRoutes);
+// Favourites are free (auth-only). Mounted before the premium router so the
+// web app's /api/premium/favorites calls hit these handlers rather than
+// falling through to premium.js, which no longer defines them.
+app.use('/api/premium/favorites', favoritesRoutes);
+app.use('/api/favorites', favoritesRoutes);
 app.use('/api/premium',  premiumRoutes);
 app.use('/api/admin',    adminRoutes);
 app.use('/api/pantry',   pantryRoutes);

@@ -18,8 +18,8 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
 
   const handleFavorite = useCallback(async (e) => {
     e.stopPropagation();
+    // Saving a recipe is free — it only needs an account to save it against.
     if (!user) { navigate('/auth'); return; }
-    if (!isPremium) { navigate('/premium'); return; }
 
     setFavLoading(true);
     try {
@@ -44,7 +44,7 @@ function RecipeCard({ recipe, showMatchReason = false, isFavorited = false, onFa
     } finally {
       setFavLoading(false);
     }
-  }, [favorited, recipe, user, isPremium, navigate, onFavoriteChange]);
+  }, [favorited, recipe, user, navigate, onFavoriteChange]);
 
   const handleClick = () => navigate(`/recipes/${recipe.id}`);
   const handleKeyDown = (e) => {
