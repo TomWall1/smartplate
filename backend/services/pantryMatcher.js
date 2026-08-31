@@ -16,6 +16,29 @@ const { validateMatch } = require('./matchingValidator');
 const MIN_COVERAGE = 0.4;
 const MAX_RESULTS  = 20;
 
+// Recipes priced before the final ranking. Coverage decides who gets PRICED;
+// price decides who gets SHOWN. The pool has to be wider than the result set
+// or the money ranking is just a re-shuffle of the coverage ranking.
+const PRICING_POOL = 80;
+
+// Charged for a missing ingredient we could not price. Deliberately on the
+// high side of a real grocery line.
+//
+// This number is the guard against the failure that matters here. Ranking
+// takes the argmin over the whole pool, so it does not merely tolerate bad
+// estimates — it SEEKS them, surfacing whichever recipes were costed most
+// wrongly cheap. Anything we cannot price must therefore be assumed expensive;
+// otherwise "we had no data" becomes indistinguishable from "it is free", and
+// missing data wins every time.
+const UNPRICED_ITEM_COST = 4.00;
+
+// Below this, too little of the basket is priced for a dollar figure to mean
+// anything, and the result is reported as unranked-by-cost rather than given a
+// number we cannot stand behind.
+const MIN_PRICED_RATIO = 0.5;
+
+const DEFAULT_SERVINGS = 4;
+
 const PANTRY_STAPLES = new Set([
   'salt', 'pepper', 'black pepper', 'white pepper', 'cracked pepper',
   'olive oil', 'vegetable oil', 'cooking oil', 'canola oil', 'oil',
@@ -195,14 +218,31 @@ function findDealForIngredient(ingName, allDeals) {
 
 /**
  * Match a user's pantry against the FULL recipe library — a true "what can I
- * make right now" tool (not just this week's deal recipes). Missing ingredients
- * are enriched with current deals, but only after ranking + slicing to the top
- * results, so deal lookup stays cheap regardless of library size.
+ * make right now" tool (not just this week's deal recipes).
  *
- * @param {string[]} userIngredients - Array of ingredient name strings
- * @param {boolean}  hasPantryStaples - Whether user has common pantry staples
- * @param {object}   [opts] - { state } for store-correct deal enrichment
- * @returns {Promise<Array>} Ranked list of matched recipes
+ * RANKING. Results are ordered by what the shopper still has to SPEND, not by
+ * how much of the recipe they happen to own.
+ *
+ * The old ranking was coverage — matched ÷ required — which is the wrong
+ * objective for a feature whose whole promise is value. It structurally
+ * favoured short, simple recipes (four ingredients, own three) over a real
+ * dinner where you own six of nine and the lamb is half price, and it ignored
+ * price and deals completely: deals were loaded only AFTER the top 20 had been
+ * chosen, so the user's supermarket could not influence which recipes they saw.
+ *
+ * Ranking on cost-to-complete rather than on savings is deliberate. Savings
+ * would mean subtracting an estimated value for what the user already owns,
+ * and a ranking that subtracts an estimate selects for whichever estimate was
+ * most wrongly generous. Pricing only what must be BOUGHT inverts that: the
+ * items being priced are the ones sitting in this week's catalogue with real
+ * prices attached, and to wrongly promote a recipe we would have to UNDER-price
+ * something we have real data for. What the user owns enters as a count, never
+ * as a dollar figure.
+ *
+ * @param {string[]} userIngredients  - Ingredient name strings
+ * @param {boolean}  hasPantryStaples - Whether the user has common staples
+ * @param {object}   [opts]           - { state, store }
+ * @returns {Promise<Array>} Ranked recipes, cheapest-to-finish first
  */
 async function matchPantry(userIngredients, hasPantryStaples = true, opts = {}) {
   const recipeMatcher = require('./recipeMatcher');
@@ -220,43 +260,73 @@ async function matchPantry(userIngredients, hasPantryStaples = true, opts = {}) 
     results.push({ recipe, match });
   }
 
-  // 2. Rank, then slice to the top results BEFORE the expensive deal lookup.
+  // 2. Coverage decides who gets priced. This is a shortlist, not the answer —
+  //    it exists because pricing every one of the 2,184 library recipes against
+  //    the catalogue would be wasted work, not because coverage is the ranking.
   results.sort((a, b) => {
     if (b.match.coverage !== a.match.coverage) return b.match.coverage - a.match.coverage;
-    // prefer fewer missing items, then more total ingredients (more substantial)
     if (a.match.missingIngredients.length !== b.match.missingIngredients.length) {
       return a.match.missingIngredients.length - b.match.missingIngredients.length;
     }
-    return (b.match.matchedIngredients.length) - (a.match.matchedIngredients.length);
+    return b.match.matchedIngredients.length - a.match.matchedIngredients.length;
   });
-  results = results.slice(0, MAX_RESULTS);
+  results = results.slice(0, PRICING_POOL);
 
-  // 3. Load current (state-correct) deals and enrich the top results only.
+  // 3. Load current deals for the user's state, and narrow to their store when
+  //    they have chosen one. Without the store filter the cheapest price for a
+  //    missing item could come from a supermarket they are not shopping at,
+  //    which makes the total unactionable.
   let allDeals = [];
   try {
     const cache = await dealService.getDealsByState(opts.state || 'nsw');
     allDeals = Array.isArray(cache) ? cache : [];
+    if (opts.store) {
+      const want = String(opts.store).toLowerCase();
+      const scoped = allDeals.filter(d => (d.store || '').toLowerCase() === want);
+      // Only narrow if the store actually has a catalogue this week; an empty
+      // filter would silently price every recipe at zero deals.
+      if (scoped.length > 0) allDeals = scoped;
+    }
   } catch {
-    // Non-fatal — just won't show deals on missing ingredients
+    // Non-fatal — everything still works, just with no prices attached.
   }
 
-  return results.map(({ recipe, match }) => {
-    let totalCostToComplete = 0;
-    let totalSavings = 0;
+  // 4. Price the shortlist, then rank on money.
+  const priced = results.map(({ recipe, match }) => {
+    const servings = recipe.servings > 0 ? recipe.servings : DEFAULT_SERVINGS;
+
+    let knownCost = 0;
+    let savings   = 0;
+    let pricedItems = 0;
 
     const missingWithDeals = match.missingIngredients.map(ing => {
       const ingName = ing.name || (ing.raw || '').replace(/^\d[\d\s/]*[a-z]*\s*/i, '');
       const deal = findDealForIngredient(ingName, allDeals);
-      if (deal) {
-        const price    = parseFloat(deal.price) || 0;
-        const wasPrice = parseFloat(deal.originalPrice ?? deal.wasPrice) || 0;
-        totalCostToComplete += price;
-        if (wasPrice > price) totalSavings += wasPrice - price;
-        // normalise field name for the frontend (it reads deal.wasPrice)
-        return { ...ing, deal: { ...deal, wasPrice: wasPrice || undefined } };
-      }
-      return ing;
+      if (!deal) return ing;
+
+      const price    = parseFloat(deal.price) || 0;
+      const wasPrice = parseFloat(deal.originalPrice ?? deal.wasPrice) || 0;
+      if (price > 0) { knownCost += price; pricedItems++; }
+      if (wasPrice > price) savings += wasPrice - price;
+
+      // normalise field name for the frontend (it reads deal.wasPrice)
+      return { ...ing, deal: { ...deal, wasPrice: wasPrice || undefined } };
     });
+
+    const missingCount   = match.missingIngredients.length;
+    const unpricedCount  = missingCount - pricedItems;
+    const pricedRatio    = missingCount === 0 ? 1 : pricedItems / missingCount;
+
+    // Two figures, and the difference between them is the point.
+    // - `floor` is only real prices: what we can prove, shown as "from $X".
+    // - `ranking` charges every unpriced item, so a recipe can never rank
+    //   better by being harder to price.
+    const costFloor   = +knownCost.toFixed(2);
+    // Ranked on the TOTAL basket, not per serve. Per serve is the honest unit
+    // to read, but it is the wrong thing to sort on: servings counts in the
+    // library range from 1 to 24 and are not reliable, so dividing by them
+    // hands the top of the list to whatever claims to feed the most people.
+    const costForRank = knownCost + unpricedCount * UNPRICED_ITEM_COST;
 
     return {
       recipe: {
@@ -266,14 +336,49 @@ async function matchPantry(userIngredients, hasPantryStaples = true, opts = {}) 
         image:     recipe.image,
         url:       recipe.url,
         totalTime: recipe.totalTime,
+        servings:  recipe.servings ?? null,
       },
       coverage:            match.coverage,
       matchedIngredients:  match.matchedIngredients,
       missingIngredients:  missingWithDeals,
-      totalCostToComplete: Math.round(totalCostToComplete * 100) / 100,
-      totalSavings:        Math.round(totalSavings * 100) / 100,
+
+      // What you still have to buy — the honest headline.
+      missingCount,
+      unpricedCount,
+      // A floor, not a total, unless costIsComplete. Null when we priced
+      // nothing at all: "$0.00" for a basket we could not price is the exact
+      // lie this ranking exists to avoid, and it is the one a reader is least
+      // likely to question.
+      totalCostToComplete:    pricedItems > 0 ? costFloor : null,
+      // Only ever emitted when every missing item carries a real price.
+      // Otherwise the client shows "from $X", or just the count.
+      costToCompletePerServe: unpricedCount === 0 && missingCount > 0
+        ? +(costFloor / servings).toFixed(2)
+        : null,
+      costIsComplete:         missingCount > 0 && unpricedCount === 0,
+      costConfidence:         missingCount === 0            ? 'complete'
+                            : pricedItems === 0             ? 'unpriced'
+                            : pricedRatio >= MIN_PRICED_RATIO ? 'measured'
+                            :                                 'partial',
+
+      totalSavings:           +savings.toFixed(2),
+      _rankCost:              costForRank,
     };
   });
+
+  priced.sort((a, b) => {
+    // Cheapest basket to finish, with every unpriced item charged at the
+    // pessimistic rate so missing data can never look like a bargain. When
+    // nothing at all can be priced this degrades gracefully into "fewest
+    // things to buy", which is the right answer with no price data.
+    if (a._rankCost !== b._rankCost) return a._rankCost - b._rankCost;
+    // Then fewer things to buy — one trip item beats three of the same value.
+    if (a.missingCount !== b.missingCount) return a.missingCount - b.missingCount;
+    // Then more of the recipe already in the cupboard.
+    return b.coverage - a.coverage;
+  });
+
+  return priced.slice(0, MAX_RESULTS).map(({ _rankCost, ...rest }) => rest);
 }
 
 module.exports = { matchPantry };

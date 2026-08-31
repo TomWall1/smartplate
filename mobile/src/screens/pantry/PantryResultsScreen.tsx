@@ -10,10 +10,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PremiumStackParamList } from '../../navigation';
-import { PantryMatchResult } from '../../types';
-import DealBadge from '../../components/DealBadge';
+import { PantryMatchResult, PantryIngredient } from '../../types';
 
 type Props = NativeStackScreenProps<PremiumStackParamList, 'PantryResults'>;
+
+/** The matcher returns structured lines; `name` is the bare ingredient. */
+function ingredientLabel(ing: PantryIngredient): string {
+  return (ing.name || ing.raw || '').trim();
+}
 
 function CoverageBar({ percent }: { percent: number }) {
   const clamped = Math.min(100, Math.max(0, percent));
@@ -25,36 +29,55 @@ function CoverageBar({ percent }: { percent: number }) {
   );
 }
 
+/**
+ * Results are ranked by what you still have to SPEND, so the card leads with
+ * that, not with a coverage percentage.
+ *
+ * The price line is deliberately fussy about what it claims:
+ *   every item priced  → an exact figure
+ *   some priced        → "from $X", never a total
+ *   none priced        → no figure at all, just the count
+ * A "$0.00" on a basket we could not price is the exact lie the whole ranking
+ * exists to avoid, and it is the one a reader is least likely to question.
+ */
+function priceLine(result: PantryMatchResult): string {
+  const { missingCount, totalCostToComplete, costIsComplete } = result;
+
+  if (missingCount === 0) return 'You have everything';
+  if (totalCostToComplete == null) {
+    return `${missingCount} to buy — not in this week's catalogue`;
+  }
+  const money = `$${totalCostToComplete.toFixed(2)}`;
+  return costIsComplete ? `${money} to finish` : `from ${money} to finish`;
+}
+
 function ResultCard({ result, onPress }: { result: PantryMatchResult; onPress: () => void }) {
-  const { recipe, coveragePercent, matchedCount, totalCount, missingDeals } = result;
+  const { recipe, matchedIngredients, missingIngredients, totalSavings } = result;
+
+  const matchedCount = matchedIngredients?.length ?? 0;
+  const totalCount   = matchedCount + (missingIngredients?.length ?? 0);
+  const coveragePercent = Math.round((result.coverage ?? 0) * 100);
+
+  const perServe = result.costToCompletePerServe;
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.88}>
-      <Image
-        source={{ uri: recipe.image }}
-        style={styles.cardImage}
-        resizeMode="cover"
-      />
+      <Image source={{ uri: recipe.image }} style={styles.cardImage} resizeMode="cover" />
       <View style={styles.cardBody}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle} numberOfLines={2}>{recipe.title}</Text>
-          <View style={[
-            styles.coverageBadge,
-            { backgroundColor: coveragePercent >= 75 ? '#DCE4D6' : coveragePercent >= 50 ? '#FFF3E0' : '#FDECEA' }
-          ]}>
-            <Text style={[
-              styles.coverageBadgeText,
-              { color: coveragePercent >= 75 ? '#36453B' : coveragePercent >= 50 ? '#c07820' : '#b03060' }
-            ]}>
-              {Math.round(coveragePercent)}%
-            </Text>
-          </View>
+        <Text style={styles.cardTitle} numberOfLines={2}>{recipe.title}</Text>
+
+        {/* The headline: what finishing this dish costs. */}
+        <View style={styles.priceRow}>
+          <Text style={styles.priceText}>{priceLine(result)}</Text>
+          {perServe != null && (
+            <Text style={styles.perServeText}>${perServe.toFixed(2)} a serve</Text>
+          )}
         </View>
 
         <View style={styles.coverageRow}>
           <CoverageBar percent={coveragePercent} />
           <Text style={styles.coverageText}>
-            You have {matchedCount}/{totalCount} ingredients
+            You have {matchedCount} of {totalCount} ingredients
           </Text>
         </View>
 
@@ -65,16 +88,28 @@ function ResultCard({ result, onPress }: { result: PantryMatchResult; onPress: (
           </View>
         )}
 
-        {missingDeals && missingDeals.length > 0 && (
+        {missingIngredients && missingIngredients.length > 0 && (
           <View style={styles.dealsSection}>
-            <Text style={styles.dealsSectionLabel}>
-              Deals on missing items:
-            </Text>
-            {missingDeals.slice(0, 2).map((deal, idx) => (
-              <DealBadge key={idx} deal={deal} />
+            <Text style={styles.dealsSectionLabel}>Still need</Text>
+            {missingIngredients.slice(0, 3).map((ing, idx) => (
+              <View key={idx} style={styles.missingRow}>
+                <Text style={styles.missingName} numberOfLines={1}>
+                  {ingredientLabel(ing)}
+                </Text>
+                {ing.deal?.price != null ? (
+                  <Text style={styles.missingPrice}>${Number(ing.deal.price).toFixed(2)}</Text>
+                ) : (
+                  <Text style={styles.missingUnpriced}>—</Text>
+                )}
+              </View>
             ))}
-            {missingDeals.length > 2 && (
-              <Text style={styles.moreDeals}>+{missingDeals.length - 2} more deals</Text>
+            {missingIngredients.length > 3 && (
+              <Text style={styles.moreDeals}>+{missingIngredients.length - 3} more</Text>
+            )}
+            {totalSavings > 0 && (
+              <Text style={styles.savingLine}>
+                Some are on special — saves ${totalSavings.toFixed(2)}.
+              </Text>
             )}
           </View>
         )}
@@ -105,7 +140,7 @@ export default function PantryResultsScreen({ route, navigation }: Props) {
     <View style={styles.container}>
       <View style={styles.resultsSummary}>
         <Text style={styles.resultsSummaryText}>
-          Found {results.length} recipe{results.length !== 1 ? 's' : ''} matching your pantry
+          {results.length} recipe{results.length !== 1 ? 's' : ''}, cheapest to finish first
         </Text>
       </View>
       <FlatList
@@ -172,27 +207,31 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 10,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
   cardTitle: {
-    flex: 1,
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
     color: '#2A241F',
     lineHeight: 22,
   },
-  coverageBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    flexShrink: 0,
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 8,
   },
-  coverageBadgeText: {
+  priceText: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#BE6A43',
+    flexShrink: 1,
+  },
+  perServeText: {
+    fontSize: 12,
+    color: '#6B5F52',
+  },
+  missingUnpriced: {
     fontSize: 13,
-    fontFamily: 'Inter_700Bold',
+    color: '#9A8E7E',
   },
   coverageRow: {
     gap: 6,
@@ -235,6 +274,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#36453B',
     fontFamily: 'Inter_600SemiBold',
+  },
+  missingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  missingName: {
+    flex: 1,
+    fontSize: 13,
+    color: '#6B5F52',
+  },
+  missingPrice: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#BE6A43',
+  },
+  savingLine: {
+    fontSize: 12,
+    color: '#BE6A43',
+    fontFamily: 'Inter_500Medium',
+    marginTop: 2,
   },
   empty: {
     flex: 1,

@@ -15,9 +15,12 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PremiumStackParamList } from '../../navigation';
-import { matchPantry } from '../../api/pantry';
+import { matchPantry, savePantry } from '../../api/pantry';
+import { usePantry } from '../../api/hooks';
 import PremiumGate from '../../components/PremiumGate';
 import { usePremium } from '../../context/PremiumContext';
+import { useAuth } from '../../context/AuthContext';
+import { useStore } from '../../context/StoreContext';
 
 type Props = NativeStackScreenProps<PremiumStackParamList, 'PantryInput'>;
 
@@ -28,10 +31,24 @@ const QUICK_ADD_ITEMS = [
 
 export default function PantryInputScreen({ navigation }: Props) {
   const { isPremium } = usePremium();
+  const { user } = useAuth();
+  const { selectedState, selectedStore } = useStore();
   const [inputText, setInputText] = useState('');
   const [items, setItems] = useState<string[]>([]);
   const [includeStaples, setIncludeStaples] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // A pantry does not change much between visits, so the saved one is the
+  // starting point. The save endpoint existed from the beginning but nothing
+  // ever called it, which meant re-typing the cupboard on every use.
+  const { data: savedPantry } = usePantry(isPremium);
+  const [restored, setRestored] = useState(false);
+  React.useEffect(() => {
+    if (restored || !savedPantry) return;
+    setRestored(true);
+    if (savedPantry.ingredients?.length) setItems(savedPantry.ingredients);
+    setIncludeStaples(savedPantry.has_pantry_staples !== false);
+  }, [savedPantry, restored]);
 
   function addItem(name: string) {
     const trimmed = name.trim();
@@ -64,14 +81,18 @@ export default function PantryInputScreen({ navigation }: Props) {
     }
     setLoading(true);
     try {
-      const results = await matchPantry(items, includeStaples);
+      const state = user?.state || selectedState;
+      const results = await matchPantry(items, includeStaples, state, selectedStore);
+      // Save after a successful match, not before: a rejected request should
+      // not persist a pantry the server would not accept.
+      savePantry(items, includeStaples).catch(() => { /* not worth blocking on */ });
       navigation.navigate('PantryResults', { results });
     } catch {
       Alert.alert('Error', 'Could not match recipes. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [items, includeStaples, navigation]);
+  }, [items, includeStaples, navigation, user?.state, selectedState, selectedStore]);
 
   // Second line behind the premium hub — matching is a paid, Claude-backed
   // call, so a free user must not reach the form at all.

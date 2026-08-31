@@ -77,17 +77,23 @@ router.delete('/', requirePremium, async (req, res) => {
 // ── POST /api/pantry/match ────────────────────────────────────────────────────
 // Find recipes matching the provided pantry ingredients.
 router.post('/match', requirePremium, async (req, res) => {
-  const { ingredients, has_pantry_staples, state } = req.body;
+  const { ingredients, has_pantry_staples, state, store } = req.body;
 
   if (!Array.isArray(ingredients) || ingredients.length === 0) {
     return res.status(400).json({ error: 'ingredients must be a non-empty array' });
   }
 
   try {
+    // `store` narrows the pricing of missing ingredients to the supermarket the
+    // user actually shops at — a cheaper price at a store they are not visiting
+    // is not a price they can act on.
     const results = await matchPantry(
       ingredients.map(s => String(s).trim()).filter(Boolean),
       has_pantry_staples !== false,
-      { state: (state || 'nsw').toLowerCase() }
+      {
+        state: (state || 'nsw').toLowerCase(),
+        store: store ? String(store).toLowerCase() : null,
+      }
     );
     res.json({ recipes: results, total: results.length });
   } catch (err) {
