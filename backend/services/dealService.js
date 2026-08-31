@@ -456,6 +456,8 @@ const getCurrentDeals = async () => {
  *
  * Called by POST /api/deals/refresh, the weekly cron job, and server startup.
  */
+const priceHistoryService = require('./priceHistoryService');
+
 const refreshDeals = async (state) => {
   // Phase 1: raw fetch + immediate cache write
   const byStore = await _fetchRaw(state);
@@ -649,6 +651,12 @@ async function refreshStateDeals() {
           console.warn(`[StateDeals] ${state}: PI enrichment of state-unique deals failed: ${err.message}`);
         }
       }
+
+      // Record this week's real prices BEFORE the artifact write, while the
+      // scraped unit prices are still on the deals. Price data cannot be
+      // backfilled — a week not recorded here is gone for good. Never throws;
+      // bookkeeping must not be able to break the deal refresh.
+      await priceHistoryService.recordDeals(flat, state);
 
       await db.saveStateDeals(state, {
         state,

@@ -102,6 +102,40 @@ const _autoMigrate = (async () => {
         generated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    // Every week the catalogue scraper reads ~470 real prices — including the
+    // advertised unit price ("$21 per kg") — and until now threw all of it
+    // away. Price data cannot be backfilled: a price not recorded this week is
+    // gone. This is the series that eventually replaces estimated ingredient
+    // costs with measured ones.
+    //
+    // UNIQUE(week, store, state, normalized) makes recording idempotent, so a
+    // re-run of the weekly pipeline cannot double-count a week.
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS price_observations (
+        id              BIGSERIAL   PRIMARY KEY,
+        observed_week   DATE        NOT NULL,
+        store           TEXT        NOT NULL,
+        state           TEXT        NOT NULL,
+        product_name    TEXT        NOT NULL,
+        normalized      TEXT        NOT NULL,
+        brand           TEXT,
+        tier            TEXT        NOT NULL DEFAULT 'branded',
+        price           NUMERIC(10,2),
+        was_price       NUMERIC(10,2),
+        unit_value      NUMERIC(12,4),
+        unit_basis      TEXT,
+        category        TEXT,
+        base_ingredient TEXT,
+        recorded_at     TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (observed_week, store, state, normalized)
+      )
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_price_obs_normalized ON price_observations(normalized)
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_price_obs_base ON price_observations(base_ingredient)
+    `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS outbound_clicks (
         source TEXT NOT NULL,
@@ -614,6 +648,70 @@ async function getStats() {
   return { products, aliases };
 }
 
+
+// ── Price observations (weekly measured prices) ───────────────────────────────
+
+/**
+ * Record one week's catalogue prices. Idempotent per
+ * (week, store, state, product) so re-running the pipeline cannot inflate the
+ * series; a repeat write refreshes the row rather than adding a second one.
+ * @param {Array} rows - see services/priceHistoryService.js buildObservations
+ */
+async function savePriceObservations(rows) {
+  await _autoMigrate;
+  if (!rows.length) return 0;
+
+  // Chunked: a full national week is ~3,300 rows across states and 14
+  // parameters each, which overruns the 65,535 bind-parameter ceiling.
+  const CHUNK = 400;
+  let written = 0;
+
+  for (let start = 0; start < rows.length; start += CHUNK) {
+    const chunk = rows.slice(start, start + CHUNK);
+    const values = [];
+    const params = [];
+    chunk.forEach((r, i) => {
+      const b = i * 13;
+      values.push(`($${b+1},$${b+2},$${b+3},$${b+4},$${b+5},$${b+6},$${b+7},$${b+8},$${b+9},$${b+10},$${b+11},$${b+12},$${b+13})`);
+      params.push(
+        r.observedWeek, r.store, r.state, r.productName, r.normalized,
+        r.brand ?? null, r.tier ?? 'branded', r.price ?? null, r.wasPrice ?? null,
+        r.unitValue ?? null, r.unitBasis ?? null, r.category ?? null, r.baseIngredient ?? null,
+      );
+    });
+
+    await pool.query(`
+      INSERT INTO price_observations
+        (observed_week, store, state, product_name, normalized, brand, tier,
+         price, was_price, unit_value, unit_basis, category, base_ingredient)
+      VALUES ${values.join(',')}
+      ON CONFLICT (observed_week, store, state, normalized) DO UPDATE
+        SET price = EXCLUDED.price, was_price = EXCLUDED.was_price,
+            unit_value = EXCLUDED.unit_value, unit_basis = EXCLUDED.unit_basis,
+            tier = EXCLUDED.tier, brand = EXCLUDED.brand,
+            category = EXCLUDED.category, base_ingredient = EXCLUDED.base_ingredient,
+            recorded_at = CURRENT_TIMESTAMP
+    `, params);
+    written += chunk.length;
+  }
+  return written;
+}
+
+/** How much price history exists — the answer to "is this worth using yet". */
+async function getPriceObservationStats() {
+  await _autoMigrate;
+  const { rows } = await pool.query(`
+    SELECT COUNT(*)::int                              AS observations,
+           COUNT(DISTINCT normalized)::int            AS distinct_products,
+           COUNT(DISTINCT observed_week)::int         AS weeks,
+           COUNT(unit_value)::int                     AS with_unit_price,
+           MIN(observed_week)                         AS first_week,
+           MAX(observed_week)                         AS last_week
+    FROM price_observations
+  `);
+  return rows[0] ?? null;
+}
+
 module.exports = {
   getDb,
   closeDb,
@@ -624,6 +722,8 @@ module.exports = {
   getDealsCache,
   getMatchEdges,
   saveMatchEdges,
+  savePriceObservations,
+  getPriceObservationStats,
   getRecipeCosts,
   saveRecipeCosts,
   saveStateDeals,

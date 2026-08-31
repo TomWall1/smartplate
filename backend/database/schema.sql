@@ -219,3 +219,28 @@ CREATE TABLE IF NOT EXISTS outbound_clicks (
   clicks INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (source, day)
 );
+
+
+-- Weekly measured catalogue prices. Mirrors the Postgres table created in
+-- database/pg.js _autoMigrate. Price data cannot be backfilled, so this is
+-- written on every deal refresh from the very first run.
+CREATE TABLE IF NOT EXISTS price_observations (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  observed_week   TEXT    NOT NULL,
+  store           TEXT    NOT NULL,
+  state           TEXT    NOT NULL,
+  product_name    TEXT    NOT NULL,
+  normalized      TEXT    NOT NULL,
+  brand           TEXT,
+  tier            TEXT    NOT NULL DEFAULT 'branded',
+  price           REAL,
+  was_price       REAL,
+  unit_value      REAL,
+  unit_basis      TEXT,
+  category        TEXT,
+  base_ingredient TEXT,
+  recorded_at     TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (observed_week, store, state, normalized)
+);
+CREATE INDEX IF NOT EXISTS idx_price_obs_normalized ON price_observations(normalized);
+CREATE INDEX IF NOT EXISTS idx_price_obs_base ON price_observations(base_ingredient);

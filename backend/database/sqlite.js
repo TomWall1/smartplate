@@ -447,6 +447,54 @@ function getStats() {
   };
 }
 
+
+// ── Price observations (weekly measured prices) ───────────────────────────────
+
+function savePriceObservations(rows) {
+  if (!rows.length) return 0;
+  const db = getDb();
+  const stmt = db.prepare(`
+    INSERT INTO price_observations
+      (observed_week, store, state, product_name, normalized, brand, tier,
+       price, was_price, unit_value, unit_basis, category, base_ingredient)
+    VALUES (@observedWeek, @store, @state, @productName, @normalized, @brand, @tier,
+            @price, @wasPrice, @unitValue, @unitBasis, @category, @baseIngredient)
+    ON CONFLICT (observed_week, store, state, normalized) DO UPDATE SET
+      price = excluded.price, was_price = excluded.was_price,
+      unit_value = excluded.unit_value, unit_basis = excluded.unit_basis,
+      tier = excluded.tier, brand = excluded.brand,
+      category = excluded.category, base_ingredient = excluded.base_ingredient,
+      recorded_at = CURRENT_TIMESTAMP
+  `);
+  const run = db.transaction((list) => {
+    for (const r of list) {
+      stmt.run({
+        observedWeek: r.observedWeek, store: r.store, state: r.state,
+        productName: r.productName, normalized: r.normalized,
+        brand: r.brand ?? null, tier: r.tier ?? 'branded',
+        price: r.price ?? null, wasPrice: r.wasPrice ?? null,
+        unitValue: r.unitValue ?? null, unitBasis: r.unitBasis ?? null,
+        category: r.category ?? null, baseIngredient: r.baseIngredient ?? null,
+      });
+    }
+  });
+  run(rows);
+  return rows.length;
+}
+
+function getPriceObservationStats() {
+  const db = getDb();
+  return db.prepare(`
+    SELECT COUNT(*)                        AS observations,
+           COUNT(DISTINCT normalized)      AS distinct_products,
+           COUNT(DISTINCT observed_week)   AS weeks,
+           COUNT(unit_value)               AS with_unit_price,
+           MIN(observed_week)              AS first_week,
+           MAX(observed_week)              AS last_week
+    FROM price_observations
+  `).get();
+}
+
 module.exports = {
   getDb,
   closeDb,
@@ -456,6 +504,8 @@ module.exports = {
   getDealsCache,
   getMatchEdges,
   saveMatchEdges,
+  savePriceObservations,
+  getPriceObservationStats,
   getRecipeCosts,
   saveRecipeCosts,
   saveStateDeals,
