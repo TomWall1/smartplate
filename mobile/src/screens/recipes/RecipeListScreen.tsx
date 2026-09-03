@@ -1,24 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   RefreshControl,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
-import { useRecipes } from '../../api/hooks';
+import { useRecipes, usePantry } from '../../api/hooks';
 import { useAuth } from '../../context/AuthContext';
 import { useStore } from '../../context/StoreContext';
 import { usePremium } from '../../context/PremiumContext';
-import { FilterType } from '../../types';
+import { RecipeSortKey } from '../../types';
 import RecipeCard from '../../components/RecipeCard';
+import RecipeFilterBar from '../../components/RecipeFilterBar';
 import ErrorState from '../../components/ErrorState';
 import RecipeListSkeleton from '../../components/RecipeListSkeleton';
-import { FILTERS, PROTEIN_FILTERS, applyFilter, hasProteinDeal } from '../../lib/recipeFilters';
+import {
+  applyFacets,
+  facetCounts,
+  sortRecipes,
+  pantryTermsFrom,
+  SORT_OPTIONS,
+} from '../../lib/recipeFilters';
 import { track, secondsSinceOpen } from '../../lib/analytics';
 import { storeColors } from '../../theme';
 
@@ -27,6 +34,10 @@ type Props = NativeStackScreenProps<RecipesStackParamList, 'RecipeList'>;
 // How many recipes someone without an account sees. Enough to judge whether
 // the app is worth having; the rest is what the free account is for.
 const GUEST_PREVIEW = 10;
+
+// The chosen order survives tab switches and restarts. Someone who has told us
+// they shop on time, or on price, should not have to say it again every visit.
+const SORT_KEY = 'deals-to-dish-recipe-sort';
 
 const storeLabel = (s: string | null) =>
   s ? s.charAt(0).toUpperCase() + s.slice(1) : 'your store';
@@ -57,12 +68,11 @@ function GuestCta({
   const heldBack = total - shown;
   return (
     <View style={styles.ctaCard}>
-      <Text style={styles.ctaEyebrow}>Free account</Text>
-      <Text style={styles.ctaTitle}>Keep the ones you like</Text>
+      <Text style={styles.ctaTitle}>Want to see more?</Text>
       <Text style={styles.ctaBody}>
         {heldBack > 0
-          ? `That's ${shown} of ${total} recipes built from this week's ${storeLabel(store)} specials. An account saves your favourites and has next week's ready when the catalogue changes.`
-          : `An account saves your favourites and has next week's recipes ready when the ${storeLabel(store)} catalogue changes.`}
+          ? `That's ${shown} of ${total} recipes from this week's ${storeLabel(store)} specials. Create a free account to open another ${heldBack} recipes this week.`
+          : `A free account keeps the ones you like, and has next week's recipes ready when the ${storeLabel(store)} specials change.`}
       </Text>
       <TouchableOpacity style={styles.ctaButton} onPress={onCreate} activeOpacity={0.9}>
         <Text style={styles.ctaButtonText}>Create a free account</Text>
@@ -88,24 +98,57 @@ export default function RecipeListScreen({ navigation }: Props) {
     selectedStore,
     isPremium,
   );
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-  const [activeProtein, setActiveProtein] = useState<string | null>(null);
+  const [sort, setSort] = useState<RecipeSortKey>('recommended');
+  const [proteins, setProteins] = useState<string[]>([]);
+  const [features, setFeatures] = useState<string[]>([]);
 
   // No account yet — this is the first thing they ever see. No filters, no
-  // controls, just the food, then one ask at the end.
+  // controls, just the food, then one ask at the end. The default order does
+  // the work here instead: it is what makes the first ten cards a week of
+  // meals rather than ten variations on whatever is deepest-discounted.
   const isGuest = !user;
   const storeCfg = storeColors[selectedStore ?? 'woolworths'] ?? storeColors.woolworths;
 
-  // Best first — biggest saving against this week's specials, which is the
-  // figure the cards themselves show. Ties keep the backend's own order.
-  const ranked = [...recipes].sort(
-    (a, b) => (b.estimatedSaving ?? 0) - (a.estimatedSaving ?? 0)
-  );
+  // Sorting by pantry needs a saved pantry; without one the option is not
+  // offered, and a stored preference for it quietly falls back.
+  const { data: pantry } = usePantry(!isGuest);
+  const pantryTerms = useMemo(() => pantryTermsFrom(pantry?.ingredients), [pantry]);
+  const pantryAvailable = pantryTerms.length > 0;
+  const effectiveSort: RecipeSortKey =
+    sort === 'pantry' && !pantryAvailable ? 'recommended' : sort;
 
-  const filtered = applyFilter(ranked, activeFilter).filter((r) =>
-    hasProteinDeal(r, activeProtein)
+  useEffect(() => {
+    AsyncStorage.getItem(SORT_KEY)
+      .then((saved) => {
+        // Validate: a key left behind by an older build must not put the list
+        // into an order that no longer exists.
+        if (saved && SORT_OPTIONS.some((o) => o.key === saved)) setSort(saved as RecipeSortKey);
+      })
+      .catch(() => {});
+  }, []);
+
+  const changeSort = (next: RecipeSortKey) => {
+    setSort(next);
+    AsyncStorage.setItem(SORT_KEY, next).catch(() => {});
+    track('recipe_sort_changed', { sort: next });
+  };
+
+  const facets = { proteins, features };
+
+  // Filter first, then order — so "Recommended" re-spreads the survivors
+  // across hero lanes instead of leaving a filtered list clumped.
+  const filtered = useMemo(
+    () => sortRecipes(applyFacets(recipes, facets), effectiveSort, { pantryTerms }),
+    [recipes, proteins, features, effectiveSort, pantryTerms]
   );
+  const counts = useMemo(() => facetCounts(recipes, facets), [recipes, proteins, features]);
+
   const visible = isGuest ? filtered.slice(0, GUEST_PREVIEW) : filtered;
+  const hasFilters = proteins.length > 0 || features.length > 0;
+  const clearFilters = () => {
+    setProteins([]);
+    setFeatures([]);
+  };
 
   // Time-to-value: the whole point of the first-run flow is shrinking this.
   // Fires once, when recipes first appear.
@@ -143,63 +186,26 @@ export default function RecipeListScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* Tag filter chips — hidden until there's an account, so the first
-          screen is nothing but recipes. */}
+      {/* One control row — order, protein, features. Hidden until there's an
+          account, so the first screen is nothing but recipes. */}
       {!isGuest && (
-      <View style={styles.filtersWrapper}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filtersContent}
-        >
-          {FILTERS.map((f) => (
-            <TouchableOpacity
-              key={f.key}
-              style={[styles.chip, activeFilter === f.key && styles.chipActive]}
-              onPress={() => setActiveFilter(f.key)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.chipText, activeFilter === f.key && styles.chipTextActive]}>
-                {f.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-      )}
-
-      {/* Protein filter chips. These were premium-only, but they only filter a
-          list the device has already downloaded — there is nothing behind the
-          gate to pay for, and no paywall ever mentioned them. */}
-      {!isGuest && (
-        <View style={styles.proteinSection}>
-          <View style={styles.proteinHeader}>
-            <Text style={styles.proteinLabel}>Filter by protein on special</Text>
-            {activeProtein && (
-              <TouchableOpacity onPress={() => setActiveProtein(null)}>
-                <Text style={styles.clearText}>Clear</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filtersContent}
-          >
-            {PROTEIN_FILTERS.map((p) => (
-              <TouchableOpacity
-                key={p.id}
-                style={[styles.proteinChip, activeProtein === p.id && styles.proteinChipActive]}
-                onPress={() => setActiveProtein(activeProtein === p.id ? null : p.id)}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.chipText, activeProtein === p.id && styles.proteinChipTextActive]}>
-                  {p.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+        <RecipeFilterBar
+          sort={effectiveSort}
+          onSortChange={changeSort}
+          pantryAvailable={pantryAvailable}
+          proteins={proteins}
+          onProteinsChange={(ids) => {
+            setProteins(ids);
+            track('recipe_filter_changed', { facet: 'protein', selected: ids.length });
+          }}
+          proteinCounts={counts.proteins}
+          features={features}
+          onFeaturesChange={(ids) => {
+            setFeatures(ids);
+            track('recipe_filter_changed', { facet: 'feature', selected: ids.length });
+          }}
+          featureCounts={counts.features}
+        />
       )}
 
       <FlatList
@@ -249,8 +255,14 @@ export default function RecipeListScreen({ navigation }: Props) {
             <Text style={styles.emptyText}>
               {recipes.length === 0
                 ? 'No recipes found for your area.'
-                : 'No recipes match this filter.'}
+                : 'Nothing this week matches all of those. Try dropping one.'}
             </Text>
+            {/* Never leave someone in an empty list with no way out. */}
+            {hasFilters && recipes.length > 0 ? (
+              <TouchableOpacity style={styles.emptyBtn} onPress={clearFilters} activeOpacity={0.9}>
+                <Text style={styles.emptyBtnText}>Clear filters</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         }
         showsVerticalScrollIndicator={false}
@@ -291,12 +303,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     gap: 8,
   },
-  ctaEyebrow: {
-    fontSize: 12,
-    fontFamily: 'Inter_500Medium',
-    color: '#36453B',
-    letterSpacing: 0.4,
-  },
   ctaTitle: { fontSize: 20, fontFamily: 'Fraunces_500Medium', color: '#2A241F' },
   ctaBody: { fontSize: 14, fontFamily: 'Inter_400Regular', color: '#6B5F52', lineHeight: 21 },
   ctaButton: {
@@ -314,81 +320,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 8,
   },
-  filtersWrapper: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2D8C6',
-    backgroundColor: '#ffffff',
-  },
-  filtersContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 999,
-    borderWidth: 1.5,
-    borderColor: '#E2D8C6',
-    backgroundColor: '#ffffff',
-    marginRight: 8,
-  },
-  chipActive: {
-    backgroundColor: '#36453B',
-    borderColor: '#36453B',
-  },
-  chipText: {
-    fontSize: 13,
-    fontFamily: 'Inter_600SemiBold',
-    color: '#6B5F52',
-  },
-  chipTextActive: {
-    color: '#ffffff',
-  },
-  // Protein section
-  proteinSection: {
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2D8C6',
-    paddingTop: 8,
-    paddingBottom: 4,
-  },
-  proteinHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginBottom: 4,
-  },
-  proteinLabel: {
-    fontSize: 11,
-    fontFamily: 'Inter_700Bold',
-    color: '#6B5F52',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  clearText: {
-    fontSize: 12,
-    fontFamily: 'Inter_700Bold',
-    color: '#6B5F52',
-    textDecorationLine: 'underline',
-  },
-  proteinChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 999,
-    borderWidth: 1.5,
-    borderColor: '#E2D8C6',
-    backgroundColor: '#ffffff',
-    marginRight: 8,
-  },
-  proteinChipActive: {
-    backgroundColor: '#BE6A43',
-    borderColor: '#BE6A43',
-  },
-  proteinChipTextActive: {
-    color: '#ffffff',
-  },
   list: {
     paddingTop: 8,
     paddingBottom: 24,
@@ -404,4 +335,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
+  emptyBtn: {
+    marginTop: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#36453B',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  emptyBtnText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: '#36453B' },
 });

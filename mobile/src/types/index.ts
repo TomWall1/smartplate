@@ -159,4 +159,8 @@ export interface AuthResponse {
   user: User;
 }
 
-export type FilterType = 'all' | 'quick' | 'vegetarian' | 'vegan' | 'gluten-free';
+/**
+ * How the recipe list is ordered. 'recommended' is the default and is NOT a
+ * saving sort — see lib/recipeFilters.ts for why that matters.
+ */
+export type RecipeSortKey = 'recommended' | 'savings' | 'cheapest' | 'quickest' | 'pantry';
