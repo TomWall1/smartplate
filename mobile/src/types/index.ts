@@ -55,6 +55,10 @@ export interface Recipe {
   ingredients?: string[];
   source?: string;
   sourceUrl?: string;
+  /** ISO date this recipe was saved. Present only on favourites, where the
+   *  savings and cost above were computed against THAT week's specials and
+   *  must not be shown as if they were current. */
+  savedAt?: string;
 }
 
 export interface User {

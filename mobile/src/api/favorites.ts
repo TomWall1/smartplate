@@ -18,7 +18,41 @@ interface FavoriteRow {
   recipe_data?: Partial<Recipe> | null;
 }
 
-/** The snapshot worth keeping — enough to render a card without a fetch. */
+function toRecipe(row: FavoriteRow): Recipe {
+  // Snapshots written before this change stored a saving and a cost. Drop
+  // them here rather than migrating the table: they were computed against a
+  // catalogue week that has since been replaced.
+  const {
+    estimatedSaving: _saving,
+    totalEstimatedCost: _cost,
+    totalMealSaving: _mealSaving,
+    totalPerServingSaving: _perServe,
+    matchedDeals: _deals,
+    dealHighlights: _highlights,
+    ...rest
+  } = row.recipe_data ?? {};
+
+  return {
+    ...rest,
+    id:      String(row.recipe_id),
+    title:   row.recipe_data?.title ?? 'Saved recipe',
+    // Rows saved before the snapshot carried a date still have the server's.
+    savedAt: row.recipe_data?.savedAt ?? row.saved_at,
+  } as Recipe;
+}
+
+/**
+ * The snapshot worth keeping — enough to render the whole recipe, not just
+ * its card. It used to hold the card fields only, so a favourite that fell
+ * out of the current week's menu listed fine and then failed to open: the
+ * detail screen refetches by id, and the server only searches THIS week.
+ *
+ * NOTHING priced is kept. Deals, savings and cost estimates are all true for
+ * exactly one catalogue week at one store, so a saved copy shows none of
+ * them — a saved recipe is a recipe you liked, not a price you were quoted.
+ * When the recipe is back in the current week the detail screen fetches it
+ * live and every figure returns.
+ */
 export function snapshotOf(recipe: Recipe): Partial<Recipe> {
   return {
     id:              recipe.id,
@@ -28,8 +62,11 @@ export function snapshotOf(recipe: Recipe): Partial<Recipe> {
     cookTime:        recipe.cookTime,
     servings:        recipe.servings,
     tags:            recipe.tags,
-    estimatedSaving: recipe.estimatedSaving,
-    totalEstimatedCost: recipe.totalEstimatedCost,
+    // What the detail screen needs to stand on its own.
+    allIngredients:  recipe.allIngredients ?? recipe.ingredients,
+    source:          recipe.source,
+    sourceUrl:       recipe.sourceUrl,
+    savedAt:         new Date().toISOString(),
   };
 }
 
@@ -45,11 +82,20 @@ export async function getFavoriteIds(): Promise<string[]> {
  */
 export async function getFavorites(): Promise<Recipe[]> {
   const response = await client.get<{ favorites: FavoriteRow[] }>('/api/favorites');
-  return (response.data.favorites ?? []).map((row) => ({
-    ...(row.recipe_data ?? {}),
-    id:    String(row.recipe_id),
-    title: row.recipe_data?.title ?? 'Saved recipe',
-  })) as Recipe[];
+  return (response.data.favorites ?? []).map(toRecipe);
+}
+
+/**
+ * One saved recipe by id, or null. This is the detail screen's fallback when
+ * the live fetch 404s because the recipe is not in the current week's menu —
+ * the point of saving something is that it is still there next month.
+ */
+export async function getFavoriteById(recipeId: string): Promise<Recipe | null> {
+  const response = await client.get<{ favorites: FavoriteRow[] }>('/api/favorites');
+  const row = (response.data.favorites ?? []).find(
+    (f) => String(f.recipe_id) === String(recipeId)
+  );
+  return row ? toRecipe(row) : null;
 }
 
 export async function addFavorite(recipeId: string, recipe?: Recipe): Promise<void> {

@@ -7,7 +7,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getDealsByStore, getDealsStatus } from './deals';
 import { getRecipeSuggestions, getRecipeById } from './recipes';
-import { getFavorites, getFavoriteIds, addFavorite, removeFavorite } from './favorites';
+import { getFavorites, getFavoriteIds, getFavoriteById, addFavorite, removeFavorite } from './favorites';
 import { getPantry, matchPantry } from './pantry';
 import {
   getPriceAlerts, createPriceAlert, deletePriceAlert,
@@ -73,6 +73,18 @@ export function useFavorites(enabled = true) {
     queryKey: keys.favorites(),
     queryFn: getFavorites,
     enabled,
+  });
+}
+
+/**
+ * The saved copy of one recipe, used only when the live fetch fails. Enabled
+ * by the caller so it never runs for a recipe that loaded normally.
+ */
+export function useFavoriteSnapshot(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: [...keys.favorites(), 'snapshot', id] as const,
+    queryFn: () => getFavoriteById(id),
+    enabled: enabled && !!id,
   });
 }
 
