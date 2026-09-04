@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
@@ -17,6 +16,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PremiumStackParamList } from '../../navigation';
 import { matchPantry, savePantry } from '../../api/pantry';
 import { usePantry } from '../../api/hooks';
+import IngredientAutocomplete from '../../components/IngredientAutocomplete';
 import PremiumGate from '../../components/PremiumGate';
 import { usePremium } from '../../context/PremiumContext';
 import { useAuth } from '../../context/AuthContext';
@@ -24,16 +24,19 @@ import { useStore } from '../../context/StoreContext';
 
 type Props = NativeStackScreenProps<PremiumStackParamList, 'PantryInput'>;
 
+// Canonical vocabulary names (lowercase, singular — the form the recipe
+// library uses). Displayed capitalised by the chip style. Keep every entry
+// present in ingredientVocab.json or quick-add becomes a way to add an item
+// the picker itself would reject.
 const QUICK_ADD_ITEMS = [
-  'Chicken', 'Rice', 'Eggs', 'Pasta',
-  'Onion', 'Garlic', 'Tomatoes', 'Cheese',
+  'chicken', 'rice', 'egg', 'pasta',
+  'onion', 'garlic', 'tomato', 'cheese',
 ];
 
 export default function PantryInputScreen({ navigation }: Props) {
   const { isPremium } = usePremium();
   const { user } = useAuth();
   const { selectedState, selectedStore } = useStore();
-  const [inputText, setInputText] = useState('');
   const [items, setItems] = useState<string[]>([]);
   const [includeStaples, setIncludeStaples] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,10 +60,6 @@ export default function PantryInputScreen({ navigation }: Props) {
     setItems((prev) => [...prev, trimmed]);
   }
 
-  function handleInputSubmit() {
-    addItem(inputText);
-    setInputText('');
-  }
 
   function removeItem(name: string) {
     setItems((prev) => prev.filter((i) => i !== name));
@@ -113,21 +112,11 @@ export default function PantryInputScreen({ navigation }: Props) {
           Tell us what you have and we'll find recipes with on-sale ingredients.
         </Text>
 
-        {/* Search input */}
-        <View style={styles.searchRow}>
-          <TextInput
-            style={styles.searchInput}
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Type an ingredient..."
-            placeholderTextColor="#9A8E7E"
-            returnKeyType="done"
-            onSubmitEditing={handleInputSubmit}
-          />
-          <TouchableOpacity style={styles.addButton} onPress={handleInputSubmit} activeOpacity={0.8}>
-            <Ionicons name="add" size={22} color="#ffffff" />
-          </TouchableOpacity>
-        </View>
+        {/* Ingredient picker — restricted to the recipe-database vocabulary.
+            Free text used to be accepted here, but the matcher scores against
+            library ingredient names, so anything it did not recognise matched
+            nothing and still spent a premium call. */}
+        <IngredientAutocomplete onAdd={addItem} existing={items} />
 
         {/* Quick-add chips */}
         <View>
@@ -226,28 +215,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginTop: -8,
   },
-  searchRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  searchInput: {
-    flex: 1,
-    borderWidth: 1.5,
-    borderColor: '#E2D8C6',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#2A241F',
-    backgroundColor: '#ffffff',
-  },
-  addButton: {
-    backgroundColor: '#36453B',
-    width: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   sectionLabel: {
     fontSize: 13,
     fontFamily: 'Inter_700Bold',
@@ -280,6 +247,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B5F52',
     fontFamily: 'Inter_500Medium',
+    textTransform: 'capitalize',
   },
   quickChipTextActive: {
     color: '#36453B',
@@ -303,6 +271,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#ffffff',
     fontFamily: 'Inter_600SemiBold',
+    textTransform: 'capitalize',
   },
   staplesRow: {
     flexDirection: 'row',

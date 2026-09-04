@@ -3,7 +3,9 @@
  * autocomplete dropdowns (pantry + exclude-ingredients). Cleans the messy
  * per-ingredient names, dedupes, frequency-ranks, and keeps common ones.
  *
- * Run with --write to emit frontend/src/constants/ingredientVocab.json,
+ * Run with --write to emit ingredientVocab.json for BOTH clients (web and
+ * mobile). The pantry picker is vocabulary-restricted, so a name missing
+ * from this file is a name the user cannot enter,
  * otherwise prints stats for inspection.
  *   node scripts/eval/buildIngredientVocab.js          (inspect)
  *   node scripts/eval/buildIngredientVocab.js --write   (write JSON)
@@ -58,7 +60,9 @@ function clean(raw) {
   words = words.map(singular).filter(Boolean);
   // collapse consecutive duplicate words ("egg egg" → "egg")
   words = words.filter((w, i) => i === 0 || w !== words[i - 1]);
-  return words.join(' ').trim();
+  // The character class in clean() keeps '-' (for 'all-rounder potato'),
+  // which also let list-bullet hyphens through as '- salt'. Trim the edges.
+  return words.join(' ').replace(/^[-s]+|[-s]+$/g, '').trim();
 }
 
 (function main() {
@@ -97,10 +101,19 @@ function clean(raw) {
   console.log('Sample starting with "ch":', vocab.filter(v => v.name.startsWith('ch')).slice(0, 20).map(v => v.name));
 
   if (process.argv.includes('--write')) {
-    const out = path.join(__dirname, '..', '..', '..', 'frontend', 'src', 'constants', 'ingredientVocab.json');
+    const root = path.join(__dirname, '..', '..', '..');
+    // Both clients read the same list; the mobile pantry picker rejects
+    // anything not in it, so they must not drift apart.
+    const outs = [
+      path.join(root, 'frontend', 'src', 'constants', 'ingredientVocab.json'),
+      path.join(root, 'mobile', 'src', 'constants', 'ingredientVocab.json'),
+    ];
     // Ship just the names (alphabetical), frequency-ranked dropdown handled client-side.
-    const payload = vocab.map(v => v.name).sort();
-    fs.writeFileSync(out, JSON.stringify(payload));
-    console.log(`\nWrote ${payload.length} ingredients → ${out}`);
+    const payload = [...new Set(vocab.map(v => v.name))].sort();
+    for (const out of outs) {
+      fs.mkdirSync(path.dirname(out), { recursive: true });
+      fs.writeFileSync(out, JSON.stringify(payload));
+      console.log(`\nWrote ${payload.length} ingredients → ${out}`);
+    }
   }
 })();
