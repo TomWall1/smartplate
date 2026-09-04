@@ -14,14 +14,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RecipesStackParamList } from '../../navigation';
 import { MatchedDeal } from '../../types';
-import { useRecipe, useToggleFavorite, useFavoriteIds } from '../../api/hooks';
+import {
+  useRecipe, useToggleFavorite, useFavoriteIds, useFavoriteSnapshot, usePantry,
+} from '../../api/hooks';
 import { useAuth } from '../../context/AuthContext';
 import { usePremium } from '../../context/PremiumContext';
 import { addItemsToList, getOrCreateDefaultList } from '../../api/premium';
 import { track } from '../../lib/analytics';
 import { decodeEntities } from '../../lib/displayText';
+import { isPantryStaple, pantryCovers } from '../../lib/pantryMatch';
 import { useStore } from '../../context/StoreContext';
-import DealBadge from '../../components/DealBadge';
 import LoadingState from '../../components/LoadingState';
 import ErrorState from '../../components/ErrorState';
 import CostPerServeCard from '../../components/CostPerServeCard';
@@ -31,6 +33,14 @@ type Props = NativeStackScreenProps<RecipesStackParamList, 'RecipeDetail'>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_HEIGHT = 260;
+
+/** "12 Aug" — the day this copy was saved, for the archived banner. */
+function savedOn(iso?: string): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+}
 
 /** Words worth matching on — drops units, quantities and filler. */
 const STOP = new Set([
@@ -91,7 +101,25 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
   const store = selectedStore;
   const state = user?.state || selectedState;
   const { isPremium } = usePremium();
-  const { data: recipe, isLoading, isError, refetch } = useRecipe(String(id), store, state);
+  const {
+    data: liveRecipe, isLoading: liveLoading, isError: liveError, refetch,
+  } = useRecipe(String(id), store, state);
+
+  // A recipe is only served while it is in the current week's menu, so a
+  // favourite saved a few weeks ago 404s here. Fall back to the copy stored
+  // when it was saved — keeping a recipe is the whole reason for an account,
+  // and it used to end at an error screen.
+  const { data: saved, isLoading: savedLoading } = useFavoriteSnapshot(
+    String(id),
+    !!user && liveError,
+  );
+  const recipe = liveRecipe ?? saved ?? null;
+  // Showing the snapshot means showing figures from the week it was saved.
+  const isArchived = !liveRecipe && !!saved;
+  const savedDate = isArchived ? savedOn(saved?.savedAt) : null;
+  const isLoading = liveLoading || (liveError && savedLoading);
+  const isError = liveError && !saved;
+
   const toggleFav = useToggleFavorite();
   // Whether this recipe is saved comes from the server, not from local state.
   // The screen used to keep its own boolean that started false on every open
@@ -101,6 +129,18 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
   const favorited = favoriteIds.includes(String(id));
   const [dealsOpen, setDealsOpen] = useState(false);
   const [addingToList, setAddingToList] = useState(false);
+  // Which ingredients go on the list. Starts empty: every item on someone's
+  // shopping list should be there because they chose it. The old single
+  // "Add to list" button copied all fifteen names in one tap, which is how a
+  // list reaches ninety items nobody picked.
+  const [selected, setSelected] = useState<string[]>([]);
+
+  // The saved pantry marks rows as already-had. Premium-gated server-side, so
+  // free accounts simply get no pantry rows — the staples list still applies,
+  // since it is a fixed list rather than anything about this account.
+  const { data: pantry } = usePantry(isPremium && !!user);
+  const pantryItems = pantry?.ingredients ?? [];
+  const hasStaples = pantry?.has_pantry_staples !== false;
 
   // Deals here open the same screen as tapping a deal in the Deals tab: the
   // nested navigate switches tab and pushes DealRecipes onto that stack, which
@@ -139,23 +179,25 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
       return;
     }
     toggleFav.mutate(
-      { id: String(id), recipe, isFavorite: favorited },
+      { id: String(id), recipe: recipe ?? undefined, isFavorite: favorited },
       { onError: () => Alert.alert('Error', 'Could not update favourite. Please try again.') }
     );
   }
 
+  const toggleIngredient = useCallback((name: string) => {
+    setSelected((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+    );
+  }, []);
+
   /**
-   * Put this recipe's ingredients on the shopping list. Everything already
-   * there is skipped, so tapping twice does not double the list.
+   * Put the TICKED ingredients on the shopping list. Anything already there is
+   * skipped, so tapping twice does not double the list.
    */
   const handleAddToList = useCallback(async () => {
     if (!recipe) return;
-    const names = (recipe.allIngredients ?? recipe.ingredients ?? [])
-      .filter((i): i is string => typeof i === 'string');
-    if (names.length === 0) {
-      Alert.alert('Nothing to add', 'This recipe has no ingredient list to copy.');
-      return;
-    }
+    const names = selected;
+    if (names.length === 0) return;
 
     setAddingToList(true);
     try {
@@ -164,7 +206,14 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
         id: String(id),
         title: recipe.title,
       });
-      track('shopping_list_added', { recipe_id: String(id), items: added });
+      track('shopping_list_added', {
+        recipe_id: String(id),
+        items: added,
+        selected: names.length,
+      });
+      // The ticks have done their job; leaving them set invites a second tap
+      // that adds nothing and reads as a failure.
+      if (added > 0) setSelected([]);
       Alert.alert(
         added > 0 ? 'Added to your list' : 'Already on your list',
         added > 0
@@ -176,7 +225,7 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
     } finally {
       setAddingToList(false);
     }
-  }, [recipe, id]);
+  }, [recipe, id, selected]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -203,12 +252,26 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
   }
 
   const matchedDeals = recipe.matchedDeals ?? [];
-  const ingredients = recipe.allIngredients ?? recipe.ingredients ?? [];
+  const ingredients = (recipe.allIngredients ?? recipe.ingredients ?? [])
+    .filter((i): i is string => typeof i === 'string' && i.trim().length > 0);
   const tags = recipe.tags ?? [];
   const prep = recipe.prepTime ?? recipe.cookTime;
   const totalSavings = recipe.estimatedSaving ?? matchedDeals.reduce((s, d) => s + (d.saving ?? 0), 0);
 
+  // One pass over the ingredient list settles every row: what it costs this
+  // week, and whether the account already says you have it. A row can be both
+  // (on special AND in your pantry) — worth knowing before you skip it.
+  const rows = ingredients.map((name) => ({
+    name,
+    deal: findDealForIngredient(matchedDeals, name),
+    inPantry: pantryItems.length > 0 && pantryCovers(pantryItems, name),
+    staple: hasStaples && isPantryStaple(name),
+  }));
+  const pantryCount = rows.filter((r) => r.inPantry).length;
+  const allSelected = ingredients.length > 0 && selected.length === ingredients.length;
+
   return (
+    <View style={styles.flex}>
     <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
       <Image source={recipe.image} style={styles.heroImage} contentFit="cover" transition={200} />
 
@@ -234,6 +297,17 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
             </Text>
           </TouchableOpacity>
         ) : null}
+
+        {isArchived && (
+          <View style={styles.archivedCard}>
+            <Ionicons name="bookmark" size={16} color="#6B5F52" />
+            <Text style={styles.archivedText}>
+              {savedDate
+                ? `Saved ${savedDate}. Not in this week's specials, so there are no prices on it — everything else still works.`
+                : "Not in this week's specials, so there are no prices on it — everything else still works."}
+            </Text>
+          </View>
+        )}
 
         <View style={styles.chips}>
           {prep ? (
@@ -305,53 +379,81 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
+        {/* A saved pantry finally does something outside premium matching:
+            it marks the rows you can skip. */}
+        {pantryCount > 0 && (
+          <View style={styles.pantryNote}>
+            <Ionicons name="checkmark" size={15} color="#36453B" />
+            <Text style={styles.pantryNoteText}>
+              {pantryCount} of these are in your pantry. Tick one anyway if you have run out.
+            </Text>
+          </View>
+        )}
+
         <View style={styles.ingredientsHeader}>
           <Text style={styles.sectionTitle}>Ingredients</Text>
-          {/* Premium: the free tier gets the gate on the list screen itself,
-              so this stays visible and explains what it is for. */}
-          <TouchableOpacity
-            style={styles.addToListButton}
-            activeOpacity={0.8}
-            disabled={addingToList}
-            onPress={() => {
-              if (!user) { navigation.navigate('Login' as never); return; }
-              if (!isPremium) { navigation.navigate('Paywall' as never); return; }
-              handleAddToList();
-            }}
-          >
-            <Ionicons
-              name={isPremium ? 'cart-outline' : 'lock-closed'}
-              size={15}
-              color="#36453B"
-            />
-            <Text style={styles.addToListText}>
-              {addingToList ? 'Adding…' : 'Add to list'}
-            </Text>
-          </TouchableOpacity>
+          {ingredients.length > 0 && (
+            <TouchableOpacity
+              onPress={() => setSelected(allSelected ? [] : ingredients)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.selectAllText}>
+                {allSelected ? 'Clear all' : 'Select all'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
         <View style={styles.ingredientsList}>
-          {ingredients.map((ing, idx) => {
-            const name = typeof ing === 'string' ? ing : '';
-            // The matcher records the bare ingredient ("beef chuck steak")
-            // while the recipe line carries the whole instruction ("beef chuck
-            // steak, trimmed, cut into 4cm pieces"). Exact equality therefore
-            // linked only the lines that happened to be bare — the biryani
-            // showed three deals at the top and linked one. Match on
-            // containment, then on shared words, so a badge appears wherever
-            // the matcher actually found a deal.
-            const deal = findDealForIngredient(matchedDeals, name);
+          {rows.map((row, idx) => {
+            const isOn = selected.includes(row.name);
             return (
-              <View key={idx} style={styles.ingredientItem}>
-                <View style={styles.ingredientRow}>
-                  <View style={styles.bulletDot} />
-                  <Text style={styles.ingredientName}>{name}</Text>
+              <TouchableOpacity
+                key={idx}
+                style={[
+                  styles.ingredientItem,
+                  row.deal && styles.ingredientOnSpecial,
+                  row.inPantry && styles.ingredientInPantry,
+                  !row.deal && !row.inPantry && row.staple && styles.ingredientStaple,
+                ]}
+                activeOpacity={0.75}
+                onPress={() => toggleIngredient(row.name)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: isOn }}
+                accessibilityLabel={row.name}
+              >
+                <View style={[styles.checkbox, isOn && styles.checkboxOn]}>
+                  {isOn && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
                 </View>
-                {deal && (
-                  <TouchableOpacity activeOpacity={0.7} onPress={() => openDeal(deal.dealName)}>
-                    <DealBadge deal={deal} />
-                  </TouchableOpacity>
-                )}
-              </View>
+
+                <View style={styles.ingredientText}>
+                  <Text style={[styles.ingredientName, row.staple && !row.deal && styles.ingredientNameMuted]}>
+                    {row.name}
+                  </Text>
+
+                  {/* The deal reads as a sentence under the thing it prices,
+                      rather than a bare figure in a column of its own. */}
+                  {row.deal && (
+                    <Text style={styles.ingredientSub} onPress={() => openDeal(row.deal?.dealName)}>
+                      {row.deal.price != null ? `$${row.deal.price.toFixed(2)} ` : ''}
+                      {decodeEntities(row.deal.dealName)}
+                      {(row.deal.saving ?? 0) > 0 && (
+                        <Text style={styles.ingredientSave}>{`  save $${(row.deal.saving as number).toFixed(2)}`}</Text>
+                      )}
+                    </Text>
+                  )}
+
+                  {row.inPantry && (
+                    <View style={styles.ingredientSubRow}>
+                      <Ionicons name="checkmark" size={12} color="#36453B" />
+                      <Text style={styles.ingredientPantry}>In your pantry</Text>
+                    </View>
+                  )}
+
+                  {!row.inPantry && row.staple && !row.deal && (
+                    <Text style={styles.ingredientStapleText}>Pantry staple</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
             );
           })}
         </View>
@@ -371,10 +473,42 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
         ) : null}
       </View>
     </ScrollView>
+
+    {/* The action sits at the bottom of the screen rather than beside the
+        Ingredients heading: what it does depends on ticks made further down a
+        fifteen-row list, so it has to stay in view while you make them.
+        Shown for an archived recipe too — deciding to cook something you saved
+        last month is exactly when you need its ingredients on a list. */}
+    {ingredients.length > 0 && (
+      <View style={styles.actionBar}>
+        <Text style={styles.actionCount}>
+          {selected.length === 0
+            ? 'Nothing selected yet'
+            : `${selected.length} of ${ingredients.length} selected`}
+        </Text>
+        <TouchableOpacity
+          style={[styles.actionButton, (selected.length === 0 || addingToList) && styles.actionButtonOff]}
+          activeOpacity={0.85}
+          disabled={selected.length === 0 || addingToList}
+          onPress={() => {
+            if (!user) { navigation.navigate('Login' as never); return; }
+            if (!isPremium) { navigation.navigate('Paywall' as never); return; }
+            handleAddToList();
+          }}
+        >
+          {!isPremium && <Ionicons name="lock-closed" size={13} color="#F4EEE2" />}
+          <Text style={styles.actionButtonText}>
+            {addingToList ? 'Adding…' : selected.length === 0 ? 'Add to list' : `Add ${selected.length}`}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1, backgroundColor: '#F4EEE2' },
   scroll: { flex: 1, backgroundColor: '#F4EEE2' },
   heroImage: { width: SCREEN_WIDTH, height: IMAGE_HEIGHT, backgroundColor: '#E7DECB' },
   favButton: { marginRight: 4, padding: 4 },
@@ -386,6 +520,15 @@ const styles = StyleSheet.create({
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   dietTag: { backgroundColor: '#F2E2D6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   dietTagText: { fontSize: 12, color: '#BE6A43', fontFamily: 'Inter_600SemiBold' },
+  archivedCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 9,
+    backgroundColor: '#E7DECB',
+    borderRadius: 12,
+    padding: 12,
+  },
+  archivedText: { flex: 1, fontSize: 12.5, lineHeight: 18, color: '#6B5F52' },
   savingsCard: { backgroundColor: '#F2E2D6', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#E6C9B3' },
   savingsRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   savingsTitle: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#2A241F', flex: 1 },
@@ -404,25 +547,91 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
-  addToListButton: {
+  selectAllText: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#36453B',
+    textDecorationLine: 'underline',
+  },
+
+  // Banner above the list when the saved pantry covers some of it.
+  pantryNote: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: '#EDF1E9',
+    borderWidth: 1,
+    borderColor: '#C3D0BA',
+    borderRadius: 12,
+    padding: 11,
+  },
+  pantryNoteText: { flex: 1, fontSize: 12.5, lineHeight: 18, color: '#36453B' },
+
+  ingredientsList: { gap: 6 },
+  // Each row is one tap target: a box, the name, and whatever is known about
+  // it underneath. Four states, told apart by ground and border rather than by
+  // an extra badge — the row itself is the badge.
+  ingredientItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 11,
+    backgroundColor: '#FCFAF4',
+    borderWidth: 1,
+    borderColor: '#E2D8C6',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  ingredientOnSpecial: { backgroundColor: '#FDF7F2', borderColor: '#E6C9B3' },
+  ingredientInPantry:  { backgroundColor: '#EDF1E9', borderColor: '#C3D0BA' },
+  ingredientStaple:    { backgroundColor: 'transparent', borderStyle: 'dashed' },
+
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: '#9A8E7E',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+    flexShrink: 0,
+  },
+  checkboxOn: { backgroundColor: '#36453B', borderColor: '#36453B' },
+
+  ingredientText: { flex: 1, minWidth: 0, gap: 2 },
+  ingredientName: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 20, textTransform: 'capitalize' },
+  ingredientNameMuted: { color: '#6B5F52' },
+  ingredientSub: { fontSize: 12, lineHeight: 17, color: '#6B5F52' },
+  ingredientSave: { color: '#BE6A43', fontFamily: 'Inter_700Bold' },
+  ingredientSubRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  ingredientPantry: { fontSize: 12, lineHeight: 17, color: '#36453B', fontFamily: 'Inter_500Medium' },
+  ingredientStapleText: { fontSize: 12, lineHeight: 17, color: '#9A8E7E' },
+
+  // Sticky bar — stays in view while you work down the list.
+  actionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 11,
+    backgroundColor: '#FCFAF4',
+    borderTopWidth: 1,
+    borderTopColor: '#E2D8C6',
+    paddingHorizontal: 16,
+    paddingTop: 11,
+    paddingBottom: 16,
+  },
+  actionCount: { flex: 1, fontSize: 13, color: '#6B5F52' },
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#DCE4D6',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
+    backgroundColor: '#36453B',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 10,
   },
-  addToListText: {
-    fontSize: 13,
-    fontFamily: 'Inter_500Medium',
-    color: '#36453B',
-  },
-  ingredientsList: { gap: 12 },
-  ingredientItem: { gap: 4 },
-  ingredientRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  bulletDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#36453B', marginTop: 6, flexShrink: 0 },
-  ingredientName: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#2A241F', lineHeight: 22, flex: 1, textTransform: 'capitalize' },
+  actionButtonOff: { opacity: 0.4 },
+  actionButtonText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#F4EEE2' },
   viewFullButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#36453B', paddingVertical: 14, borderRadius: 12, marginTop: 4 },
   viewFullText: { color: '#F4EEE2', fontSize: 15, fontFamily: 'Inter_600SemiBold' },
   sourceChip: {
