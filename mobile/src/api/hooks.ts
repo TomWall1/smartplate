@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getDealsByStore, getDealsStatus } from './deals';
 import { getRecipeSuggestions, getRecipeById } from './recipes';
 import { getFavorites, getFavoriteIds, getFavoriteById, addFavorite, removeFavorite } from './favorites';
-import { getPantry, matchPantry } from './pantry';
+import { getPantry, savePantry, matchPantry } from './pantry';
 import {
   getPriceAlerts, createPriceAlert, deletePriceAlert,
   getOrCreateDefaultList, updateShoppingList,
@@ -132,6 +132,30 @@ export function useToggleFavorite() {
 
 export function usePantry(enabled = true) {
   return useQuery({ queryKey: keys.pantry(), queryFn: getPantry, enabled });
+}
+
+/**
+ * Save the pantry AND tell every other screen about it.
+ *
+ * The pantry used to be written with a bare savePantry() call, which meant
+ * nothing invalidated the cached copy. usePantry holds its result for ten
+ * minutes and does not refetch on focus, so a recipe opened straight after
+ * editing the pantry read the OLD list and marked nothing — the item was
+ * genuinely saved, and genuinely not visible.
+ */
+export function useSavePantry() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ingredients, hasPantryStaples }:
+      { ingredients: string[]; hasPantryStaples: boolean }) =>
+      savePantry(ingredients, hasPantryStaples),
+    // Seed the cache from the server's own response, then revalidate — the
+    // pantry screen and the recipe screens read the same query.
+    onSuccess: (pantry) => {
+      qc.setQueryData(keys.pantry(), pantry);
+      qc.invalidateQueries({ queryKey: keys.pantry() });
+    },
+  });
 }
 
 export function useMatchPantry() {

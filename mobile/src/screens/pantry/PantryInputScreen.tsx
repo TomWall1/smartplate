@@ -14,8 +14,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PremiumStackParamList } from '../../navigation';
-import { matchPantry, savePantry } from '../../api/pantry';
-import { usePantry } from '../../api/hooks';
+import { matchPantry } from '../../api/pantry';
+import { usePantry, useSavePantry } from '../../api/hooks';
 import IngredientAutocomplete from '../../components/IngredientAutocomplete';
 import PremiumGate from '../../components/PremiumGate';
 import { usePremium } from '../../context/PremiumContext';
@@ -53,16 +53,41 @@ export default function PantryInputScreen({ navigation }: Props) {
     setIncludeStaples(savedPantry.has_pantry_staples !== false);
   }, [savedPantry, restored]);
 
+  // The pantry saves itself as you edit it.
+  //
+  // It used to be written only as a side-effect of Find Recipes, so adding
+  // an item and going back saved nothing at all — the screen showed the item
+  // as added and the server never heard about it. Adding something to your
+  // cupboard list is the whole action; it should not need a second button.
+  //
+  // `dirty` keeps the restore above from writing straight back what it just
+  // read, and the delay collects a burst of chips into one request.
+  const savePantryMutation = useSavePantry();
+  const [dirty, setDirty] = useState(false);
+  React.useEffect(() => {
+    if (!dirty || !isPremium) return;
+    const t = setTimeout(() => {
+      savePantryMutation.mutate({ ingredients: items, hasPantryStaples: includeStaples });
+      setDirty(false);
+    }, 800);
+    return () => clearTimeout(t);
+    // savePantryMutation is stable enough for this; re-running on every
+    // render would restart the timer forever and never save.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dirty, items, includeStaples, isPremium]);
+
   function addItem(name: string) {
     const trimmed = name.trim();
     if (!trimmed) return;
     if (items.some((i) => i.toLowerCase() === trimmed.toLowerCase())) return;
     setItems((prev) => [...prev, trimmed]);
+    setDirty(true);
   }
 
 
   function removeItem(name: string) {
     setItems((prev) => prev.filter((i) => i !== name));
+    setDirty(true);
   }
 
   function toggleQuickAdd(item: string) {
@@ -82,9 +107,7 @@ export default function PantryInputScreen({ navigation }: Props) {
     try {
       const state = user?.state || selectedState;
       const results = await matchPantry(items, includeStaples, state, selectedStore);
-      // Save after a successful match, not before: a rejected request should
-      // not persist a pantry the server would not accept.
-      savePantry(items, includeStaples).catch(() => { /* not worth blocking on */ });
+      // No save here any more — the pantry writes itself as it is edited.
       navigation.navigate('PantryResults', { results });
     } catch {
       Alert.alert('Error', 'Could not match recipes. Please try again.');
@@ -169,7 +192,7 @@ export default function PantryInputScreen({ navigation }: Props) {
           </View>
           <Switch
             value={includeStaples}
-            onValueChange={setIncludeStaples}
+            onValueChange={(v) => { setIncludeStaples(v); setDirty(true); }}
             trackColor={{ false: '#E2D8C6', true: '#36453B' }}
             thumbColor="#ffffff"
           />
