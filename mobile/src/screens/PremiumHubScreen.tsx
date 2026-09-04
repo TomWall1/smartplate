@@ -46,9 +46,31 @@ const PREMIUM_FEATURES = [
     description: 'Scaled to your household',
     icon: 'wallet-outline' as const,
     color: '#7C6A9C',
-    // Shown on every recipe rather than being its own screen, so this tile
-    // takes you to the recipes to see it in place.
-    screen: 'RecipesTab',
+    // Renders on every recipe rather than being a screen of its own, so it
+    // has no tile on the hub — see HUB_TILES.
+    screen: null,
+  },
+];
+
+// What the hub grid shows a subscriber. Every tile here is somewhere to go:
+// "Cost per serve" had one, but with no screen behind it the tile just
+// bounced you to the recipe list, which reads as a dead card. It stays in
+// PREMIUM_FEATURES above, where it is a reason to subscribe.
+//
+// Saved recipes is FREE and lives in the recipes stack. It is here as a way
+// through, not as a paid feature — which is why it is absent from the
+// upgrade list, where advertising a free feature as premium would be a 2.3.1
+// problem.
+const HUB_TILES = [
+  ...PREMIUM_FEATURES.filter((f) => f.screen !== null).map((f) => ({ ...f, tab: null as string | null })),
+  {
+    key: 'saved',
+    title: 'Saved recipes',
+    description: 'The ones you kept',
+    icon: 'heart-outline' as const,
+    color: '#BE6A43',
+    screen: 'Favourites',
+    tab: 'RecipesTab' as string | null,
   },
 ];
 
@@ -100,16 +122,23 @@ export default function PremiumHubScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.hubContent}>
-      <Text style={styles.hubTitle}>Premium</Text>
-      <Text style={styles.hubSubtitle}>Cook smart and save more</Text>
-
+      {/* No heading here. The stack header already reads "Premium" on the
+          same off-white, exactly as the recipes tab does — repeating it in
+          the body said the word twice and pushed the tiles down. */}
       <View style={styles.grid}>
-        {PREMIUM_FEATURES.map((f) => (
+        {HUB_TILES.map((f) => (
           <TouchableOpacity
             key={f.key}
             style={styles.featureCard}
             activeOpacity={0.8}
-            onPress={() => navigation.navigate(f.screen as never)}
+            onPress={() =>
+              f.tab
+                // Saved recipes lives in the recipes stack. `initial: false`
+                // puts the recipe list underneath it, which is what makes
+                // the back button work.
+                ? navigation.navigate(f.tab, { screen: f.screen, initial: false })
+                : navigation.navigate(f.screen as never)
+            }
           >
             <View style={[styles.featureIcon, { backgroundColor: f.color + '18' }]}>
               <Ionicons name={f.icon} size={32} color={f.color} />
@@ -184,8 +213,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 20,
   },
-  hubTitle: { fontSize: 22, fontFamily: 'Inter_700Bold', color: '#2A241F' },
-  hubSubtitle: { fontSize: 14, color: '#6B5F52', marginTop: -12 },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
