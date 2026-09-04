@@ -146,6 +146,9 @@ export interface ShoppingListItem {
   /** Which recipe put it on the list, for grouping and de-duplication. */
   recipeTitle?: string;
   recipeId?: string;
+  /** ISO date this item was added. Absent on anything added before the
+   *  field existed, which is treated as "from a previous week". */
+  addedAt?: string;
 }
 
 /** GET /api/premium/shopping-lists */

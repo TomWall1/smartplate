@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePremium } from '../context/PremiumContext';
 import { useShoppingList, useUpdateShoppingItems } from '../api/hooks';
 import PremiumGate from '../components/PremiumGate';
@@ -18,6 +19,7 @@ import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import { ShoppingListItem } from '../types';
 import { decodeEntities } from '../lib/displayText';
+import { catalogueWeekKey, isFromPreviousWeek } from '../lib/catalogueWeek';
 import { colors, type, spacing, radius, shadow } from '../theme';
 
 /**
@@ -31,7 +33,16 @@ import { colors, type, spacing, radius, shadow } from '../theme';
  * whole array. Ticking a box therefore updates optimistically — waiting on a
  * round trip to strike out a line makes the list feel broken in a supermarket
  * aisle on bad reception.
+ *
+ * The list used to have no way of ending. There is one per account, no week
+ * boundary, and "Clear ticked" only removes what you ticked off while
+ * shopping — so it accumulated indefinitely (ninety items was a real one).
+ * Two things close that: Clear list, and a prompt when the catalogue turns
+ * over on Wednesday offering to drop what is left from last week.
  */
+
+/** Remembers the catalogue week whose leftover prompt has been dealt with. */
+const PROMPT_SEEN_KEY = 'deals-to-dish-list-week-prompt';
 
 const MANUAL_SECTION = 'Added by you';
 
@@ -41,6 +52,16 @@ export default function ShoppingListScreen() {
   const updateItems = useUpdateShoppingItems();
 
   const [newItem, setNewItem] = useState('');
+  // Which catalogue week's leftover prompt has already been dealt with, so
+  // dismissing it lasts until next Wednesday rather than until the next
+  // time this screen mounts. null while it is still being read.
+  const [promptSeenWeek, setPromptSeenWeek] = useState<string | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem(PROMPT_SEEN_KEY)
+      .then((v) => setPromptSeenWeek(v ?? ''))
+      .catch(() => setPromptSeenWeek(''));
+  }, []);
   // Local echo of the server array so ticks land instantly.
   const [pending, setPending] = useState<ShoppingListItem[] | null>(null);
 
@@ -92,6 +113,40 @@ export default function ShoppingListScreen() {
       { text: 'Clear', style: 'destructive', onPress: () => write(remaining) },
     ]);
   }, [items, write]);
+
+  const clearAll = useCallback(() => {
+    if (items.length === 0) return;
+    Alert.alert(
+      'Clear the list',
+      `Remove all ${items.length} item${items.length === 1 ? '' : 's'}? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Clear list', style: 'destructive', onPress: () => write([]) },
+      ]
+    );
+  }, [items, write]);
+
+  // ── Last week's leftovers ───────────────────────────────────────────────
+  // Anything added before this Wednesday's catalogue belongs to a shop that
+  // has already happened. Offering to clear exactly those keeps whatever was
+  // added since — a blanket "start fresh" would throw away this week's work.
+  const leftovers = useMemo(
+    () => items.filter((i) => isFromPreviousWeek(i.addedAt)),
+    [items]
+  );
+  const thisWeek = catalogueWeekKey();
+  const showLeftoverPrompt =
+    promptSeenWeek !== null && promptSeenWeek !== thisWeek && leftovers.length > 0;
+
+  const dismissPrompt = useCallback(() => {
+    setPromptSeenWeek(thisWeek);
+    AsyncStorage.setItem(PROMPT_SEEN_KEY, thisWeek).catch(() => {});
+  }, [thisWeek]);
+
+  const clearLeftovers = useCallback(() => {
+    write(items.filter((i) => !isFromPreviousWeek(i.addedAt)));
+    dismissPrompt();
+  }, [items, write, dismissPrompt]);
 
   // Group by the recipe an item came from; manual additions collect at the end.
   const sections = useMemo(() => {
@@ -157,15 +212,51 @@ export default function ShoppingListScreen() {
           )}
           ListHeaderComponent={
             items.length > 0 ? (
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryText}>
-                  {checkedCount} of {items.length} ticked
-                </Text>
-                {checkedCount > 0 && (
-                  <TouchableOpacity onPress={clearChecked}>
-                    <Text style={styles.clearLink}>Clear ticked</Text>
-                  </TouchableOpacity>
+              <View>
+                {/* Wednesday: the catalogue has turned over and some of this
+                    list is from the shop before it. Asked once a week — the
+                    dismissal is stored against the week, not the session. */}
+                {showLeftoverPrompt && (
+                  <View style={styles.weekCard}>
+                    <Text style={styles.weekTitle}>New specials are in</Text>
+                    <Text style={styles.weekBody}>
+                      {leftovers.length} item{leftovers.length === 1 ? '' : 's'} on this list
+                      {leftovers.length === 1 ? ' was' : ' were'} added before this
+                      {" week's specials."}
+                    </Text>
+                    <View style={styles.weekActions}>
+                      <TouchableOpacity
+                        style={styles.weekPrimary}
+                        onPress={clearLeftovers}
+                        activeOpacity={0.85}
+                      >
+                        <Text style={styles.weekPrimaryText}>
+                          Clear {leftovers.length}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={dismissPrompt} activeOpacity={0.7}>
+                        <Text style={styles.weekSecondary}>Keep them</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 )}
+
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryText}>
+                    {checkedCount} of {items.length} ticked
+                  </Text>
+                  <View style={styles.summaryActions}>
+                    {checkedCount > 0 && (
+                      <TouchableOpacity onPress={clearChecked}>
+                        <Text style={styles.clearLink}>Clear ticked</Text>
+                      </TouchableOpacity>
+                    )}
+                    {/* The list had no way of ending before this. */}
+                    <TouchableOpacity onPress={clearAll}>
+                      <Text style={styles.clearAllLink}>Clear list</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
             ) : null
           }
@@ -174,7 +265,7 @@ export default function ShoppingListScreen() {
               <Ionicons name="cart-outline" size={48} color={colors.border} />
               <Text style={styles.emptyTitle}>Your list is empty</Text>
               <Text style={styles.emptyText}>
-                Open a recipe and tap "Add to shopping list", or type something below.
+                Open a recipe, tick the ingredients you need, or type something below.
               </Text>
             </View>
           }
@@ -214,7 +305,38 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   summaryText: { ...type.caption, color: colors.inkSecondary },
+  summaryActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
   clearLink: { ...type.label, color: colors.brand },
+  // Emptying the whole list is destructive, so it reads as the quieter of the
+  // two — it is confirmed before anything happens, but it should not compete
+  // with the tick-off action you use every shop.
+  clearAllLink: { ...type.label, color: colors.inkSecondary },
+
+  weekCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.sheet,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    gap: 6,
+  },
+  weekTitle: { ...type.title, color: colors.ink },
+  weekBody: { ...type.body, color: colors.inkSecondary },
+  weekActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.lg,
+    marginTop: spacing.sm,
+  },
+  weekPrimary: {
+    backgroundColor: colors.brand,
+    borderRadius: radius.tag,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 10,
+  },
+  weekPrimaryText: { ...type.label, color: colors.onBrand },
+  weekSecondary: { ...type.label, color: colors.inkSecondary },
 
   sectionHeader: {
     ...type.label,

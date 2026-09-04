@@ -106,6 +106,7 @@ export async function addItemsToList(
       checked: false,
       recipeId: recipe?.id,
       recipeTitle: recipe?.title,
+      addedAt: new Date().toISOString(),
     });
   }
 
